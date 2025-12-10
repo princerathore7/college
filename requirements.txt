@@ -1,0 +1,10 @@
+Flask
+pymongo
+flask_cors
+dnspython
+mongoengine
+python-dotenv
+reportlab
+cloudinary
+requests
+gunicorn
