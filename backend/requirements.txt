@@ -4,4 +4,4 @@ pymongo==4.15.5
 python-dotenv==1.2.1
 gunicorn==21.2.0
 mongoengine==0.29.1
-cloudinary==2.21.1
+cloudinary==1.44.1
