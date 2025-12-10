@@ -38,7 +38,7 @@
   </div>
 
 <script>
-const API = "http://127.0.0.1:5000/api/notices/";
+const API = "https://college-hwbb.onrender.com/api/notices/";
 
 async function loadNotices(){
   const res = await fetch(API);
@@ -65,7 +65,7 @@ async function deleteNotice(title) {
     const encodedTitle = encodeURIComponent(title);
 
     // 🧩 Base API URL — make sure it matches your Flask server
-    const API_BASE = "http://127.0.0.1:5000/api/notices";
+    const API_BASE = "https://college-hwbb.onrender.com/api/notices";
 
     const res = await fetch(`${API_BASE}/${encodedTitle}`, {
       method: "DELETE",

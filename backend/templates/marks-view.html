@@ -50,7 +50,7 @@ async function loadMarks(){
   const enr = document.getElementById('enr').value.trim();
   if(!enr) return alert('Enter enrollment');
   try{
-    const res = await fetch(`http://127.0.0.1:5000/api/marks/${encodeURIComponent(enr)}`);
+    const res = await fetch(`https://college-hwbb.onrender.com/api/marks/${encodeURIComponent(enr)}`);
     if(!res.ok){
       const err = await res.json();
       return alert(err.message || 'Failed to fetch');

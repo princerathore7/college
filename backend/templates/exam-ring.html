@@ -63,7 +63,7 @@ table th { background:#f0e6e6; }
 <script>
 async function fetchExams() {
   try {
-    const res = await fetch("http://localhost:5000/api/exams");
+    const res = await fetch("https://college-hwbb.onrender.com/api/exams");
     if(!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const data = await res.json();
     const tbody = document.querySelector("#examTable tbody");
@@ -91,7 +91,7 @@ async function fetchExams() {
 async function deleteExam(id){
   if(!confirm("Are you sure you want to delete this exam?")) return;
   try{
-    const res = await fetch(`http://localhost:5000/api/exams/${id}`, { method:'DELETE' });
+    const res = await fetch(`https://college-hwbb.onrender.com/api/exams/${id}`, { method:'DELETE' });
     if(!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const data = await res.json();
     if(data.success) fetchExams();
@@ -111,7 +111,7 @@ document.getElementById("postExam").addEventListener("click", async ()=>{
   }
 
   try{
-    const res = await fetch("http://localhost:5000/api/exams", {
+    const res = await fetch("https://college-hwbb.onrender.com/api/exams", {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({examName, subject, date, room, class:className})

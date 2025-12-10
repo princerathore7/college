@@ -168,7 +168,7 @@
       }
 
       try {
-        const res = await fetch("http://127.0.0.1:5000/api/signup/mentor", {
+        const res = await fetch("https://college-hwbb.onrender.com/api/signup/mentor", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ mentorId, name, email, phone, subject, branch, classAssigned, password })

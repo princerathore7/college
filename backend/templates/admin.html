@@ -165,7 +165,7 @@
       if (!enrollment) { msg.textContent = "Please enter enrollment number"; msg.style.color = "red"; return; }
 
       try {
-        const res = await fetch(`http://localhost:5000/api/students/${enrollment}/class`);
+        const res = await fetch(`https://college-hwbb.onrender.com/api/students/${enrollment}/class`);
         const data = await res.json();
         if (res.ok && data.success) {
           document.getElementById("studentInfo").style.display = "block";
@@ -214,7 +214,7 @@ async function updateClass() {
   const combinedClass = `${year} ${newClass}`;
 
   try {
-    const res = await fetch(`http://localhost:5000/api/students/${enrollment}/class`, {
+    const res = await fetch(`https://college-hwbb.onrender.com/api/students/${enrollment}/class`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ class: combinedClass })
@@ -251,7 +251,7 @@ document.getElementById("yearSelect").addEventListener("change", () => {
 
     async function fetchAttendance(enrollment) {
       try {
-        const res = await fetch(`http://localhost:5000/api/attendance/student/${enrollment}`);
+        const res = await fetch(`https://college-hwbb.onrender.com/api/attendance/student/${enrollment}`);
         const data = await res.json();
         if (res.ok && data.success) {
           const tbody = document.getElementById("attendanceBody");
@@ -275,7 +275,7 @@ document.getElementById("yearSelect").addEventListener("change", () => {
       if(isNaN(total) || isNaN(present) || total < 0 || present < 0 || present > total){
         alert("Invalid input!"); return;
       }
-      fetch(`http://localhost:5000/api/attendance/edit_percentage`, {
+      fetch(`https://college-hwbb.onrender.com/api/attendance/edit_percentage`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({ enrollment: enrollment, total: total, present: present })

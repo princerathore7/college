@@ -131,7 +131,7 @@
     tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:gray;">Loading...</td></tr>`;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/attendance/class/${className}`);
+      const res = await fetch(`https://college-hwbb.onrender.com/api/attendance/class/${className}`);
       const data = await res.json();
       tbody.innerHTML = "";
 
@@ -158,7 +158,7 @@
   }
 
   async function mark(enrollment, className, status) {
-    const res = await fetch("http://localhost:5000/api/attendance/mark", {
+    const res = await fetch("https://college-hwbb.onrender.com/api/attendance/mark", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ enrollment, class: className, status })

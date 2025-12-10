@@ -483,7 +483,7 @@ h2.section-title {
 
 <script>
 /* ---------- Configuration ---------- */
-const API_ROOT = "http://localhost:5000"; // change if backend host is different
+const API_ROOT = "https://college-hwbb.onrender.com/"; // change if backend host is different
 const API_TIMETABLES = `${API_ROOT}/api/timetables`;
 
 /* ---------- UI helpers ---------- */
@@ -540,7 +540,7 @@ async function loadStudentProfile(enrollment){
   // 🔹 Load attendance
   async function loadAttendance(enrollment) {
     try {
-      const res = await fetch(`http://localhost:5000/api/attendance/student/${enrollment}`);
+      const res = await fetch(`https://college-hwbb.onrender.com/api/attendance/student/${enrollment}`);
       const data = await res.json();
 
       if (res.ok && data.success) {
@@ -565,7 +565,7 @@ async function loadStudentProfile(enrollment){
       // 1️⃣ Get student class (from localStorage or fetch if missing)
       let studentClass = localStorage.getItem("studentClass");
       if (!studentClass) {
-        const stuRes = await fetch(`http://localhost:5000/api/students/${enrollment}/class`);
+        const stuRes = await fetch(`https://college-hwbb.onrender.com/api/students/${enrollment}/class`);
         const stuData = await stuRes.json();
 
         // Backend may store class under 'class' or 'branch'
@@ -580,7 +580,7 @@ async function loadStudentProfile(enrollment){
       console.log("📦 Fetching assignments for class:", branch);
 
       // 2️⃣ Fetch assignments for this class
-      const assignmentsRes = await fetch(`http://localhost:5000/api/assignments/class/${branch}`);
+      const assignmentsRes = await fetch(`https://college-hwbb.onrender.com/api/assignments/class/${branch}`);
       if (!assignmentsRes.ok) throw new Error("Failed to fetch assignments");
       const assignmentsData = await assignmentsRes.json();
 
@@ -729,7 +729,7 @@ async function fetchNotes() {
   container.innerHTML = `<p style="color:#666;">⏳ Fetching Notes/PDF for ${year} ${branch} ${section}...</p>`;
 
   try {
-    const res = await fetch(`http://localhost:5000/api/assignments/class/${className}`);
+    const res = await fetch(`https://college-hwbb.onrender.com/api/assignments/class/${className}`);
     const data = await res.json();
 
     if(res.ok && data.success && data.assignments.length>0){

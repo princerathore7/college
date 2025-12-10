@@ -19,7 +19,7 @@
 <script>
 async function loadClasses() {
     try {
-        const res = await fetch("http://127.0.0.1:5000/api/classes");
+        const res = await fetch("https://college-hwbb.onrender.com/api/classes");
         const data = await res.json();
 
         const classSelect = document.getElementById("classSelect");

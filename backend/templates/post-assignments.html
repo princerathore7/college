@@ -169,7 +169,7 @@ function logout() {
 // ✅ Fetch all assignments (no class filter)
 async function fetchPostedAssignments() {
   try {
-    const res = await fetch(`http://localhost:5000/api/assignments`);
+    const res = await fetch(`https://college-hwbb.onrender.com/api/assignments`);
     const data = await res.json();
 
     const tbody = document.getElementById("postedAssignmentsTable").querySelector("tbody");
@@ -201,7 +201,7 @@ async function fetchPostedAssignments() {
 async function deleteAssignment(assignmentId) {
   if(!confirm("Are you sure you want to delete this assignment?")) return;
   try {
-    const res = await fetch(`http://localhost:5000/api/assignments/${assignmentId}`, { method: 'DELETE' });
+    const res = await fetch(`https://college-hwbb.onrender.com/api/assignments/${assignmentId}`, { method: 'DELETE' });
     const data = await res.json();
     if(res.ok && data.success){
       alert("Assignment deleted successfully!");
@@ -231,7 +231,7 @@ document.getElementById("assignmentForm").addEventListener("submit", async (e) =
   }
 
   try {
-    const res = await fetch(`http://localhost:5000/api/assignments`, {
+    const res = await fetch(`https://college-hwbb.onrender.com/api/assignments`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ class: className, title, subject, deadline })

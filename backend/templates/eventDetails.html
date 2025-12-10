@@ -45,7 +45,7 @@
 
   async function loadEventDetails(){
     try{
-      const res = await fetch(`http://localhost:5000/api/events/${eventId}`);
+      const res = await fetch(`https://college-hwbb.onrender.com/api/events/${eventId}`);
       const data = await res.json();
       if(res.ok && data.success && data.event){
         const ev = data.event;

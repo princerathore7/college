@@ -113,7 +113,7 @@ form.addEventListener("submit", async (e) => {
   }
 
   try {
-    const res = await fetch(`http://localhost:5000/api/students/${enrollment}/pending-fees`, {
+    const res = await fetch(`https://college-hwbb.onrender.com/api/students/${enrollment}/pending-fees`, {
       method: "POST", // backend should accept POST to update
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ pending_fees: pendingFees })

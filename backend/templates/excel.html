@@ -103,8 +103,8 @@
 Time-table builder front-end.
 - Builds a (days x periods) editable table.
 - Each cell is contenteditable and has a color picker.
-- Save -> POST http://localhost:5000/api/timetables  (payload described below)
-- Load -> GET  http://localhost:5000/api/timetables?class=CLASS
+- Save -> POST https://college-hwbb.onrender.com/api/timetables  (payload described below)
+- Load -> GET  https://college-hwbb.onrender.com/api/timetables?class=CLASS
 Payload format (example):
 {
   "class": "1-A",
@@ -330,7 +330,7 @@ saveBtn.addEventListener('click', async () => {
   if(!payload){ alert('Nothing to save'); return; }
 
   try{
-    const res = await fetch('http://localhost:5000/api/timetables', {
+    const res = await fetch('https://college-hwbb.onrender.com/api/timetables', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify(payload)
@@ -358,7 +358,7 @@ loadBtn.addEventListener('click', async () => {
   if(!className){ alert('Enter/select class to load'); return; }
 
   try{
-    const url = `http://localhost:5000/api/timetables?class=${encodeURIComponent(className)}`;
+    const url = `https://college-hwbb.onrender.com/api/timetables?class=${encodeURIComponent(className)}`;
     const res = await fetch(url);
     if(!res.ok){
       const t = await res.text();

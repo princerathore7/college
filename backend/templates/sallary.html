@@ -69,7 +69,7 @@
     const mentorId = document.getElementById("mentorId").value.trim();
     if(!mentorId) return alert("Please enter your Mentor ID");
 
-    const res = await fetch(`http://127.0.0.1:5000/api/salary/${mentorId}`);
+    const res = await fetch(`https://college-hwbb.onrender.com/api/salary/${mentorId}`);
     const data = await res.json();
 
     const box = document.getElementById("salaryInfo");

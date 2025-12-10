@@ -30,7 +30,7 @@
 <script>
 async function loadEvents() {
   try {
-    const res = await fetch("http://localhost:5000/api/events");
+    const res = await fetch("https://college-hwbb.onrender.com/api/events");
     const data = await res.json();
     const container = document.getElementById("eventsContainer");
     container.innerHTML = "";
@@ -64,7 +64,7 @@ async function deleteEvent(eventId) {
   if (!confirm("Are you sure you want to delete this event?")) return;
 
   try {
-    const res = await fetch(`http://localhost:5000/api/events/${eventId}`, {
+    const res = await fetch(`https://college-hwbb.onrender.com/api/events/${eventId}`, {
       method: "DELETE"
     });
     const data = await res.json();

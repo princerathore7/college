@@ -104,7 +104,7 @@ async function computeAndSave(){
 
   document.getElementById('spinner').style.display = 'block';
   try{
-    const res = await fetch('http://127.0.0.1:5000/api/marks', {
+    const res = await fetch('https://college-hwbb.onrender.com/api/marks', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify(payload)

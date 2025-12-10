@@ -52,7 +52,7 @@ async function saveSalary(){
     amount: document.getElementById("amount").value.trim(),
     status: document.getElementById("status").value
   };
-  const res = await fetch("http://127.0.0.1:5000/api/salary", {
+  const res = await fetch("https://college-hwbb.onrender.com/api/salary", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(salaryData)

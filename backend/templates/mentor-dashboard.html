@@ -291,7 +291,7 @@ function logout() {
 }
 // Fetch unread notice count
 async function loadUnreadCount(userType, enrollment) {
-  const res = await fetch(`http://127.0.0.1:5000/api/notices/get/${userType}`);
+  const res = await fetch(`https://college-hwbb.onrender.com/api/notices/get/${userType}`);
   const data = await res.json();
   if(data.success){
     const unread = data.notices.filter(n => !n.readBy.includes(enrollment)).length;
@@ -310,7 +310,7 @@ document.getElementById("noticeBtn").addEventListener("click", ()=>{
 // Example: Fetch events dynamically
 async function loadEventsBanner() {
   try {
-    const res = await fetch("http://localhost:5000/api/events");
+    const res = await fetch("https://college-hwbb.onrender.com/api/events");
     const data = await res.json();
     const banner = document.getElementById('eventsBanner');
     banner.innerHTML = "";
