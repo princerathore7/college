@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acropolis College - Mentor Signup</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #f0f0f0, #dcdcdc);
+      color: #2c2c2c;
+    }
+
+    .signup-container {
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(12px);
+      padding: 40px 30px;
+      border-radius: 18px;
+      width: 400px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    .signup-container img {
+      width: 120px;
+      margin-bottom: 20px;
+      border-radius: 50%;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+      color: #6d1b1b;
+    }
+
+    p.subtitle {
+      font-size: 0.95rem;
+      color: #555;
+      margin-bottom: 25px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    input, select {
+      padding: 12px 15px;
+      border-radius: 12px;
+      border: 1.5px solid #a1887f;
+      font-size: 15px;
+      background: #fafafa;
+      color: #3e2723;
+      transition: all 0.3s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: #6d1b1b;
+      box-shadow: 0 0 6px rgba(109,27,27,0.3);
+      outline: none;
+    }
+
+    button {
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #8d6e63, #6d1b1b);
+      color: #fff;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, #6d1b1b, #3e2723);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+    }
+
+    .login-student {
+      margin-top: 20px;
+      font-size: 0.95rem;
+    }
+
+    .login-student button {
+      background: linear-gradient(135deg, #DAA520, #B8860B);
+    }
+
+    @media(max-width: 420px){
+      .signup-container { width: 90%; padding: 30px 20px; }
+      h1 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="signup-container">
+    <img src="logo.jpg" alt="Acropolis College Logo">
+    <h1>Mentor Signup</h1>
+    <p class="subtitle">Register your mentor account to manage classes and assignments</p>
+
+    <form id="mentorSignupForm">
+      <input type="text" id="mentorId" placeholder="Mentor ID" required>
+      <input type="text" id="name" placeholder="Full Name" required>
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="tel" id="phone" placeholder="Phone Number" required>
+      <select id="subject" required>
+        <option value="" disabled selected>Select Subject</option>
+        <option value="DBMS">DBMS</option>
+        <option value="Mathematics">Mathematics</option>
+        <option value="Programming">Programming</option>
+        <option value="Physics">Physics</option>
+      </select>
+      <select id="branch" required>
+        <option value="" disabled selected>Select Branch</option>
+        <option value="CSE">CSE</option>
+        <option value="ECE">ECE</option>
+        <option value="ME">ME</option>
+        <option value="CE">CE</option>
+      </select>
+      <select id="classAssigned" required>
+        <option value="" disabled selected>Select Class Assigned</option>
+        <option value="1st Year - A">1st Year - A</option>
+        <option value="2nd Year - A">2nd Year - A</option>
+        <option value="3rd Year - A">3rd Year - A</option>
+        <option value="3rd Year - B">3rd Year - B</option>
+      </select>
+      <input type="password" id="password" placeholder="Password" required>
+      <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+      <button type="submit">Signup</button>
+    </form>
+
+    <div class="login-student">
+      Already a student? <button onclick="window.location.href='/student-signup'">Student Signup/Login</button>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('mentorSignupForm');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const mentorId = document.getElementById('mentorId').value;
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const phone = document.getElementById('phone').value;
+      const subject = document.getElementById('subject').value;
+      const branch = document.getElementById('branch').value;
+      const classAssigned = document.getElementById('classAssigned').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if(password !== confirmPassword){
+        alert("Passwords do not match!");
+        return;
+      }
+
+      try {
+        const res = await fetch("https://college-hwbb.onrender.com/api/signup/mentor", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mentorId, name, email, phone, subject, branch, classAssigned, password })
+        });
+
+        const data = await res.json();
+        if(res.ok){
+          alert("Mentor signup successful! Redirecting to login...");
+          window.location.href = '/mentor-login';
+        } else {
+          alert(data.message || "Signup failed!");
+        }
+      } catch(err){
+        console.error(err);
+        alert("Error connecting to server");
+      }
+    });
+  </script>
+</body>
+</html>

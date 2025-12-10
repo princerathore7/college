@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Admin — Update Marks</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  body { font-family: 'Poppins', sans-serif; background:#f4f6f8; margin:0; padding:30px; color:#233043; }
+  .card { max-width:760px; margin:20px auto; background:#fff; padding:22px; border-radius:12px; box-shadow:0 8px 24px rgba(17,24,39,0.06); }
+  h1 { margin:0 0 12px 0; color:#16324f; }
+  label { display:block; margin-top:12px; font-weight:600; color:#234; }
+  input[type=text], input[type=number] { width:100%; padding:10px 12px; border-radius:8px; border:1px solid #d6dbe0; margin-top:6px; font-size:1rem; }
+  .row { display:flex; gap:12px; }
+  .col { flex:1; }
+  .actions { margin-top:18px; display:flex; gap:12px; align-items:center; }
+  button { padding:10px 16px; border:none; border-radius:8px; font-weight:700; cursor:pointer; }
+  button.primary { background:#1e3c72; color:#fff; }
+  button.ghost { background:#fff; border:1px solid #d6dbe0; color:#1e3c72; }
+  .result { margin-top:14px; padding:10px; background:#eef6ff; border-radius:8px; color:#083e8a; font-weight:700; }
+  small.note { color:#6b7280; display:block; margin-top:6px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Admin — Update Marks (Percentage)</h1>
+
+    <label>Enrollment ID</label>
+    <input id="enrollment" type="text" placeholder="e.g. EN001">
+
+    <label>Student Name</label>
+    <input id="name" type="text" placeholder="Student full name (optional)">
+
+    <label>Class</label>
+    <input id="class" type="text" placeholder="e.g. 1A">
+
+    <div class="row">
+      <div class="col">
+        <label>MST (out of 100)</label>
+        <input id="mst" type="number" min="0" max="100" step="0.01" placeholder="e.g. 78">
+      </div>
+      <div class="col">
+        <label>Internal (out of 100)</label>
+        <input id="internal" type="number" min="0" max="100" step="0.01" placeholder="e.g. 82">
+      </div>
+      <div class="col">
+        <label>Assignments (out of 100)</label>
+        <input id="assignments" type="number" min="0" max="100" step="0.01" placeholder="e.g. 85">
+      </div>
+    </div>
+
+    <label>Optional Weights (leave empty for equal weights)</label>
+    <div class="row">
+      <div class="col">
+        <input id="w_mst" type="number" placeholder="mst weight (e.g. 0.4)" step="0.01" min="0">
+      </div>
+      <div class="col">
+        <input id="w_internal" type="number" placeholder="internal weight (e.g. 0.4)" step="0.01" min="0">
+      </div>
+      <div class="col">
+        <input id="w_assign" type="number" placeholder="assign weight (e.g. 0.2)" step="0.01" min="0">
+      </div>
+    </div>
+    <small class="note">If you provide weights they will be normalized automatically. Example: 0.4,0.4,0.2</small>
+
+    <div class="actions">
+      <button class="primary" onclick="computeAndSave()">Compute & Save</button>
+      <button class="ghost" onclick="clearForm()">Clear</button>
+      <div id="spinner" style="margin-left:auto;display:none">Saving…</div>
+    </div>
+
+    <div id="result" class="result" style="display:none;"></div>
+  </div>
+
+<script>
+async function computeAndSave(){
+  const enrollment = document.getElementById('enrollment').value.trim();
+  if(!enrollment) return alert('Enrollment is required');
+
+  const mst = parseFloat(document.getElementById('mst').value) || 0;
+  const internal = parseFloat(document.getElementById('internal').value) || 0;
+  const assignments = parseFloat(document.getElementById('assignments').value) || 0;
+
+  // weights
+  const w_mst_raw = document.getElementById('w_mst').value;
+  const w_internal_raw = document.getElementById('w_internal').value;
+  const w_assign_raw = document.getElementById('w_assign').value;
+
+  let payload = {
+    enrollment,
+    name: document.getElementById('name').value.trim(),
+    class: document.getElementById('class').value.trim(),
+    mst, internal, assignments
+  };
+
+  // attach weights if any entered
+  if(w_mst_raw !== '' || w_internal_raw !== '' || w_assign_raw !== ''){
+    payload.weights = {
+      mst: w_mst_raw === '' ? 0 : parseFloat(w_mst_raw),
+      internal: w_internal_raw === '' ? 0 : parseFloat(w_internal_raw),
+      assignments: w_assign_raw === '' ? 0 : parseFloat(w_assign_raw)
+    };
+  }
+
+  document.getElementById('spinner').style.display = 'block';
+  try{
+    const res = await fetch('https://college-hwbb.onrender.com/api/marks', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    document.getElementById('spinner').style.display = 'none';
+    if(res.ok && data.success){
+      document.getElementById('result').style.display = 'block';
+      document.getElementById('result').innerText = `Saved. Percentage: ${data.marks.percentage}% (Enrollment: ${data.marks.enrollment})`;
+    } else {
+      alert(data.message || 'Failed to save');
+    }
+  } catch(err){
+    document.getElementById('spinner').style.display = 'none';
+    console.error(err);
+    alert('Error saving marks');
+  }
+}
+
+function clearForm(){
+  ['enrollment','name','class','mst','internal','assignments','w_mst','w_internal','w_assign'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('result').style.display='none';
+}
+</script>
+</body>
+</html>

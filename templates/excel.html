@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Time Table Builder — Acropolis</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --primary:#4a90e2;
+    --accent:#6d1b1b;
+    --card:#fff;
+    --muted:#666;
+  }
+  body{font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;padding:18px;background:#f4f6f8;color:#222;}
+  .wrap{max-width:1100px;margin:0 auto;}
+  header{display:flex;align-items:center;gap:16px;margin-bottom:18px;}
+  header h1{margin:0;font-size:20px;}
+  .controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:12px;}
+  select,input[type=text]{padding:8px;border-radius:6px;border:1px solid #ccc;}
+  button{background:var(--primary);color:#fff;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:600;}
+  button.ghost{background:#fff;color:var(--accent);border:1px solid #ddd;}
+  .card{background:var(--card);padding:14px;border-radius:10px;box-shadow:0 6px 18px rgba(20,20,30,0.04);}
+  .grid-wrap{overflow:auto;margin-top:12px;}
+  table.timetable{border-collapse:collapse;width:100%;min-width:900px;}
+  table.timetable th, table.timetable td{border:1px solid #e2e6ea;padding:8px;vertical-align:top;}
+  table.timetable th{background:#fafafa;text-align:left;}
+  td.slot-cell{min-width:140px;height:80px;padding:6px;position:relative;}
+  td.slot-cell[contenteditable="true"]{outline:none;cursor:text;}
+  .cell-controls{position:absolute;right:4px;top:4px;display:flex;gap:4px;opacity:0.0;transition:opacity .12s;}
+  td.slot-cell:hover .cell-controls{opacity:1;}
+  .small{font-size:13px;padding:6px 8px;border-radius:6px;}
+  .row-actions{margin-top:8px;display:flex;gap:8px;}
+  .meta{display:flex;gap:12px;align-items:center;}
+  .notice{color:var(--muted);font-size:13px;margin-top:8px;}
+  .color-dot{width:18px;height:18px;border-radius:4px;border:1px solid rgba(0,0,0,0.08);display:inline-block;vertical-align:middle;}
+  .download{background:#16a34a;}
+  @media (max-width:900px){
+    table.timetable{min-width:700px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Time Table Builder</h1>
+    <div class="meta notice">Create & assign a 6-day timetable to a class. Edit cells, color them, save to backend.</div>
+  </header>
+
+  <div class="card">
+    <div class="controls">
+      <label>
+        Class:
+        <select id="classSelect">
+          <option value="">-- select class --</option>
+          <option>1-A</option><option>1-B</option><option>2-A</option><option>2-B</option>
+          <option>IT</option><option>CS</option><option>EC</option><option>ME</option>
+        </select>
+      </label>
+
+      <label>
+        or create:
+        <input type="text" id="classInput" placeholder="e.g. 3-A or IT" />
+      </label>
+
+      <button id="newGridBtn" class="ghost">New 6×6 Grid</button>
+
+      <button id="loadBtn">Load</button>
+      <button id="saveBtn">Save</button>
+      <button id="exportBtn" class="download">Export CSV</button>
+
+      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+        <label class="small" style="display:flex;gap:8px;align-items:center">
+          Days:
+          <select id="daysSelect" class="small">
+            <option value="6">Mon-Sat (6)</option>
+            <option value="5">Mon-Fri (5)</option>
+          </select>
+        </label>
+        <label class="small" style="display:flex;gap:8px;align-items:center">
+          Periods:
+          <input id="periodsInput" type="number" value="6" min="1" max="12" style="width:70px;padding:6px" />
+        </label>
+      </div>
+    </div>
+
+    <div class="notice">Tip: Click a cell to type subject/room (e.g. <em>DBMS / Hall 2</em>). Use color picker to mark important cells.</div>
+
+    <div class="row-actions" style="margin-top:12px;">
+      <button id="addRow">Add Row</button>
+      <button id="removeRow" class="ghost">Remove Last Row</button>
+      <button id="clearColors" class="ghost">Clear Colors</button>
+    </div>
+
+    <div class="grid-wrap card" id="gridWrap" style="margin-top:12px;">
+      <!-- timetable table will be injected here -->
+    </div>
+  </div>
+</div>
+
+<script>
+/*
+Time-table builder front-end.
+- Builds a (days x periods) editable table.
+- Each cell is contenteditable and has a color picker.
+- Save -> POST https://college-hwbb.onrender.com/api/timetables  (payload described below)
+- Load -> GET  https://college-hwbb.onrender.com/api/timetables?class=CLASS
+Payload format (example):
+{
+  "class": "1-A",
+  "days": ["Mon","Tue","Wed","Thu","Fri","Sat"],
+  "timeslots": [
+    { "time":"09:00-09:45", "cells": { "Mon": {"text":"DBMS / 101","color":"#ffd54f"}, ... } },
+    ...
+  ]
+}
+*/
+
+const DAYS_6 = ["Mon","Tue","Wed","Thu","Fri","Sat"];
+const DAYS_5 = ["Mon","Tue","Wed","Thu","Fri"];
+const gridWrap = document.getElementById('gridWrap');
+const classSelect = document.getElementById('classSelect');
+const classInput = document.getElementById('classInput');
+const newGridBtn = document.getElementById('newGridBtn');
+const saveBtn = document.getElementById('saveBtn');
+const loadBtn = document.getElementById('loadBtn');
+const exportBtn = document.getElementById('exportBtn');
+const addRowBtn = document.getElementById('addRow');
+const removeRowBtn = document.getElementById('removeRow');
+const clearColorsBtn = document.getElementById('clearColors');
+const daysSelect = document.getElementById('daysSelect');
+const periodsInput = document.getElementById('periodsInput');
+
+let currentDays = DAYS_6.slice();
+let currentPeriods = parseInt(periodsInput.value,10) || 6;
+let tableEl = null;
+
+// Build grid
+function buildGrid(days = currentDays, periods = currentPeriods) {
+  gridWrap.innerHTML = '';
+  const table = document.createElement('table');
+  table.className = 'timetable';
+  const thead = document.createElement('thead');
+  const headRow = document.createElement('tr');
+
+  // top-left empty header
+  const th0 = document.createElement('th'); th0.textContent = 'Time / Day';
+  headRow.appendChild(th0);
+
+  // day headers
+  days.forEach(d => {
+    const th = document.createElement('th');
+    th.textContent = d;
+    headRow.appendChild(th);
+  });
+  thead.appendChild(headRow);
+  table.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+
+  for (let r=0; r<periods; r++){
+    const tr = document.createElement('tr');
+
+    // time slot label cell
+    const timeTd = document.createElement('td');
+    timeTd.contentEditable = true;
+    timeTd.className = 'time-label';
+    timeTd.textContent = `Period ${r+1}\n09:${String(r*45).padStart(2,'0')}`; // rough placeholder
+    tr.appendChild(timeTd);
+
+    // day cells
+    days.forEach(day => {
+      const td = document.createElement('td');
+      td.className = 'slot-cell';
+      td.contentEditable = true;
+      td.dataset.day = day;
+      td.dataset.row = r;
+      td.innerHTML = `<div class="cell-text" style="white-space:pre-wrap;"></div>
+        <div class="cell-controls">
+          <input type="color" title="Pick color" class="cell-color" style="width:28px;height:26px;border:0;padding:0;margin:0" />
+        </div>`;
+      // click focuses the editable div
+      td.addEventListener('click', (e) => {
+        const editable = td.querySelector('.cell-text');
+        // place caret at end
+        editable.focus();
+        placeCaretAtEnd(editable);
+      });
+
+      // wire color
+      const colorInput = td.querySelector('.cell-color');
+      colorInput.addEventListener('input', (ev) => {
+        td.style.background = ev.target.value;
+      });
+
+      // allow typed text inside .cell-text
+      const cellText = td.querySelector('.cell-text');
+      cellText.contentEditable = true;
+      cellText.addEventListener('input', () => {
+        // no-op, content is read when saving
+      });
+
+      tr.appendChild(td);
+    });
+
+    tbody.appendChild(tr);
+  }
+
+  table.appendChild(tbody);
+  gridWrap.appendChild(table);
+  tableEl = table;
+}
+
+// Helper to put caret at end of contenteditable
+function placeCaretAtEnd(el) {
+  el = el || window;
+  el.focus();
+  if (typeof window.getSelection != "undefined"
+      && typeof document.createRange != "undefined") {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    range.collapse(false);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+}
+
+// Build initial grid on load
+buildGrid(currentDays, currentPeriods);
+
+// UI handlers
+daysSelect.addEventListener('change', () => {
+  currentDays = (daysSelect.value === '5') ? DAYS_5.slice() : DAYS_6.slice();
+  buildGrid(currentDays, currentPeriods);
+});
+
+periodsInput.addEventListener('change', () => {
+  currentPeriods = parseInt(periodsInput.value,10) || 6;
+  buildGrid(currentDays, currentPeriods);
+});
+
+newGridBtn.addEventListener('click', () => {
+  const c = classInput.value.trim() || classSelect.value;
+  if(!c){
+    if(!confirm("No class selected — create grid anyway?")) return;
+  }
+  currentDays = (daysSelect.value === '5') ? DAYS_5.slice() : DAYS_6.slice();
+  currentPeriods = parseInt(periodsInput.value,10) || 6;
+  buildGrid(currentDays, currentPeriods);
+});
+
+addRowBtn.addEventListener('click', () => {
+  if(!tableEl) return;
+  const tbody = tableEl.querySelector('tbody');
+  const r = tbody.rows.length;
+  const tr = document.createElement('tr');
+
+  const timeTd = document.createElement('td');
+  timeTd.contentEditable = true;
+  timeTd.className = 'time-label';
+  timeTd.textContent = `Period ${r+1}`;
+  tr.appendChild(timeTd);
+
+  currentDays.forEach(day => {
+    const td = document.createElement('td');
+    td.className = 'slot-cell';
+    td.contentEditable = true;
+    td.dataset.day = day;
+    td.dataset.row = r;
+    td.innerHTML = `<div class="cell-text" style="white-space:pre-wrap;"></div>
+      <div class="cell-controls">
+        <input type="color" title="Pick color" class="cell-color" style="width:28px;height:26px;border:0;padding:0;margin:0" />
+      </div>`;
+    const colorInput = td.querySelector('.cell-color');
+    colorInput.addEventListener('input', (ev) => td.style.background = ev.target.value );
+    tr.appendChild(td);
+  });
+
+  tbody.appendChild(tr);
+});
+
+removeRowBtn.addEventListener('click', () => {
+  if(!tableEl) return;
+  const tbody = tableEl.querySelector('tbody');
+  if(tbody.rows.length > 1) tbody.deleteRow(-1);
+});
+
+clearColorsBtn.addEventListener('click', () => {
+  if(!tableEl) return;
+  tableEl.querySelectorAll('td.slot-cell').forEach(td => td.style.background = '');
+  tableEl.querySelectorAll('.cell-color').forEach(inp => inp.value = '#ffffff');
+});
+
+// Build JSON payload from grid
+function buildPayloadForSave(className){
+  if(!tableEl) return null;
+  const days = currentDays.slice();
+  const tbody = tableEl.querySelector('tbody');
+  const timeslots = [];
+
+  for(let r=0; r<tbody.rows.length; r++){
+    const row = tbody.rows[r];
+    const timeCell = row.cells[0];
+    const timeLabel = (timeCell.textContent || '').trim();
+    const cells = {};
+    for(let c=1;c<row.cells.length;c++){
+      const day = days[c-1];
+      const td = row.cells[c];
+      const text = td.querySelector('.cell-text').innerText.trim();
+      // if computed background color is rgba/hex etc — read from style attribute or color input
+      const colorInput = td.querySelector('.cell-color');
+      const color = colorInput ? colorInput.value : '';
+      cells[day] = { text, color };
+    }
+    timeslots.push({ time: timeLabel, cells });
+  }
+
+  return { class: className, days, timeslots };
+}
+
+// Save button -> POST to backend
+saveBtn.addEventListener('click', async () => {
+  const className = classInput.value.trim() || classSelect.value;
+  if(!className){
+    alert('Please select or enter a class name before saving.');
+    return;
+  }
+  const payload = buildPayloadForSave(className);
+  if(!payload){ alert('Nothing to save'); return; }
+
+  try{
+    const res = await fetch('https://college-hwbb.onrender.com/api/timetables', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    if(!res.ok){
+      const text = await res.text();
+      console.error('Save error raw response:', text);
+      throw new Error(`HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    if(data.success) {
+      alert('Timetable saved successfully.');
+    } else {
+      alert('Save failed: ' + (data.message || 'unknown'));
+    }
+  } catch(err){
+    console.error('Error saving timetable:', err);
+    alert('Error saving timetable — see console.');
+  }
+});
+
+// Load button -> GET from backend
+loadBtn.addEventListener('click', async () => {
+  const className = classInput.value.trim() || classSelect.value;
+  if(!className){ alert('Enter/select class to load'); return; }
+
+  try{
+    const url = `https://college-hwbb.onrender.com/api/timetables?class=${encodeURIComponent(className)}`;
+    const res = await fetch(url);
+    if(!res.ok){
+      const t = await res.text();
+      console.error('Load raw error:', t);
+      throw new Error(`HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    if(!data.success || !data.timetable){
+      alert('No timetable found for this class.');
+      return;
+    }
+    // populate grid from data.timetable
+    const tt = data.timetable;
+    const days = tt.days || currentDays.slice();
+    const periods = tt.timeslots ? tt.timeslots.length : currentPeriods;
+    currentDays = days;
+    currentPeriods = periods;
+    // rebuild proper grid
+    buildGrid(currentDays, currentPeriods);
+
+    // fill cells
+    const tbody = tableEl.querySelector('tbody');
+    for(let r=0;r<tbody.rows.length;r++){
+      const row = tbody.rows[r];
+      const slot = (tt.timeslots && tt.timeslots[r]) ? tt.timeslots[r] : null;
+      if(slot){
+        row.cells[0].textContent = slot.time || row.cells[0].textContent;
+        for(let c=1;c<row.cells.length;c++){
+          const day = days[c-1];
+          const td = row.cells[c];
+          const value = slot.cells && slot.cells[day] ? slot.cells[day].text : '';
+          const color = slot.cells && slot.cells[day] ? slot.cells[day].color : '';
+          td.querySelector('.cell-text').innerText = value || '';
+          if(color){
+            td.style.background = color;
+            const colorInput = td.querySelector('.cell-color');
+            if(colorInput) colorInput.value = color;
+          } else {
+            td.style.background = '';
+          }
+        }
+      }
+    }
+
+    alert('Timetable loaded.');
+  }catch(err){
+    console.error('Error loading timetable:', err);
+    alert('Error loading timetable — see console.');
+  }
+});
+
+// Export CSV (simple)
+exportBtn.addEventListener('click', () => {
+  const className = classInput.value.trim() || classSelect.value || 'timetable';
+  const payload = buildPayloadForSave(className);
+  if(!payload) return alert('Nothing to export');
+
+  const rows = [];
+  // header
+  rows.push(['Time'].concat(payload.days));
+  payload.timeslots.forEach(ts => {
+    const row = [ts.time || ''];
+    payload.days.forEach(d => {
+      const cell = ts.cells[d] ? ts.cells[d].text.replace(/\n/g,' / ') : '';
+      row.push(cell);
+    });
+    rows.push(row);
+  });
+
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${className}_timetable.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+});
+
+// initial small helper: when selecting class from dropdown, set classInput
+classSelect.addEventListener('change', () => {
+  classInput.value = classSelect.value;
+});
+
+</script>
+</body>
+</html>

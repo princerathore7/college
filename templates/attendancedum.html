@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendance Management — Mentor</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: #f5f5f5;
+    margin: 0; padding: 0;
+    color: #3e2723;
+  }
+  header {
+    background: linear-gradient(135deg, #6d1b1b, #8d6e63);
+    color: #fff; padding: 20px;
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+  main {
+    max-width: 950px;
+    margin: 30px auto;
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
+  h2 {
+    font-family: 'Playfair Display', serif;
+    color: #6d1b1b;
+    margin-bottom: 15px;
+  }
+  .class-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .class-buttons button {
+    background: #6d1b1b;
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+  .class-buttons button:hover {
+    background: #ffd700;
+    color: #3e2723;
+    transform: translateY(-2px);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 15px;
+  }
+  table th, table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #ccc;
+    text-align: left;
+  }
+  table th {
+    background: #f0e6e6;
+    color: #6d1b1b;
+  }
+  .pBtn, .aBtn {
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #fff;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    margin-right: 5px;
+  }
+  .pBtn { background: #43a047; }
+  .pBtn:hover { background: #2e7d32; }
+  .aBtn { background: #e53935; }
+  .aBtn:hover { background: #b71c1c; }
+
+  @media (max-width: 768px){
+    .class-buttons { justify-content: center; }
+    table th, table td { font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+<header>Mentor — Attendance Management</header>
+
+<main>
+  <h2>Select Class</h2>
+  <div class="class-buttons" id="classList"></div>
+
+  <table id="studentTable">
+    <thead>
+      <tr><th>Enrollment</th><th>Name</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      <tr><td colspan="3" style="text-align:center;color:gray;">Select a class</td></tr>
+    </tbody>
+  </table>
+</main>
+
+<script>
+  const allClasses = [
+    "cse1","CSE 2","CSE 3","CSE 4","CSE 5",
+"IT 1","IT 2","IT 3","IT 4","IT 5",
+"ECE 1","ECE 2","ECE 3","ECE 4","ECE 5",
+"ME 1","ME 2","ME 3","ME 4","ME 5",
+"EE 1","EE 2","EE 3","EE 4","EE 5,"
+
+  ];
+
+  const classList = document.getElementById("classList");
+  allClasses.forEach(cls => {
+    const btn = document.createElement("button");
+    btn.textContent = cls;
+    btn.onclick = () => loadStudents(cls);
+    classList.appendChild(btn);
+  });
+
+  async function loadStudents(className) {
+    const tbody = document.querySelector("#studentTable tbody");
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:gray;">Loading...</td></tr>`;
+
+    try {
+      const res = await fetch(`https://college-hwbb.onrender.com/api/attendance/class/${className}`);
+      const data = await res.json();
+      tbody.innerHTML = "";
+
+      if(res.ok && data.students.length > 0){
+        data.students.forEach(s => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${s.enrollment}</td>
+            <td>${s.name}</td>
+            <td>
+              <button class="pBtn" onclick="mark('${s.enrollment}','${className}','P')">P</button>
+              <button class="aBtn" onclick="mark('${s.enrollment}','${className}','A')">A</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } else {
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:gray;">No students in this class</td></tr>`;
+      }
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:red;">Error loading data</td></tr>`;
+      console.error(err);
+    }
+  }
+
+  async function mark(enrollment, className, status) {
+    const res = await fetch("https://college-hwbb.onrender.com/api/attendance/mark", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enrollment, class: className, status })
+    });
+    const data = await res.json();
+    if(res.ok) alert(`${enrollment} marked ${status}`);
+    else alert(data.message || "Error marking attendance");
+  }
+</script>
+</body>
+</html>
