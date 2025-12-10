@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>All Classes</title>
+    <style>
+        body { font-family: Arial; background: #f0f0f0; padding: 20px; }
+        .container { width: 600px; background: #fff; padding: 20px; border-radius: 8px; margin: auto; }
+        h2 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
+        th { background: #333; color: white; }
+    </style>
+</head>
+<body>
+<select id="classSelect">
+  <option value="">-- Select Class --</option>
+</select>
+
+<script>
+async function loadClasses() {
+    try {
+        const res = await fetch("http://127.0.0.1:5000/api/classes");
+        const data = await res.json();
+
+        const classSelect = document.getElementById("classSelect");
+        classSelect.innerHTML = "<option value=''>-- Select Class --</option>";
+
+        if (data.success && data.classes.length) {
+            data.classes.forEach(cls => {
+                const option = document.createElement("option");
+                option.value = cls.class_name; // ya cls.full_name agar complete dikhana hai
+                option.textContent = `${cls.year} - ${cls.branch} - ${cls.class_name}`;
+                classSelect.appendChild(option);
+            });
+        }
+    } catch (err) {
+        console.error("Error loading classes", err);
+    }
+}
+
+// Load classes on page load
+document.addEventListener("DOMContentLoaded", loadClasses);
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Post Assignments — Acropolis College</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: #f5f5f5;
+    margin: 0;
+    padding: 0;
+    color: #3e2723;
+  }
+  header {
+    background: linear-gradient(135deg,#6d1b1b,#8d6e63);
+    color: #fff;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+  header h1 {
+    margin: 0;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+  }
+  nav button {
+    background: #fff;
+    color: #6d1b1b;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  nav button:hover {
+    background: #ffd700;
+    color: #3e2723;
+  }
+  main {
+    max-width: 850px;
+    margin: 30px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  h2 {
+    font-family: 'Playfair Display', serif;
+    color: #6d1b1b;
+    margin-top: 0;
+  }
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+  label {
+    margin: 10px 0 5px;
+    font-weight: 500;
+  }
+  input, select {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+  }
+  button.submitBtn {
+    margin-top: 20px;
+    background: #6d1b1b;
+    color: #fff;
+    border: none;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  button.submitBtn:hover {
+    background: #8d6e63;
+  }
+  .message {
+    margin-top: 15px;
+    font-weight: 600;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 25px;
+  }
+  table th, table td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: left;
+  }
+  table th {
+    background: #f0e6e6;
+    color: #6d1b1b;
+  }
+  button.deleteBtn {
+    background: #f44336;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  button.deleteBtn:hover {
+    background: #d32f2f;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Post Assignment</h1>
+  <nav>
+    <button onclick="logout()">Logout</button>
+  </nav>
+</header>
+
+<main>
+  <h2>Add New Assignment</h2>
+  <form id="assignmentForm">
+    <label for="class">Class / Branch</label>
+    <input type="text" id="class" placeholder="e.g. 1styearIT1" required>
+
+    <label for="title">Assignment Title</label>
+    <input type="text" id="title" placeholder="Assignment title" required>
+
+    <label for="subject">Subject</label>
+    <input type="text" id="subject" placeholder="Subject name" required>
+
+    <label for="deadline">Deadline</label>
+    <input type="date" id="deadline" required>
+
+    <button type="submit" class="submitBtn">Post Assignment</button>
+  </form>
+  <div class="message" id="message"></div>
+
+  <h2>All Posted Assignments</h2>
+  <table id="postedAssignmentsTable">
+    <thead>
+      <tr>
+        <th>Class</th>
+        <th>Title</th>
+        <th>Subject</th>
+        <th>Deadline</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td colspan="5" style="text-align:center; color:gray;">Loading...</td></tr>
+    </tbody>
+  </table>
+</main>
+
+<script>
+function logout() {
+  localStorage.removeItem("mentorLoggedIn");
+  localStorage.removeItem("mentorBranch");
+  window.location.href = "mentor-login.html";
+}
+
+// ✅ Fetch all assignments (no class filter)
+async function fetchPostedAssignments() {
+  try {
+    const res = await fetch(`http://localhost:5000/api/assignments`);
+    const data = await res.json();
+
+    const tbody = document.getElementById("postedAssignmentsTable").querySelector("tbody");
+    tbody.innerHTML = '';
+
+    if(res.ok && data.success && data.assignments.length > 0){
+      data.assignments.forEach(a => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${a.class}</td>
+          <td>${a.title}</td>
+          <td>${a.subject}</td>
+          <td>${a.deadline}</td>
+          <td><button class="deleteBtn" onclick="deleteAssignment('${a.assignmentId}')">Delete</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } else {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:gray;">No assignments posted yet</td></tr>`;
+    }
+  } catch(err){
+    console.error(err);
+    const tbody = document.getElementById("postedAssignmentsTable").querySelector("tbody");
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Error fetching assignments</td></tr>`;
+  }
+}
+
+// ✅ Delete Assignment
+async function deleteAssignment(assignmentId) {
+  if(!confirm("Are you sure you want to delete this assignment?")) return;
+  try {
+    const res = await fetch(`http://localhost:5000/api/assignments/${assignmentId}`, { method: 'DELETE' });
+    const data = await res.json();
+    if(res.ok && data.success){
+      alert("Assignment deleted successfully!");
+      fetchPostedAssignments();
+    } else {
+      alert(data.message || "Error deleting assignment");
+    }
+  } catch(err){
+    console.error(err);
+    alert("Error connecting to server");
+  }
+}
+
+// ✅ Post new assignment
+document.getElementById("assignmentForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const className = document.getElementById("class").value.trim().toUpperCase();
+  const title = document.getElementById("title").value.trim();
+  const subject = document.getElementById("subject").value.trim();
+  const deadline = document.getElementById("deadline").value;
+
+  if (!className || !title || !subject || !deadline) {
+    document.getElementById("message").textContent = "All fields are required!";
+    document.getElementById("message").style.color = "red";
+    return;
+  }
+
+  try {
+    const res = await fetch(`http://localhost:5000/api/assignments`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ class: className, title, subject, deadline })
+    });
+
+    const data = await res.json();
+    if (res.ok && data.success) {
+      document.getElementById("message").textContent = "Assignment posted successfully!";
+      document.getElementById("message").style.color = "green";
+      document.getElementById("assignmentForm").reset();
+      fetchPostedAssignments();
+    } else {
+      document.getElementById("message").textContent = data.message || "Error posting assignment";
+      document.getElementById("message").style.color = "red";
+    }
+  } catch(err) {
+    console.error(err);
+    document.getElementById("message").textContent = "Error connecting to server";
+    document.getElementById("message").style.color = "red";
+  }
+});
+
+// ✅ Fetch all assignments on page load
+document.addEventListener("DOMContentLoaded", fetchPostedAssignments);
+</script>
+
+</body>
+</html>

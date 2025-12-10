@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upcoming Events or Announcements - Student Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    header {
+      background-color: #4a90e2;
+      color: white;
+      padding: 1rem 2rem;
+      text-align: center;
+    }
+    h1 {
+      margin: 0;
+      font-weight: 600;
+    }
+    main {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .events-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .event-card {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease;
+    }
+    .event-card:hover {
+      transform: translateY(-5px);
+    }
+    .event-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+    .event-card .content {
+      padding: 1rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .event-card h2 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    .event-card p {
+      flex: 1;
+      margin: 0 0 0.5rem 0;
+      font-size: 0.95rem;
+      color: #555;
+    }
+    .event-card .date {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #888;
+      text-align: right;
+    }
+    .no-events {
+      text-align: center;
+      color: #888;
+      margin-top: 3rem;
+      font-size: 1.1rem;
+    }
+    .events-grid { display:grid; grid-template-columns: repeat(auto-fill,minmax(250px,1fr)); gap:1rem; }
+.event-card { background:white; padding:1rem; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1); cursor:pointer; }
+.event-card img { width:100%; height:150px; object-fit:cover; border-radius:5px; margin-bottom:0.5rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Upcoming Events</h1>
+</header>
+<!-- events.html me add kare -->
+<button onclick="goBack()" style="padding:0.5rem 1rem; background:#888; color:white; border:none; border-radius:5px; cursor:pointer; margin-bottom:1rem;">
+  ← Back
+</button>
+<main>
+  <div id="eventsGrid" class="events-grid">
+    <!-- Events will be dynamically inserted here -->
+  </div>
+  
+<div id="eventsContainer" class="events-grid"></div>
+  <div id="noEvents" class="no-events" style="display:none;">
+    No upcoming events to show.
+  </div>
+</main>
+
+<script>
+async function loadEvents() {
+    const res = await fetch("http://localhost:5000/api/events");
+    const data = await res.json();
+    const container = document.getElementById("eventsContainer");
+    container.innerHTML = "";
+
+    if(data.success && Array.isArray(data.events)) {
+        data.events.forEach(ev => {
+            const card = document.createElement("div");
+            card.className = "event-card";
+            card.innerHTML = `
+                <img src="${ev.image || ''}" alt="${ev.title}" />
+                <h3>${ev.title}</h3>
+                <p>${ev.date ? 'Date: '+ev.date : ''}</p>
+                <p>${ev.description.substring(0, 100)}...</p>
+            `;
+            card.onclick = () => window.location.href = `eventDetails.html?eventId=${ev.eventId}`;
+            container.appendChild(card);
+        });
+    }
+}
+loadEvents();
+</script>
+<script>
+function goBack() {
+  // Previous page pe wapas jaaye
+  window.history.back();
+}
+</script>
+</body>
+</html>

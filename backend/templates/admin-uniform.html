@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Uniform Requests</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: #f5f7ff;
+    margin: 0;
+    padding: 0;
+    color: #222;
+  }
+  header {
+    background: #0b5fff;
+    color: white;
+    text-align: center;
+    padding: 20px 10px;
+    font-size: 1.6rem;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  }
+  .container {
+    max-width: 1000px;
+    margin: 30px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  }
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th, td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+  }
+  th {
+    background: #0b5fff;
+    color: white;
+  }
+  tr:hover {
+    background: #f3f6ff;
+  }
+  .status {
+    font-weight: 600;
+  }
+  .btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    transition: 0.2s ease;
+  }
+  .approve { background: #22c55e; }
+  .reject { background: #ef4444; }
+  .delivered { background: #0b5fff; }
+  .btn:hover { opacity: 0.9; transform: scale(1.05); }
+</style>
+</head>
+<body>
+  <header>🧾 Admin Panel — Uniform Purchase Requests</header>
+
+  <div class="container">
+    <h2>Incoming Requests</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Student Name</th>
+          <th>Item</th>
+          <th>Quantity</th>
+          <th>Price</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="requestTable">
+        <tr>
+          <td>Rohan Sharma</td>
+          <td>School Shirt</td>
+          <td>2</td>
+          <td>₹998</td>
+          <td class="status">Pending</td>
+          <td>
+            <button class="btn approve" onclick="updateStatus(this, 'Approved')">Approve</button>
+            <button class="btn reject" onclick="updateStatus(this, 'Rejected')">Reject</button>
+          </td>
+        </tr>
+        <tr>
+          <td>Priya Verma</td>
+          <td>School Shoes</td>
+          <td>1</td>
+          <td>₹999</td>
+          <td class="status">Pending</td>
+          <td>
+            <button class="btn approve" onclick="updateStatus(this, 'Approved')">Approve</button>
+            <button class="btn reject" onclick="updateStatus(this, 'Rejected')">Reject</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+   window.onload = async () => {
+  const res = await fetch('/api/uniform/requests');
+  const data = await res.json();
+  const table = document.getElementById('requestTable');
+  table.innerHTML = '';
+  data.requests.forEach(req => {
+    table.innerHTML += `
+      <tr>
+        <td>${req.student_name}</td>
+        <td>${req.item}</td>
+        <td>${req.quantity}</td>
+        <td>${req.class}</td>
+        <td>${req.measurements}</td>
+        <td class="status">${req.status}</td>
+        <td>
+          <button class='btn approve' onclick='updateStatus("${req._id}", "Approved")'>Approve</button>
+          <button class='btn reject' onclick='updateStatus("${req._id}", "Rejected")'>Reject</button>
+        </td>
+      </tr>`;
+  });
+};
+
+async function updateStatus(id, status) {
+  await fetch(`/api/uniform/update-status/${id}`, {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({status})
+  });
+  location.reload();
+}
+
+  </script>
+</body>
+</html>

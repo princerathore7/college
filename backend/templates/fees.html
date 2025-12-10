@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Pending Fees Checker</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: #f3f6fa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding-top: 60px;
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 30px;
+    }
+    .card {
+      background: #fff;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 360px;
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-size: 15px;
+    }
+    button {
+      background: #007bff;
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      font-size: 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+      width: 100%;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .result {
+      margin-top: 20px;
+      font-size: 16px;
+      color: #222;
+    }
+    .badge {
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-weight: 600;
+      color: #fff;
+      display: inline-block;
+    }
+    .paid { background: #28a745; }
+    .pending { background: #dc3545; }
+  </style>
+</head>
+<body>
+
+  <h1>🎓 Student Pending Fees Checker</h1>
+
+  <div class="card">
+    <input type="text" id="enrollmentInput" placeholder="Enter Enrollment Number" />
+    <button onclick="fetchPendingFees()">Check Fees</button>
+
+    <div class="result" id="resultBox"></div>
+  </div>
+
+  <script>
+    async function fetchPendingFees() {
+      const enrollment = document.getElementById("enrollmentInput").value.trim();
+      const resultBox = document.getElementById("resultBox");
+
+      if (!enrollment) {
+        resultBox.innerHTML = "<span style='color:red;'>⚠️ Please enter an enrollment number.</span>";
+        return;
+      }
+
+      resultBox.textContent = "⏳ Fetching fees...";
+
+      try {
+        const response = await fetch(`http://localhost:5000/api/students/${enrollment}/pending-fees?nocache=${Date.now()}`, {
+          method: "GET",
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+          },
+        });
+
+        if (!response.ok) throw new Error(`Server returned ${response.status}`);
+        const data = await response.json();
+
+        if (data.success) {
+          const pending = Number(data.pending_fees) || 0;
+
+          if (pending > 0) {
+            resultBox.innerHTML = `
+              <p>💰 Pending Fees: <strong>₹${pending.toLocaleString()}</strong></p>
+              <span class="badge pending">Pending</span>
+            `;
+          } else {
+            resultBox.innerHTML = `
+              <p>✅ No pending fees!</p>
+              <span class="badge paid">Paid</span>
+            `;
+          }
+        } else {
+          resultBox.innerHTML = `<span style='color:red;'>⚠️ No data found for this student.</span>`;
+        }
+      } catch (err) {
+        console.error("Error fetching fees:", err);
+        resultBox.innerHTML = `<span style='color:red;'>❌ Error fetching data from server.</span>`;
+      }
+    }
+  </script>
+</body>
+</html>

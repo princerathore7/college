@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Update Pending Fees — Acropolis College</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: #f5f5f5;
+    margin: 0;
+    padding: 0;
+    color: #3e2723;
+  }
+  header {
+    background: linear-gradient(135deg,#6d1b1b,#8d6e63);
+    color: #fff;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+  header h1 {
+    margin: 0;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+  }
+  nav button {
+    background: #fff;
+    color: #6d1b1b;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  nav button:hover {
+    background: #ffd700;
+    color: #3e2723;
+  }
+  main {
+    max-width: 500px;
+    margin: 30px auto;
+    padding: 25px 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  h2 { font-family: 'Playfair Display', serif; color:#6d1b1b; }
+  form { display:flex; flex-direction:column; gap:15px; margin-top:20px; }
+  input[type="text"], input[type="number"] {
+    padding:12px 15px; border-radius:8px; border:1px solid #a1887f;
+    font-size:15px; background:#fafafa; color:#3e2723; transition:all 0.3s ease;
+  }
+  input:focus { border-color:#6d1b1b; outline:none; box-shadow:0 0 6px rgba(109,27,27,0.3); }
+  button.submit-btn {
+    padding:12px; border-radius:8px; border:none; font-size:16px; font-weight:600;
+    cursor:pointer; background: linear-gradient(135deg,#8d6e63,#6d1b1b); color:#fff;
+    transition: all 0.3s ease;
+  }
+  button.submit-btn:hover {
+    background: linear-gradient(135deg,#6d1b1b,#3e2723);
+    transform:translateY(-2px); box-shadow:0 6px 15px rgba(0,0,0,0.3);
+  }
+  .message { margin-top:15px; font-weight:600; }
+  .message.success { color: green; }
+  .message.error { color: red; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Update Student Fees</h1>
+  <nav>
+    <button onclick="logout()">Logout</button>
+  </nav>
+</header>
+
+<main>
+  <h2>Enter Student Details</h2>
+  <form id="updateForm">
+    <input type="text" id="enrollment" placeholder="Student Enrollment Number" required />
+    <input type="number" id="pendingFees" placeholder="Pending Fees Amount" required />
+    <button type="submit" class="submit-btn">Update Fees</button>
+  </form>
+  <div class="message" id="msg"></div>
+</main>
+
+<script>
+function logout(){
+  // Optionally clear mentor session/localStorage
+  window.location.href = "login.html";
+}
+
+const form = document.getElementById("updateForm");
+const msgEl = document.getElementById("msg");
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  msgEl.textContent = "";
+  msgEl.className = "message";
+
+  const enrollment = document.getElementById("enrollment").value.trim();
+  const pendingFees = parseFloat(document.getElementById("pendingFees").value);
+
+  if(!enrollment || isNaN(pendingFees)){
+    msgEl.textContent = "Please enter valid details.";
+    msgEl.classList.add("error");
+    return;
+  }
+
+  try {
+    const res = await fetch(`http://localhost:5000/api/students/${enrollment}/pending-fees`, {
+      method: "POST", // backend should accept POST to update
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pending_fees: pendingFees })
+    });
+
+    const data = await res.json();
+
+    if(res.ok && data.success){
+      msgEl.textContent = `Pending fees for enrollment ${enrollment} updated to ₹${pendingFees}.`;
+      msgEl.classList.add("success");
+      form.reset();
+    } else {
+      msgEl.textContent = data.message || "Failed to update fees.";
+      msgEl.classList.add("error");
+    }
+  } catch(err){
+    console.error(err);
+    msgEl.textContent = "Error connecting to server.";
+    msgEl.classList.add("error");
+  }
+});
+</script>
+
+</body>
+</html>
+
