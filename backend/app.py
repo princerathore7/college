@@ -32,9 +32,19 @@ CORS(app)
 # ---------------------------------------------
 # MONGODB CONNECTION
 # ---------------------------------------------
-connect(db="college_db", alias="db1", host="localhost", port=27017)
-connect(db="college", alias="db2", host="localhost", port=27017)
+# College database
+connect(
+    db="college", 
+    alias="db1", 
+    host="mongodb+srv://prince242com:prince242%24@cluster0.3k2ajwh.mongodb.net/college?retryWrites=true&w=majority"
+)
 
+# College_db database
+connect(
+    db="college_db", 
+    alias="db2", 
+    host="mongodb+srv://prince242com:prince242%24@cluster0.3k2ajwh.mongodb.net/college_db?retryWrites=true&w=majority"
+)
 client = MongoClient("mongodb://localhost:27017/")
 db = client["college_db"]
 students_collection = db["students"]
