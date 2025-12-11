@@ -357,8 +357,7 @@ h2.section-title {
       </div>
 
       <div class="section" id="attendanceSection">
-        <button id="refreshBtn">🔄 Refresh</button>
-
+        
         <h2 class="section-title">Attendance</h2>
         <p><strong>Total:</strong> <span id="attTotal">0</span></p>
         <p><strong>Present:</strong> <span id="attPresent">0</span></p>
@@ -540,41 +539,22 @@ async function loadStudentProfile(enrollment){
 // Attendance loader — table-based version
 
   // 🔹 Load attendance
- // 🔹 Load attendance FROM LOCALSTORAGE (if exists)
-function loadAttendanceFromCache() {
-  const cached = localStorage.getItem("studentAttendance");
-  if (!cached) return;
+  async function loadAttendance(enrollment) {
+    try {
+      const res = await fetch(`https://college-hwbb.onrender.com/api/attendance/student/${enrollment}`);
+      const data = await res.json();
 
-  const data = JSON.parse(cached);
-
-  document.getElementById("attTotal").textContent = data.total || 0;
-  document.getElementById("attPresent").textContent = data.present || 0;
-  document.getElementById("attPercent").textContent = (data.percentage || 0) + "%";
-}
-
-
-
-// 🔹 Fetch ATTENDANCE from backend & save to cache
-async function fetchAttendance(enrollment) {
-  try {
-    const res = await fetch(`https://college-hwbb.onrender.com/api/attendance/student/${enrollment}`);
-    const data = await res.json();
-
-    if (res.ok && data.success) {
-
-      // ⚡ SAVE to localStorage
-      localStorage.setItem("studentAttendance", JSON.stringify(data.attendance));
-
-      // ⚡ Update UI
-      loadAttendanceFromCache();
-
-    } else {
-      console.warn("Attendance fetch failed");
+      if (res.ok && data.success) {
+        document.getElementById("attTotal").textContent = data.attendance.total;
+        document.getElementById("attPresent").textContent = data.attendance.present;
+        document.getElementById("attPercent").textContent = data.attendance.percentage + "%";
+      } else {
+        console.warn("Attendance not found");
+      }
+    } catch (err) {
+      console.error("Error fetching attendance:", err);
     }
-  } catch (err) {
-    console.error("Error fetching attendance:", err);
   }
-}
 
   
 
@@ -817,20 +797,6 @@ async function loadUnreadCount(userType, enrollment){
     }
   }catch(err){ console.error('Error loading notices:', err); }
 }
-document.getElementById("refreshBtn").addEventListener("click", refreshAllData);
-
-async function refreshAllData() {
-  const enrollment = localStorage.getItem("studentEnrollment");
-  if (!enrollment) return alert("Enrollment not found!");
-
-  await fetchProfile(enrollment);
-  await fetchAttendance(enrollment);
-  await fetchAssignments(enrollment);
-  await fetchUpcomingExams(enrollment);
-
-  localStorage.setItem("lastRefresh", Date.now());
-  alert("Dashboard Updated!");
-}
 
 /* ---------- Init on load ---------- */
 /* ---------- Init on load (FINAL MERGED VERSION) ---------- */
@@ -870,9 +836,6 @@ function loadDashboardFromCache() {
   loadAssignments(localStorage.getItem("studentAssignments"));
   loadUpcomingExams(localStorage.getItem("upcomingExams"));
 }
-window.onload = () => {
-  loadAttendanceFromCache();  // Load old data instantly
-};
 
 /* close modal when clicking outside */
 document.addEventListener('click', (e) => {
