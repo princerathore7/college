@@ -231,24 +231,46 @@
       }
     }
 
-    function editAttendance(enrollment) {
-      let total = prompt("Enter total days:");
-      let present = prompt("Enter present days:");
-      total = parseInt(total);
-      present = parseInt(present);
-      if(isNaN(total) || isNaN(present) || total < 0 || present < 0 || present > total){
-        alert("Invalid input!"); return;
-      }
-      fetch(`https://college-hwbb.onrender.com/api/attendance/edit_percentage`, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ enrollment: enrollment, total: total, present: present })
-      }).then(res=>res.json())
-        .then(data => {
-          if(data.success){ alert("Attendance updated successfully!"); fetchAttendance(enrollment); }
-          else { alert(data.message || "Failed to update attendance"); }
-        }).catch(err => { console.error(err); alert("Error connecting to server"); });
+   async function editAttendance(enrollment) {
+  let total = prompt("Enter total days:");
+  let present = prompt("Enter present days:");
+
+  total = parseInt(total);
+  present = parseInt(present);
+
+  if (isNaN(total) || isNaN(present) || total < 0 || present < 0 || present > total) {
+    alert("Invalid input!");
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/attendance/edit_percentage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enrollment, total, present })
+    });
+
+    let data;
+    try {
+      data = await res.json();
+    } catch (jsonErr) {
+      console.error("Failed to parse JSON:", jsonErr);
+      alert("Server returned invalid response (not JSON)");
+      return;
     }
+
+    if (res.ok && data.success) {
+      alert("✅ Attendance updated successfully!");
+      fetchAttendance(enrollment);
+    } else {
+      alert(data.message || "❌ Failed to update attendance");
+    }
+
+  } catch (err) {
+    console.error("Error connecting to server:", err);
+    alert("❌ Error connecting to server");
+  }
+}
 
     // Load saved class on page load
     window.onload = () => {
