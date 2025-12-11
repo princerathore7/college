@@ -144,31 +144,34 @@ def edit_attendance():
 # =====================================================
 @attendance_bp.route('/edit_percentage', methods=['POST'])
 def edit_attendance_percentage():
+    try:
+        data = request.json
+        enrollment = data.get("enrollment")
+        total = data.get("total")
+        present = data.get("present")
 
-    data = request.json
-    enrollment = data.get("enrollment")
-    total = data.get("total")
-    present = data.get("present")
+        if not all([enrollment, total is not None, present is not None]):
+            return jsonify({"success": False, "message": "Missing fields"}), 400
 
-    if not all([enrollment, total is not None, present is not None]):
-        return jsonify({"success": False, "message": "Missing fields"}), 400
+        # Remove old records
+        attendance_collection.delete_many({"enrollment": enrollment})
 
-    # Remove old records
-    attendance_collection.delete_many({"enrollment": enrollment})
+        # Fetch student section
+        student = students_collection.find_one({"enrollment": enrollment})
+        section = student.get("section", "") if student else ""
 
-    # Fetch student section
-    student = students_collection.find_one({"enrollment": enrollment})
-    section = student.get("section", "") if student else ""
+        # Generate new attendance history
+        for i in range(total):
+            status = "P" if i < present else "A"
+            attendance_collection.insert_one({
+                "enrollment": enrollment,
+                "section": section,
+                "status": status,
+                "date": f"2025-01-{i+1:02d}"
+            })
 
-    # Generate new attendance histor
-    for i in range(total):
-        status = "P" if i < present else "A"
+        return jsonify({"success": True, "message": "Attendance percentage updated"}), 200
 
-        attendance_collection.insert_one({
-            "enrollment": enrollment,
-            "section": section,
-            "status": status,
-            "date": f"2025-01-{i+1:02d}"
-        })
-
-    return jsonify({"success": True, "message": "Attendance percentage updated"}), 200
+    except Exception as e:
+        print("❌ Error in edit_attendance_percentage:", e)
+        return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
