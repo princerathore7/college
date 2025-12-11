@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from datetime import datetime
 from pymongo import MongoClient
 from flask_cors import CORS
-
+import os
 # Blueprint
 attendance_bp = Blueprint('attendance', __name__, url_prefix='/api/attendance')
 # MongoDB Connection
