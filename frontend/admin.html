@@ -239,7 +239,7 @@ async function editAttendance(enrollment) {
     return;
   }
 
-  const API = "https://college-hwbb.onrender.com/attendance";
+  const API = "https://college-hwbb.onrender.com/api/attendance";
 
   try {
     const res = await fetch(`${API}/edit_percentage`, {
