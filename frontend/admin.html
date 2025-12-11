@@ -230,8 +230,7 @@
         console.error(err); 
       }
     }
-
-  async function editAttendance(enrollment) {
+async function editAttendance(enrollment) {
   let total = parseInt(prompt("Enter total days:"));
   let present = parseInt(prompt("Enter present days:"));
 
@@ -240,8 +239,11 @@
     return;
   }
 
+  // ✅ Use your full backend URL deployed on Render
+  const BACKEND_URL = "https://college-hwbb.onrender.com";
+
   try {
-    const res = await fetch(`/api/attendance/edit_percentage`, {
+    const res = await fetch(`${BACKEND_URL}/api/attendance/edit_percentage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ enrollment, total, present })
@@ -253,7 +255,7 @@
       const data = await res.json();
       if (res.ok && data.success) {
         alert("✅ Attendance updated successfully!");
-        fetchAttendance(enrollment);
+        fetchAttendance(enrollment); // Make sure this function also uses the correct backend URL
       } else {
         alert(data.message || "❌ Failed to update attendance");
       }
@@ -269,6 +271,7 @@
     alert("❌ Error connecting to server");
   }
 }
+
 
     // Load saved class on page load
     window.onload = () => {
