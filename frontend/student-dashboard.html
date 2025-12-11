@@ -619,9 +619,10 @@ async function loadStudentProfile(enrollment){
   function normalizeClassName(str) {
     if (!str) return "IT";
     str = str.trim().toLowerCase();
-    str = str.replace(/[^a-z0-9]/g, '');  // remove spaces, dashes, special chars
-    str = str.replace(/st|nd|rd|th/g, ''); // remove ordinals
-    return str.toUpperCase();               // backend expects uppercase, e.g. "1A", "IT"
+str = str.replace(/[^a-z0-9]/g, '');  // remove spaces, dashes, special chars
+str = str.replace(/st|nd|rd|th/g, ''); // remove ordinals
+return str.toUpperCase();
+               // backend expects uppercase, e.g. "1A", "IT"
   }
 
 

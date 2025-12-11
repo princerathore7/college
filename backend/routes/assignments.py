@@ -25,7 +25,7 @@ def normalize_class_name(class_name):
     if not class_name:
         return ""
     class_name = class_name.strip().upper()
-    class_name = re.sub(r"[^A-Z0-9]", "", class_name)
+    class_name = re.sub(r'[^A-Z0-9]', '', class_name)
     return class_name
 
 # -----------------------------
