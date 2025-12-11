@@ -13,7 +13,7 @@ CORS(assignments_bp)
 # MongoDB Setup
 # -----------------------------
 # Use environment variable for deployment
-MONGO_URI = os.getenv("MONGO_ASSIGNMENTS_URI") or "mongodb://localhost:27017/"
+MONGO_URI = os.getenv("MONGO_COLLEGE_DB_URI") or "mongodb://localhost:27017/"
 client = MongoClient(MONGO_URI)
 db = client["college_db"]
 assignments_collection = db["assignments"]
