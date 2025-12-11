@@ -45,25 +45,26 @@ CORS(app , resources={r"/*": {
 connect(
     db="college", 
     alias="db1", 
-    host="mongodb+srv://prince242com:prince242%24@cluster0.3k2ajwh.mongodb.net/college?retryWrites=true&w=majority"
+    host=os.getenv("MONGO_COLLEGE_URI")
 )
 
 # College_db database
 connect(
     db="college_db", 
     alias="db2", 
-    host="prince242com:prince242%24@cluster0.3k2ajwh.mongodb.net/college_db?retryWrites=true&w=majority"
+    host=os.getenv("MONGO_COLLEGE_DB_URI")
 )
 # PyMongo connection (same as college_db)
 client = MongoClient(os.getenv("MONGO_COLLEGE_DB_URI"))
 db = client["college_db"]
 students_collection = db["students"]
 cloudinary.config(
-    cloud_name="CLOUDINARY_CLOUD_NAME",
-    api_key="CLOUDINARY_API_KEY",
-    api_secret="CLOUDINARY_API_SECRET",
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
     secure=True
 )
+
 
 # ---------------------------------------------
 # REGISTER BLUEPRINTS
