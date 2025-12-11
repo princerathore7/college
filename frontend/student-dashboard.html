@@ -764,6 +764,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("refreshDashboard");
   if (btn) btn.addEventListener("click", refreshDashboard);
 });
+function openSidebar() {
+  document.getElementById("sidebar").classList.add("sidebar-open");
+  document.getElementById("backdrop").style.display = "block";
+}
+
+function closeSidebar() {
+  document.getElementById("sidebar").classList.remove("sidebar-open");
+  document.getElementById("backdrop").style.display = "none";
+}
+
+document.getElementById("menuToggle").addEventListener("click", openSidebar);
 </script>
 
 
