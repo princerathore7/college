@@ -5,6 +5,9 @@ from utils import generate_id
 
 exams_bp = Blueprint("exams_bp", __name__, url_prefix="/api/exams")
 
+# Enable CORS for this blueprint
+CORS(exams_bp)
+
 # GET all exams or by class
 @exams_bp.route('', methods=['GET'])
 def get_exams():

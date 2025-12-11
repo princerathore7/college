@@ -1,10 +1,12 @@
 from flask import Blueprint, request, jsonify
-from flask_cors import cross_origin
+from flask_cors import CORS, cross_origin
 import cloudinary
 import cloudinary.uploader
 
 bus_bp = Blueprint("bus_bp", __name__, url_prefix="/api/bus")
 
+# Enable CORS for this blueprint
+CORS(bus_bp)
 # Cloudinary setup should be configured in your app's config
 # cloudinary.config(
 #     cloud_name='YOUR_CLOUD_NAME',

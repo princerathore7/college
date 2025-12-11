@@ -1,9 +1,13 @@
 from flask import Blueprint, request, jsonify
 from datetime import datetime
 from pymongo import MongoClient
+from flask_cors import CORS
 
 # Blueprint
 attendance_bp = Blueprint('attendance', __name__, url_prefix='/api/attendance')
+
+# Enable CORS for this blueprint
+CORS(attendance_bp)
 
 # MongoDB Connection
 client = MongoClient("mongodb://localhost:27017/")
@@ -11,6 +15,7 @@ db = client["college_db"]
 
 students_collection = db["student"]
 attendance_collection = db["attendance"]
+
 
 
 # =====================================================

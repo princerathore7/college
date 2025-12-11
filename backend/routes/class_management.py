@@ -1,8 +1,13 @@
 # routes/class_management.py
+# routes/class_management.py
 from flask import Blueprint, request, jsonify
+from flask_cors import CORS, cross_origin
 from db import db
 
 class_mgmt_bp = Blueprint('class_mgmt', __name__, url_prefix='/api/class')
+
+# Enable CORS for this entire blueprint
+CORS(class_mgmt_bp)
 
 # ✅ Get student info by enrollment number
 @class_mgmt_bp.route('/get/<enrollment>', methods=['GET'])

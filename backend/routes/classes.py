@@ -3,6 +3,8 @@ from pymongo import MongoClient
 
 classes_bp = Blueprint("classes_bp", __name__, url_prefix="/api/classes")
 
+# Enable CORS for this entire blueprint
+CORS(classes_bp)
 # MongoDB connection
 client = MongoClient("mongodb://localhost:27017/")
 db = client["college"]  # Database name
