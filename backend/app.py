@@ -1,7 +1,7 @@
 from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
 from mongoengine import connect
-from pymongo import MongoClient
+from pymongo import MongoClient, WriteConcern
 import os
 import cloudinary
 import cloudinary.uploader
@@ -28,7 +28,7 @@ from routes.management import management_bp
 # FLASK APP SETUP
 # ---------------------------------------------
 app = Flask(__name__, template_folder="templates", static_folder="static")
-CORS(app , resources={r"/*": {
+CORS(app, resources={r"/*": {
     "origins": [
         "https://acropoliss.netlify.app",
         "https://college-hwbb.onrender.com",
@@ -45,15 +45,15 @@ connect(db="college", alias="db1", host=os.getenv("MONGO_COLLEGE_URI"))
 connect(db="college_db", alias="db2", host=os.getenv("MONGO_COLLEGE_DB_URI"))
 
 client = MongoClient(os.getenv("MONGO_COLLEGE_DB_URI"))
-db = client["college_db"]
+db = client.get_database("college_db", write_concern=WriteConcern(w=1))  # safe write
 students_collection = db["students"]
 
-# Ensure indexes for faster queries
-students_collection.create_index("enrollment")
-students_collection.create_index("branch")
-students_collection.create_index("class_assigned")
-db.classes.create_index("classname")
-db.attendance.create_index([("branch", 1), ("date", 1)])
+# Ensure indexes for faster queries (no majority issue)
+students_collection.create_index("enrollment", background=True)
+students_collection.create_index("branch", background=True)
+students_collection.create_index("class_assigned", background=True)
+db.classes.create_index("classname", background=True)
+db.attendance.create_index([("branch", 1), ("date", 1)], background=True)
 
 # ---------------------------------------------
 # CLOUDINARY CONFIG
@@ -94,7 +94,7 @@ def admin_dashboard():
     return render_template("admin-class-man.html")
 
 # ---------------------------------------------
-# TIMETABLE UPLOAD / DELETE / FETCH (CLOUDINARY) optimized with background upload
+# TIMETABLE UPLOAD / DELETE / FETCH (background upload)
 # ---------------------------------------------
 def async_upload(pdf, filename):
     cloudinary.uploader.upload(pdf, public_id=filename, resource_type="raw", folder="timetables")
@@ -103,13 +103,10 @@ def async_upload(pdf, filename):
 def upload_timetable():
     class_name = request.form['class_name']
     pdf = request.files['pdf']
-
     if pdf and pdf.filename.endswith('.pdf'):
         filename = f"{class_name}_timetable"
-        # Background upload
         Thread(target=async_upload, args=(pdf, filename)).start()
         return jsonify({'success': True, 'message': 'Timetable upload started!'}), 202
-
     return jsonify({'success': False, 'message': 'Invalid file type'}), 400
 
 @app.route('/delete_timetable/<class_name>', methods=['DELETE'])
@@ -145,7 +142,7 @@ def get_timetable_by_class():
         return jsonify({"success": False, "message": "No timetable found"}), 404
 
 # ---------------------------------------------
-# UNIFORM REQUEST ROUTES (same as original)
+# UNIFORM REQUEST ROUTES
 # ---------------------------------------------
 @app.route("/api/uniform/request", methods=["POST"])
 def create_request():
@@ -185,7 +182,7 @@ def modify_status(req_id):
         return jsonify({"success": False, "msg": "Error updating status"}), 500
 
 # ---------------------------------------------
-# STUDENT & CLASS ROUTES (optimized)
+# STUDENT & CLASS ROUTES
 # ---------------------------------------------
 @app.route('/api/classes/<string:branch>/<string:class_name>/students', methods=['GET'])
 def get_students_by_branch_class(branch, class_name):
@@ -214,7 +211,6 @@ def update_student_branch(enrollment):
     result = students_collection.update_one({"enrollment": enrollment}, {"$set": {"branch": new_branch}})
     return jsonify({"success": result.modified_count > 0, "message": "Branch updated successfully" if result.modified_count > 0 else "No changes made or enrollment not found"}), 200 if result.modified_count > 0 else 404
 
-# Class creation & student generation remains same
 @app.route("/api/classes/create", methods=["POST"])
 def create_class():
     try:
@@ -258,9 +254,6 @@ def get_classes():
         print("Error fetching classes:", e)
         return jsonify({"success": False, "classes": [], "error": str(e)})
 
-# ---------------------------------------------
-# ATTENDANCE
-# ---------------------------------------------
 @app.route("/api/attendance/submit", methods=["POST"])
 def submit_attendance():
     data = request.json
@@ -271,9 +264,6 @@ def submit_attendance():
     })
     return jsonify({"success": True, "message": "Attendance Saved"})
 
-# ---------------------------------------------
-# STUDENT FETCH BY CLASSNAME
-# ---------------------------------------------
 @app.route('/api/students/<string:classname>', methods=['GET'])
 def get_students_by_classname(classname):
     try:
@@ -289,5 +279,4 @@ def get_students_by_classname(classname):
 # MAIN ENTRY POINT
 # ---------------------------------------------
 if __name__ == "__main__":
-    # For production, use gunicorn instead
     app.run(host="0.0.0.0", port=5000)
