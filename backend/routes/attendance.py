@@ -6,7 +6,7 @@ from flask_cors import CORS
 # Blueprint
 attendance_bp = Blueprint('attendance', __name__, url_prefix='/api/attendance')
 # MongoDB Connection
-client = MongoClient("mongodb://localhost:27017/")
+client = MongoClient(os.getenv("MONGO_COLLEGE_DB_URI"))
 db = client["college_db"]
 
 students_collection = db["student"]
