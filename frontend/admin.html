@@ -239,11 +239,10 @@ async function editAttendance(enrollment) {
     return;
   }
 
-  // ✅ Use your full backend URL deployed on Render
-  const BACKEND_URL = "https://college-hwbb.onrender.com";
+  const API = "https://college-hwbb.onrender.com/api/attendance";
 
   try {
-    const res = await fetch(`${BACKEND_URL}/api/attendance/edit_percentage`, {
+    const res = await fetch(`${API}/edit_percentage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ enrollment, total, present })
@@ -251,24 +250,22 @@ async function editAttendance(enrollment) {
 
     const contentType = res.headers.get("content-type");
 
-    if (contentType && contentType.includes("application/json")) {
+    if (contentType?.includes("application/json")) {
       const data = await res.json();
-      if (res.ok && data.success) {
-        alert("✅ Attendance updated successfully!");
-        fetchAttendance(enrollment); // Make sure this function also uses the correct backend URL
+      if (data.success) {
+        alert("Attendance updated!");
+        fetchAttendance(enrollment);
       } else {
-        alert(data.message || "❌ Failed to update attendance");
+        alert(data.message);
       }
     } else {
-      // HTML / non-JSON response
-      const text = await res.text();
-      console.error("Server returned non-JSON:", text);
-      alert("❌ Server returned invalid response (not JSON)");
+      console.error(await res.text());
+      alert("Server returned invalid response (not JSON)");
     }
 
   } catch (err) {
-    console.error("Error connecting to server:", err);
-    alert("❌ Error connecting to server");
+    console.error(err);
+    alert("Error connecting to server");
   }
 }
 
