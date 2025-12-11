@@ -1,17 +1,26 @@
 from flask import Blueprint, request, jsonify
+from flask_cors import CORS
 from db import db
 from utils import generate_id
 import re
 
 assignments_bp = Blueprint('assignments', __name__, url_prefix='/api/assignments')
-# 🔹 Normalizer function (already present)
+
+# Enable CORS for this blueprint
+CORS(assignments_bp)
+
+# 🔹 Normalize class format (IT-2 → IT2, it2 → IT2)
 def normalize_class_name(class_name):
     if not class_name:
         return ""
-    class_name = class_name.strip().lower()
-    class_name = re.sub(r'[^a-z0-9]', '', class_name)   # remove spaces, -, etc.
-    class_name = class_name.replace("st", "").replace("nd", "").replace("rd", "").replace("th", "")
-    return class_name.upper()  # e.g. "1st IT2" -> "1IT2"
+        
+    class_name = class_name.strip().upper()
+
+    # Remove spaces, hyphens
+    class_name = re.sub(r'[^A-Z0-9]', '', class_name)
+
+    return class_name  # final format: IT2, CSE3 etc.
+
 
 # ✅ 1. Get all assignments (for all classes)
 @assignments_bp.route('', methods=['GET'])
