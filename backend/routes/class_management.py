@@ -6,8 +6,6 @@ from db import db
 
 class_mgmt_bp = Blueprint('class_mgmt', __name__, url_prefix='/api/class')
 
-# Enable CORS for this entire blueprint
-CORS(class_mgmt_bp)
 
 # ✅ Get student info by enrollment number
 @class_mgmt_bp.route('/get/<enrollment>', methods=['GET'])

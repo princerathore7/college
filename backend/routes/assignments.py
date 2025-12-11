@@ -6,8 +6,7 @@ import re
 
 assignments_bp = Blueprint('assignments', __name__, url_prefix='/api/assignments')
 
-# Enable CORS for this blueprint
-CORS(assignments_bp)
+
 
 # 🔹 Normalize class format (IT-2 → IT2, it2 → IT2)
 def normalize_class_name(class_name):
