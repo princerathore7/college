@@ -540,22 +540,41 @@ async function loadStudentProfile(enrollment){
 // Attendance loader — table-based version
 
   // 🔹 Load attendance
-  async function loadAttendance(enrollment) {
-    try {
-      const res = await fetch(`https://college-hwbb.onrender.com/api/attendance/student/${enrollment}`);
-      const data = await res.json();
+ // 🔹 Load attendance FROM LOCALSTORAGE (if exists)
+function loadAttendanceFromCache() {
+  const cached = localStorage.getItem("studentAttendance");
+  if (!cached) return;
 
-      if (res.ok && data.success) {
-        document.getElementById("attTotal").textContent = data.attendance.total;
-        document.getElementById("attPresent").textContent = data.attendance.present;
-        document.getElementById("attPercent").textContent = data.attendance.percentage + "%";
-      } else {
-        console.warn("Attendance not found");
-      }
-    } catch (err) {
-      console.error("Error fetching attendance:", err);
+  const data = JSON.parse(cached);
+
+  document.getElementById("attTotal").textContent = data.total || 0;
+  document.getElementById("attPresent").textContent = data.present || 0;
+  document.getElementById("attPercent").textContent = (data.percentage || 0) + "%";
+}
+
+
+
+// 🔹 Fetch ATTENDANCE from backend & save to cache
+async function fetchAttendance(enrollment) {
+  try {
+    const res = await fetch(`https://college-hwbb.onrender.com/api/attendance/student/${enrollment}`);
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+
+      // ⚡ SAVE to localStorage
+      localStorage.setItem("studentAttendance", JSON.stringify(data.attendance));
+
+      // ⚡ Update UI
+      loadAttendanceFromCache();
+
+    } else {
+      console.warn("Attendance fetch failed");
     }
+  } catch (err) {
+    console.error("Error fetching attendance:", err);
   }
+}
 
   
 
@@ -851,6 +870,9 @@ function loadDashboardFromCache() {
   loadAssignments(localStorage.getItem("studentAssignments"));
   loadUpcomingExams(localStorage.getItem("upcomingExams"));
 }
+window.onload = () => {
+  loadAttendanceFromCache();  // Load old data instantly
+};
 
 /* close modal when clicking outside */
 document.addEventListener('click', (e) => {
