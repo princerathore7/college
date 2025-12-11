@@ -27,7 +27,16 @@ from routes.management import management_bp
 # FLASK APP SETUP
 # ---------------------------------------------
 app = Flask(__name__, template_folder="templates", static_folder="static")
-CORS(app)
+CORS(app , resources={r"/*": {
+    "origins": [
+        "https://acropoliss.netlify.app",
+        "https://college-hwbb.onrender.com",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173"
+    ],
+    "supports_credentials": True
+}})
+
 
 # ---------------------------------------------
 # MONGODB CONNECTION
@@ -43,15 +52,16 @@ connect(
 connect(
     db="college_db", 
     alias="db2", 
-    host="mongodb+srv://prince242com:prince242%24@cluster0.3k2ajwh.mongodb.net/college_db?retryWrites=true&w=majority"
+    host="prince242com:prince242%24@cluster0.3k2ajwh.mongodb.net/college_db?retryWrites=true&w=majority"
 )
-client = MongoClient("mongodb://localhost:27017/")
+# PyMongo connection (same as college_db)
+client = MongoClient(os.getenv("MONGO_COLLEGE_DB_URI"))
 db = client["college_db"]
 students_collection = db["students"]
 cloudinary.config(
-    cloud_name="deqqkiovg",
-    api_key="452184782769581",
-    api_secret="1NRiK3bczAp2MBb6Y273xPLHuuA",
+    cloud_name="CLOUDINARY_CLOUD_NAME",
+    api_key="CLOUDINARY_API_KEY",
+    api_secret="CLOUDINARY_API_SECRET",
     secure=True
 )
 
