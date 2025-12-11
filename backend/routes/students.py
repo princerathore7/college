@@ -3,11 +3,18 @@ from flask_cors import CORS
 from pymongo import MongoClient
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+import os
 students_bp = Blueprint("students_bp", __name__, url_prefix="/api/students")
 CORS(students_bp)
 
 # ----------------- MongoDB Setup -----------------
-client = MongoClient("mongodb://localhost:27017/")
+# ----------- MongoDB Atlas Connection (Render Environment Variables) -----------
+MONGO_URL = os.getenv("MONGO_URL")
+
+if not MONGO_URL:
+    raise Exception("MONGO_URL environment variable missing!")
+
+client = MongoClient(MONGO_URL)
 classes_db = client["classes"]         # collections for each class-section
 users_db = client["users"]             # user login DB
 students_collection = users_db["students"]  # explicit collection reference
@@ -27,8 +34,11 @@ def get_collection_name(branch_section):
 @students_bp.route("/<branch>", methods=["GET"])
 def get_students(branch):
     try:
-        # fetch from actual students collection
-        students = list(db.students.find({"class": branch}, {"_id": 0, "name": 1, "enrollment": 1}))
+        # fetch students based on branch
+        students = list(students_collection.find(
+            {"branch": branch},
+            {"_id": 0, "name": 1, "enrollment": 1}
+        ))
         return jsonify({"success": True, "students": students}), 200
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
