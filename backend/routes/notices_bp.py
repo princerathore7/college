@@ -3,14 +3,20 @@ from flask_cors import CORS
 from pymongo import MongoClient
 from datetime import datetime
 from urllib.parse import unquote
+import os
 
 # --- Blueprint Setup ---
 notices_bp = Blueprint("notices_bp", __name__, url_prefix="/api/notices")
 CORS(notices_bp)
 
 # --- MongoDB Setup ---
-client = MongoClient("mongodb://localhost:27017/")
-db = client["users"]
+# Use environment variable from __init__.py / .env
+MONGO_URI = os.getenv("MONGO_COLLEGE_DB_URI")
+if not MONGO_URI:
+    raise Exception("MONGO_COLLEGE_DB_URI not set in environment variables")
+
+client = MongoClient(MONGO_URI)
+db = client["college_db"]
 notices_collection = db["notices"]
 
 # =====================================
