@@ -2,8 +2,7 @@
 from flask import Blueprint, request, jsonify
 from db import db  # assuming pymongo client
 from utils import generate_id
-from flask_cors import cross_origin
-from flask_cors import CORS
+from flask_cors import cross_origin, CORS
 
 events_bp = Blueprint("events_bp", __name__, url_prefix="/api/events")
 CORS(events_bp, resources={r"/*": {"origins": "*"}})
@@ -31,22 +30,32 @@ def post_event():
     if request.method == "OPTIONS":
         return jsonify({}), 200
 
-    data = request.get_json()
+    # Use silent=True to avoid crash if body is not JSON
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"success": False, "message": "Invalid or missing JSON body"}), 400
 
-    required = ["title", "description", "image"]  # Cloudinary URL
+    # Validate required fields
+    required = ["title", "description", "image"]
     for field in required:
-        if field not in data or not data[field]:
+        if field not in data or not data[field].strip():
             return jsonify({"success": False, "message": f"{field} is required"}), 400
 
+    # Generate unique event ID
     data['eventId'] = generate_id("E")
 
-    db.events.insert_one({
-        "eventId": data["eventId"],
-        "title": data["title"],
-        "description": data["description"],
-        "date": data.get("date", ""),
-        "image": data["image"]  # Cloudinary URL
-    })
+    # Insert into MongoDB safely
+    try:
+        db.events.insert_one({
+            "eventId": data["eventId"],
+            "title": data["title"].strip(),
+            "description": data["description"].strip(),
+            "date": data.get("date", "").strip(),
+            "image": data["image"].strip()
+        })
+    except Exception as e:
+        print("DB Insert Error:", e)
+        return jsonify({"success": False, "message": "Database error occurred"}), 500
 
     return jsonify({
         "success": True,
@@ -54,7 +63,7 @@ def post_event():
         "eventId": data['eventId']
     }), 201
 
-# DELETE an event
+# ✅ DELETE an event
 @events_bp.route('/<eventId>', methods=['DELETE'])
 @cross_origin()
 def delete_event(eventId):
@@ -62,9 +71,12 @@ def delete_event(eventId):
     if not event:
         return jsonify({"success": False, "message": "Event not found"}), 404
 
-    # Optional: Delete from Cloudinary if stored
-    # Only if you saved public_id or using a pattern
-    # Example: public_id = f"events/event_{eventId}"
+    # Optional: Delete from Cloudinary if needed
 
-    result = db.events.delete_one({"eventId": eventId})
+    try:
+        db.events.delete_one({"eventId": eventId})
+    except Exception as e:
+        print("DB Delete Error:", e)
+        return jsonify({"success": False, "message": "Database error occurred"}), 500
+
     return jsonify({"success": True, "message": "Event deleted"}), 200

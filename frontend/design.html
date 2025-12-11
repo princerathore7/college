@@ -101,15 +101,19 @@
       const data = await res.json();
       console.log("Cloudinary upload:", data);
 
-      uploadedImageUrl = data.secure_url;
+      if (!data.secure_url) {
+        alert("Image upload failed! No URL returned.");
+        return;
+      }
 
+      uploadedImageUrl = data.secure_url;
       previewImage.src = uploadedImageUrl;
       previewImage.style.display = "block";
 
       updatePreview();
 
     } catch (err) {
-      console.error(err);
+      console.error("Cloudinary Upload Error:", err);
       alert("Image upload failed!");
     }
   });
@@ -135,29 +139,29 @@
 
   /* ------------------ POST EVENT → BACKEND ------------------ */
   document.getElementById("postEvent").addEventListener("click", async () => {
+    const title = titleInput.value.trim();
+    const date = dateInput.value.trim();
+    const description = descInput.innerHTML.trim();
+
+    if (!title || !description) {
+      alert("Title and description are required!");
+      return;
+    }
+
+    if (!uploadedImageUrl) {
+      alert("Please select and upload an image!");
+      return;
+    }
+
+    const payload = {
+      title,
+      date,
+      description,
+      image: uploadedImageUrl
+    };
+
     try {
-      const title = titleInput.value.trim();
-      const date = dateInput.value.trim();
-      const description = descInput.innerHTML.trim();
-
-      if (!title || !description) {
-        alert("Title and description are required!");
-        return;
-      }
-
-      if (!uploadedImageUrl) {
-        alert("Please select and upload an image!");
-        return;
-      }
-
-      const payload = {
-        title: title,
-        date: date,
-        description: description,
-        image: uploadedImageUrl
-      };
-
-      const res = await fetch("https://college-hwbb.onrender.com/api/events", {
+      const res = await fetch("http://college-hwbb.onrender.com/api/events", { // Use localhost for testing
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -166,7 +170,7 @@
       const data = await res.json();
       console.log("Event post response:", data);
 
-      if (data.success) {
+      if (res.ok && data.success) {
         alert("Event posted successfully!");
 
         // Reset form
@@ -179,12 +183,12 @@
 
         updatePreview();
       } else {
-        alert(data.message);
+        alert(data.message || "Failed to post event");
       }
 
     } catch (err) {
-      console.error(err);
-      alert("Failed to post event");
+      console.error("Post Event Error:", err);
+      alert("Failed to post event due to network/server error.");
     }
   });
 </script>
