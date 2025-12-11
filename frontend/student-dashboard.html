@@ -797,26 +797,43 @@ async function loadUnreadCount(userType, enrollment){
 }
 
 /* ---------- Init on load ---------- */
-document.addEventListener('DOMContentLoaded', async ()=>{
-  const enrollment = localStorage.getItem('enrollment') || prompt('Enter enrollment to continue:');
-  if(!enrollment){ alert('No enrollment provided'); window.location.href='student-login.html'; return; }
-  // save if not present
-  if(!localStorage.getItem('enrollment')) localStorage.setItem('enrollment', enrollment);
+/* ---------- Init on load (FINAL MERGED VERSION) ---------- */
+document.addEventListener('DOMContentLoaded', async () => {
+  let enrollment = localStorage.getItem('enrollment');
 
-  // start loading data
-  await loadStudentProfile(enrollment);
-  loadEventsBanner();
-  loadUnreadCount('students', enrollment);
-  await loadAttendance(enrollment);
-  await loadAssignments(enrollment);
-  await loadExams();
-  await loadTimetable();
+  if (!enrollment) {
+    enrollment = prompt('Enter enrollment to continue:');
+    if (!enrollment) {
+      alert('No enrollment provided');
+      window.location.href = 'student-login.html';
+      return;
+    }
+    localStorage.setItem('enrollment', enrollment);
+  }
+
+  try {
+    // Basic student info
+    await loadStudentProfile(enrollment);
+
+    // UI elements
+    loadEventsBanner();
+    loadUnreadCount('students', enrollment);
+
+    // Main modules
+    await loadAttendance(enrollment);
+    await loadAssignments(enrollment);
+    await loadExams();
+    await loadTimetable();
+  } catch (err) {
+    console.error("Error loading dashboard:", err);
+  }
 });
 
-/* make sure clicking outside modal closes it */
-document.addEventListener('click', (e)=> {
-  if(e.target === feesModal) closeFeesModal();
+/* close modal when clicking outside */
+document.addEventListener('click', (e) => {
+  if (e.target === feesModal) closeFeesModal();
 });
+
 </script>
 
 </body>
