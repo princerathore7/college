@@ -3,8 +3,10 @@ from flask import Blueprint, request, jsonify
 from db import db  # assuming pymongo client
 from utils import generate_id
 from flask_cors import cross_origin
+from flask_cors import CORS
 
 events_bp = Blueprint("events_bp", __name__, url_prefix="/api/events")
+CORS(events_bp, resources={r"/*": {"origins": "*"}})
 
 # ✅ GET all events
 @events_bp.route('', methods=['GET'])
@@ -24,7 +26,7 @@ def get_event(eventId):
 
 # ✅ POST new event (JSON body with image URL)
 @events_bp.route('', methods=['POST', 'OPTIONS'])
-@cross_origin()
+@cross_origin(headers=["Content-Type"])
 def post_event():
     if request.method == "OPTIONS":
         return jsonify({}), 200
