@@ -78,7 +78,7 @@ header {
 }
 
 /* SIDEBAR */
-.sidebar {
+/* .sidebar {
     position: fixed;
     left: -260px;
     top: 0;
@@ -101,7 +101,16 @@ header {
     padding: 12px 18px;
     text-decoration: none;
     font-weight: 500;
+} */
+ .sidebar {
+  transform: translateX(-260px);
+  transition: 0.3s ease;
 }
+
+.sidebar-open {
+  transform: translateX(0);
+}
+
 
 /* BACKDROP */
 .backdrop {
