@@ -231,12 +231,9 @@
       }
     }
 
-   async function editAttendance(enrollment) {
-  let total = prompt("Enter total days:");
-  let present = prompt("Enter present days:");
-
-  total = parseInt(total);
-  present = parseInt(present);
+  async function editAttendance(enrollment) {
+  let total = parseInt(prompt("Enter total days:"));
+  let present = parseInt(prompt("Enter present days:"));
 
   if (isNaN(total) || isNaN(present) || total < 0 || present < 0 || present > total) {
     alert("Invalid input!");
@@ -250,20 +247,21 @@
       body: JSON.stringify({ enrollment, total, present })
     });
 
-    let data;
-    try {
-      data = await res.json();
-    } catch (jsonErr) {
-      console.error("Failed to parse JSON:", jsonErr);
-      alert("Server returned invalid response (not JSON)");
-      return;
-    }
+    const contentType = res.headers.get("content-type");
 
-    if (res.ok && data.success) {
-      alert("✅ Attendance updated successfully!");
-      fetchAttendance(enrollment);
+    if (contentType && contentType.includes("application/json")) {
+      const data = await res.json();
+      if (res.ok && data.success) {
+        alert("✅ Attendance updated successfully!");
+        fetchAttendance(enrollment);
+      } else {
+        alert(data.message || "❌ Failed to update attendance");
+      }
     } else {
-      alert(data.message || "❌ Failed to update attendance");
+      // HTML / non-JSON response
+      const text = await res.text();
+      console.error("Server returned non-JSON:", text);
+      alert("❌ Server returned invalid response (not JSON)");
     }
 
   } catch (err) {
