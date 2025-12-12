@@ -69,4 +69,5 @@ def bus_direct():
     rec = db.bus.find_one({}, {"_id":0,"pdf_url":1})
     if not rec or not rec.get("pdf_url"):
         return jsonify({"success":False,"message":"No Bus PDF found"}),404
+    url = rec["pdf_url"] + "?fl=attachment"
     return jsonify({"success":True,"url":rec["pdf_url"]})

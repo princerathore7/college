@@ -197,7 +197,6 @@ downloadBtn.addEventListener('click', async ()=> {
 
         const fileUrl = data.url;
 
-        // Correct download method for raw PDFs
         const xhr = new XMLHttpRequest();
         xhr.open("GET", fileUrl, true);
         xhr.responseType = "blob";
@@ -210,19 +209,23 @@ downloadBtn.addEventListener('click', async ()=> {
                 link.download = "Bus_Routes.pdf";
                 link.click();
             } else {
-                alert("Download failed!");
+                console.log("XHR status:", xhr.status);
+                alert("Download failed (server error)!");
             }
         };
 
-        xhr.onerror = () => alert("Download error!");
+        xhr.onerror = () => {
+            alert("Download failed (network error)!");
+        };
 
         xhr.send();
 
     } catch (err) {
         console.error(err);
-        alert("Download failed!");
+        alert("Download failed (JS error)!");
     }
 });
+
 
 
 // Fetch & display
