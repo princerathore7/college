@@ -1,6 +1,5 @@
 from pymongo import MongoClient
 import os
-from db import db   # 🟢 make sure this line is present
 
 # --------------------------------------------------------
 # 🔥 1. Load MongoDB URI from Environment Variable

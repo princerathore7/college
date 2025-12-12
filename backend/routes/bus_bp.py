@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_cors import CORS, cross_origin
 import cloudinary
 import cloudinary.uploader
+from db import db
 
 bus_bp = Blueprint("bus_bp", __name__, url_prefix="/api/bus")
 
