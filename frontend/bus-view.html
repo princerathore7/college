@@ -166,72 +166,92 @@
 const API_ROOT = "https://college-hwbb.onrender.com/api/bus";
 let currentPdfUrl = "";
 
+// DOM
 const statusText = document.getElementById('statusText');
 const pdfWrap = document.getElementById('pdfWrap');
 const pdfFrame = document.getElementById('pdfFrame');
 const fallback = document.getElementById('fallback');
 const fallbackMsg = document.getElementById('fallbackMsg');
 const fallbackHint = document.getElementById('fallbackHint');
-const openDirectLink = document.getElementById('openDirectLink');
 const downloadBtn = document.getElementById('downloadBtn');
+const openDirectLink = document.getElementById('openDirectLink');
 
 document.getElementById('refreshBtn').addEventListener('click', checkAndLoad);
 document.getElementById('retryBtn').addEventListener('click', checkAndLoad);
-document.getElementById('openNewBtn').addEventListener('click', ()=> { if(currentPdfUrl) window.open(currentPdfUrl,'_blank'); });
+document.getElementById('openNewBtn').addEventListener('click', ()=>{ if(currentPdfUrl) window.open(currentPdfUrl,'_blank'); });
 document.getElementById('backBtn').addEventListener('click', ()=> window.history.back());
-openDirectLink.addEventListener('click', ()=> { if(currentPdfUrl) window.open(currentPdfUrl,'_blank'); });
+openDirectLink.addEventListener('click', ()=>{ if(currentPdfUrl) window.open(currentPdfUrl,'_blank'); });
 
-// ✅ Download PDF directly to device native PDF app
-downloadBtn.addEventListener('click', ()=> {
-  if(!currentPdfUrl) return;
-  const a = document.createElement('a');
-  a.href = currentPdfUrl; 
-  a.setAttribute('target','_blank'); // ensures device PDF app opens
-  a.download = 'Bus_Routes.pdf';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+// ✅ Download PDF like Notes system
+downloadBtn.addEventListener('click', async ()=>{
+    if(!currentPdfUrl) return;
+
+    try{
+        // Fetch JSON endpoint
+        const res = await fetch(`${API_ROOT}/direct`);
+        const data = await res.json();
+
+        if(!data.success){
+            alert("Bus PDF not found!");
+            return;
+        }
+
+        const fileUrl = data.url;
+        const response = await fetch(fileUrl);
+        const blob = await response.blob();
+
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = "Bus_Routes.pdf";
+        link.click();
+    }catch(err){
+        console.error(err);
+        alert("Download failed!");
+    }
 });
 
+// Fetch & display
 async function checkAndLoad(){
-  statusText.textContent = 'Fetching Bus PDF…';
-  pdfWrap.style.display='none';
-  fallback.style.display='none';
-  try{
-    const res = await fetch(`${API_ROOT}/view`);
-    const data = await res.json();
-    if(data.success && data.pdf_url){
-      currentPdfUrl = data.pdf_url;
-      pdfFrame.src = currentPdfUrl; // iframe view
-      pdfWrap.style.display='block';
-      fallback.style.display='none';
-      statusText.textContent = 'Bus PDF is available 🚌';
-      openDirectLink.href = currentPdfUrl;
-      downloadBtn.style.display='inline-block';
-    }else{
-      currentPdfUrl='';
-      statusText.textContent='Bus PDF not available ❌';
-      fallbackMsg.textContent='No Bus PDF uploaded yet.';
-      fallbackHint.textContent='The bus routes PDF is not available right now. Contact admin or try again later.';
-      fallback.style.display='block';
-      openDirectLink.href='#';
-      downloadBtn.style.display='none';
+    statusText.textContent = 'Fetching Bus PDF…';
+    pdfWrap.style.display='none';
+    fallback.style.display='none';
+    try{
+        const res = await fetch(`${API_ROOT}/view`);
+        const data = await res.json();
+
+        if(data.success && data.pdf_url){
+            currentPdfUrl = data.pdf_url;
+            pdfFrame.src = currentPdfUrl;
+            pdfWrap.style.display='block';
+            fallback.style.display='none';
+            statusText.textContent = 'Bus PDF is available 🚌';
+            openDirectLink.href = currentPdfUrl;
+            downloadBtn.style.display='inline-block';
+        }else{
+            currentPdfUrl='';
+            statusText.textContent='Bus PDF not available ❌';
+            fallbackMsg.textContent='No Bus PDF uploaded yet.';
+            fallbackHint.textContent='Contact admin or try again later.';
+            fallback.style.display='block';
+            openDirectLink.href='#';
+            downloadBtn.style.display='none';
+        }
+    }catch(err){
+        console.error(err);
+        currentPdfUrl='';
+        statusText.textContent='Unable to fetch PDF ⚠';
+        fallbackMsg.textContent='Cannot load Bus PDF.';
+        fallbackHint.textContent='Check your internet connection or try again later.';
+        fallback.style.display='block';
+        openDirectLink.href='#';
+        downloadBtn.style.display='none';
     }
-  }catch(err){
-    console.error(err);
-    currentPdfUrl='';
-    statusText.textContent='Unable to fetch PDF ⚠';
-    fallbackMsg.textContent='Cannot load Bus PDF.';
-    fallbackHint.textContent='Check your internet connection or try again later.';
-    fallback.style.display='block';
-    openDirectLink.href='#';
-    downloadBtn.style.display='none';
-  }
 }
 
-// auto-load
+// Auto-load
 document.addEventListener('DOMContentLoaded', checkAndLoad);
 </script>
+
 </body>
 </html>
 

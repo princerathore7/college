@@ -56,3 +56,11 @@ def view_bus_pdf():
         return jsonify({"success": True, "pdf_url": pdf_url}), 200
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+# /api/bus/direct
+@bus_bp.route("/direct", methods=["GET"])
+@cross_origin()
+def bus_direct():
+    rec = db.bus.find_one({}, {"_id":0,"pdf_url":1})
+    if not rec or not rec.get("pdf_url"):
+        return jsonify({"success":False,"message":"No Bus PDF found"}),404
+    return jsonify({"success":True,"url":rec["pdf_url"]})
