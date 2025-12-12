@@ -23,7 +23,7 @@ from timetables import timetables_bp
 from models.uniform_request import create_uniform_request, get_all_requests, update_status
 from routes.bus_bp import bus_bp
 from routes.management import management_bp
-
+from routes.fine_bp import fine_bp
 # ---------------------------------------------
 # FLASK APP SETUP
 # ---------------------------------------------
@@ -70,7 +70,7 @@ cloudinary.config(
 # ---------------------------------------------
 for bp in [
     notices_bp, students_bp, mentors_bp, attendance_bp, assignments_bp, classes_bp,
-    class_mgmt_bp, events_bp, exams_bp, timetables_bp, marks_bp, bus_bp, management_bp, notes_bp
+    class_mgmt_bp, events_bp, exams_bp, timetables_bp, marks_bp, bus_bp, management_bp, notes_bp, fine_bp
 ]:
     app.register_blueprint(bp)
 
