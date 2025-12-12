@@ -153,7 +153,7 @@
     }
 
     try {
-      const res = await fetch(`${API_URL}/api/fines/${enrollment}`);
+      const res = await fetch(`${API_URL}/api/fines/${enr}`);
       const data = await res.json();
 
       if (data.success) {
