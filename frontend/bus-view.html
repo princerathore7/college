@@ -183,32 +183,47 @@ document.getElementById('backBtn').addEventListener('click', ()=> window.history
 openDirectLink.addEventListener('click', ()=>{ if(currentPdfUrl) window.open(currentPdfUrl,'_blank'); });
 
 // ✅ Download PDF like Notes system
-downloadBtn.addEventListener('click', async ()=>{
-    if(!currentPdfUrl) return;
+downloadBtn.addEventListener('click', async ()=> {
+    if (!currentPdfUrl) return;
 
-    try{
-        // Fetch JSON endpoint
+    try {
         const res = await fetch(`${API_ROOT}/direct`);
         const data = await res.json();
 
-        if(!data.success){
+        if (!data.success) {
             alert("Bus PDF not found!");
             return;
         }
 
         const fileUrl = data.url;
-        const response = await fetch(fileUrl);
-        const blob = await response.blob();
 
-        const link = document.createElement('a');
-        link.href = window.URL.createObjectURL(blob);
-        link.download = "Bus_Routes.pdf";
-        link.click();
-    }catch(err){
+        // Correct download method for raw PDFs
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", fileUrl, true);
+        xhr.responseType = "blob";
+
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                const blob = xhr.response;
+                const link = document.createElement("a");
+                link.href = window.URL.createObjectURL(blob);
+                link.download = "Bus_Routes.pdf";
+                link.click();
+            } else {
+                alert("Download failed!");
+            }
+        };
+
+        xhr.onerror = () => alert("Download error!");
+
+        xhr.send();
+
+    } catch (err) {
         console.error(err);
         alert("Download failed!");
     }
 });
+
 
 // Fetch & display
 async function checkAndLoad(){
