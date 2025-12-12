@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin – Fine Management</title>
+
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background:#f3f3f3;
+        margin:0;
+        padding:0;
+    }
+    .topbar {
+        display:flex;
+        align-items:center;
+        gap:15px;
+        background:white;
+        padding:10px 20px;
+        border-bottom:1px solid #ddd;
+    }
+    .topbar img {
+        height:45px;
+    }
+    .topbar h2 {
+        margin:0;
+        font-size:20px;
+        font-weight:600;
+    }
+    .container {
+        max-width:900px;
+        margin:25px auto;
+        background:white;
+        padding:20px;
+        border-radius:10px;
+        box-shadow:0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h3 {
+        text-align:center;
+        margin:0 0 15px;
+        font-size:20px;
+        font-weight:600;
+    }
+
+    .row {
+        display:flex;
+        gap:10px;
+        margin-bottom:12px;
+        flex-wrap:wrap;
+    }
+    input, select {
+        padding:10px;
+        width:100%;
+        border:1px solid #ccc;
+        border-radius:5px;
+    }
+
+    .student-block {
+        border:1px solid #ddd;
+        padding:15px;
+        border-radius:8px;
+        margin-bottom:10px;
+        background:#f9f9f9;
+    }
+
+    button {
+        background:#002147;
+        color:white;
+        padding:12px 20px;
+        border:none;
+        border-radius:6px;
+        cursor:pointer;
+        font-size:15px;
+    }
+    button:hover {
+        opacity:0.9;
+    }
+
+    #fineTable {
+        width:100%;
+        margin-top:20px;
+        border-collapse:collapse;
+    }
+    #fineTable th, #fineTable td {
+        border:1px solid #ccc;
+        padding:8px;
+        font-size:14px;
+    }
+    #fineTable th {
+        background:#002147;
+        color:white;
+    }
+
+    .editBtn {
+        background:#ff9800;
+    }
+    .deleteBtn {
+        background:#d32f2f;
+    }
+
+    @media(max-width:600px){
+        h3 { font-size:18px; }
+        .topbar h2 { font-size:17px; }
+    }
+</style>
+</head>
+
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+    <img src="logo.jpg" alt="Acropolis Logo">
+    <h2>Acropolis Institute Indore — Fine Management</h2>
+</div>
+
+<div class="container">
+
+    <h3>Add Fine (Single / Bulk)</h3>
+
+    <div id="studentsContainer"></div>
+
+    <button onclick="addStudentBlock()">➕ Add More Student</button>
+    <button onclick="submitFines()">✔ Submit All Fines</button>
+
+</div>
+
+
+<!-- SEARCH & EDIT PANEL -->
+<div class="container">
+    <h3>Search & Edit Fine</h3>
+
+    <div class="row">
+        <input type="text" id="searchEnrollment" placeholder="Enter Enrollment Number">
+    </div>
+
+    <button onclick="searchFine()">Search</button>
+
+    <table id="fineTable" style="display:none;">
+        <thead>
+            <tr>
+                <th>Enrollment</th>
+                <th>Class</th>
+                <th>Fine</th>
+                <th>Reason</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="fineBody"></tbody>
+    </table>
+</div>
+
+
+
+
+<script>
+/***************************
+     ADD STUDENT UI BLOCK
+****************************/
+function addStudentBlock() {
+    const container = document.getElementById("studentsContainer");
+
+    const block = document.createElement("div");
+    block.className = "student-block";
+
+    block.innerHTML = `
+        <div class="row">
+            <input type="text" class="enrollment" placeholder="Enrollment Number">
+        </div>
+
+        <div class="row">
+            <input type="text" class="class" placeholder="Class (e.g., CSE 2nd Year)">
+        </div>
+
+        <div class="row">
+            <input type="number" class="fineAmount" placeholder="Fine Amount (₹)">
+        </div>
+
+        <div class="row">
+            <input type="text" class="reason" placeholder="Reason">
+        </div>
+        <button onclick="this.parentElement.remove()">❌ Remove</button>
+    `;
+
+    container.appendChild(block);
+}
+
+addStudentBlock(); // show first block initially
+
+
+
+/***************************
+     SUBMIT FINES
+****************************/
+async function submitFines() {
+    const blocks = document.querySelectorAll(".student-block");
+
+    const fines = [];
+
+    blocks.forEach(b => {
+        const enrollment = b.querySelector(".enrollment").value.trim();
+        const cls = b.querySelector(".class").value.trim();
+        const amount = b.querySelector(".fineAmount").value.trim();
+        const reason = b.querySelector(".reason").value.trim();
+
+        if (enrollment && amount && reason && cls) {
+            fines.push({ enrollment, class: cls, fine: Number(amount), reason });
+        }
+    });
+
+    if (fines.length === 0) {
+        alert("Please enter at least one valid fine record.");
+        return;
+    }
+
+    const res = await fetch("https://college-hwbb.onrender.com/api/fines/bulk-add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fines })
+    });
+
+    const data = await res.json();
+    alert(data.message || "Fines Added Successfully!");
+
+}
+
+
+
+ /***************************
+       SEARCH FINE
+****************************/
+async function searchFine() {
+    const enr = document.getElementById("searchEnrollment").value.trim();
+    if (!enr) return alert("Enter enrollment number!");
+
+    const res = await fetch(`https://college-hwbb.onrender.com/api/fines/${enr}`);
+    const data = await res.json();
+
+    const table = document.getElementById("fineTable");
+    const body = document.getElementById("fineBody");
+    body.innerHTML = "";
+
+    if (!data || data.length === 0) {
+        table.style.display = "none";
+        alert("No fine found!");
+        return;
+    }
+
+    table.style.display = "table";
+
+    data.forEach(f => {
+        body.innerHTML += `
+            <tr>
+                <td>${f.enrollment}</td>
+                <td>${f.class}</td>
+                <td><input type="number" id="editFine-${f._id}" value="${f.fine}"></td>
+                <td><input type="text" id="editReason-${f._id}" value="${f.reason}"></td>
+                <td>
+                    <button class="editBtn" onclick="updateFine('${f._id}')">Update</button>
+                    <button class="deleteBtn" onclick="deleteFine('${f._id}')">Delete</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+
+
+/***************************
+       UPDATE FINE
+****************************/
+async function updateFine(id) {
+    const newFine = document.getElementById(`editFine-${id}`).value;
+    const newReason = document.getElementById(`editReason-${id}`).value;
+
+    const res = await fetch(`https://college-hwbb.onrender.com/api/fines/update/${id}`, {
+        method:"PUT",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({ fine:newFine, reason:newReason })
+    });
+
+    const data = await res.json();
+    alert(data.message || "Updated!");
+    searchFine();
+}
+
+
+
+/***************************
+       DELETE FINE
+****************************/
+async function deleteFine(id) {
+    if (!confirm("Delete this fine?")) return;
+
+    await fetch(`https://college-hwbb.onrender.com/api/fines/delete/${id}`, {
+        method:"DELETE"
+    });
+
+    alert("Fine Deleted!");
+    searchFine();
+}
+
+</script>
+
+</body>
+</html>

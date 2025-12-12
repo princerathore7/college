@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Fines — Acropolis</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: #f4f6f9;
+    }
+
+    header {
+      background: #003366;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    header img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 30px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .label {
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      background: #003366;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0055aa;
+    }
+
+    .fine-box {
+      margin-top: 20px;
+      padding: 15px;
+      background: #eef3ff;
+      border-left: 4px solid #003366;
+      border-radius: 6px;
+    }
+
+    .warning {
+      margin-top: 15px;
+      font-size: 14px;
+      color: red;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <img src="logo.jpg" alt="Acropolis Logo">
+  <h2>Acropolis Institute, Indore</h2>
+</header>
+
+<div class="container">
+
+  <h2>Your Fine Details</h2>
+
+  <!-- Enrollment Display -->
+  <p class="label">Enrollment Number:</p>
+  <input type="text" id="enrollment" readonly>
+
+  <button id="refreshBtn">Refresh Fine</button>
+
+  <!-- Fine Section -->
+  <div id="fineSection" class="hidden">
+    <div class="fine-box">
+      <p><b>Fine Amount:</b> ₹ <span id="fineAmount"></span></p>
+      <p><b>Reason:</b> <span id="fineReason"></span></p>
+      <p><b>Status:</b> <span id="fineStatus"></span></p>
+    </div>
+
+    <button id="payBtn" style="margin-top: 15px; background:#009933;">
+      Pay Fine
+    </button>
+
+    <p class="warning">
+      If you do not clear your pending fines, your RGPV exam form will not be forwarded by the institution.
+    </p>
+  </div>
+
+  <hr style="margin:30px 0;">
+
+  <!-- Check Another Enrollment -->
+  <h3>Check Another Enrollment</h3>
+  <input type="text" id="newEnroll" placeholder="Enter Enrollment Number">
+  <button onclick="checkAnother()">Check Fine</button>
+
+</div>
+
+<script>
+  const API_URL = "https://college-hwbb.onrender.com";
+
+  // Get enrollment from dashboard redirect
+  let enrollment = localStorage.getItem("studentEnrollment") || "";
+
+  document.getElementById("enrollment").value = enrollment;
+
+  // Load fine from localStorage OR fetch
+  loadFine();
+
+  async function loadFine(force = false) {
+    if (!enrollment) return;
+
+    let cached = localStorage.getItem("studentFineData");
+    cached = cached ? JSON.parse(cached) : null;
+
+    if (cached && !force) {
+      displayFine(cached);
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_URL}/api/fines/${enrollment}`);
+      const data = await res.json();
+
+      if (data.success) {
+        localStorage.setItem("studentFineData", JSON.stringify(data.fine));
+        displayFine(data.fine);
+      } else {
+        alert("No fine found!");
+      }
+    } catch (err) {
+      alert("Server error!");
+    }
+  }
+
+  function displayFine(fine) {
+    document.getElementById("fineSection").classList.remove("hidden");
+    document.getElementById("fineAmount").innerText = fine.amount;
+    document.getElementById("fineReason").innerText = fine.reason;
+    document.getElementById("fineStatus").innerText = fine.status;
+  }
+
+  // Refresh Button
+  document.getElementById("refreshBtn").onclick = function () {
+    loadFine(true);
+  };
+
+  // Check another enrollment
+  function checkAnother() {
+    let e = document.getElementById("newEnroll").value.trim();
+    if (e === "") return alert("Enter a valid enrollment number!");
+
+    localStorage.setItem("studentEnrollment", e);
+    localStorage.removeItem("studentFineData");
+
+    location.reload();
+  }
+</script>
+
+</body>
+</html>
