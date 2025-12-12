@@ -1,194 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Your Fines — Acropolis</title>
-  <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Fines — Acropolis</title>
+
+<style>
     body {
-      margin: 0;
-      font-family: "Poppins", sans-serif;
-      background: #f4f6f9;
+        margin: 0;
+        font-family: "Poppins", sans-serif;
+        background: #f4f6f9;
     }
 
-    header {
-      background: #003366;
-      color: white;
-      padding: 15px;
-      text-align: center;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      justify-content: center;
+    .topbar {
+        background: #003366;
+        color: white;
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
     }
 
-    header img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
+    .topbar img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
     }
 
     .container {
-      max-width: 500px;
-      margin: 30px auto;
-      padding: 20px;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        max-width: 450px;
+        margin: 25px auto;
+        padding: 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
 
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #333;
+    h3 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #333;
     }
 
-    .label {
-      font-weight: 600;
-      margin-top: 10px;
-    }
-
-    input, button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 8px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 16px;
+    input {
+        width: 100%;
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        margin-bottom: 12px;
+        font-size: 16px;
     }
 
     button {
-      background: #003366;
-      color: white;
-      border: none;
-      cursor: pointer;
+        width: 100%;
+        padding: 12px;
+        background: #003366;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        margin-top: 5px;
+        cursor: pointer;
+        font-size: 16px;
     }
 
     button:hover {
-      background: #0055aa;
+        background: #0057ad;
     }
 
     .fine-box {
-      margin-top: 20px;
-      padding: 15px;
-      background: #eef3ff;
-      border-left: 4px solid #003366;
-      border-radius: 6px;
+        margin-top: 20px;
+        padding: 15px;
+        background: #eef3ff;
+        border-left: 4px solid #003366;
+        border-radius: 6px;
+    }
+
+    #payBtn {
+        background: #009933;
+        margin-top: 15px;
     }
 
     .warning {
-      margin-top: 15px;
-      font-size: 14px;
-      color: red;
-      font-weight: 600;
-      text-align: center;
+        margin-top: 15px;
+        color: red;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 600;
     }
 
     .hidden { display: none; }
-  </style>
+
+</style>
 </head>
 <body>
 
-<header>
-  <img src="logo.jpg" alt="Acropolis Logo">
-  <h2>Acropolis Institute, Indore</h2>
-</header>
+<!-- TOP BAR -->
+<div class="topbar">
+    <img src="logo.jpg" alt="Acropolis Logo">
+    <h2>Acropolis Institute Indore — Fine Status</h2>
+</div>
 
 <div class="container">
 
-  <h2>Your Fine Details</h2>
+    <h3>Check Your Fine</h3>
 
-  <!-- Enrollment Display -->
-  <p class="label">Enrollment Number:</p>
-  <input type="text" id="enrollment" readonly>
+    <!-- Single Search Input -->
+    <input type="text" id="searchEnrollment" placeholder="Enter Enrollment Number">
 
-  <button id="refreshBtn">Refresh Fine</button>
+    <button onclick="searchFine()">Check Fine</button>
 
-  <!-- Fine Section -->
-  <div id="fineSection" class="hidden">
-    <div class="fine-box">
-      <p><b>Fine Amount:</b> ₹ <span id="fineAmount"></span></p>
-      <p><b>Reason:</b> <span id="fineReason"></span></p>
-      <p><b>Status:</b> <span id="fineStatus"></span></p>
+    <!-- Fine Details -->
+    <div id="fineSection" class="hidden">
+        <div class="fine-box">
+            <p><b>Enrollment:</b> <span id="showEnrollment"></span></p>
+            <p><b>Fine Amount:</b> ₹ <span id="fineAmount"></span></p>
+            <p><b>Reason:</b> <span id="fineReason"></span></p>
+            <p><b>Status:</b> <span id="fineStatus"></span></p>
+        </div>
+
+        <button id="payBtn">Pay Fine</button>
+
+        <p class="warning">
+            If you do not clear your pending fines, your RGPV exam form will not be forwarded by the institution.
+        </p>
     </div>
-
-    <button id="payBtn" style="margin-top: 15px; background:#009933;">
-      Pay Fine
-    </button>
-
-    <p class="warning">
-      If you do not clear your pending fines, your RGPV exam form will not be forwarded by the institution.
-    </p>
-  </div>
-
-  <hr style="margin:30px 0;">
-
-  <!-- Check Another Enrollment -->
-  <h3>Check Another Enrollment</h3>
-  <input type="text" id="newEnroll" placeholder="Enter Enrollment Number">
-  <button onclick="checkAnother()">Check Fine</button>
-
 </div>
 
+
+
+
 <script>
-  const API_URL = "https://college-hwbb.onrender.com";
+const API_URL = "https://college-hwbb.onrender.com";
 
-  // Get enrollment from dashboard redirect
-  let enrollment = localStorage.getItem("studentEnrollment") || "";
-
-  document.getElementById("enrollment").value = enrollment;
-
-  // Load fine from localStorage OR fetch
-  loadFine();
-
-  async function loadFine(force = false) {
-    if (!enrollment) return;
-
-    let cached = localStorage.getItem("studentFineData");
-    cached = cached ? JSON.parse(cached) : null;
-
-    if (cached && !force) {
-      displayFine(cached);
-      return;
-    }
+/****************************************
+    SEARCH FINE (Same logic as admin)
+****************************************/
+async function searchFine() {
+    const enr = document.getElementById("searchEnrollment").value.trim();
+    if (!enr) return alert("Please enter an enrollment number!");
 
     try {
-      const res = await fetch(`${API_URL}/api/fines/${enr}`);
-      const data = await res.json();
+        const res = await fetch(`${API_URL}/api/fines/${enr}`);
+        const data = await res.json();
 
-      if (data.success) {
-        localStorage.setItem("studentFineData", JSON.stringify(data.fine));
-        displayFine(data.fine);
-      } else {
-        alert("No fine found!");
-      }
+        if (!data || data.length === 0) {
+            document.getElementById("fineSection").classList.add("hidden");
+            alert("No fine found!");
+            return;
+        }
+
+        const f = data[0];  // first fine record for the student
+
+        document.getElementById("fineSection").classList.remove("hidden");
+
+        document.getElementById("showEnrollment").innerText = f.enrollment;
+        document.getElementById("fineAmount").innerText = f.fine;
+        document.getElementById("fineReason").innerText = f.reason;
+        document.getElementById("fineStatus").innerText = f.status || "Pending";
+
     } catch (err) {
-      alert("Server error!");
+        alert("Server error!");
+        console.log(err);
     }
-  }
+}
 
-  function displayFine(fine) {
-    document.getElementById("fineSection").classList.remove("hidden");
-    document.getElementById("fineAmount").innerText = fine.amount;
-    document.getElementById("fineReason").innerText = fine.reason;
-    document.getElementById("fineStatus").innerText = fine.status;
-  }
-
-  // Refresh Button
-  document.getElementById("refreshBtn").onclick = function () {
-    loadFine(true);
-  };
-
-  // Check another enrollment
-  function checkAnother() {
-    let e = document.getElementById("newEnroll").value.trim();
-    if (e === "") return alert("Enter a valid enrollment number!");
-
-    localStorage.setItem("studentEnrollment", e);
-    localStorage.removeItem("studentFineData");
-
-    location.reload();
-  }
 </script>
 
 </body>
