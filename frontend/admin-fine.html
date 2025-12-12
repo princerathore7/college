@@ -155,6 +155,7 @@ function addStudentBlock() {
     const lastBlock = container.querySelector(".student-block:last-child");
     let fineVal = lastBlock ? lastBlock.querySelector(".fineAmount").value : "";
     let reasonVal = lastBlock ? lastBlock.querySelector(".reason").value : "";
+    let classVal = lastBlock ? lastBlock.querySelector(".class").value : "";
 
     const block = document.createElement("div");
     block.className = "student-block";
@@ -164,7 +165,7 @@ function addStudentBlock() {
             <input type="text" class="enrollment" placeholder="Enrollment Number">
         </div>
         <div class="row">
-            <input type="text" class="class" placeholder="Class (e.g., CSE 2nd Year)">
+            <input type="text" class="class" placeholder="Class (e.g., CSE 2nd Year)" value="${classVal}">
         </div>
         <div class="row">
             <input type="number" class="fineAmount" placeholder="Fine Amount (₹)" value="${fineVal}">
@@ -200,23 +201,33 @@ async function submitFines() {
 
     if (fines.length === 0) { alert("Enter at least one valid fine."); return; }
 
-    const res = await fetch(`${API_URL}/api/fines/bulk-add`, {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({ fines })
-    });
-
-    const data = await res.json();
-    alert(data.message || "Fines Added!");
-    refreshFines();
+    try {
+        const res = await fetch(`${API_URL}/api/fines/bulk-add`, {
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            body:JSON.stringify({ fines })
+        });
+        const data = await res.json();
+        alert(data.message || "Fines Added!");
+        refreshFines(true); // Force refresh after submission
+    } catch(e) {
+        console.error(e);
+        alert("Error submitting fines!");
+    }
 }
 
 // -----------------------------
 // LOAD ALL FINES (API or LocalStorage)
 // -----------------------------
-async function refreshFines() {
+async function refreshFines(force=false) {
+    let cached = getLS("allFines");
+    if(cached && !force) {
+        renderFinesTable(cached);
+        return;
+    }
+
     try {
-        const res = await fetch(`${API_URL}/api/fines`);
+        const res = await fetch(`${API_URL}/api/fines/all`);
         const data = await res.json();
         if(data.success) {
             saveLS("allFines", data.fines);
@@ -279,15 +290,19 @@ async function updateFine(id) {
     const newFine = document.getElementById(`editFine-${id}`).value;
     const newReason = document.getElementById(`editReason-${id}`).value;
 
-    const res = await fetch(`${API_URL}/api/fines/update/${id}`, {
-        method:"PUT",
-        headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({ fine:newFine, reason:newReason })
-    });
-
-    const data = await res.json();
-    alert(data.message || "Updated!");
-    refreshFines();
+    try {
+        const res = await fetch(`${API_URL}/api/fines/update/${id}`, {
+            method:"PUT",
+            headers:{ "Content-Type":"application/json" },
+            body:JSON.stringify({ fine:newFine, reason:newReason })
+        });
+        const data = await res.json();
+        alert(data.message || "Updated!");
+        refreshFines(true);
+    } catch(e) {
+        console.error(e);
+        alert("Error updating fine!");
+    }
 }
 
 // -----------------------------
@@ -296,18 +311,24 @@ async function updateFine(id) {
 async function deleteFine(id) {
     if(!confirm("Delete this fine?")) return;
 
-    await fetch(`${API_URL}/api/fines/delete/${id}`, { method:"DELETE" });
-    alert("Deleted!");
-    refreshFines();
+    try {
+        await fetch(`${API_URL}/api/fines/delete/${id}`, { method:"DELETE" });
+        alert("Deleted!");
+        refreshFines(true);
+    } catch(e) {
+        console.error(e);
+        alert("Error deleting fine!");
+    }
 }
 
 // -----------------------------
 // ON PAGE LOAD
 // -----------------------------
 document.addEventListener("DOMContentLoaded", () => {
-    if(!getLS("allFines")) refreshFines(); // Load API if cache not found
+    refreshFines(); // Force load on first visit
 });
 </script>
+
 
 </body>
 </html>
