@@ -33,7 +33,6 @@ def upload_bus_pdf():
         return jsonify({"success": False, "message": "File must be PDF"}), 400
 
     try:
-        # Upload PDF to Cloudinary (resource_type="raw" for non-image files)
         upload_result = cloudinary.uploader.upload(
             pdf,
             folder="bus",
@@ -41,8 +40,14 @@ def upload_bus_pdf():
             resource_type="raw",
             overwrite=True
         )
+
         pdf_url = upload_result.get("secure_url")
+
+        # 🔥 SAVE TO DATABASE
+        db.bus.update_one({}, {"$set": {"pdf_url": pdf_url}}, upsert=True)
+
         return jsonify({"success": True, "message": "Bus PDF uploaded successfully", "pdf_url": pdf_url}), 201
+
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 

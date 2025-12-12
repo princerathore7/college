@@ -4,7 +4,7 @@ from utils import generate_id
 import cloudinary
 import cloudinary.uploader
 from flask_cors import cross_origin
-from datetime import datetime
+from datetime import datetime 
 
 notes_bp = Blueprint("notes_bp", __name__, url_prefix="/api/notes")
 
