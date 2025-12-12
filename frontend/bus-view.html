@@ -1,75 +1,76 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>View Bus Routes — Acropolis</title>
-  <style>
-    :root{--primary:#004d40;--accent:#4a90e2;--muted:#666}
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:Inter, Poppins, sans-serif;background:#f4f6f8;color:#222;min-height:100vh;display:flex;flex-direction:column}
-    .topbar{background:linear-gradient(135deg,var(--primary),#009688);color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between}
-    .topbar h1{font-size:1.05rem;font-weight:600}
-    main{max-width:1100px;margin:28px auto;padding:18px;width:94%}
-    .card{background:#fff;border-radius:12px;box-shadow:0 8px 26px rgba(10,20,30,0.06);overflow:hidden}
-    .card-head{padding:18px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;gap:12px}
-    .card-head .title{font-weight:700;color:var(--primary)}
-    .controls{display:flex;gap:10px;align-items:center}
-    .btn{background:var(--accent);color:#fff;padding:10px 14px;border-radius:8px;border:none;cursor:pointer;font-weight:600}
-    .btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
-    .status{font-size:0.95rem;color:var(--muted)}
-    .viewer{height:76vh;display:flex;flex-direction:column}
-    .pdf-wrap{flex:1;background:#fff}
-    iframe{width:100%;height:100%;border:0;display:block}
-    .fallback{padding:32px;text-align:center}
-    .msg{color:#c34141;font-weight:600;margin-bottom:12px}
-    .hint{color:var(--muted);margin-bottom:18px}
-    .small{font-size:0.9rem;color:var(--muted)}
-    @media(max-width:720px){
-      .card-head{flex-direction:column;align-items:flex-start;gap:8px}
-      .controls{width:100%;justify-content:flex-start}
-      .viewer{height:66vh}
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>View Bus Routes — Acropolis</title>
+<style>
+  :root{--primary:#e6c700;--accent:#e2c311;--muted:#666}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Inter, Poppins, sans-serif;background:#f4f6f8;color:#222;min-height:100vh;display:flex;flex-direction:column}
+  .topbar{background:linear-gradient(135deg,var(--primary),#cfb300);color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+  .topbar h1{font-size:1.05rem;font-weight:600}
+  main{max-width:1100px;margin:28px auto;padding:18px;width:94%}
+  .card{background:#fff;border-radius:12px;box-shadow:0 8px 26px rgba(10,20,30,0.06);overflow:hidden;display:flex;flex-direction:column}
+  .card-head{padding:18px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .card-head .title{font-weight:700;color:var(--primary)}
+  .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .btn{background:var(--accent);color:#fff;padding:10px 16px;border-radius:8px;border:none;cursor:pointer;font-weight:600;transition:0.2s}
+  .btn:hover{transform:scale(1.05)}
+  .btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+  .status{font-size:0.95rem;color:var(--muted)}
+  .viewer{height:76vh;display:flex;flex-direction:column;margin-top:12px;border-radius:8px;overflow:hidden}
+  .pdf-wrap{flex:1;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.05)}
+  iframe{width:100%;height:100%;border:0;display:block}
+  .fallback{padding:32px;text-align:center;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.05)}
+  .msg{color:#e2c315;font-weight:600;margin-bottom:12px;font-size:1.05rem}
+  .hint{color:var(--muted);margin-bottom:18px}
+  .small{font-size:0.9rem;color:var(--muted)}
+  @media(max-width:720px){
+    .card-head{flex-direction:column;align-items:flex-start;gap:8px}
+    .controls{width:100%;justify-content:flex-start}
+    .viewer{height:66vh}
+  }
+</style>
 </head>
 <body>
-  <header class="topbar">
-    <h1>Acropolis — Bus Routes</h1>
-    <div class="small">Student Panel</div>
-  </header>
+<header class="topbar">
+  <h1>Acropolis — Bus Routes</h1>
+  <div class="small">Student Panel</div>
+</header>
 
-  <main>
-    <div class="card" id="card">
-      <div class="card-head">
-        <div>
-          <div class="title">Bus Routes PDF</div>
-          <div class="status" id="statusText">Checking availability…</div>
-        </div>
-
-        <div class="controls">
-          <button class="btn" id="refreshBtn">Refresh</button>
-          <button class="btn ghost" id="openNewBtn">Open in new tab</button>
-          <button class="btn ghost" id="backBtn">Back</button>
-          <button class="btn ghost" id="downloadBtn">Download PDF</button>
-        </div>
+<main>
+  <div class="card" id="card">
+    <div class="card-head">
+      <div>
+        <div class="title">Bus Routes PDF</div>
+        <div class="status" id="statusText">Checking availability…</div>
       </div>
 
-      <div class="viewer" id="viewer">
-        <div class="pdf-wrap" id="pdfWrap" style="display:none">
-          <iframe id="pdfFrame" src="" title="Bus Routes PDF"></iframe>
-        </div>
+      <div class="controls">
+        <button class="btn" id="refreshBtn">Refresh</button>
+        <button class="btn ghost" id="openNewBtn">Open in new tab</button>
+        <button class="btn ghost" id="backBtn">Back</button>
+        <button class="btn ghost" id="downloadBtn">Download PDF</button>
+      </div>
+    </div>
 
-        <div class="fallback" id="fallback" style="display:none">
-          <div class="msg" id="fallbackMsg">No Bus PDF uploaded yet.</div>
-          <div class="hint" id="fallbackHint">The bus routes PDF is not available right now. Contact admin or try again later.</div>
-          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-            <button class="btn" id="retryBtn">Try Again</button>
-            <a id="openDirectLink" class="btn ghost" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center">Open direct link</a>
-          </div>
+    <div class="viewer" id="viewer">
+      <div class="pdf-wrap" id="pdfWrap" style="display:none">
+        <iframe id="pdfFrame" src="" title="Bus Routes PDF"></iframe>
+      </div>
+
+      <div class="fallback" id="fallback" style="display:none">
+        <div class="msg" id="fallbackMsg">No Bus PDF uploaded yet.</div>
+        <div class="hint" id="fallbackHint">The bus routes PDF is not available right now. Contact admin or try again later.</div>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <button class="btn" id="retryBtn">Try Again</button>
+          <a id="openDirectLink" class="btn ghost" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center">Open direct link</a>
         </div>
       </div>
     </div>
-  </main>
+  </div>
+</main>
 
 <script>
 const API_ROOT = "https://college-hwbb.onrender.com/api/bus";
@@ -89,10 +90,20 @@ document.getElementById('retryBtn').addEventListener('click', checkAndLoad);
 document.getElementById('openNewBtn').addEventListener('click', ()=> { if(currentPdfUrl) window.open(currentPdfUrl,'_blank'); });
 document.getElementById('backBtn').addEventListener('click', ()=> window.history.back());
 openDirectLink.addEventListener('click', ()=> { if(currentPdfUrl) window.open(currentPdfUrl,'_blank'); });
-downloadBtn.addEventListener('click', ()=> { if(currentPdfUrl) downloadPDF(currentPdfUrl); });
+
+// ✅ Fixed download to use direct link (works on all devices)
+downloadBtn.addEventListener('click', ()=> {
+  if(!currentPdfUrl) return;
+  const a = document.createElement('a');
+  a.href = currentPdfUrl;
+  a.download = 'Bus_Routes.pdf';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+});
 
 async function checkAndLoad() {
-  statusText.textContent = 'Checking availability…';
+  statusText.textContent = 'Fetching Bus PDF…';
   pdfWrap.style.display = 'none';
   fallback.style.display = 'none';
 
@@ -100,7 +111,7 @@ async function checkAndLoad() {
     const res = await fetch(`${API_ROOT}/view`);
     const data = await res.json();
 
-    if (data.success && data.pdf_url) {
+    if(data.success && data.pdf_url){
       currentPdfUrl = data.pdf_url;
       pdfFrame.src = currentPdfUrl;
       pdfWrap.style.display = 'block';
@@ -117,10 +128,10 @@ async function checkAndLoad() {
       openDirectLink.href = '#';
       downloadBtn.style.display = 'none';
     }
-  } catch(err) {
+  } catch(err){
     console.error(err);
     currentPdfUrl = '';
-    statusText.textContent = 'Unable to check PDF (network/CORS).';
+    statusText.textContent = 'Unable to fetch PDF (network/CORS)';
     fallbackMsg.textContent = 'Cannot load Bus PDF.';
     fallbackHint.textContent = 'Check your internet connection or try again later.';
     fallback.style.display = 'block';
@@ -129,21 +140,7 @@ async function checkAndLoad() {
   }
 }
 
-async function downloadPDF(url) {
-  try {
-    const res = await fetch(url);
-    const blob = await res.blob();
-    const link = document.createElement('a');
-    link.href = window.URL.createObjectURL(blob);
-    link.download = 'Bus_Routes.pdf';
-    link.click();
-  } catch(err) {
-    alert('Download failed!');
-    console.error(err);
-  }
-}
-
-// auto-run on load
+// auto-load on page open
 document.addEventListener('DOMContentLoaded', checkAndLoad);
 </script>
 </body>
