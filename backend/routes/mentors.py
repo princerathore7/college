@@ -85,14 +85,11 @@ def mentor_login():
     }), 200
 
 
-
 # ============================================================
-# 3️⃣  SALARY STORAGE IN MONGODB  (AUTO COLLECTION CREATE)
+# 3️⃣  SALARY STORAGE IN MONGODB — MATCHES FRONTEND EXACTLY
 # ============================================================
 
-# Collection: college_db → salary
-salary_col = db.salary   # Auto-created if not exists
-
+salary_col = db.salary  # Auto-created
 
 # -------------------------------
 # GET Salary by Mentor ID
@@ -110,27 +107,27 @@ def get_salary(mentor_id):
 
 
 # -------------------------------
-# ADD or UPDATE Salary
+# ADD / UPDATE Salary
 # -------------------------------
 @mentors_bp.route("/salary", methods=["POST"])
 def post_salary():
     data = request.get_json()
     print("SALARY DATA RECEIVED:", data)
 
-    if not data or not data.get("mentorId"):
+    if not data.get("mentorId"):
         return jsonify({"success": False, "message": "Mentor ID is required"}), 400
 
     mentor_id = data["mentorId"]
 
-    # Auto–upsert salary data
     salary_col.update_one(
         {"mentorId": mentor_id},
         {"$set": {
             "mentorId": mentor_id,
-            "baseSalary": data.get("baseSalary"),
-            "bonus": data.get("bonus"),
+            "name": data.get("name"),
+            "designation": data.get("designation"),
             "month": data.get("month"),
-            "year": data.get("year"),
+            "amount": data.get("amount"),
+            "status": data.get("status"),
             "updatedAt": datetime.datetime.utcnow()
         }},
         upsert=True
