@@ -31,7 +31,41 @@ def mentor_login():
             "classAssigned": mentor.get("classAssigned")
         }
     }), 200
+# -------------------------------
+# 1️⃣ Mentor Signup Route
+# -------------------------------
+@mentors_bp.route("/signup/mentor", methods=["POST"])
+def mentor_signup():
+    data = request.get_json()
 
+    required_fields = ["mentorId", "name", "email", "phone", "subject", "branch", "classAssigned", "password"]
+    if not all(field in data and data[field] for field in required_fields):
+        return jsonify({"success": False, "message": "All fields are required"}), 400
+
+    # Duplicate check
+    if db.mentors.find_one({"mentorId": data["mentorId"]}):
+        return jsonify({"success": False, "message": "Mentor ID already exists"}), 409
+    
+    if db.mentors.find_one({"email": data["email"]}):
+        return jsonify({"success": False, "message": "Email already registered"}), 409
+
+    # Hash password
+    hashed_password = generate_password_hash(data["password"])
+
+    mentor_data = {
+        "mentorId": data["mentorId"],
+        "name": data["name"],
+        "email": data["email"],
+        "phone": data["phone"],
+        "subject": data["subject"],
+        "branch": data["branch"],
+        "classAssigned": data["classAssigned"],
+        "password": hashed_password
+    }
+
+    db.mentors.insert_one(mentor_data)
+
+    return jsonify({"success": True, "message": "Mentor registered successfully"}), 201
 # -------------------------------
 # 2️⃣ Salary Data Management
 # -------------------------------
