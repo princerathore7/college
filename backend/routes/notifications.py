@@ -248,3 +248,17 @@ def notify_events():
     url = data.get('url', "/events.html")
     result = send_global(title, body, url)
     return jsonify({"success": True, "result": result})
+# --------------------------------------------------
+# 🔔 COMMON HELPER (Assignments / Notices / Exams)
+# --------------------------------------------------
+def send_notification_to_class(class_name, title, body, url="/"):
+    """
+    Wrapper for class-wise notifications
+    Used by assignments, notices, exams etc.
+    """
+    return send_to_class(
+        student_class=class_name,
+        title=title,
+        body=body,
+        url=url
+    )
