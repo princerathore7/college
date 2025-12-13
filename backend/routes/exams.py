@@ -4,7 +4,7 @@ from utils import generate_id
 from flask_cors import cross_origin
 
 # 🔔 Notification helper
-from routes.notifications import send_notification_to_class
+from routes.notifications import send_to_class
 
 exams_bp = Blueprint("exams_bp", __name__, url_prefix="/api/exams")
 
@@ -69,7 +69,7 @@ def post_exam():
     db.exams.insert_one(exam_doc)
 
     # 🔔 CLASS-WISE NOTIFICATION
-    send_notification_to_class(
+    send_to_class(
         class_name=data["class"],
         title="📝 New Exam Scheduled",
         body=f'{data["examName"]} ({data["subject"]}) on {data["date"]}',

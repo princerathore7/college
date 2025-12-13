@@ -5,7 +5,7 @@ from datetime import datetime
 from bson.objectid import ObjectId
 
 # 🔔 Notification helper
-from routes.notifications import send_notification_to_enrollment
+from routes.notifications import notify_fine
 
 fine_bp = Blueprint("fine_bp", __name__, url_prefix="/api/fines")
 
@@ -47,7 +47,7 @@ def add_bulk_fines():
         db.fine.insert_one(record)
 
         # 🔔 SEND NOTIFICATION (ENROLLMENT WISE)
-        send_notification_to_enrollment(
+        notify_fine(
             enrollment=enrollment,
             title="💰 New Fine Added",
             body=f"A fine of ₹{fine_amount} has been added. Reason: {reason}",

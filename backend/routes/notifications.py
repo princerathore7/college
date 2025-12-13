@@ -214,18 +214,22 @@ def notify_notices():
         result = send_global(title, body, url)
     return jsonify({"success": True, "result": result})
 
-
 @notifications_bp.route('/api/notify/assignments', methods=['POST'])
 def notify_assignments():
     data = request.json
-    target_class = data.get('class')
+    class_name = data.get('class')  # optional, send to specific class
     title = data.get('title')
     body = data.get('body')
     url = data.get('url', "/assignments.html")
-    if target_class:
-        result = send_to_class(target_class, title, body, url)
+
+    if not title or not body:
+        return jsonify({"success": False, "message": "Title and body are required"}), 400
+
+    if class_name:
+        result = send_to_class(class_name, title, body, url)
     else:
         result = send_global(title, body, url)
+
     return jsonify({"success": True, "result": result})
 
 

@@ -8,7 +8,7 @@ import cloudinary
 import cloudinary.uploader
 
 # 🔔 Notification helpers
-from routes.notifications import send_notification_to_class, send_global as send_notification_to_all
+from routes.notifications import send_to_class, send_global #as notify_notices
 
 
 # --- Blueprint Setup ---
@@ -75,13 +75,13 @@ def add_notice():
 
         # 🔔 SEND NOTIFICATION
         if target == "all":
-            send_notification_to_all(
+            send_global(
                 title=f"📢 New Notice: {title}",
                 body=message,
                 url="/notices.html"
             )
         elif target_class:
-            send_notification_to_class(
+            send_to_class(
                 class_name=target_class,
                 title=f"📢 New Notice: {title}",
                 body=message,
