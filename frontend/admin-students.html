@@ -42,10 +42,84 @@ th{background:#f1f3f8}
 <main style="padding:20px;max-width:1400px;margin:auto">
 
 <div class="controls">
-  <select id="year"><option value="">All Years</option><option>1</option><option>2</option><option>3</option><option>4</option></select>
-  <select id="branch"><option value="">All Branches</option><option>CSE</option><option>IT</option><option>AIML</option><option>ECE</option></select>
+  <select id="year">
+    <option value="">All Years</option>
+    <option value="1">1st Year</option>
+    <option value="2">2nd Year</option>
+    <option value="3">3rd Year</option>
+    <option value="4">4th Year</option>
+     <option value="5">5th Year</option>
+  </select>
+
+  <select id="branch">
+    <option value="">All Branches</option>
+
+    <!-- Computer / IT -->
+    <option value="CSE">CSE - Computer Science Engineering</option>
+    <option value="IT">IT - Information Technology</option>
+    <option value="AIML">AIML - Artificial Intelligence & Machine Learning</option>
+    <option value="AIDS">AIDS - Artificial Intelligence & Data Science</option>
+    <option value="CSBS">CSBS - Computer Science & Business Systems</option>
+    <option value="IOT">IoT - Internet of Things</option>
+
+    <!-- Electrical / Electronics -->
+    <option value="ECE">ECE - Electronics & Communication</option>
+    <option value="EEE">EEE - Electrical & Electronics</option>
+    <option value="EE">EE - Electrical Engineering</option>
+
+    <!-- Mechanical / Automobile -->
+    <option value="ME">ME - Mechanical Engineering</option>
+    <option value="AU">AU - Automobile Engineering</option>
+    <option value="MT">MT - Mechatronics</option>
+
+    <!-- Civil / Core -->
+    <option value="CE">CE - Civil Engineering</option>
+    <option value="CHE">CHE - Chemical Engineering</option>
+    <option value="MIN">MIN - Mining Engineering</option>
+    <option value="PET">PET - Petroleum Engineering</option>
+
+    <!-- Bio / Agri -->
+    <option value="BT">BT - Biotechnology</option>
+    <option value="BME">BME - Biomedical Engineering</option>
+    <option value="AG">AG - Agriculture Engineering</option>
+    <option value="FT">FT - Food Technology</option>
+    <option value="ENV">ENV - Environmental Engineering</option>
+    <option value="TX">TX - Textile Engineering</option>
+
+    <!-- Management / Pharma -->
+    <option value="PIE">PIE - Production & Industrial Engineering</option>
+    <option value="IM">IM - Industrial Management</option>
+    <option value="DPHARMA">D.Pharmacy</option>
+    <option value="BPHARMA">B.Pharmacy</option>
+    <option value="MPHARMA">M.Pharmacy</option>
+    <option value="PHARMA-CHEM">Pharmaceutical Chemistry</option>
+    <option value="PHARMA-ANALYTICAL">Pharmaceutical Analysis</option>
+    <option value="PHARMA-QUALITY">Quality Assurance</option>
+    <option value="PHARMA-PHARMACO">Pharmacology</option>
+    <option value="PHARMA-PHARMACEUTICS">Pharmaceutics</option>
+    <option value="PHARMA-BIOTECH">Pharmaceutical Biotechnology</option>
+    <option value="PHARMA-REGULATORY">Regulatory Affairs</option>
+
+    <!-- Diploma -->
+    <option value="DCSE">Diploma - Computer Science Engineering</option>
+    <option value="DIT">Diploma - Information Technology</option>
+    <option value="DCYBER">Diploma - Cyber Security</option>
+    <option value="DECE">Diploma - Electronics & Communication</option>
+    <option value="DEEE">Diploma - Electrical & Electronics</option>
+    <option value="DEE">Diploma - Electrical Engineering</option>
+    <option value="DME">Diploma - Mechanical Engineering</option>
+    <option value="DCE">Diploma - Civil Engineering</option>
+    <option value="DMIN">Diploma - Mining Engineering</option>
+    <option value="DCHE">Diploma - Chemical Engineering</option>
+    <option value="DAG">Diploma - Agriculture Engineering</option>
+    <option value="DTX">Diploma - Textile Technology</option>
+    <option value="DPLASTIC">Diploma - Plastic Engineering</option>
+    <option value="DPOLY">Diploma - Polymer Engineering</option>
+  </select>
+
   <button class="actionBtn" id="refreshBtn">Refresh</button>
 </div>
+
 
 <table>
 <thead>
