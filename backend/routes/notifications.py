@@ -171,10 +171,19 @@ def notify_marks():
     body = data.get('body', "Your marks have been updated")
     title = data.get('title', "Marks Update")
     url = data.get('url', "/marks.html")
+
+    if not enrollments:
+        return jsonify({"success": False, "message": "No enrollments provided"}), 400
+
     results = []
     for e in enrollments:
-        results.append(send_to_enrollment(e, title, body, url))
-    return jsonify({"success": True, "results": results})
+        try:
+            res = send_to_enrollment(e, title, body, url)
+            results.append({"enrollment": e, "status": "success", "result": res})
+        except Exception as ex:
+            results.append({"enrollment": e, "status": "failed", "error": str(ex)})
+
+    return jsonify({"success": True, "results": results}), 200
 
 
 # Fine update

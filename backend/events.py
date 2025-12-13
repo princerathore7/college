@@ -4,7 +4,7 @@ from utils import generate_id
 from flask_cors import cross_origin, CORS
 
 # 🔔 Notification helper
-from routes.notifications import send_global_notification
+from routes.notifications import send_global
 
 events_bp = Blueprint("events_bp", __name__, url_prefix="/api/events")
 CORS(events_bp, resources={r"/*": {"origins": "*"}})
@@ -70,7 +70,7 @@ def post_event():
         return jsonify({"success": False, "message": "Database error occurred"}), 500
 
     # 🔔 GLOBAL NOTIFICATION (ALL USERS)
-    send_global_notification(
+    send_global(
         title="📢 New Event Announced",
         body=data["title"].strip(),
         url="/events.html"
