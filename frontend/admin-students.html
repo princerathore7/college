@@ -17,131 +17,34 @@
   --yellow:#ca8a04;
   --red:#dc2626;
 }
-body{
-  margin:0;
-  font-family:Inter,system-ui,sans-serif;
-  background:var(--bg);
-  color:#111;
-}
-
-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  background:var(--card);
-  padding:12px 20px;
-  border-bottom:1px solid #e6e9f2;
-  position:sticky;
-  top:0;
-  z-index:1000;
-}
-header img{height:45px;margin-right:12px}
-header h1{font-size:20px;margin:0}
-header button{
-  background:var(--accent);
-  color:#fff;
-  border:0;
-  padding:8px 14px;
-  border-radius:8px;
-  cursor:pointer;
-}
-
-main{padding:20px;max-width:1400px;margin:auto}
-
-.controls{
-  display:flex;
-  gap:12px;
-  flex-wrap:wrap;
-  margin-bottom:16px;
-  align-items:center;
-}
-.controls select,.controls button{
-  padding:6px 10px;
-  border-radius:6px;
-  border:1px solid #ccc;
-  font-size:14px;
-}
-.controls button{
-  background:var(--accent);
-  color:#fff;
-  border:none;
-  cursor:pointer;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  background:var(--card);
-  border-radius:8px;
-  overflow:hidden;
-  box-shadow:0 4px 12px rgba(0,0,0,.08)
-}
-th,td{
-  padding:10px 12px;
-  font-size:14px;
-  border-bottom:1px solid #eee;
-}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:#111}
+header{display:flex;justify-content:space-between;align-items:center;background:#fff;padding:12px 20px;border-bottom:1px solid #e6e9f2}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden}
+th,td{padding:10px 12px;border-bottom:1px solid #eee;font-size:14px}
 th{background:#f1f3f8}
-.no-data{text-align:center;color:#888;padding:20px}
-
-.badge{
-  padding:4px 8px;
-  border-radius:12px;
-  font-weight:600;
-  font-size:12px;
-  color:#fff;
-}
+.controls{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.badge{padding:4px 8px;border-radius:12px;font-size:12px;font-weight:600;color:#fff}
 .green{background:var(--green)}
 .yellow{background:var(--yellow)}
 .red{background:var(--red)}
-
-@media(max-width:900px){
-  .controls{flex-direction:column;align-items:flex-start}
-}
+.actionBtn{padding:4px 8px;font-size:12px;border:0;border-radius:6px;cursor:pointer;background:var(--accent);color:#fff}
+.no-data{text-align:center;color:#888}
 </style>
 </head>
 
 <body>
 
 <header>
-  <div style="display:flex;align-items:center">
-    <img src="logo.jpg" alt="Logo">
-    <h1>Admin — Students</h1>
-  </div>
-  <button onclick="logout()">Logout</button>
+  <h2>Admin — Students</h2>
+  <button class="actionBtn" onclick="logout()">Logout</button>
 </header>
 
-<main>
+<main style="padding:20px;max-width:1400px;margin:auto">
 
 <div class="controls">
-  <select id="year">
-    <option value="">All Years</option>
-    <option value="1">1st</option>
-    <option value="2">2nd</option>
-    <option value="3">3rd</option>
-    <option value="4">4th</option>
-  </select>
-
-  <select id="branch">
-    <option value="">All Branches</option>
-    <option>CSE</option>
-    <option>IT</option>
-    <option>AIML</option>
-    <option>ECE</option>
-    <option>ME</option>
-    <option>CE</option>
-  </select>
-
-  <select id="section">
-    <option value="">All Sections</option>
-    <option>1</option>
-    <option>2</option>
-    <option>3</option>
-    <option>4</option>
-    <option>5</option>
-  </select>
-
-  <button id="refreshBtn">Refresh</button>
+  <select id="year"><option value="">All Years</option><option>1</option><option>2</option><option>3</option><option>4</option></select>
+  <select id="branch"><option value="">All Branches</option><option>CSE</option><option>IT</option><option>AIML</option><option>ECE</option></select>
+  <button class="actionBtn" id="refreshBtn">Refresh</button>
 </div>
 
 <table>
@@ -151,93 +54,120 @@ th{background:#f1f3f8}
   <th>Name</th>
   <th>Year</th>
   <th>Branch</th>
-  <th>Section</th>
   <th>Attendance</th>
   <th>Pending Fees</th>
   <th>Fine</th>
 </tr>
 </thead>
 <tbody id="studentsBody">
-<tr><td colspan="8" class="no-data">Loading...</td></tr>
+<tr><td colspan="7" class="no-data">Loading...</td></tr>
 </tbody>
 </table>
 
 </main>
 
 <script>
-const API_ROOT = "https://college-hwbb.onrender.com/api/admin/students";
+const API_STUDENTS = "https://college-hwbb.onrender.com/api/admin/students";
+const API_ATT = "https://college-hwbb.onrender.com/api/attendance/student/";
+const API_FINE = "https://college-hwbb.onrender.com/api/fines/student-dashboard/";
 
 function logout(){
   localStorage.clear();
   location.href="login.html";
 }
 
-async function fetchStudents(refresh=false){
-  if(!refresh){
-    const cache = localStorage.getItem("adminStudents");
-    if(cache) return JSON.parse(cache);
+/* -------------------------
+   FETCH STUDENTS (CACHE)
+-------------------------- */
+async function fetchStudents(force=false){
+  if(!force){
+    const cached = localStorage.getItem("admin_students");
+    if(cached) return JSON.parse(cached);
   }
-  try{
-    const res = await fetch(API_ROOT);
-    const data = await res.json();
-    if(data.success){
-      localStorage.setItem("adminStudents", JSON.stringify(data.students));
-      return data.students;
-    }
-  }catch(e){
-    console.error(e);
+
+  const res = await fetch(API_STUDENTS);
+  const data = await res.json();
+  if(data.success){
+    localStorage.setItem("admin_students", JSON.stringify(data.students));
+    return data.students;
   }
   return [];
 }
 
-function attendanceBadge(att){
-  if(!att || att.percentage === undefined) return "—";
-  let cls = att.percentage >= 75 ? "green" :
-            att.percentage >= 60 ? "yellow" : "red";
-  return `<span class="badge ${cls}">${att.percentage}%</span>`;
+/* -------------------------
+   FETCH ATTENDANCE (REFRESH)
+-------------------------- */
+async function fetchAttendance(enr){
+  const res = await fetch(API_ATT + enr);
+  const d = await res.json();
+  return d.success ? d.attendance : null;
 }
 
-function renderStudents(students){
-  const tbody = document.getElementById("studentsBody");
+/* -------------------------
+   FETCH FINE (REFRESH)
+-------------------------- */
+async function fetchFine(enr){
+  const res = await fetch(API_FINE + enr);
+  const d = await res.json();
+  if(d.success && d.fines.length){
+    return d.fines.reduce((s,f)=>s+f.fine,0);
+  }
+  return 0;
+}
 
-  const y = year.value, b = branch.value, s = section.value;
-  const filtered = students.filter(st =>
-    (!y || st.year == y) &&
-    (!b || st.branch == b) &&
-    (!s || st.section == s)
-  );
+/* -------------------------
+   RENDER
+-------------------------- */
+async function render(refresh=false){
+  const body = document.getElementById("studentsBody");
+  const students = await fetchStudents(refresh);
 
-  if(!filtered.length){
-    tbody.innerHTML = `<tr><td colspan="8" class="no-data">No students found</td></tr>`;
-    return;
+  body.innerHTML = "";
+
+  for(const s of students){
+    let att = s.attendance;
+    let fine = s.fine ?? 0;
+
+    if(refresh){
+      att = await fetchAttendance(s.enrollment);
+      fine = await fetchFine(s.enrollment);
+      s.attendance = att;
+      s.fine = fine;
+    }
+
+    const badge = att
+      ? `<span class="badge ${att.percentage>=75?"green":att.percentage>=60?"yellow":"red"}">${att.percentage}%</span>
+         <button class="actionBtn" onclick="editAttendance('${s.enrollment}')">Edit</button>`
+      : "—";
+
+    body.innerHTML += `
+      <tr>
+        <td>${s.enrollment}</td>
+        <td>${s.name}</td>
+        <td>${s.year}</td>
+        <td>${s.branch}</td>
+        <td>${badge}</td>
+        <td>₹ ${s.pendingFees ?? 0}
+          <button class="actionBtn" onclick="editFees('${s.enrollment}')">Update</button>
+        </td>
+        <td>₹ ${fine}</td>
+      </tr>
+    `;
   }
 
-  tbody.innerHTML = filtered.map(st => `
-    <tr>
-      <td>${st.enrollment}</td>
-      <td>${st.name}</td>
-      <td>${st.year}</td>
-      <td>${st.branch}</td>
-      <td>${st.section}</td>
-      <td>${attendanceBadge(st.attendance)}</td>
-      <td>₹ ${st.pendingFees ?? 0}</td>
-      <td>₹ ${st.fine ?? 0}</td>
-    </tr>
-  `).join("");
+  localStorage.setItem("admin_students", JSON.stringify(students));
 }
 
-async function load(refresh=false){
-  const data = await fetchStudents(refresh);
-  renderStudents(data);
+function editAttendance(enr){
+  location.href = `admin.html?enrollment=${enr}`;
 }
 
-["year","branch","section"].forEach(id=>{
-  document.getElementById(id).addEventListener("change",()=>load());
-});
+function editFees(enr){
+  location.href = `pending.html?enrollment=${enr}`;
+}
 
-refreshBtn.onclick = ()=> load(true);
-
-document.addEventListener("DOMContentLoaded",()=>load());
+refreshBtn.onclick = ()=>render(true);
+document.addEventListener("DOMContentLoaded",()=>render(false));
 </script>
 
 </body>
