@@ -3,18 +3,25 @@ from pymongo import MongoClient
 import firebase_admin
 from firebase_admin import credentials, messaging
 from datetime import datetime
+import os, json
 
 notifications_bp = Blueprint('notifications', __name__)
 
 # -------------------- DATABASE SETUP --------------------
-client = MongoClient("mongodb://localhost:27017/")  # replace with your DB URL
+client = MongoClient(os.getenv("MONGO_COLLEGE_DB_URI"))
+  # replace with your DB URL
 db = client['college_db']
 
 tokens_col = db['fcm_tokens']             # Store student FCM tokens
 notifications_col = db['notifications']   # Store sent notifications history/log
 
 # -------------------- FIREBASE ADMIN SETUP --------------------
-cred = credentials.Certificate("firebase-service-account.json")  # path to service account
+# Use environment variable for service account JSON
+firebase_json = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
+if not firebase_json:
+    raise RuntimeError("FIREBASE_SERVICE_ACCOUNT_JSON environment variable not set!")
+
+cred = credentials.Certificate(json.loads(firebase_json))
 firebase_admin.initialize_app(cred)
 
 # -------------------- HELPER FUNCTION --------------------
