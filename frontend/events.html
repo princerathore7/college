@@ -3,75 +3,110 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Upcoming Events or Announcements - Student Portal</title>
+  <title>Exciting Upcoming Events - Student Portal</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Inter', sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #f9f9f9;
-      color: #333;
+      background: #0d0d0d;
+      color: #fff;
     }
     header {
-      background-color: #4a90e2;
-      color: white;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: #111;
       padding: 1rem 2rem;
-      text-align: center;
+      box-shadow: 0 4px 10px rgba(255,215,0,0.2);
     }
-    h1 {
+    header img {
+      height: 50px;
+      object-fit: contain;
+    }
+    header h1 {
       margin: 0;
+      font-weight: 800;
+      font-size: 1.8rem;
+      color: #FFD700;
+    }
+    button.back-btn {
+      display: block;
+      margin: 1rem auto;
+      padding: 0.5rem 1.2rem;
+      background: #FFD700;
+      color: #111;
       font-weight: 600;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+    button.back-btn:hover {
+      transform: translateY(-3px);
+      background: #e6c200;
     }
     main {
       max-width: 1200px;
-      margin: 2rem auto;
+      margin: 1rem auto 3rem;
       padding: 0 1rem;
+    }
+    /* Loading animation */
+    .loader {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #FFD700;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      margin: 4rem auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
     .events-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 1.5rem;
+      margin-top: 1.5rem;
     }
     .event-card {
-      background-color: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      background: #1a1a1a;
+      border-radius: 12px;
       overflow: hidden;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(255,215,0,0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
       display: flex;
       flex-direction: column;
-      transition: transform 0.2s ease;
     }
     .event-card:hover {
-      transform: translateY(-5px);
+      transform: translateY(-10px) scale(1.03);
+      box-shadow: 0 10px 25px rgba(255,215,0,0.5);
     }
     .event-card img {
       width: 100%;
       height: 180px;
       object-fit: cover;
+      transition: transform 0.3s ease;
     }
-    .event-card .content {
-      padding: 1rem;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
+    .event-card:hover img {
+      transform: scale(1.05);
     }
-    .event-card h2 {
-      margin: 0 0 0.5rem 0;
+    .event-card h3 {
+      margin: 0.8rem 1rem 0.3rem 1rem;
       font-size: 1.2rem;
-      font-weight: 600;
+      font-weight: 700;
+      color: #FFD700;
+      text-align: center;
     }
     .event-card p {
-      flex: 1;
-      margin: 0 0 0.5rem 0;
+      margin: 0 1rem 1rem 1rem;
       font-size: 0.95rem;
-      color: #555;
-    }
-    .event-card .date {
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: #888;
-      text-align: right;
+      color: #FFD700AA;
+      text-align: center;
     }
     .no-events {
       text-align: center;
@@ -79,60 +114,83 @@
       margin-top: 3rem;
       font-size: 1.1rem;
     }
-    .events-grid { display:grid; grid-template-columns: repeat(auto-fill,minmax(250px,1fr)); gap:1rem; }
-.event-card { background:white; padding:1rem; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1); cursor:pointer; }
-.event-card img { width:100%; height:150px; object-fit:cover; border-radius:5px; margin-bottom:0.5rem; }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+      }
+      header img {
+        height: 40px;
+      }
+      .event-card img {
+        height: 150px;
+      }
+    }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>Upcoming Events</h1>
+  <img src="logo.jpg" alt="Acropolis Logo">
+  <h1>🎉 Exciting Upcoming Events 🎉</h1>
 </header>
-<!-- events.html me add kare -->
-<button onclick="goBack()" style="padding:0.5rem 1rem; background:#888; color:white; border:none; border-radius:5px; cursor:pointer; margin-bottom:1rem;">
-  ← Back
-</button>
+
+<button class="back-btn" onclick="goBack()">← Back</button>
+
 <main>
-  <div id="eventsGrid" class="events-grid">
-    <!-- Events will be dynamically inserted here -->
-  </div>
-  
-<div id="eventsContainer" class="events-grid"></div>
-  <div id="noEvents" class="no-events" style="display:none;">
-    No upcoming events to show.
-  </div>
+  <div id="loader" class="loader"></div>
+  <div id="eventsContainer" class="events-grid" style="display:none;"></div>
+  <div id="noEvents" class="no-events" style="display:none;">No upcoming events to show.</div>
 </main>
 
 <script>
-async function loadEvents() {
-    const res = await fetch("https://college-hwbb.onrender.com/api/events");
-    const data = await res.json();
-    const container = document.getElementById("eventsContainer");
-    container.innerHTML = "";
-
-    if(data.success && Array.isArray(data.events)) {
-        data.events.forEach(ev => {
-            const card = document.createElement("div");
-            card.className = "event-card";
-            card.innerHTML = `
-                <img src="${ev.image || ''}" alt="${ev.title}" />
-                <h3>${ev.title}</h3>
-                <p>${ev.date ? 'Date: '+ev.date : ''}</p>
-                <p>${ev.description.substring(0, 100)}...</p>
-            `;
-            card.onclick = () => window.location.href = `eventDetails.html?eventId=${ev.eventId}`;
-            container.appendChild(card);
-        });
-    }
-}
-loadEvents();
-</script>
-<script>
 function goBack() {
-  // Previous page pe wapas jaaye
   window.history.back();
 }
+
+async function loadEvents() {
+  const container = document.getElementById("eventsContainer");
+  const loader = document.getElementById("loader");
+  const noEvents = document.getElementById("noEvents");
+
+  loader.style.display = "block";
+  container.style.display = "none";
+  noEvents.style.display = "none";
+
+  try {
+    const res = await fetch("https://college-hwbb.onrender.com/api/events");
+    const data = await res.json();
+    container.innerHTML = "";
+    loader.style.display = "none";
+
+    if(data.success && Array.isArray(data.events) && data.events.length > 0) {
+      container.style.display = "grid";
+      data.events.forEach(ev => {
+        const card = document.createElement("div");
+        card.className = "event-card";
+        card.innerHTML = `
+          <img src="${ev.image || 'logo.jpg'}" alt="${ev.title}">
+          <h3>${ev.title}</h3>
+          <p>Click this to get the details of this event</p>
+        `;
+        card.onclick = () => window.location.href = `eventDetails.html?eventId=${ev.eventId}`;
+        container.appendChild(card);
+      });
+    } else {
+      noEvents.style.display = "block";
+    }
+  } catch(err) {
+    console.error("Error fetching events:", err);
+    loader.style.display = "none";
+    noEvents.style.display = "block";
+  }
+}
+
+loadEvents();
 </script>
+
 </body>
 </html>
