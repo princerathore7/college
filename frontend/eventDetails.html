@@ -4,28 +4,91 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Event Details</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
 <style>
-  body { font-family: 'Inter', sans-serif; margin:0; padding:0; background:#f3f4f6; color:#333; }
-  header { background:#4a90e2; color:white; padding:1rem 2rem; text-align:center; }
-  main { max-width:900px; margin:2rem auto; padding:1rem; background:white; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
-  h1 { margin-top:0; }
-  .event-detail img { max-width:100%; border-radius:5px; margin-bottom:1rem; }
-  .event-detail h2 { margin:0.5rem 0; }
-  .event-detail p { margin:0.5rem 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f3f4f6;
+    color: #333;
+  }
+
+  header {
+    background: #4a90e2;
+    color: white;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  header img {
+    height: 40px;
+    width: auto;
+  }
+
+  header h1 {
+    margin: 0;
+    font-size: 1.3rem;
+  }
+
+  main {
+    max-width: 900px;
+    margin: 1.5rem auto;
+    padding: 1rem;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .event-detail img {
+    max-width: 100%;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+  }
+
+  .event-detail h2 {
+    margin-top: 0;
+  }
+
+  #eventDescription a {
+    color: #2563eb;
+    text-decoration: underline;
+    word-break: break-word;
+  }
+
+  .back-btn {
+    margin: 1rem auto;
+    max-width: 900px;
+  }
+
+  .back-btn button {
+    padding: 0.5rem 1rem;
+    background: #6b7280;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
 </style>
 </head>
+
 <body>
 
 <header>
+  <img src="logo.jpg" alt="College Logo">
   <h1>Event Details</h1>
 </header>
-<!-- events.html me add kare -->
-<button onclick="goBack()" style="padding:0.5rem 1rem; background:#888; color:white; border:none; border-radius:5px; cursor:pointer; margin-bottom:1rem;">
-  ← Back
-</button>
+
+<div class="back-btn">
+  <button onclick="goBack()">← Back</button>
+</div>
+
 <main>
-  <div class="event-detail" id="eventContainer">
+  <div class="event-detail">
     <h2 id="eventTitle"></h2>
     <img id="eventImage" src="" alt="Event Image" style="display:none;">
     <p id="eventDate"></p>
@@ -34,50 +97,67 @@
 </main>
 
 <script>
-  // 🔹 Get eventId from URL query params
+  // 🔹 Auto link detect function (WhatsApp style)
+  function linkify(text) {
+    if (!text) return "";
+
+    const urlPattern = /(https?:\/\/[^\s]+)|(www\.[^\s]+)/g;
+
+    return text.replace(urlPattern, function (url) {
+      let href = url;
+      if (!href.startsWith("http")) {
+        href = "https://" + href;
+      }
+      return `<a href="${href}" target="_blank">${url}</a>`;
+    });
+  }
+
+  // 🔹 Get eventId from URL
   const urlParams = new URLSearchParams(window.location.search);
   const eventId = urlParams.get('eventId');
 
-  if(!eventId){
-    alert("No event specified! Redirecting to events page.");
+  if (!eventId) {
+    alert("No event specified! Redirecting...");
     window.location.href = "events.html";
   }
 
-  async function loadEventDetails(){
-    try{
+  async function loadEventDetails() {
+    try {
       const res = await fetch(`https://college-hwbb.onrender.com/api/events/${eventId}`);
       const data = await res.json();
-      if(res.ok && data.success && data.event){
+
+      if (res.ok && data.success && data.event) {
         const ev = data.event;
-        document.getElementById("eventTitle").textContent = ev.title;
-        document.getElementById("eventDescription").innerHTML = ev.description || "";
-        if(ev.image){
+
+        document.getElementById("eventTitle").textContent = ev.title || "";
+        document.getElementById("eventDescription").innerHTML = linkify(ev.description);
+
+        if (ev.image) {
           const imgEl = document.getElementById("eventImage");
           imgEl.src = ev.image;
           imgEl.style.display = "block";
         }
-        if(ev.date){
+
+        if (ev.date) {
           document.getElementById("eventDate").textContent = "Date: " + ev.date;
         }
+
       } else {
-        alert("Event not found. Redirecting...");
+        alert("Event not found.");
         window.location.href = "events.html";
       }
-    } catch(err){
+    } catch (err) {
       console.error(err);
       alert("Error fetching event data.");
     }
   }
 
   loadEventDetails();
-  
+
+  function goBack() {
+    window.history.back();
+  }
 </script>
-<script>
-function goBack() {
-  // Previous page pe wapas jaaye
-  window.history.back();
-}
-</script>
+
 </body>
 </html>
-
