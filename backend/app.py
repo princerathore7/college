@@ -24,6 +24,7 @@ from models.uniform_request import create_uniform_request, get_all_requests, upd
 from routes.bus_bp import bus_bp
 from routes.management import management_bp
 from routes.fine_bp import fine_bp
+from routes.admin_students import admin_students_bp
 # ---------------------------------------------
 # FLASK APP SETUP
 # ---------------------------------------------
@@ -69,8 +70,11 @@ cloudinary.config(
 # REGISTER BLUEPRINTS
 # ---------------------------------------------
 for bp in [
-    notices_bp, students_bp, mentors_bp, attendance_bp, assignments_bp, classes_bp,
-    class_mgmt_bp, events_bp, exams_bp, timetables_bp, marks_bp, bus_bp, management_bp, notes_bp, fine_bp
+    notices_bp, students_bp, mentors_bp, attendance_bp,
+    assignments_bp, classes_bp, class_mgmt_bp,
+    events_bp, exams_bp, timetables_bp, marks_bp,
+    bus_bp, management_bp, notes_bp, fine_bp,
+    admin_students_bp,
 ]:
     app.register_blueprint(bp)
 

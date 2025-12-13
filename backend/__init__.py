@@ -29,7 +29,6 @@ from events import events_bp
 from timetables import timetables_bp
 from routes.bus_bp import bus_bp
 from routes.management import management_bp
-
 # -------------------------
 # FLASK APP SETUP
 # -------------------------
@@ -94,7 +93,6 @@ app.register_blueprint(events_bp)
 app.register_blueprint(timetables_bp)
 app.register_blueprint(bus_bp)
 app.register_blueprint(management_bp)
-
 # -------------------------
 # DEFAULT ROUTE
 # -------------------------
