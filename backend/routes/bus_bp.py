@@ -5,7 +5,7 @@ import cloudinary.uploader
 from db import db
 
 # 🔔 Notification helper
-from routes.notifications import send_notification_to_all
+from routes.notifications import notify_bus
 
 bus_bp = Blueprint("bus_bp", __name__, url_prefix="/api/bus")
 
@@ -44,7 +44,7 @@ def upload_bus_pdf():
         db.bus.update_one({}, {"$set": {"pdf_url": pdf_url}}, upsert=True)
 
         # 🔔 GLOBAL NOTIFICATION (ALL USERS)
-        send_notification_to_all(
+        notify_bus(
             title="🚌 Bus Route Updated",
             body="New bus route PDF has been uploaded. Check routes now.",
             url="/bus-route.html"
