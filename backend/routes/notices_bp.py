@@ -8,7 +8,8 @@ import cloudinary
 import cloudinary.uploader
 
 # 🔔 Notification helpers
-from routes.notifications import send_notification_to_class, send_notification_to_all
+from routes.notifications import send_notification_to_class, send_global as send_notification_to_all
+
 
 # --- Blueprint Setup ---
 notices_bp = Blueprint("notices_bp", __name__, url_prefix="/api/notices")
