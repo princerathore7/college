@@ -8,3 +8,4 @@ reportlab
 cloudinary
 requests
 gunicorn
+firebase-admin
