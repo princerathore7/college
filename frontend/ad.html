@@ -13,6 +13,7 @@
     .wrap{max-width:100%;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
 
     header{display:flex;align-items:center;justify-content:space-between;background:var(--card);padding:12px 20px;border-bottom:1px solid #e6e9f2;}
+    header img {height:50px; object-fit:contain; margin-right:1rem;}
     header h1{font-size:20px;margin:0}
     header .user{display:flex;gap:12px;align-items:center}
     header button{background:var(--accent);color:#fff;border:0;padding:8px 14px;border-radius:8px;cursor:pointer}
@@ -24,7 +25,15 @@
     .nav button{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;border:0;background:transparent;text-align:left;cursor:pointer;transition:0.2s}
     .nav button.active, .nav button:hover{background:linear-gradient(90deg,var(--accent),#816cff);color:white}
 
-    main{background:var(--bg);padding:20px;}
+    main{background:var(--bg);padding:20px;overflow:auto;}
+
+    iframe.content-frame{
+      width:100%;
+      height:80vh;
+      border:none;
+      border-radius:10px;
+      box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    }
 
     @media (max-width:900px){
       .grid{grid-template-columns:1fr;}
@@ -35,7 +44,10 @@
 <body>
   <div class="wrap">
     <header>
-      <h1>Administration Panel</h1>
+      <div style="display:flex; align-items:center;">
+        <img src="logo.jpg" alt="Acropolis Logo">
+        <h1>Administration Panel</h1>
+      </div>
       <div class="user">
         <div>Admin</div>
         <button id="logoutBtn">Logout</button>
@@ -48,45 +60,47 @@
           <button data-page="admin-students.html">🎓 Students</button>
           <button data-page="admin-marks.html">📊 Marks</button>
           <button data-page="exam-ring.html">🧾 Exams</button>
-            <button data-page="bus-route.html">🚌 BUs ROute editing</button>
-                        <button data-page="bus-viewhtml">🚌 BUs current pdf</button>
+          <button data-page="bus-route.html">🚌 Bus Route Editing</button>
+          <button data-page="bus-view.html">🚌 Bus Current PDF</button>
           <button data-page="admin-salary.html">💰 Salary</button>
-          <button data-page="pending.html">💰 fees</button>
-          <button data-page="fees.html">💰 check fees dues</button>
+          <button data-page="pending.html">💰 Fees Pending</button>
+          <button data-page="fees.html">💰 Check Fees Dues</button>
           <button data-page="time-table.html">📅 Timetable</button>
           <button data-page="notice.html">📢 Notices</button>
-          <button data-page="manage.html">⚙️ Delete an event</button>
-          <button data-page="design.html">🎶 Post an event</button>
-          <button data-page="admin.html">💯 Manage attendance and marks</button>
-          <button data-page="admin-uniform.html">👨‍💼 UNIFORM Requests</button>
-           <button data-page="notes-post.html"> 📑POST NOTES</button>
-            <button data-page="notes-view.html"> 📑view  NOTES</button>
+          <button data-page="manage.html">⚙️ Delete an Event</button>
+          <button data-page="design.html">🎶 Post an Event</button>
+          <button data-page="admin.html">💯 Manage Attendance & Marks</button>
+          <button data-page="admin-uniform.html">👨‍💼 Uniform Requests</button>
+          <button data-page="notes-post.html">📑 Post Notes</button>
+          <button data-page="notes-view.html">📑 View Notes</button>
         </nav>
       </aside>
 
       <main>
         <h2>Welcome to Administration Panel</h2>
-        <p>Select a page from the sidebar to navigate.</p>
+        <p>Select a page from the sidebar to navigate. The page will load here directly without leaving this dashboard.</p>
+        <iframe id="contentFrame" class="content-frame" src="" style="display:none;"></iframe>
       </main>
     </div>
   </div>
 
   <script>
     const buttons = document.querySelectorAll('.nav button');
+    const iframe = document.getElementById('contentFrame');
 
     buttons.forEach(btn => {
       btn.addEventListener('click', () => {
         buttons.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
 
-        // Direct page redirect
         const page = btn.getAttribute('data-page');
-        window.location.href = page; // <-- redirects full page
+        iframe.src = page;
+        iframe.style.display = "block";
       });
     });
 
     document.getElementById('logoutBtn').addEventListener('click', () => {
-      if (confirm('Logout?')) alert('Logged out (demo)');
+      if(confirm('Logout?')) alert('Logged out (demo)');
     });
   </script>
 </body>

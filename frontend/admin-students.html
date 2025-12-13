@@ -1,264 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Admin — Students</title>
-  <style>
-    :root{ --bg:#f4f6fb; --card:#fff; --accent:#4f46e5; --muted:#6b7280; }
-    *{box-sizing:border-box;font-family:Inter, system-ui, Arial, sans-serif}
-    body{margin:0;background:var(--bg);color:#111;padding:18px}
-    .card{background:var(--card);padding:16px;border-radius:12px;border:1px solid #e6e9f2;max-width:1200px;margin:0 auto}
-    h1{margin:0 0 8px 0;font-size:20px}
-    .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}
-    select,input[type="text"]{padding:8px 10px;border-radius:8px;border:1px solid #e6e9f2}
-    button{padding:8px 12px;border-radius:8px;border:0;background:var(--accent);color:#fff;cursor:pointer}
-    button.ghost{background:#fff;color:#111;border:1px solid #e6e9f2}
-    .small{color:var(--muted);font-size:13px}
-    .stats{display:flex;gap:16px;margin-top:8px;align-items:center}
-    .stat{background:#fbfbff;padding:10px;border-radius:8px;border:1px solid #eef0ff;min-width:160px;text-align:center}
-    table{width:100%;border-collapse:collapse;margin-top:12px}
-    th,td{padding:10px;border-bottom:1px solid #f0f2f7;text-align:left}
-    th{background:#fafbff}
-    .action-del{background:#ffecec;color:#9b1c1c;border:1px solid #f5c6c6;padding:6px 10px;border-radius:8px;cursor:pointer}
-    .right{margin-left:auto}
-    .loading{opacity:0.7}
-    @media (max-width:720px){
-      .stats{flex-direction:column;align-items:flex-start}
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin — Students Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f6fb; --card:#ffffff; --accent:#4f46e5; --muted:#6b7280;
+}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:#111}
+header{display:flex;align-items:center;justify-content:space-between;background:var(--card);padding:12px 20px;border-bottom:1px solid #e6e9f2;position:sticky;top:0;z-index:1000}
+header img{height:50px;object-fit:contain;margin-right:12px}
+header h1{font-size:20px;margin:0}
+header button{background:var(--accent);color:#fff;border:0;padding:8px 14px;border-radius:8px;cursor:pointer}
+
+main{padding:20px;max-width:1400px;margin:0 auto}
+
+.controls{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.controls select,input, .controls button{padding:6px 10px;border-radius:6px;border:1px solid #ccc;font-size:14px}
+.controls button{background:var(--accent);color:#fff;border:none;cursor:pointer}
+
+table{width:100%;border-collapse:collapse;background:var(--card);border-radius:8px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+table th, table td{padding:8px 12px;text-align:left;border-bottom:1px solid #eee;font-size:14px}
+table th{background:#f0f0f0}
+.no-data{text-align:center;color:#888;padding:20px}
+
+@media(max-width:900px){
+  .controls{flex-direction:column;align-items:flex-start}
+}
+</style>
 </head>
 <body>
-  <div class="card">
-    <h1>Students — Class-wise</h1>
-    <div class="small">Select class to fetch students. Use search to filter. Delete removes student from that class (server call).</div>
 
-    <div class="controls">
-      <label>
-        Class:
-        <select id="classSelect">
-          <!-- Common options; edit as needed -->
-          <option value="1-A">1-A</option>
-          <option value="1-B">1-B</option>
-          <option value="1-C">1-C</option>
-          <option value="2-A">2-A</option>
-          <option value="2-B">2-B</option>
-          <option value="2-C">2-C</option>
-          <option value="3-A">3-A</option>
-          <option value="4-A">4-A</option>
-          <option value="5-A">5-A</option>
-          <option value="6-A">6-A</option>
-          <option value="7-A">7-A</option>
-          <option value="8-A">8-A</option>
-          <option value="9-A">9-A</option>
-          <option value="10-A">10-A</option>
-          <option value="11-A">11-A</option>
-          <option value="12-A">12-A</option>
-        </select>
-      </label>
+<header>
+  <div style="display:flex;align-items:center">
+    <img src="logo.jpg" alt="Acropolis Logo">
+    <h1>Admin — Students</h1>
+  </div>
+  <button onclick="logout()">Logout</button>
+</header>
 
-      <label>
-        Search:
-        <input type="text" id="searchInput" placeholder="Search name or enrollment">
-      </label>
+<main>
+  <div class="controls">
+    <label>Select Year
+      <select id="year">
+        <option value="">All Years</option>
+        <option value="1">1st Year</option>
+        <option value="2">2nd Year</option>
+        <option value="3">3rd Year</option>
+        <option value="4">4th Year</option>
+      </select>
+    </label>
 
-      <button id="fetchBtn">Fetch Students</button>
-      <button id="totalAllBtn" class="ghost" title="Compute total across many common classes">Total (All classes)</button>
+    <label>Select Branch
+      <select id="branch">
+        <option value="">All Branches</option>
+        <option value="CSE">CSE</option>
+        <option value="IT">IT</option>
+        <option value="AIML">AIML</option>
+        <option value="ECE">ECE</option>
+        <option value="ME">ME</option>
+        <option value="CE">CE</option>
+        <!-- Add more branches as needed -->
+      </select>
+    </label>
 
-      <div class="right small" id="lastUpdated"></div>
-    </div>
+    <label>Select Section
+      <select id="section">
+        <option value="">All Sections</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+      </select>
+    </label>
 
-    <div class="stats">
-      <div class="stat">
-        <div class="small">Selected class</div>
-        <div id="selectedClass" style="font-weight:700">—</div>
-      </div>
-
-      <div class="stat">
-        <div class="small">Students in class</div>
-        <div id="classTotal" style="font-weight:700">0</div>
-      </div>
-
-      <div class="stat">
-        <div class="small">Total (all computed)</div>
-        <div id="overallTotal" style="font-weight:700">—</div>
-      </div>
-    </div>
-
-    <table id="studentsTable" aria-live="polite">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Name</th>
-          <th>Enrollment</th>
-          <th>Class</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- rows injected by JS -->
-      </tbody>
-    </table>
-
-    <div id="emptyNote" class="small" style="margin-top:10px;display:none">No students found for this class.</div>
+    <button id="refreshBtn">Refresh Students Data</button>
   </div>
 
-  <script>
-    // --- configuration: API base ---
-const API_BASE = 'https://college-hwbb.onrender.com/api/students';
-// keep same origin; update if backend path differs
+  <table>
+    <thead>
+      <tr>
+        <th>Enrollment</th>
+        <th>Name</th>
+        <th>Year</th>
+        <th>Branch</th>
+        <th>Section</th>
+        <th>Attendance</th>
+        <th>Pending Fees</th>
+        <th>Fine</th>
+      </tr>
+    </thead>
+    <tbody id="studentsBody">
+      <tr><td colspan="8" class="no-data">Loading students data...</td></tr>
+    </tbody>
+  </table>
+</main>
 
-    // default set of branches to compute "all classes" total
-    const DEFAULT_BRANCHES = (() => {
-      const arr = [];
-      for(let c=1;c<=12;c++){
-        ['A','B','C'].forEach(sec => arr.push(`${c}-${sec}`));
-      }
-      return arr;
-    })();
+<script>
+const API_ROOT = "https://college-hwbb.onrender.com/api";
 
-    // UI refs
-    const classSelect = document.getElementById('classSelect');
-    const fetchBtn = document.getElementById('fetchBtn');
-    const totalAllBtn = document.getElementById('totalAllBtn');
-    const tableBody = document.querySelector('#studentsTable tbody');
-    const classTotalEl = document.getElementById('classTotal');
-    const selectedClassEl = document.getElementById('selectedClass');
-    const overallTotalEl = document.getElementById('overallTotal');
-    const searchInput = document.getElementById('searchInput');
-    const emptyNote = document.getElementById('emptyNote');
-    const lastUpdated = document.getElementById('lastUpdated');
+// Logout function
+function logout(){
+  localStorage.clear();
+  window.location.href='login.html';
+}
 
-    let currentStudents = []; // array of {name,enrollment, ...}
-    let currentBranch = classSelect.value;
+// Fetch all students data from API
+async function fetchStudents(refresh=false){
+  const localData = localStorage.getItem('allStudents');
+  if(localData && !refresh){
+    return JSON.parse(localData);
+  }
+  try{
+    const res = await fetch(`${API_ROOT}/students`);
+    const data = await res.json();
+    if(data.success && Array.isArray(data.students)){
+      localStorage.setItem('allStudents', JSON.stringify(data.students));
+      return data.students;
+    } else return [];
+  }catch(err){
+    console.error('Error fetching students:',err);
+    return [];
+  }
+}
 
-    // fetch students for a single branch: GET /api/students/<branch>
-    async function fetchStudentsFor(branch){
-      const encoded = encodeURIComponent(branch);
-      try{
-        const res = await fetch(`${API_BASE}/${encoded}`);
-        if(!res.ok){
-          const txt = await res.text();
-          throw new Error(`Server responded ${res.status}: ${txt}`);
-        }
-        const data = await res.json();
-        if(!data.success) throw new Error(data.message || 'Failed to fetch');
-        // server returns students list
-        return data.students || [];
-      } catch(err){
-        alert('Error fetching ' + branch + ': ' + err.message);
-        return [];
-      }
-    }
+// Render students table
+function renderStudents(students){
+  const tbody = document.getElementById('studentsBody');
+  if(!students || students.length===0){
+    tbody.innerHTML = `<tr><td colspan="8" class="no-data">No students found.</td></tr>`;
+    return;
+  }
 
-    // render table rows from currentStudents (apply search filter)
-    function renderTable(){
-      const q = searchInput.value.trim().toLowerCase();
-      tableBody.innerHTML = '';
-      const filtered = currentStudents.filter(s=>{
-        if(!q) return true;
-        return (s.name && s.name.toLowerCase().includes(q)) || (s.enrollment && String(s.enrollment).toLowerCase().includes(q));
-      });
+  const yearFilter = document.getElementById('year').value;
+  const branchFilter = document.getElementById('branch').value;
+  const sectionFilter = document.getElementById('section').value;
 
-      if(filtered.length === 0){
-        emptyNote.style.display = 'block';
-      } else {
-        emptyNote.style.display = 'none';
-      }
+  const filtered = students.filter(s=>{
+    return (!yearFilter || s.year==yearFilter)
+      && (!branchFilter || s.branch==branchFilter)
+      && (!sectionFilter || s.section==sectionFilter);
+  });
 
-      filtered.forEach((s, i) => {
-        const tr = document.createElement('tr');
-        const idx = document.createElement('td'); idx.textContent = i+1;
-        const nameTd = document.createElement('td'); nameTd.textContent = s.name || '-';
-        const enrTd = document.createElement('td'); enrTd.textContent = s.enrollment || '-';
-        const clsTd = document.createElement('td'); clsTd.textContent = s.branch || currentBranch;
-        const actTd = document.createElement('td');
-        const delBtn = document.createElement('button');
-        delBtn.className = 'action-del';
-        delBtn.textContent = 'Delete';
-        delBtn.title = 'Delete this student from the class (Server call)';
-        delBtn.onclick = ()=> confirmAndDelete(s.enrollment, clsTd.textContent);
-        actTd.appendChild(delBtn);
+  if(filtered.length===0){
+    tbody.innerHTML = `<tr><td colspan="8" class="no-data">No students match the selected filters.</td></tr>`;
+    return;
+  }
 
-        tr.appendChild(idx); tr.appendChild(nameTd); tr.appendChild(enrTd); tr.appendChild(clsTd); tr.appendChild(actTd);
-        tableBody.appendChild(tr);
-      });
+  tbody.innerHTML = '';
+  filtered.forEach(s=>{
+    tbody.innerHTML += `<tr>
+      <td>${s.enrollment}</td>
+      <td>${s.name}</td>
+      <td>${s.year}</td>
+      <td>${s.branch}</td>
+      <td>${s.section}</td>
+      <td>${s.attendance ?? '—'}</td>
+      <td>${s.pendingFees ?? '—'}</td>
+      <td>${s.fine ?? '—'}</td>
+    </tr>`;
+  });
+}
 
-      classTotalEl.textContent = currentStudents.length;
-      selectedClassEl.textContent = currentBranch;
-      lastUpdated.textContent = 'Last: ' + new Date().toLocaleString();
-    }
+// Initial load
+async function loadStudents(refresh=false){
+  const students = await fetchStudents(refresh);
+  renderStudents(students);
+}
 
-    // main load for selected class
-    async function loadSelectedClass(){
-      currentBranch = classSelect.value;
-      // UI: loading state
-      classTotalEl.textContent = 'Loading...';
-      tableBody.innerHTML = '';
-      emptyNote.style.display = 'none';
+// Filters change
+document.getElementById('year').addEventListener('change', ()=> loadStudents());
+document.getElementById('branch').addEventListener('change', ()=> loadStudents());
+document.getElementById('section').addEventListener('change', ()=> loadStudents());
 
-      const students = await fetchStudentsFor(currentBranch);
-      // normalize entries: ensure name/enrollment fields, attach branch for display
-      currentStudents = students.map(s => ({
-        name: s.name || s.fullName || '',
-        enrollment: s.enrollment || s.roll || s.id || '',
-        branch: currentBranch,
-        raw: s
-      }));
-      renderTable();
-    }
+// Refresh button
+document.getElementById('refreshBtn').addEventListener('click', ()=> loadStudents(true));
 
-    // delete student: DELETE /api/students/<branch>/<enrollment>
-    async function confirmAndDelete(enrollment, branch){
-      if(!confirm(`Delete student ${enrollment} from ${branch}? This will remove the record.`)) return;
-      try{
-        const encodedBranch = encodeURIComponent(branch);
-        const encodedEnr = encodeURIComponent(enrollment);
-        const res = await fetch(`${API_BASE}/${encodedBranch}/${encodedEnr}`, { method: 'DELETE' });
-        const data = await res.json().catch(()=>({success: res.ok}));
-        if(!res.ok || !data.success){
-          throw new Error(data.message || `Server returned ${res.status}`);
-        }
-        alert('Deleted successfully.');
-        // reload selected class
-        await loadSelectedClass();
-      } catch(err){
-        alert('Delete failed: ' + err.message);
-      }
-    }
+// Load on page load
+document.addEventListener('DOMContentLoaded', ()=> loadStudents());
+</script>
 
-    // compute total across many branches (uses DEFAULT_BRANCHES)
-    async function computeTotalAll(){
-      overallTotalEl.textContent = 'Computing...';
-      totalAllBtn.disabled = true;
-      try{
-        const promises = DEFAULT_BRANCHES.map(b => fetchStudentsFor(b));
-        const results = await Promise.all(promises);
-        const total = results.reduce((acc, arr) => acc + (arr ? arr.length : 0), 0);
-        overallTotalEl.textContent = total;
-      } catch(err){
-        overallTotalEl.textContent = 'Error';
-      } finally {
-        totalAllBtn.disabled = false;
-      }
-    }
-
-    // events
-    fetchBtn.addEventListener('click', loadSelectedClass);
-    classSelect.addEventListener('change', () => {
-      // immediate fetch on change
-      loadSelectedClass();
-    });
-    searchInput.addEventListener('input', renderTable);
-    totalAllBtn.addEventListener('click', computeTotalAll);
-
-    // initial load
-    window.addEventListener('load', () => {
-      loadSelectedClass();
-      // compute overall in background (optional)
-      computeTotalAll();
-    });
-  </script>
 </body>
 </html>
-
