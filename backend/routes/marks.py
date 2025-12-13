@@ -3,7 +3,7 @@ import os
 import json
 
 # 🔔 Notification helper
-from routes.notifications import send_notification_to_enrollment
+from routes.notifications import send_to_enrollment as send_notification_to_enrollment
 
 marks_bp = Blueprint("marks_bp", __name__)
 
