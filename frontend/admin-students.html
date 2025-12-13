@@ -27,7 +27,7 @@ th{background:#f1f3f8}
 .green{background:var(--green)}
 .yellow{background:var(--yellow)}
 .red{background:var(--red)}
-.actionBtn{padding:4px 8px;font-size:12px;border:0;border-radius:6px;cursor:pointer;background:var(--accent);color:#fff}
+.actionBtn{padding:4px 8px;font-size:12px;border:0;border-radius:6px;cursor:pointer;background:var(--accent);color:#fff;margin-left:4px}
 .no-data{text-align:center;color:#888}
 </style>
 </head>
@@ -150,7 +150,9 @@ async function render(refresh=false){
         <td>₹ ${s.pendingFees ?? 0}
           <button class="actionBtn" onclick="editFees('${s.enrollment}')">Update</button>
         </td>
-        <td>₹ ${fine}</td>
+        <td>₹ ${fine}
+          <button class="actionBtn" onclick="editFine('${s.enrollment}')">Update</button>
+        </td>
       </tr>
     `;
   }
@@ -158,15 +160,32 @@ async function render(refresh=false){
   localStorage.setItem("admin_students", JSON.stringify(students));
 }
 
+/* -------------------------
+   REDIRECTION LOGIC
+-------------------------- */
 function editAttendance(enr){
-  location.href = `admin.html?enrollment=${enr}`;
+  localStorage.setItem("selectedEnrollment", enr);
+  window.location.href = "admin.html";
 }
 
 function editFees(enr){
-  location.href = `pending.html?enrollment=${enr}`;
+  localStorage.setItem("selectedEnrollment", enr);
+  window.location.href = "pending.html";
 }
 
+function editFine(enr){
+  localStorage.setItem("selectedEnrollment", enr);
+  window.location.href = "admin-fine.html";
+}
+
+/* -------------------------
+   FILTERS + REFRESH
+-------------------------- */
+["year","branch"].forEach(id=>{
+  document.getElementById(id).addEventListener("change",()=>render(false));
+});
 refreshBtn.onclick = ()=>render(true);
+
 document.addEventListener("DOMContentLoaded",()=>render(false));
 </script>
 
