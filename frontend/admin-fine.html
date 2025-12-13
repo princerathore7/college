@@ -327,6 +327,21 @@ async function deleteFine(id) {
 document.addEventListener("DOMContentLoaded", () => {
     refreshFines(); // Force load on first visit
 });
+document.addEventListener("DOMContentLoaded", () => {
+  // Input field jahan enrollment number show karna hai
+  const enrInput = document.getElementById("enrollmentInput"); // <-- input field ka id
+
+  // localStorage se enrollment fetch karo
+  const selectedEnr = localStorage.getItem("selectedEnrollment");
+
+  if(selectedEnr && enrInput){
+    enrInput.value = selectedEnr;
+
+    // Agar page load hote hi info fetch karni hai:
+    fetchStudentInfo(selectedEnr); // ye function aap define kar sakte ho
+  }
+});
+
 </script>
 
 
