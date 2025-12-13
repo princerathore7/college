@@ -5,8 +5,9 @@ from pymongo import MongoClient, WriteConcern
 import os
 import cloudinary
 import cloudinary.uploader
+import firebase_init
 from threading import Thread
-
+firebase_init.init_firebase()
 # Import blueprints
 from notes import notes_bp
 from routes.class_management import class_mgmt_bp

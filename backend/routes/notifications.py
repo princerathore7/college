@@ -9,20 +9,26 @@ notifications_bp = Blueprint('notifications', __name__)
 
 # -------------------- DATABASE SETUP --------------------
 client = MongoClient(os.getenv("MONGO_COLLEGE_DB_URI"))
-  # replace with your DB URL
 db = client['college_db']
 
 tokens_col = db['fcm_tokens']             # Store student FCM tokens
 notifications_col = db['notifications']   # Store sent notifications history/log
 
 # -------------------- FIREBASE ADMIN SETUP --------------------
-# Use environment variable for service account JSON
+# Initialize Firebase only once
 firebase_json = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
-if not firebase_json:
-    raise RuntimeError("FIREBASE_SERVICE_ACCOUNT_JSON environment variable not set!")
 
-cred = credentials.Certificate(json.loads(firebase_json))
-firebase_admin.initialize_app(cred)
+if firebase_json:
+    try:
+        cred_dict = json.loads(firebase_json)
+        if not firebase_admin._apps:
+            cred = credentials.Certificate(cred_dict)
+            firebase_admin.initialize_app(cred)
+            print("✅ Firebase initialized successfully")
+    except Exception as e:
+        print("❌ Firebase init failed:", e)
+else:
+    print("⚠️ Firebase disabled: FIREBASE_SERVICE_ACCOUNT_JSON not set")
 
 # -------------------- HELPER FUNCTION --------------------
 def send_fcm_notification(title, body, tokens, data=None):
