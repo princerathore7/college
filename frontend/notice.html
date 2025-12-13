@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Admin — Notice Board</title>
+
 <style>
   body {
     font-family: Inter, system-ui, sans-serif;
@@ -39,46 +40,73 @@
     border: none;
     cursor: pointer;
     font-weight: 600;
-    transition: 0.2s;
   }
   button:hover { background: #4338ca; }
+
   .notice {
     border: 1px solid #eee;
     padding: 14px;
     border-radius: 8px;
     margin: 12px 0;
-    transition: 0.2s;
   }
-  .notice:hover { background: #fafafa; }
   .notice h3 { margin:0;font-size:16px; color:#4f46e5; }
   .meta { font-size:13px;color:#666;margin-top:6px; }
-  .del { background:#ffecec;color:#9b1c1c;border:1px solid #f5c6c6;width:auto;margin-top:8px;padding:6px 12px; cursor:pointer; }
+
+  .del {
+    background:#ffecec;
+    color:#9b1c1c;
+    border:1px solid #f5c6c6;
+    width:auto;
+    margin-top:8px;
+    padding:6px 12px;
+    cursor:pointer;
+  }
+
   .processing { color: #28a745; font-weight: 600; margin: 10px 0; }
   .back-btn { margin-bottom: 16px; background:#6b7280; }
-  .back-btn:hover { background:#4b5563; }
 </style>
 </head>
+
 <body>
-  <div class="card">
-    <button class="back-btn" onclick="window.history.back()">← Back</button>
-    <h1>📢 Notice Management (Admin)</h1>
+<div class="card">
+  <button class="back-btn" onclick="window.history.back()">← Back</button>
+  <h1>📢 Notice Management (Admin)</h1>
 
-    <h3>Add New Notice</h3>
-    <input type="text" id="title" placeholder="Notice Title">
-    <textarea id="message" rows="3" placeholder="Notice Message"></textarea>
-    <select id="target">
-      <option value="all">All</option>
-      <option value="students">Students</option>
-      <option value="mentors">Mentors</option>
-    </select>
-    <button id="addNotice">Add Notice</button>
-    <div id="processing" class="processing" style="display:none;">Processing your request Please wait...</div>
+  <h3>Add New Notice</h3>
 
-    <hr>
+  <input type="text" id="title" placeholder="Notice Title">
+  <textarea id="message" rows="3" placeholder="Notice Message"></textarea>
 
-    <h3>All Notices</h3>
-    <div id="noticeList"></div>
+  <!-- OLD TARGET -->
+  <select id="target">
+    <option value="all">All</option>
+    <option value="students">Students</option>
+    <option value="mentors">Mentors</option>
+  </select>
+
+  <!-- 🔹 NEW CLASS SELECT (OPTIONAL) -->
+  <select id="targetClass">
+    <option value="">-- Select Class (Optional) --</option>
+    <option value="CSE">CSE</option>
+    <option value="CSE-1">CSE-1</option>
+    <option value="IT">IT</option>
+    <option value="IT-2">IT-2</option>
+    <option value="ECE">ECE</option>
+  </select>
+
+  <!-- 🔹 NEW IMAGE INPUT (OPTIONAL) -->
+  <input type="file" id="image" accept="image/*">
+
+  <button id="addNotice">Add Notice</button>
+  <div id="processing" class="processing" style="display:none;">
+    Processing your request… Please wait
   </div>
+
+  <hr>
+
+  <h3>All Notices</h3>
+  <div id="noticeList"></div>
+</div>
 
 <script>
 const API = "https://college-hwbb.onrender.com/api/notices/";
@@ -86,6 +114,8 @@ const API = "https://college-hwbb.onrender.com/api/notices/";
 const titleEl = document.getElementById("title");
 const messageEl = document.getElementById("message");
 const targetEl = document.getElementById("target");
+const classEl = document.getElementById("targetClass");
+const imageEl = document.getElementById("image");
 const processingEl = document.getElementById("processing");
 
 async function loadNotices(){
@@ -94,14 +124,28 @@ async function loadNotices(){
     const data = await res.json();
     const container = document.getElementById("noticeList");
     container.innerHTML = "";
-    if(!data.success) return container.innerHTML="<p style='color:red;'>Error fetching notices</p>";
+
+    if(!data.success){
+      container.innerHTML = "<p style='color:red;'>Error fetching notices</p>";
+      return;
+    }
+
     data.notices.forEach(n=>{
       const div = document.createElement("div");
       div.className = "notice";
+
       div.innerHTML = `
         <h3>${n.title}</h3>
         <div>${n.message}</div>
-        <div class="meta">Target: ${n.target} | By: ${n.sender} | ${n.timestamp}</div>
+
+        ${n.imageUrl ? `<img src="${n.imageUrl}" style="max-width:100%;margin-top:8px;border-radius:6px;">` : ""}
+
+        <div class="meta">
+          Target: ${n.target}
+          ${n.targetClass ? " | Class: " + n.targetClass : ""}
+          | By: ${n.sender} | ${n.timestamp}
+        </div>
+
         <button class="del" onclick="deleteNotice('${encodeURIComponent(n.title)}')">Delete</button>
       `;
       container.appendChild(div);
@@ -113,43 +157,57 @@ async function loadNotices(){
 
 async function deleteNotice(title){
   if(!confirm("Are you sure you want to delete this notice?")) return;
-  try{
-    const res = await fetch(`${API}${encodeURIComponent(title)}`, {method:"DELETE", headers:{"Content-Type":"application/json"}});
-    const data = await res.json();
-    alert(data.message || "Notice deleted successfully!");
-    loadNotices();
-  } catch(err){
-    console.error(err);
-    alert("❌ Failed to delete notice.");
-  }
+
+  const res = await fetch(API + title, { method: "DELETE" });
+  const data = await res.json();
+  alert(data.message || "Deleted");
+  loadNotices();
 }
 
 document.getElementById("addNotice").addEventListener("click", async ()=>{
   const title = titleEl.value.trim();
   const message = messageEl.value.trim();
-  const target = targetEl.value;
-  if(!title || !message) return alert("Title & message required");
+
+  if(!title || !message){
+    alert("Title & message required");
+    return;
+  }
 
   processingEl.style.display = "block";
 
-  try{
+  const formData = new FormData();
+  formData.append("title", title);
+  formData.append("message", message);
+  formData.append("target", targetEl.value);
+  formData.append("targetClass", classEl.value);
+  formData.append("sender", "Admin");
+
+  if(imageEl.files.length > 0){
+    formData.append("image", imageEl.files[0]);
+  }
+
+  try {
     const res = await fetch(API, {
       method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({title,message,target,sender:"Admin"})
+      body: formData
     });
+
     const data = await res.json();
     processingEl.style.display = "none";
 
+    alert(data.message);
+
     if(data.success){
-      titleEl.value=""; messageEl.value="";
+      titleEl.value = "";
+      messageEl.value = "";
+      classEl.value = "";
+      imageEl.value = "";
       loadNotices();
     }
-    alert(data.message);
   } catch(err){
     console.error(err);
     processingEl.style.display = "none";
-    alert("❌ Error posting notice. Check backend.");
+    alert("❌ Error posting notice");
   }
 });
 

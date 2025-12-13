@@ -4,13 +4,14 @@ from pymongo import MongoClient
 from datetime import datetime
 from urllib.parse import unquote
 import os
+import cloudinary
+import cloudinary.uploader
 
 # --- Blueprint Setup ---
 notices_bp = Blueprint("notices_bp", __name__, url_prefix="/api/notices")
 CORS(notices_bp)
 
 # --- MongoDB Setup ---
-# Use environment variable from __init__.py / .env
 MONGO_URI = os.getenv("MONGO_COLLEGE_DB_URI")
 if not MONGO_URI:
     raise Exception("MONGO_COLLEGE_DB_URI not set in environment variables")
@@ -18,6 +19,14 @@ if not MONGO_URI:
 client = MongoClient(MONGO_URI)
 db = client["college_db"]
 notices_collection = db["notices"]
+students_collection = db["students"]
+
+# --- Cloudinary Setup ---
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET")
+)
 
 # =====================================
 # 1️⃣  CREATE NOTICE (Admin only)
@@ -25,19 +34,34 @@ notices_collection = db["notices"]
 @notices_bp.route("", methods=["POST"], strict_slashes=False)
 def add_notice():
     try:
-        data = request.get_json()
+        # 🔹 multipart + json dono support
+        data = request.form if request.form else request.get_json()
+
         title = data.get("title")
         message = data.get("message")
-        target = data.get("target", "all")
+        target = data.get("target", "all")          # student / mentor / all
+        target_class = data.get("targetClass")      # 👈 NEW (optional)
         sender = data.get("sender", "Admin")
 
         if not title or not message:
             return jsonify({"success": False, "message": "Title and message are required"}), 400
 
+        image_url = None
+
+        # 🔹 Optional image upload
+        if "image" in request.files:
+            upload = cloudinary.uploader.upload(
+                request.files["image"],
+                folder="college_notices"
+            )
+            image_url = upload.get("secure_url")
+
         notice = {
             "title": title,
             "message": message,
             "target": target,
+            "targetClass": target_class,    # 👈 NEW
+            "imageUrl": image_url,          # 👈 NEW
             "sender": sender,
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "readBy": []
@@ -51,7 +75,7 @@ def add_notice():
 
 
 # =====================================
-# 2️⃣  FETCH NOTICES (Student/Mentor)
+# 2️⃣  FETCH NOTICES (Student / Mentor)
 # =====================================
 @notices_bp.route("", methods=["GET"], strict_slashes=False)
 def get_all_notices():
@@ -59,14 +83,34 @@ def get_all_notices():
         user_type = request.args.get("target", "all")
         enrollment = request.args.get("enrollment")
 
-        query = {}
-        if user_type and user_type != "all":
-            query["$or"] = [{"target": user_type}, {"target": "all"}]
+        student_class = None
+
+        # 🔹 student ki class backend se nikalegi
+        if enrollment:
+            student = students_collection.find_one(
+                {"enrollment": enrollment},
+                {"_id": 0, "class": 1}
+            )
+            if student:
+                student_class = student.get("class")
+
+        query = {"$or": []}
+
+        # 🔹 old target logic (unchanged)
+        if user_type != "all":
+            query["$or"].append({"target": user_type})
+
+        query["$or"].append({"target": "all"})
+
+        # 🔹 NEW class-wise filter
+        if student_class:
+            query["$or"].append({"targetClass": student_class})
+            query["$or"].append({"targetClass": None})
 
         notices = list(notices_collection.find(query, {"_id": 0}))
         notices.sort(key=lambda x: x["timestamp"], reverse=True)
 
-        # Add unread flag
+        # 🔹 unread flag
         if enrollment:
             for n in notices:
                 n["is_read"] = enrollment in n.get("readBy", [])
@@ -134,12 +178,22 @@ def unread_notice_count():
         if not user_type or not enrollment:
             return jsonify({"success": False, "message": "Missing user type or enrollment"}), 400
 
-        query = {"$or": [{"target": user_type}, {"target": "all"}]}
-        count = notices_collection.count_documents({
-            **query,
-            "readBy": {"$ne": enrollment}
-        })
+        student = students_collection.find_one(
+            {"enrollment": enrollment},
+            {"_id": 0, "class": 1}
+        )
+        student_class = student.get("class") if student else None
 
+        query = {
+            "$or": [
+                {"target": user_type},
+                {"target": "all"},
+                {"targetClass": student_class}
+            ],
+            "readBy": {"$ne": enrollment}
+        }
+
+        count = notices_collection.count_documents(query)
         return jsonify({"success": True, "unread_count": count}), 200
 
     except Exception as e:
