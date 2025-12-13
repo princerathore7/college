@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>📢 Student Notices</title>
 <style>
-  body { font-family: Inter, sans-serif; background:#f3f4f6; padding:20px }
+  body { font-family: Inter, sans-serif; background:#f3f4f6; padding:20px; margin:0 }
   .card { max-width:800px; margin:auto; background:#fff; padding:20px; border-radius:12px; box-shadow:0 3px 12px rgba(0,0,0,0.1) }
   h1 { text-align:center; margin-bottom:16px }
   .notice { border:1px solid #eee; border-radius:8px; padding:12px; margin-bottom:12px; background:#f9fafb }
@@ -14,9 +14,56 @@
   img { max-width:100%; border-radius:6px; margin-top:8px }
   .top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px }
   .btn { padding:6px 12px; border-radius:6px; border:none; cursor:pointer; background:#e0e7ff }
+
+  /* ------------- Loader Styles ------------- */
+  #loader {
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    background: rgba(255,255,255,0.8);
+    display: flex;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+  }
+
+  /* 3D rotating cube loader */
+  .cube {
+    width: 50px;
+    height: 50px;
+    position: relative;
+    transform-style: preserve-3d;
+    animation: rotateCube 1.5s infinite linear;
+  }
+  .cube div {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: #6d1b1b;
+    opacity: 0.8;
+    border-radius: 6px;
+  }
+  .cube div:nth-child(1) { transform: rotateX(0deg) translateZ(25px); }
+  .cube div:nth-child(2) { transform: rotateY(90deg) translateZ(25px); }
+  .cube div:nth-child(3) { transform: rotateY(180deg) translateZ(25px); }
+  .cube div:nth-child(4) { transform: rotateY(-90deg) translateZ(25px); }
+  .cube div:nth-child(5) { transform: rotateX(90deg) translateZ(25px); }
+  .cube div:nth-child(6) { transform: rotateX(-90deg) translateZ(25px); }
+
+  @keyframes rotateCube {
+    0% { transform: rotateX(0deg) rotateY(0deg); }
+    100% { transform: rotateX(360deg) rotateY(360deg); }
+  }
 </style>
 </head>
 <body>
+
+<!-- Loader element -->
+<div id="loader">
+  <div class="cube">
+    <div></div><div></div><div></div>
+    <div></div><div></div><div></div>
+  </div>
+</div>
 
 <div class="card">
   <div class="top-bar">
@@ -36,13 +83,25 @@ let viewAll = false;
 const studentClass = new URLSearchParams(window.location.search).get("class") || localStorage.getItem("studentClass");
 document.getElementById("classInfo").textContent = studentClass ? `Class: ${studentClass}` : "All Students";
 
-// Toggle "View All"
+// Toggle between filtered and all notices
 function toggleView() {
   viewAll = !viewAll;
   loadNotices();
 }
 
+// Show loader
+function showLoader() {
+  document.getElementById("loader").style.display = "flex";
+}
+
+// Hide loader
+function hideLoader() {
+  document.getElementById("loader").style.display = "none";
+}
+
+// Load notices from API
 async function loadNotices(){
+  showLoader(); // show loader at start
   try {
     const enrollment = localStorage.getItem("enrollment"); // optional
     const res = await fetch(`${API_ROOT}/api/notices?target=students`);
@@ -56,9 +115,12 @@ async function loadNotices(){
   } catch(err){
     console.error("Notice load error:", err);
     document.getElementById("notices").innerHTML = `<p style="color:red">Notices not available right now</p>`;
+  } finally {
+    hideLoader(); // hide loader when done
   }
 }
 
+// Render notice cards dynamically
 function renderNotices(list, enrollment, studentClass){
   const div = document.getElementById("notices");
   div.innerHTML = "";
@@ -86,7 +148,7 @@ function renderNotices(list, enrollment, studentClass){
   });
 }
 
-// Initial load
+// Initial load on page load
 window.onload = loadNotices;
 
 </script>
