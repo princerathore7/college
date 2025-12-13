@@ -369,63 +369,57 @@
                                   <td><button class="editBtn" onclick="editAttendance('${enrollment}')">Edit</button></td>`;
           tbody.appendChild(summaryRow);
         } else {
-          // Show placeholder row if no attendance
           tbody.innerHTML = `<tr><td colspan="2">No attendance yet</td><td><button class="editBtn" onclick="editAttendance('${enrollment}')">Edit</button></td></tr>`;
         }
       } catch (err) { 
         console.error(err); 
       }
     }
-async function editAttendance(enrollment) {
-  let total = parseInt(prompt("Enter total days:"));
-  let present = parseInt(prompt("Enter present days:"));
 
-  if (isNaN(total) || isNaN(present) || total < 0 || present < 0 || present > total) {
-    alert("Invalid input!");
-    return;
-  }
+    async function editAttendance(enrollment) {
+      let total = parseInt(prompt("Enter total days:"));
+      let present = parseInt(prompt("Enter present days:"));
 
-  const API = "https://college-hwbb.onrender.com/api/attendance";
-
-  try {
-    const res = await fetch(`${API}/edit_percentage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ enrollment, total, present })
-    });
-
-    const contentType = res.headers.get("content-type");
-
-    if (contentType?.includes("application/json")) {
-      const data = await res.json();
-      if (data.success) {
-        alert("Attendance updated!");
-        fetchAttendance(enrollment);
-      } else {
-        alert(data.message);
+      if (isNaN(total) || isNaN(present) || total < 0 || present < 0 || present > total) {
+        alert("Invalid input!");
+        return;
       }
-    } else {
-      console.error(await res.text());
-      alert("Server returned invalid response (not JSON)");
+
+      const API = "https://college-hwbb.onrender.com/api/attendance";
+
+      try {
+        const res = await fetch(`${API}/edit_percentage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ enrollment, total, present })
+        });
+
+        const contentType = res.headers.get("content-type");
+
+        if (contentType?.includes("application/json")) {
+          const data = await res.json();
+          if (data.success) {
+            alert("Attendance updated!");
+            fetchAttendance(enrollment);
+          } else {
+            alert(data.message);
+          }
+        } else {
+          console.error(await res.text());
+          alert("Server returned invalid response (not JSON)");
+        }
+
+      } catch (err) {
+        console.error(err);
+        alert("Error connecting to server");
+      }
     }
-
-  } catch (err) {
-    console.error(err);
-    alert("Error connecting to server");
-  }
-}
-
 
     // Load saved class on page load
     window.onload = () => {
       const savedClass = localStorage.getItem("selectedClass");
       if (savedClass) {
-        const parts = savedClass.split(" ");
-        if(parts.length >= 2){
-          document.getElementById("yearSelect").value = parts[0] + " " + parts[1];
-          document.getElementById("newClass").value = parts.slice(2).join(" ");
-          document.getElementById("sClass").textContent = savedClass;
-        }
+        document.getElementById("sClass").textContent = savedClass;
       }
     };
 
@@ -434,21 +428,16 @@ async function editAttendance(enrollment) {
       const newClass = document.getElementById("newClass").value;
       if(newClass) updateClass();
     });
+
+    // ✅ AUTO ENROLLMENT RECEIVE & AUTO FETCH
     document.addEventListener("DOMContentLoaded", () => {
-  // Input field jahan enrollment number show karna hai
-  const enrInput = document.getElementById("enrollmentInput"); // <-- input field ka id
+      const selectedEnr = localStorage.getItem("selectedEnrollment");
+      if (selectedEnr) {
+        document.getElementById("enrollment").value = selectedEnr;
+        fetchStudent(); // auto fetch
+      }
+    });
+</script>
 
-  // localStorage se enrollment fetch karo
-  const selectedEnr = localStorage.getItem("selectedEnrollment");
-
-  if(selectedEnr && enrInput){
-    enrInput.value = selectedEnr;
-
-    // Agar page load hote hi info fetch karni hai:
-    fetchStudentInfo(selectedEnr); // ye function aap define kar sakte ho
-  }
-});
-
-  </script>
 </body>
 </html>

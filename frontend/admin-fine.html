@@ -151,7 +151,6 @@ function getLS(key) {
 function addStudentBlock() {
     const container = document.getElementById("studentsContainer");
 
-    // Get last block's fine amount and reason
     const lastBlock = container.querySelector(".student-block:last-child");
     let fineVal = lastBlock ? lastBlock.querySelector(".fineAmount").value : "";
     let reasonVal = lastBlock ? lastBlock.querySelector(".reason").value : "";
@@ -209,7 +208,7 @@ async function submitFines() {
         });
         const data = await res.json();
         alert(data.message || "Fines Added!");
-        refreshFines(true); // Force refresh after submission
+        refreshFines(true);
     } catch(e) {
         console.error(e);
         alert("Error submitting fines!");
@@ -217,7 +216,7 @@ async function submitFines() {
 }
 
 // -----------------------------
-// LOAD ALL FINES (API or LocalStorage)
+// LOAD ALL FINES
 // -----------------------------
 async function refreshFines(force=false) {
     let cached = getLS("allFines");
@@ -326,22 +325,15 @@ async function deleteFine(id) {
 // -----------------------------
 document.addEventListener("DOMContentLoaded", () => {
     refreshFines(); // Force load on first visit
+
+    // Auto-fill search field with selected enrollment and trigger search
+    const selectedEnr = localStorage.getItem("selectedEnrollment");
+    const searchInput = document.getElementById("searchEnrollment");
+    if(selectedEnr && searchInput){
+        searchInput.value = selectedEnr;
+        searchFine(); // auto filter on load
+    }
 });
-document.addEventListener("DOMContentLoaded", () => {
-  // Input field jahan enrollment number show karna hai
-  const enrInput = document.getElementById("enrollmentInput"); // <-- input field ka id
-
-  // localStorage se enrollment fetch karo
-  const selectedEnr = localStorage.getItem("selectedEnrollment");
-
-  if(selectedEnr && enrInput){
-    enrInput.value = selectedEnr;
-
-    // Agar page load hote hi info fetch karni hai:
-    fetchStudentInfo(selectedEnr); // ye function aap define kar sakte ho
-  }
-});
-
 </script>
 
 
