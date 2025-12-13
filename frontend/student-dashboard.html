@@ -807,6 +807,12 @@ function closeSidebar() {
 document.getElementById("menuToggle").addEventListener("click", openSidebar);
 </script>
 
-
+ <!-- Your notification logic -->
+<script src="/static/js/notification.js"></script>
+<script>
+  window.addEventListener("load", () => {
+    enableNotifications();
+  });
+</script>
 </body>
 </html>

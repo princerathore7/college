@@ -2,6 +2,9 @@ from flask import Blueprint, jsonify, request
 import os
 import json
 
+# 🔔 Notification helper
+from routes.notifications import send_notification_to_enrollment
+
 marks_bp = Blueprint("marks_bp", __name__)
 
 DATA_FILE = os.path.join("data", "marks.json")
@@ -20,39 +23,27 @@ def save_marks(data):
     with open(DATA_FILE, "w") as f:
         json.dump(data, f, indent=4)
 
+# -----------------------------
+# GET marks by enrollment
+# -----------------------------
 @marks_bp.route("/api/marks/<enrollment>", methods=["GET"])
 def get_marks(enrollment):
-    """
-    Return marks for a student by enrollment.
-    """
     data = load_marks()
     student = data.get(enrollment)
     if not student:
         return jsonify({"success": False, "message": "No marks found for this enrollment"}), 404
     return jsonify({"success": True, "marks": student})
 
+# -----------------------------
+# POST/UPDATE marks
+# -----------------------------
 @marks_bp.route("/api/marks", methods=["POST"])
 def post_marks():
-    """
-    Add or update marks. Request JSON format:
-    {
-      "enrollment": "EN123",
-      "name": "Student Name",
-      "class": "1A",
-      "mst": 78,
-      "internal": 82,
-      "assignments": 85,
-      // optional weights (sum not required; we'll normalize)
-      "weights": {"mst": 0.4, "internal":0.4, "assignments":0.2}
-    }
-    Response returns computed percentage.
-    """
     payload = request.get_json() or {}
     enrollment = payload.get("enrollment")
     if not enrollment:
         return jsonify({"success": False, "message": "enrollment is required"}), 400
 
-    # read numeric marks (coerce)
     def number_of(x):
         try:
             return float(x)
@@ -63,21 +54,17 @@ def post_marks():
     internal = number_of(payload.get("internal", 0))
     assignments = number_of(payload.get("assignments", 0))
 
-    # weights (optional)
     weights = payload.get("weights") or {}
     w_mst = float(weights.get("mst", 0)) if isinstance(weights, dict) and weights.get("mst") is not None else None
     w_internal = float(weights.get("internal", 0)) if isinstance(weights, dict) and weights.get("internal") is not None else None
     w_assign = float(weights.get("assignments", 0)) if isinstance(weights, dict) and weights.get("assignments") is not None else None
 
-    # If any weight is provided, normalize weights; else use equal weights.
     if w_mst is not None or w_internal is not None or w_assign is not None:
-        # default missing to 0
         w_mst = w_mst or 0.0
         w_internal = w_internal or 0.0
         w_assign = w_assign or 0.0
         total_w = w_mst + w_internal + w_assign
         if total_w <= 0:
-            # avoid division by zero -> fallback equal
             w_mst = w_internal = w_assign = 1/3
         else:
             w_mst /= total_w
@@ -86,12 +73,8 @@ def post_marks():
     else:
         w_mst = w_internal = w_assign = 1/3
 
-    # compute percentage (assuming marks are each out of 100)
-    percentage = (mst * w_mst) + (internal * w_internal) + (assignments * w_assign)
-    # round to 2 decimal places
-    percentage = round(percentage, 2)
+    percentage = round((mst * w_mst) + (internal * w_internal) + (assignments * w_assign), 2)
 
-    # prepare record
     record = {
         "enrollment": enrollment,
         "name": payload.get("name", ""),
@@ -108,4 +91,13 @@ def post_marks():
     data[enrollment] = record
     save_marks(data)
 
-    return jsonify({"success": True, "message": "Marks saved", "marks": record})
+    # 🔔 SEND notification to student
+    try:
+        title = "📊 Marks Updated"
+        body = f"Hello {record['name']}, your MST/Internal/Assignment marks have been updated. Total: {percentage}%"
+        url = "/marks.html"
+        send_notification_to_enrollment(enrollment, title=title, body=body, url=url)
+    except Exception as e:
+        print("Notification error:", e)
+
+    return jsonify({"success": True, "message": "Marks saved & notification sent", "marks": record})

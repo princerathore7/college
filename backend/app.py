@@ -25,6 +25,7 @@ from routes.bus_bp import bus_bp
 from routes.management import management_bp
 from routes.fine_bp import fine_bp
 from routes.admin_students import admin_students_bp
+from routes.notifications import notifications_bp
 # ---------------------------------------------
 # FLASK APP SETUP
 # ---------------------------------------------
@@ -74,7 +75,7 @@ for bp in [
     assignments_bp, classes_bp, class_mgmt_bp,
     events_bp, exams_bp, timetables_bp, marks_bp,
     bus_bp, management_bp, notes_bp, fine_bp,
-    admin_students_bp,
+    admin_students_bp, notifications_bp
 ]:
     app.register_blueprint(bp)
 

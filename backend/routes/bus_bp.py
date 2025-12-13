@@ -1,8 +1,11 @@
 from flask import Blueprint, request, jsonify
-from flask_cors import CORS, cross_origin
+from flask_cors import cross_origin
 import cloudinary
 import cloudinary.uploader
 from db import db
+
+# 🔔 Notification helper
+from routes.notifications import send_notification_to_all
 
 bus_bp = Blueprint("bus_bp", __name__, url_prefix="/api/bus")
 
@@ -40,9 +43,16 @@ def upload_bus_pdf():
         # Save inside database
         db.bus.update_one({}, {"$set": {"pdf_url": pdf_url}}, upsert=True)
 
+        # 🔔 GLOBAL NOTIFICATION (ALL USERS)
+        send_notification_to_all(
+            title="🚌 Bus Route Updated",
+            body="New bus route PDF has been uploaded. Check routes now.",
+            url="/bus-route.html"
+        )
+
         return jsonify({
             "success": True,
-            "message": "Bus PDF uploaded successfully",
+            "message": "Bus PDF uploaded & notification sent",
             "pdf_url": pdf_url
         }), 201
 

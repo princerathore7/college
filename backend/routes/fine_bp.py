@@ -4,6 +4,9 @@ from db import db
 from datetime import datetime
 from bson.objectid import ObjectId
 
+# 🔔 Notification helper
+from routes.notifications import send_notification_to_enrollment
+
 fine_bp = Blueprint("fine_bp", __name__, url_prefix="/api/fines")
 
 # ---------------------------------------------------------
@@ -12,6 +15,7 @@ fine_bp = Blueprint("fine_bp", __name__, url_prefix="/api/fines")
 def serialize(fine):
     fine["_id"] = str(fine["_id"])
     return fine
+
 
 # ---------------------------------------------------------
 # 1️⃣ ADMIN — BULK ADD FINES
@@ -26,31 +30,44 @@ def add_bulk_fines():
         return jsonify({"success": False, "message": "Invalid fines format"}), 400
 
     for f in fines:
+        enrollment = f.get("enrollment")
+        fine_amount = int(f.get("fine", 0))
+        reason = f.get("reason", "Fine added")
+
         record = {
-            "enrollment": f.get("enrollment"),
+            "enrollment": enrollment,
             "class": f.get("class"),
-            "fine": int(f.get("fine")),
-            "reason": f.get("reason"),
+            "fine": fine_amount,
+            "reason": reason,
             "status": "Pending",
             "createdAt": datetime.now(),
             "updatedAt": datetime.now()
         }
+
         db.fine.insert_one(record)
 
-    return jsonify({"success": True, "message": "Fines added successfully!"}), 201
+        # 🔔 SEND NOTIFICATION (ENROLLMENT WISE)
+        send_notification_to_enrollment(
+            enrollment=enrollment,
+            title="💰 New Fine Added",
+            body=f"A fine of ₹{fine_amount} has been added. Reason: {reason}",
+            url="/fine.html"
+        )
+
+    return jsonify({
+        "success": True,
+        "message": "Fines added successfully and notifications sent!"
+    }), 201
 
 
 # ---------------------------------------------------------
-# 2️⃣ SEARCH FINES OF ONE STUDENT (ADMIN/TEACHER USE)
+# 2️⃣ SEARCH FINES OF ONE STUDENT (ADMIN / TEACHER)
 # ---------------------------------------------------------
 @fine_bp.route("/<enrollment>", methods=["GET"])
 @cross_origin()
 def get_student_fines(enrollment):
     records = list(db.fine.find({"enrollment": enrollment}))
     records = [serialize(r) for r in records]
-
-    if not records:
-        return jsonify([]), 200
 
     return jsonify(records), 200
 
@@ -63,16 +80,39 @@ def get_student_fines(enrollment):
 def update_fine(fine_id):
     data = request.json
 
+    fine_amount = int(data.get("fine"))
+    reason = data.get("reason", "Fine updated")
+
+    # 🔍 Get existing fine (for enrollment)
+    fine_record = db.fine.find_one({"_id": ObjectId(fine_id)})
+    if not fine_record:
+        return jsonify({"success": False, "message": "Fine not found"}), 404
+
+    enrollment = fine_record.get("enrollment")
+
     update_fields = {
-        "fine": int(data.get("fine")),
-        "reason": data.get("reason"),
+        "fine": fine_amount,
+        "reason": reason,
         "updatedAt": datetime.now()
     }
 
-    db.fine.update_one({"_id": ObjectId(fine_id)}, {"$set": update_fields})
+    db.fine.update_one(
+        {"_id": ObjectId(fine_id)},
+        {"$set": update_fields}
+    )
 
-    return jsonify({"success": True, "message": "Fine updated"}), 200
+    # 🔔 SEND NOTIFICATION TO THAT STUDENT ONLY
+    send_notification_to_enrollment(
+        enrollment=enrollment,
+        title="💰 Fine Updated",
+        body=f"Your fine has been updated to ₹{fine_amount}. Reason: {reason}",
+        url="/fine.html"
+    )
 
+    return jsonify({
+        "success": True,
+        "message": "Fine updated and notification sent"
+    }), 200
 
 # ---------------------------------------------------------
 # 4️⃣ DELETE FINE BY ID

@@ -7,6 +7,9 @@ import os
 import cloudinary
 import cloudinary.uploader
 
+# 🔔 Notification helpers
+from routes.notifications import send_notification_to_class, send_notification_to_all
+
 # --- Blueprint Setup ---
 notices_bp = Blueprint("notices_bp", __name__, url_prefix="/api/notices")
 CORS(notices_bp)
@@ -40,7 +43,7 @@ def add_notice():
         title = data.get("title")
         message = data.get("message")
         target = data.get("target", "all")          # student / mentor / all
-        target_class = data.get("targetClass")      # 👈 NEW (optional)
+        target_class = data.get("targetClass")      # optional
         sender = data.get("sender", "Admin")
 
         if not title or not message:
@@ -60,15 +63,31 @@ def add_notice():
             "title": title,
             "message": message,
             "target": target,
-            "targetClass": target_class,    # 👈 NEW
-            "imageUrl": image_url,          # 👈 NEW
+            "targetClass": target_class,
+            "imageUrl": image_url,
             "sender": sender,
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "readBy": []
         }
 
         notices_collection.insert_one(notice)
-        return jsonify({"success": True, "message": "Notice added successfully"}), 201
+
+        # 🔔 SEND NOTIFICATION
+        if target == "all":
+            send_notification_to_all(
+                title=f"📢 New Notice: {title}",
+                body=message,
+                url="/notices.html"
+            )
+        elif target_class:
+            send_notification_to_class(
+                class_name=target_class,
+                title=f"📢 New Notice: {title}",
+                body=message,
+                url="/notices.html"
+            )
+
+        return jsonify({"success": True, "message": "Notice added & notification sent"}), 201
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
@@ -84,8 +103,6 @@ def get_all_notices():
         enrollment = request.args.get("enrollment")
 
         student_class = None
-
-        # 🔹 student ki class backend se nikalegi
         if enrollment:
             student = students_collection.find_one(
                 {"enrollment": enrollment},
@@ -95,14 +112,10 @@ def get_all_notices():
                 student_class = student.get("class")
 
         query = {"$or": []}
-
-        # 🔹 old target logic (unchanged)
         if user_type != "all":
             query["$or"].append({"target": user_type})
-
         query["$or"].append({"target": "all"})
 
-        # 🔹 NEW class-wise filter
         if student_class:
             query["$or"].append({"targetClass": student_class})
             query["$or"].append({"targetClass": None})
@@ -110,7 +123,6 @@ def get_all_notices():
         notices = list(notices_collection.find(query, {"_id": 0}))
         notices.sort(key=lambda x: x["timestamp"], reverse=True)
 
-        # 🔹 unread flag
         if enrollment:
             for n in notices:
                 n["is_read"] = enrollment in n.get("readBy", [])
