@@ -47,19 +47,20 @@ async function loadNotices(){
   try{
     const enrollment = localStorage.getItem("enrollment");
     const studentClass = localStorage.getItem("studentClass");
-    const userType = getQS("userType") || "students";
 
-    document.getElementById("classInfo").innerHTML =
-      studentClass ? `<b>Class:</b> ${studentClass}` : "";
-
-    const res = await fetch(`${API_ROOT}/api/notices/get/${userType}`);
+    const res = await fetch(`${API_ROOT}/api/notices/get/students`);
     const data = await res.json();
 
     if(data.success){
       renderNotices(data.notices, enrollment, studentClass);
+    } else {
+      console.error("API success false");
     }
-  }catch(e){ console.error(e); }
+  }catch(err){
+    console.error("Notice load error:", err);
+  }
 }
+
 
 function renderNotices(list, enrollment, studentClass){
   const box = document.getElementById("notices");
