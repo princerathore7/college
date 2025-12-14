@@ -288,3 +288,22 @@ def send_web_notification(subscription, message, private_key):
         vapid_private_key=private_key,
         vapid_claims={"sub": "mailto:your-email@example.com"}
     )
+@notifications_bp.route('/api/subscribe', methods=['POST'])
+def subscribe():
+    data = request.json
+    enrollment = data.get('enrollment')  # frontend se enrollment pass karna zaruri
+    if not enrollment:
+        return jsonify({"success": False, "message": "Enrollment missing"}), 400
+
+    # subscription object
+    subscription = data.get('subscription') or data  # data me pura subscription object aa sakta hai
+
+    try:
+        tokens_col.update_one(
+            {'enrollment': enrollment},
+            {'$set': {'token': subscription}},
+            upsert=True
+        )
+        return jsonify({"success": True, "message": "Subscription saved"})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
