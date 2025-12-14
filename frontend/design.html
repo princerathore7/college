@@ -4,26 +4,126 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Post Event - Mentor Dashboard</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Roboto:wght@400;700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+
 <style>
-  body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background: #eef2f7; color: #333; }
-  header { background: #4a90e2; color: white; padding: 1rem 2rem; text-align: center; }
-  main { max-width: 900px; margin: 2rem auto; padding: 2rem; background: white; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
-  h1 { margin-top: 0; text-align:center; }
-  label { display: block; margin: 0.5rem 0 0.2rem 0; font-weight: 600; }
-  input[type="text"], input[type="date"], input[type="file"] { width: 100%; padding: 0.6rem; margin-bottom: 1rem; border-radius: 6px; border: 1px solid #ccc; }
-  #description { width: 100%; min-height: 180px; border: 1px solid #ccc; border-radius: 6px; padding: 0.5rem; overflow-y: auto; }
-  .toolbar { margin-bottom: 0.5rem; }
-  .toolbar button, .toolbar select, .toolbar input[type=color] { margin-right: 0.3rem; padding: 0.3rem 0.5rem; cursor:pointer; }
-  button#postEvent { background: #4a90e2; color: white; padding: 0.8rem 1.2rem; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; margin-top: 1rem; font-size: 16px; transition: 0.3s; }
-  button#postEvent:hover { background: #357ab8; }
-  .preview-img { display:block; max-width:150px; margin:10px 0; border-radius:8px; }
+  body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #eef2f7;
+    color: #333;
+  }
+
+  header {
+    background: #4a90e2;
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  header h1 {
+    margin: 0;
+    font-size: 1.4rem;
+  }
+
+  .manage-btn {
+    background: white;
+    color: #4a90e2;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .manage-btn:hover {
+    background: #e6eef9;
+    transform: translateY(-1px);
+  }
+
+  main {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  }
+
+  label {
+    display: block;
+    margin: 0.5rem 0 0.2rem 0;
+    font-weight: 600;
+  }
+
+  input[type="text"],
+  input[type="date"],
+  input[type="file"] {
+    width: 100%;
+    padding: 0.6rem;
+    margin-bottom: 1rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+
+  #description {
+    width: 100%;
+    min-height: 180px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 0.5rem;
+    overflow-y: auto;
+  }
+
+  .toolbar {
+    margin-bottom: 0.5rem;
+  }
+
+  .toolbar button,
+  .toolbar select,
+  .toolbar input[type=color] {
+    margin-right: 0.3rem;
+    padding: 0.3rem 0.5rem;
+    cursor: pointer;
+  }
+
+  button#postEvent {
+    background: #4a90e2;
+    color: white;
+    padding: 0.8rem 1.2rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    width: 100%;
+    margin-top: 1rem;
+    font-size: 16px;
+    transition: 0.3s;
+  }
+
+  button#postEvent:hover {
+    background: #357ab8;
+  }
+
+  .preview-img {
+    display: block;
+    max-width: 150px;
+    margin: 10px 0;
+    border-radius: 8px;
+  }
 </style>
 </head>
+
 <body>
 
 <header>
   <h1>Post New Event</h1>
+  <button class="manage-btn" onclick="goToManage()">Manage Events</button>
 </header>
 
 <main>
@@ -32,16 +132,18 @@
 
   <label for="image">Event Image:</label>
   <input type="file" id="imageFile" accept="image/*">
-  <img id="previewImage" class="preview-img" src="" alt="Preview" style="display:none;">
+  <img id="previewImage" class="preview-img" style="display:none;">
 
   <label for="date">Event Date:</label>
   <input type="date" id="date">
 
   <label for="description">Event Description:</label>
+
   <div class="toolbar">
     <button type="button" onclick="formatText('bold')"><b>B</b></button>
     <button type="button" onclick="formatText('italic')"><i>I</i></button>
     <button type="button" onclick="formatText('underline')"><u>U</u></button>
+
     <select onchange="changeFontSize(this.value)">
       <option value="">Font Size</option>
       <option value="1">Small</option>
@@ -49,6 +151,7 @@
       <option value="5">Large</option>
       <option value="7">Extra Large</option>
     </select>
+
     <select onchange="changeFont(this.value)">
       <option value="">Font Family</option>
       <option value="Inter">Inter</option>
@@ -57,9 +160,11 @@
       <option value="Arial">Arial</option>
       <option value="Times New Roman">Times New Roman</option>
     </select>
+
     <input type="color" onchange="changeColor(this.value)" title="Text color">
   </div>
-  <div id="description" contenteditable="true" placeholder="Type event description here..."></div>
+
+  <div id="description" contenteditable="true"></div>
 
   <button id="postEvent">Post Event</button>
 
@@ -68,7 +173,12 @@
   <div id="livePreview" style="border:1px solid #ccc; padding:10px; border-radius:6px;"></div>
 </main>
 
+
 <script>
+  function goToManage() {
+    window.location.href = "manage.html";
+  }
+
   /* ------------------ RICH TEXT EDITOR ------------------ */
   function formatText(cmd) { document.execCommand(cmd, false, null); }
   function changeFontSize(size) { document.execCommand("fontSize", false, size); }
