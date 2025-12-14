@@ -138,18 +138,36 @@ el("addNotice").onclick = async ()=>{
     targetClass = `${year} ${branch}${section}`.trim();
   }
 
-  const fd = new FormData();
-  fd.append("title", title);
-  fd.append("message", message);
-  fd.append("target", el("target").value);
-  fd.append("targetClass", targetClass);
-  fd.append("sender", "Admin");
+  // 🔹 Prepare request payload for backend
+  const payload = {
+    title,
+    body: message,
+    target: el("target").value,      // student / mentor / all
+    class: targetClass || undefined, // 🔹 backend expects 'class' not 'targetClass'
+    sender: "Admin"
+  };
 
-  if(el("image").files[0]) fd.append("image", el("image").files[0]);
+  // 🔹 If image is present, use FormData; else JSON
+  let fetchOptions = {};
+  if(el("image").files[0]){
+    const fd = new FormData();
+    fd.append("title", title);
+    fd.append("message", message);
+    fd.append("target", el("target").value);
+    if(targetClass) fd.append("targetClass", targetClass); // optional for image
+    fd.append("sender", "Admin");
+    fd.append("image", el("image").files[0]);
+    fetchOptions = { method: "POST", body: fd };
+  } else {
+    fetchOptions = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    };
+  }
 
   el("processing").style.display = "block";
-
-  const res = await fetch(API, { method: "POST", body: fd });
+  const res = await fetch(API, fetchOptions);
   const data = await res.json();
   el("processing").style.display = "none";
 
@@ -162,5 +180,6 @@ el("addNotice").onclick = async ()=>{
 
 window.onload = loadNotices;
 </script>
+
 </body>
 </html>
