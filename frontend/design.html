@@ -173,7 +173,6 @@
   <div id="livePreview" style="border:1px solid #ccc; padding:10px; border-radius:6px;"></div>
 </main>
 
-
 <script>
   function goToManage() {
     window.location.href = "manage.html";
@@ -200,7 +199,7 @@
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", "events_photos"); // Your unsigned preset
+    formData.append("upload_preset", "events_photos");
 
     try {
       const res = await fetch("https://api.cloudinary.com/v1_1/deqqkiovg/image/upload", {
@@ -271,7 +270,8 @@
     };
 
     try {
-      const res = await fetch("https://college-hwbb.onrender.com/api/events", { // Use localhost for testing
+      /* 1️⃣ POST EVENT */
+      const res = await fetch("https://college-hwbb.onrender.com/api/events", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -281,9 +281,21 @@
       console.log("Event post response:", data);
 
       if (res.ok && data.success) {
+
+        /* 2️⃣ FIRE NOTIFICATION (EXTRA CALL) */
+        fetch("https://college-hwbb.onrender.com/api/notify/events", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: "🎉 New Event Posted!",
+            body: title + " — Tap to view details",
+            url: "/events.html"
+          })
+        }).catch(err => console.error("Notification error:", err));
+
         alert("Event posted successfully!");
 
-        // Reset form
+        /* 3️⃣ RESET FORM */
         titleInput.value = "";
         dateInput.value = "";
         descInput.innerHTML = "";
@@ -292,6 +304,7 @@
         uploadedImageUrl = "";
 
         updatePreview();
+
       } else {
         alert(data.message || "Failed to post event");
       }
