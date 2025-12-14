@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from db import db
 from utils import generate_id
 from flask_cors import cross_origin, CORS
+from datetime import datetime
 
 # 🔔 Notification helper
 from routes.notifications import send_global
@@ -60,7 +61,7 @@ def post_event():
         "description": data["description"].strip(),
         "date": data.get("date", "").strip(),
         "image": data["image"].strip(),
-        "createdAt": datetime.now()
+        "createdAt": datetime.now().isoformat()
     }
 
     try:

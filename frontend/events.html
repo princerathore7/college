@@ -189,7 +189,49 @@ async function loadEvents() {
   }
 }
 
+
+/* 🔔 NOTIFICATION PERMISSION (Every 5 Days) */
+function requestNotificationPermissionIfNeeded() {
+  if (!("Notification" in window)) {
+    console.log("Browser does not support notifications");
+    return;
+  }
+
+  // Already allowed → kuch nahi
+  if (Notification.permission === "granted") {
+    console.log("Notification already granted");
+    return;
+  }
+
+  const LAST_ASK_KEY = "event_notification_last_ask";
+  const FIVE_DAYS = 5 * 24 * 60 * 60 * 1000;
+
+  const lastAsk = localStorage.getItem(LAST_ASK_KEY);
+  const now = Date.now();
+
+  if (!lastAsk || (now - Number(lastAsk)) > FIVE_DAYS) {
+    Notification.requestPermission().then(permission => {
+      localStorage.setItem(LAST_ASK_KEY, now.toString());
+
+      if (permission === "granted") {
+        console.log("Notification permission granted");
+
+        // Optional welcome notification
+        new Notification("🎉 Notifications Enabled!", {
+          body: "You will now receive updates about new events.",
+          icon: "logo.jpg"
+        });
+      } else {
+        console.log("Notification permission denied");
+      }
+    });
+  } else {
+    console.log("Notification prompt skipped (asked recently)");
+  }
+} 
+requestNotificationPermissionIfNeeded();
 loadEvents();
+
 </script>
 
 </body>
