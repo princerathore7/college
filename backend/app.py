@@ -67,6 +67,8 @@ cloudinary.config(
     api_secret=os.getenv("CLOUDINARY_API_SECRET"),
     secure=True
 )
+VAPID_PRIVATE_KEY = os.getenv("VAPID_PRIVATE_KEY")
+VAPID_PUBLIC_KEY = os.getenv("VAPID_PUBLIC_KEY")
 
 # ---------------------------------------------
 # REGISTER BLUEPRINTS
@@ -280,6 +282,13 @@ def get_students_by_classname(classname):
         return jsonify({"success": True, "students": students}), 200
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+@app.route("/send-notification", methods=["POST"])
+def send_notification():
+    data = request.json
+    subscription = data["subscription"]
+    message = data["message"]
+    send_web_notification(subscription, message, VAPID_PRIVATE_KEY)
+    return {"success": True}
 
 # ---------------------------------------------
 # MAIN ENTRY POINT

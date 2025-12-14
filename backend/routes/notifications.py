@@ -4,7 +4,7 @@ import firebase_admin
 from firebase_admin import credentials, messaging
 from datetime import datetime
 import os, json
-
+from pywebpush import webpush
 notifications_bp = Blueprint('notifications', __name__)
 
 # -------------------- DATABASE SETUP --------------------
@@ -280,4 +280,11 @@ def send_notification_to_class(class_name, title, body, url="/"):
         title=title,
         body=body,
         url=url
+    )
+def send_web_notification(subscription, message, private_key):
+    webpush(
+        subscription_info=subscription,
+        data=message,
+        vapid_private_key=private_key,
+        vapid_claims={"sub": "mailto:your-email@example.com"}
     )
