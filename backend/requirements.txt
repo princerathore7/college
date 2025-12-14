@@ -9,4 +9,4 @@ cloudinary==1.44.1
 requests==2.32.5
 gunicorn==21.2.0
 firebase-admin==7.1.0
-pywebpush==1.15.1
+pywebpush==2.1.2
