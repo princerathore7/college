@@ -5,3 +5,7 @@ python-dotenv==1.2.1
 gunicorn==21.2.0
 mongoengine==0.29.1
 cloudinary==1.44.1
+requests==2.32.5
+pywebpush==1.15.1
+reportlab==4.4.6
+firebase-admin==7.1.0
