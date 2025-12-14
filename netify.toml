@@ -1,0 +1,4 @@
+[[headers]]
+for = "/service-worker.js"
+  [headers.values]
+  Cache-Control = "no-store"

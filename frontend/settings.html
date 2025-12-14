@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Notification Settings</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<style>
+  body{
+    font-family: Inter, system-ui, sans-serif;
+    background:#f5f6fc;
+    padding:20px;
+  }
+  .card{
+    max-width:420px;
+    margin:40px auto;
+    background:#fff;
+    padding:22px;
+    border-radius:14px;
+    box-shadow:0 10px 30px rgba(0,0,0,.08);
+  }
+  h2{
+    margin-top:0;
+    margin-bottom:10px;
+  }
+  p{
+    color:#555;
+    font-size:14px;
+  }
+  .switch-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:25px;
+  }
+  .switch{
+    width:46px;
+    height:26px;
+    position:relative;
+  }
+  .switch input{ display:none; }
+  .slider{
+    position:absolute;
+    inset:0;
+    background:#ccc;
+    border-radius:30px;
+    cursor:pointer;
+    transition:.3s;
+  }
+  .slider:before{
+    content:"";
+    position:absolute;
+    width:20px;
+    height:20px;
+    left:3px;
+    top:3px;
+    background:#fff;
+    border-radius:50%;
+    transition:.3s;
+  }
+  input:checked + .slider{
+    background:#4f46e5;
+  }
+  input:checked + .slider:before{
+    transform:translateX(20px);
+  }
+  .status{
+    margin-top:15px;
+    font-size:14px;
+  }
+  .back{
+    margin-top:25px;
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    background:#eef0ff;
+    font-size:15px;
+    cursor:pointer;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h2>🔔 Notification Settings</h2>
+  <p>Turn notifications ON or OFF for this device.</p>
+
+  <div class="switch-row">
+    <span>Enable Notifications</span>
+    <label class="switch">
+      <input type="checkbox" id="notifySwitch">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div class="status" id="statusText"></div>
+
+  <button class="back" onclick="history.back()">⬅ Back</button>
+</div>
+
+<script>
+const PUBLIC_VAPID_KEY = "PASTE_YOUR_PUBLIC_VAPID_KEY_HERE";
+
+/* ---------- Utils ---------- */
+function urlBase64ToUint8Array(base64String) {
+  const padding = "=".repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/-/g, "+")
+    .replace(/_/g, "/");
+  return new Uint8Array([...atob(base64)].map(c => c.charCodeAt(0)));
+}
+
+/* ---------- Elements ---------- */
+const notifySwitch = document.getElementById("notifySwitch");
+const statusText = document.getElementById("statusText");
+
+/* ---------- Load state ---------- */
+document.addEventListener("DOMContentLoaded", async () => {
+
+  if (!("serviceWorker" in navigator)) {
+    statusText.textContent = "❌ Service Worker not supported";
+    notifySwitch.disabled = true;
+    return;
+  }
+
+  const reg = await navigator.serviceWorker.getRegistration();
+  if (!reg) {
+    statusText.textContent = "❌ Service Worker not registered";
+    notifySwitch.disabled = true;
+    return;
+  }
+
+  const sub = await reg.pushManager.getSubscription();
+  notifySwitch.checked = !!sub;
+
+  statusText.textContent = sub
+    ? "✅ Notifications are enabled"
+    : "🔕 Notifications are disabled";
+});
+
+/* ---------- Switch handler ---------- */
+notifySwitch.addEventListener("change", async () => {
+  if (notifySwitch.checked) {
+    await enableNotifications();
+  } else {
+    await disableNotifications();
+  }
+});
+
+/* ---------- ENABLE ---------- */
+async function enableNotifications() {
+
+  if (Notification.permission === "denied") {
+    alert(
+      "Notifications are blocked.\n\n" +
+      "Please allow them from:\n" +
+      "Browser Settings → Site Settings → Notifications"
+    );
+    notifySwitch.checked = false;
+    return;
+  }
+
+  const permission = await Notification.requestPermission();
+  if (permission !== "granted") {
+    notifySwitch.checked = false;
+    return;
+  }
+
+  const reg = await navigator.serviceWorker.ready;
+
+  let sub = await reg.pushManager.getSubscription();
+  if (!sub) {
+    sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY)
+    });
+  }
+
+  statusText.textContent = "✅ Notifications enabled";
+  console.log("Subscribed:", sub);
+}
+
+/* ---------- DISABLE ---------- */
+async function disableNotifications() {
+  const reg = await navigator.serviceWorker.ready;
+  const sub = await reg.pushManager.getSubscription();
+
+  if (sub) await sub.unsubscribe();
+
+  statusText.textContent = "🔕 Notifications disabled";
+  console.log("Unsubscribed");
+}
+</script>
+
+</body>
+</html>

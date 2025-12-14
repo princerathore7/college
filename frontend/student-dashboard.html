@@ -434,7 +434,7 @@ input:checked + .slider:before {
 <a href="notice-read.html?userType=students">
   📰 Notices <span class="notice-badge">0</span>
 </a>
-
+<a href="settings.html">⚙️settings</a>
   <a href="rules.html">📘 Rules</a>
   <a href="bus-view.html">🚌 Bus</a>
   <a href="fees.html">💰 Fees</a>
@@ -1041,6 +1041,7 @@ async function disableNotifications() {
     console.error("Disable notifications failed:", err);
   }
 }
+
 document.addEventListener("DOMContentLoaded", async () => {
   if (!("serviceWorker" in navigator)) return;
 
