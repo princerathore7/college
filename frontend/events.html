@@ -5,131 +5,143 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Exciting Upcoming Events - Student Portal</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-  <style>
+<style>
     body {
-      font-family: 'Inter', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #0d0d0d;
-      color: #fff;
+        margin: 0;
+        font-family: "Poppins", "Inter", sans-serif;
+        background: #f4f6f9;
+        color: #333;
     }
-    header {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      background: #111;
-      padding: 1rem 2rem;
-      box-shadow: 0 4px 10px rgba(255,215,0,0.2);
-    }
-    header img {
-      height: 50px;
-      object-fit: contain;
-    }
-    header h1 {
-      margin: 0;
-      font-weight: 800;
-      font-size: 1.8rem;
-      color: #FFD700;
-    }
-    button.back-btn {
-      display: block;
-      margin: 1rem auto;
-      padding: 0.5rem 1.2rem;
-      background: #FFD700;
-      color: #111;
-      font-weight: 600;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: transform 0.2s ease, background 0.2s ease;
-    }
-    button.back-btn:hover {
-      transform: translateY(-3px);
-      background: #e6c200;
-    }
-    main {
-      max-width: 1200px;
-      margin: 1rem auto 3rem;
-      padding: 0 1rem;
-    }
-    /* Loading animation */
-    .loader {
-      border: 6px solid #f3f3f3;
-      border-top: 6px solid #FFD700;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      animation: spin 1s linear infinite;
-      margin: 4rem auto;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    .events-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1.5rem;
-    }
-    .event-card {
-      background: #1a1a1a;
-      border-radius: 12px;
-      overflow: hidden;
-      cursor: pointer;
-      box-shadow: 0 4px 15px rgba(255,215,0,0.2);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      display: flex;
-      flex-direction: column;
-    }
-    .event-card:hover {
-      transform: translateY(-10px) scale(1.03);
-      box-shadow: 0 10px 25px rgba(255,215,0,0.5);
-    }
-    .event-card img {
-      width: 100%;
-      height: 180px;
-      object-fit: cover;
-      transition: transform 0.3s ease;
-    }
-    .event-card:hover img {
-      transform: scale(1.05);
-    }
-    .event-card h3 {
-      margin: 0.8rem 1rem 0.3rem 1rem;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: #FFD700;
-      text-align: center;
-    }
-    .event-card p {
-      margin: 0 1rem 1rem 1rem;
-      font-size: 0.95rem;
-      color: #FFD700AA;
-      text-align: center;
-    }
-    .no-events {
-      text-align: center;
-      color: #888;
-      margin-top: 3rem;
-      font-size: 1.1rem;
+/* TOP BAR */
+header {
+    background: #99d3ffa1;
+    color: #003366;
+    padding: 14px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    border-bottom: 3px solid #003366;
+}
+
+header img {
+    height: 60px;
+    width: auto;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 600;
+}
+
+
+    /* BACK BUTTON */
+    .back-btn {
+        margin: 18px auto 0;
+        display: block;
+        padding: 10px 18px;
+        background: #003366;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 15px;
+        cursor: pointer;
+        transition: background 0.2s ease;
     }
 
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      header {
-        flex-direction: column;
-        text-align: center;
-        gap: 0.5rem;
-      }
-      header img {
-        height: 40px;
-      }
-      .event-card img {
-        height: 150px;
-      }
+    .back-btn:hover {
+        background: #0057ad;
     }
-  </style>
+
+    main {
+        max-width: 1200px;
+        margin: 25px auto;
+        padding: 0 15px;
+    }
+
+    /* LOADER */
+    .loader {
+        border: 5px solid #ddd;
+        border-top: 5px solid #003366;
+        border-radius: 50%;
+        width: 55px;
+        height: 55px;
+        animation: spin 1s linear infinite;
+        margin: 60px auto;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* EVENTS GRID */
+    .events-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 18px;
+    }
+
+    .event-card {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .event-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    }
+
+    .event-card img {
+        width: 100%;
+        height: 170px;
+        object-fit: cover;
+    }
+
+    .event-card h3 {
+        margin: 12px 10px 6px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-align: center;
+        color: #003366;
+    }
+
+    .event-card p {
+        margin: 0 10px 14px;
+        font-size: 0.9rem;
+        text-align: center;
+        color: #555;
+    }
+
+    .no-events {
+        text-align: center;
+        color: #777;
+        margin-top: 40px;
+        font-size: 1rem;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+        header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        header img {
+            height: 50px;
+        }
+
+        header h1 {
+            font-size: 1.4rem;
+        }
+    }
+</style>
+
+
 </head>
 <body>
 
