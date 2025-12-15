@@ -1059,7 +1059,26 @@ if ("serviceWorker" in navigator) {
       });
   });
 }
+function logout() {
+  // 🔴 Clear all student related data
+  localStorage.removeItem("enrollment");
+  localStorage.removeItem("studentProfile");
+  localStorage.removeItem("studentAttendance");
+  localStorage.removeItem("studentAssignments");
+  localStorage.removeItem("studentExams");
+  localStorage.removeItem("studentEvents");
+  localStorage.removeItem("studentNotices");
+  localStorage.removeItem("studentClass");
 
+  // Optional: notification preference
+  localStorage.removeItem("notificationsEnabled");
+
+  // (Optional) Clear everything if you want full reset
+  // localStorage.clear();
+
+  // 🔁 Redirect to login page
+  window.location.href = "student-login.html";
+}
 </script>
 </body>
 </html>
