@@ -174,14 +174,15 @@
 </main>
 
 <script>
-  /* ===============================
+/* ===============================
    ACCESS CONTROL — ADMIN PANEL
 ================================ */
 
-const mentorId = localStorage.getItem("mentorId");
-const fromAdmin = sessionStorage.getItem("accessSource");
+const mentorId   = localStorage.getItem("mentorId");
+const fromAdmin  = sessionStorage.getItem("accessSource");
 
-if(!mentorId || fromAdmin !== "yes"){
+// ✔ Only allow if opened from admin panel
+if(!mentorId || fromAdmin !== "ad"){
   document.body.innerHTML = `
     <h2 style="text-align:center;margin-top:20vh;color:red">
       ❌ Access Denied <br>
@@ -190,10 +191,6 @@ if(!mentorId || fromAdmin !== "yes"){
   `;
   throw new Error("Unauthorized access");
 }
-
-  function goToManage() {
-    window.location.href = "manage.html";
-  }
 
   /* ------------------ RICH TEXT EDITOR ------------------ */
   function formatText(cmd) { document.execCommand(cmd, false, null); }
