@@ -25,14 +25,14 @@ a { display: block; text-align: center; margin-top: 20px; }
 </div>
 
 <script>
-    /* ===============================
-   ACCESS CONTROL — ADMIN PANEL
+/* ===============================
+   ACCESS CONTROL — BUS ROUTE PAGE
 ================================ */
 
 const mentorId = localStorage.getItem("mentorId");
-const fromAdmin = sessionStorage.getItem("fromAdminPanel");
+const source   = sessionStorage.getItem("accessSource"); // set by admin.html
 
-if(!mentorId || fromAdmin !== "yes"){
+if (!mentorId || source !== "ad") {
   document.body.innerHTML = `
     <h2 style="text-align:center;margin-top:20vh;color:red">
       ❌ Access Denied <br>
