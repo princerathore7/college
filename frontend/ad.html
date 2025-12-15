@@ -85,45 +85,40 @@
 
 <script>
 /* ================================
-   ACCESS CONTROL (ADMIN / MENTOR)
+   ACCESS CONTROL (MENTOR ONLY)
 ================================ */
 
-const role = localStorage.getItem("role");        // admin | mentor
-const secret = localStorage.getItem("secretKey"); // mentor secret
+// Mentor ID check from localStorage
+const mentorId = localStorage.getItem("mentorId");
 
-// ❌ Student ya koi aur
-if(!role || (role !== "admin" && role !== "mentor")){
+// ❌ If no mentorId, block access
+if(!mentorId){
   document.body.innerHTML = `
     <h2 style="text-align:center;margin-top:20vh;color:red;">
-      ❌ Sorry, you are not allowed to access this page
+      ❌ Unauthorized access. Only mentors can view this page.
     </h2>
   `;
-  throw new Error("Access Denied");
-}
-
-// ❌ Mentor but without secret
-if(role === "mentor" && secret !== "MENTOR_ACCESS_2025"){
-  document.body.innerHTML = `
-    <h2 style="text-align:center;margin-top:20vh;color:red;">
-      ❌ Unauthorized mentor access
-    </h2>
-  `;
-  throw new Error("Invalid Mentor Key");
+  throw new Error("Access Denied: Mentor only");
 }
 
 /* ================================
-   REDIRECTION BUTTONS ONLY
+   REDIRECTION BUTTONS
 ================================ */
 
+// Select all navigation buttons and iframe
 const buttons = document.querySelectorAll('.nav button');
 const iframe = document.getElementById('contentFrame');
 
 buttons.forEach(btn => {
   btn.addEventListener('click', () => {
 
+    // Remove active class from all buttons
     buttons.forEach(b => b.classList.remove('active'));
+
+    // Add active to current button
     btn.classList.add('active');
 
+    // Load the page inside iframe
     iframe.src = btn.dataset.page;
     iframe.style.display = "block";
   });
@@ -132,15 +127,18 @@ buttons.forEach(btn => {
 /* ================================
    LOGOUT
 ================================ */
-
-document.getElementById('logoutBtn').addEventListener('click', () => {
-  if(confirm("Logout?")){
-    localStorage.clear();
-    sessionStorage.clear();
-    window.location.href = "/login";
-  }
-});
+const logoutBtn = document.getElementById('logoutBtn');
+if(logoutBtn){
+  logoutBtn.addEventListener('click', () => {
+    if(confirm("Logout?")){
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = "/login.html";
+    }
+  });
+}
 </script>
+
 
 </body>
 </html>
