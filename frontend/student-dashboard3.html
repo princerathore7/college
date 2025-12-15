@@ -489,21 +489,21 @@ h1 {
   </div>
 
 <!-- Timetable Section -->
-<body onload="loadTimetable()">
+<!-- <body onload="loadTimetable()">
   <div class="wrapper">
     <h1>📅 Class Timetable</h1>
     <div id="timetableContainer" class="timetable-container">
-      <!-- Timetable will load here -->
+      Timetable will load here
     </div>
   </div>
-</body>
+</body> -->
 
 
-  <div class="container">
+  <!-- <div class="container">
     <h2>📘 Class Timetable</h2>
     <div id="timetableContainer"></div>
     <a href="events.html" class="back-btn">⬅ Back</a>
-  </div>
+  </div> -->
 
       </thead>
       <tbody></tbody>
@@ -842,47 +842,47 @@ const API_BASE = "https://college-hwbb.onrender.com/api/timetables";
     { day: 'Monday', period: '1', subject: 'DBMS', room: '101' },
     { day: 'Monday', period: '2', subject: 'Maths', room: '102' },
   ];
-// 🔹 Load timetable automatically when page opens
-async function loadTimetable() {
-  // Get class name from localStorage or prompt user once
-  let className = localStorage.getItem("studentClass");
-  if (!className) {
-    className = prompt("Enter your class (e.g., 1A, 2B, 10C):");
-    if (!className) return alert("Class not specified!");
-    localStorage.setItem("studentClass", className.trim());
-  }
+// // 🔹 Load timetable automatically when page opens
+// async function loadTimetable() {
+//   // Get class name from localStorage or prompt user once
+//   let className = localStorage.getItem("studentClass");
+//   if (!className) {
+//     className = prompt("Enter your class (e.g., 1A, 2B, 10C):");
+//     if (!className) return alert("Class not specified!");
+//     localStorage.setItem("studentClass", className.trim());
+//   }
 
-  const container = document.getElementById("timetableContainer");
-  container.innerHTML = "<p>⏳ Fetching timetable...</p>";
+//   const container = document.getElementById("timetableContainer");
+//   container.innerHTML = "<p>⏳ Fetching timetable...</p>";
 
-  try {
-    const res = await fetch(`${API_BASE}?class=${encodeURIComponent(className)}`);
-    const data = await res.json();
+//   try {
+//     const res = await fetch(`${API_BASE}?class=${encodeURIComponent(className)}`);
+//     const data = await res.json();
 
-    if (!data.success || !data.timetables || data.timetables.length === 0) {
-      container.innerHTML = `
-        <div class="no-data">
-          <p>No timetable uploaded yet for <strong>${className}</strong>.</p>
-        </div>`;
-      return;
-    }
+//     if (!data.success || !data.timetables || data.timetables.length === 0) {
+//       container.innerHTML = `
+//         <div class="no-data">
+//           <p>No timetable uploaded yet for <strong>${className}</strong>.</p>
+//         </div>`;
+//       return;
+//     }
 
-    // Pick latest timetable (last uploaded)
-    const latest = data.timetables[data.timetables.length - 1];
-    const fileUrl = `${API_BASE}/${latest.timetableId}/file`;
+//     // Pick latest timetable (last uploaded)
+//     const latest = data.timetables[data.timetables.length - 1];
+//     const fileUrl = `${API_BASE}/${latest.timetableId}/file`;
 
-    container.innerHTML = `
-      <div class="timetable-card">
-        <h3>📘 Class: ${latest.class}</h3>
-        <p class="meta">Uploaded on: ${new Date(latest.uploadedAt).toLocaleString()}</p>
-        <iframe src="${fileUrl}" class="pdf-frame" allowfullscreen></iframe>
-      </div>
-    `;
-  } catch (err) {
-    console.error("Error loading timetable:", err);
-    container.innerHTML = `<p style="color:red;">❌ Failed to load timetable. Check console.</p>`;
-  }
-}
+//     container.innerHTML = `
+//       <div class="timetable-card">
+//         <h3>📘 Class: ${latest.class}</h3>
+//         <p class="meta">Uploaded on: ${new Date(latest.uploadedAt).toLocaleString()}</p>
+//         <iframe src="${fileUrl}" class="pdf-frame" allowfullscreen></iframe>
+//       </div>
+//     `;
+//   } catch (err) {
+//     console.error("Error loading timetable:", err);
+//     container.innerHTML = `<p style="color:red;">❌ Failed to load timetable. Check console.</p>`;
+//   }
+// }
   // 🔹 Login success helper
   function onStudentLoginSuccess(enrollment) {
     localStorage.setItem("enrollment", enrollment);
