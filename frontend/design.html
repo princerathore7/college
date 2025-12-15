@@ -179,7 +179,7 @@
 ================================ */
 
 const mentorId = localStorage.getItem("mentorId");
-const fromAdmin = sessionStorage.getItem("fromAdminPanel");
+const fromAdmin = sessionStorage.getItem("accessSource");
 
 if(!mentorId || fromAdmin !== "yes"){
   document.body.innerHTML = `
