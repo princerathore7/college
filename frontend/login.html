@@ -248,7 +248,7 @@ form.addEventListener("submit", async (e) => {
 
       /* ---- MENTOR (FIXED) ---- */
       if(role === "mentor"){
-        localStorage.setItem("mentorId", data.mentorId);
+        localStorage.setItem("mentorId", data.mentor.mentorId);
         localStorage.setItem("mentorName", data.mentor.name || "Mentor");
         localStorage.setItem("role", "mentor");
         window.location.href = "mentor-dashboard.html";
