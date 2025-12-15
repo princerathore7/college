@@ -57,24 +57,23 @@
     <div class="grid">
       <aside>
         <nav class="nav">
-          <button data-page="admin-students.html">🎓 Students</button>
-          <button data-page="admin-marks.html">📊 Marks</button>
-          <button data-page="exam-ring.html">🧾 Exams</button>
-          <button data-page="bus-route.html">🚌 Bus Route Editing</button>
-          <button data-page="bus-view.html">🚌 Bus Current PDF</button>
-          <button data-page="admin-salary.html">💰 Salary</button>
-          <button data-page="pending.html">💰 Fees Pending</button>
-          <button data-page="fees.html">💰 Check Fees Dues</button>
-          <button data-page="time-table.html">📅 Timetable</button>
-          <button data-page="notice.html">📢 Notices</button>
-          <button data-page="manage.html">⚙️ Delete an Event</button>
-          <button data-page="design.html">🎶 Post an Event</button>
-          <button data-page="admin.html">💯 Manage Attendance & Marks</button>
-          <button data-page="admin-uniform.html">👨‍💼 Uniform Requests</button>
-          <button data-page="notes-post.html">📑 Post Notes</button>
-          <button data-page="notes-view.html">📑 View Notes</button>
-        </nav>
-      </aside>
+  <button data-page="/bibfewuicigehgewgegwgeadministrationstudentsxyzzxy">🎓 Students</button>
+  <button data-page="/bfewfebewfbewbadmin-marks">📊 Marks</button>
+  <button data-page="/wqbdbqwbdbfvgkevchuwihdeuieadministrationsdeexam-ringsxyzzxy">🧾 Exams</button>
+  <button data-page="/ehiuheigewuhdewdhadministrationstudentbusroutesxyzzxy">🚌 Bus Route Editing</button>
+  <button data-page="/buiedeguideuiegadministrationsdesignsxyzzxy">🚌 Bus Current PDF</button>
+  <button data-page="/ewfgefgfudgebewuffadminsallaryxyzabc">💰 Salary</button>
+  <button data-page="/929u29192u198uihdwqdbdadministrationsdeesallrysxyzzxy">💰 Fees Pending</button>
+  <button data-page="/ewuhewbbewubewbeadmin-fine">💰 Check Fees Dues</button>
+  <button data-page="/fghlwegfuhbcdkbfrufckjbfufgewufdbcadministration-pannelxyzabc">📅 Timetable</button>
+  <button data-page="/nisjfewibfasdvkfdhasiucbdschsbdcbdscshdcbdb">📢 Notices</button>
+  <button data-page="/hsdbibdjvbsdkbdsbskkdsnd3h3u09adibdscbkhdbcreid">⚙️ Delete an Event</button>
+  <button data-page="/buiedeguideuiegadministrationsdesignsxyzzxy">🎶 Post an Event</button>
+  <button data-page="/bebwfbewhfbeubuewdueadminxyzzxy">💯 Attendance & Marks</button>
+  <button data-page="/dsuivchdsivbidvbidndshkcsdocxcbouvxznsaicnisn">📑 Post Notes</button>
+  <button data-page="/dvoidsnvnsdljvndjvhdsbivgfdvguifgvugguun">📑 View Notes</button>
+</nav>
+
 
       <main>
         <h2>Welcome to Administration Panel</h2>
@@ -84,24 +83,64 @@
     </div>
   </div>
 
-  <script>
-    const buttons = document.querySelectorAll('.nav button');
-    const iframe = document.getElementById('contentFrame');
+<script>
+/* ================================
+   ACCESS CONTROL (ADMIN / MENTOR)
+================================ */
 
-    buttons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        buttons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+const role = localStorage.getItem("role");        // admin | mentor
+const secret = localStorage.getItem("secretKey"); // mentor secret
 
-        const page = btn.getAttribute('data-page');
-        iframe.src = page;
-        iframe.style.display = "block";
-      });
-    });
+// ❌ Student ya koi aur
+if(!role || (role !== "admin" && role !== "mentor")){
+  document.body.innerHTML = `
+    <h2 style="text-align:center;margin-top:20vh;color:red;">
+      ❌ Sorry, you are not allowed to access this page
+    </h2>
+  `;
+  throw new Error("Access Denied");
+}
 
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-      if(confirm('Logout?')) alert('Logged out (demo)');
-    });
-  </script>
+// ❌ Mentor but without secret
+if(role === "mentor" && secret !== "MENTOR_ACCESS_2025"){
+  document.body.innerHTML = `
+    <h2 style="text-align:center;margin-top:20vh;color:red;">
+      ❌ Unauthorized mentor access
+    </h2>
+  `;
+  throw new Error("Invalid Mentor Key");
+}
+
+/* ================================
+   REDIRECTION BUTTONS ONLY
+================================ */
+
+const buttons = document.querySelectorAll('.nav button');
+const iframe = document.getElementById('contentFrame');
+
+buttons.forEach(btn => {
+  btn.addEventListener('click', () => {
+
+    buttons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    iframe.src = btn.dataset.page;
+    iframe.style.display = "block";
+  });
+});
+
+/* ================================
+   LOGOUT
+================================ */
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  if(confirm("Logout?")){
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.href = "/login";
+  }
+});
+</script>
+
 </body>
 </html>
