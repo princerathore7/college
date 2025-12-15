@@ -23,6 +23,7 @@ header{
   background:var(--card);
   padding:12px 20px;
   border-bottom:1px solid #e6e9f2;
+  z-index:2;
 }
 header h1{margin:0;font-size:20px}
 header button{
@@ -67,21 +68,43 @@ aside{
 
 main{
   padding:20px;
-  overflow:auto;
 }
 
-iframe{
-  width:100%;
-  height:80vh;
-  border:none;
-  border-radius:10px;
-  box-shadow:0 4px 10px rgba(0,0,0,.1);
+/* ======================
+   FULL SCREEN OVERLAY
+====================== */
+
+.overlay{
+  position:fixed;
+  inset:0;
+  background:#fff;
+  z-index:999;
   display:none;
+  flex-direction:column;
 }
 
-@media(max-width:900px){
-  .grid{grid-template-columns:1fr}
-  aside{border-right:0;border-bottom:1px solid #e6e9f2}
+.overlay-header{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px 16px;
+  background:var(--card);
+  border-bottom:1px solid #e6e9f2;
+}
+
+.overlay-header button{
+  background:#eee;
+  border:0;
+  padding:8px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.overlay iframe{
+  flex:1;
+  width:100%;
+  border:none;
 }
 </style>
 </head>
@@ -95,119 +118,98 @@ iframe{
 </header>
 
 <div class="grid">
-  <aside>
-    <nav class="nav">
+<aside>
+<nav class="nav">
 
-      <button data-page="/admin-students.html">
-        🎓 Student Management
-      </button>
+  <button data-page="/admin-students.html">🎓 Student Management</button>
+  <button data-page="/admin-marks.html">📊 Marks & Results</button>
+  <button data-page="/exam-ring.html">📝 Examination Setup</button>
+  <button data-page="/bus-route.html">🚌 Transport / Bus Routes</button>
+  <button data-page="/admin.html">🧑‍🏫 Attendance & Class Control</button>
+  <button data-page="/admin-salary.html">💰 Staff Salary</button>
+  <button data-page="/pending.html">⏳ Pending Fees</button>
+  <button data-page="/admin-fine.html">💳 Fees & Dues</button>
+  <button data-page="/notice.html">📢 Notice Board</button>
+  <button data-page="/manage.html">⚙️ System Management</button>
+  <button data-page="/design.html">🎉 Post New Event</button>
+  <button data-page="/notes-post.html">📚 Upload Study Notes</button>
 
-      <button data-page="/admin-marks.html">
-        📊 Marks & Results
-      </button>
-
-      <button data-page="/exam-ring.html">
-        📝 Examination Setup
-      </button>
-
-      <button data-page="/bus-route.html">
-        🚌 Transport / Bus Routes
-      </button>
-
-      <button data-page="/admin.html">
-        🧑‍🏫 Attendance & Class Control
-      </button>
-
-      <button data-page="/admin-salary.html">
-        💰 Staff Salary
-      </button>
-
-      <button data-page="/pending.html">
-        ⏳ Pending Fees
-      </button>
-
-      <button data-page="/admin-fine.html">
-        💳 Fees & Dues
-      </button>
-
-      <button data-page="/notice.html">
-        📢 Notice Board
-      </button>
-
-      <button data-page="/manage.html">
-        ⚙️ System Management
-      </button>
-
-      <button data-page="/design.html">
-        🎉 Post New Event
-      </button>
-
-      <button data-page="/notes-post.html">
-        📚 Upload Study Notes
-      </button>
-
-    </nav>
-  </aside>
-</div>
-
+</nav>
+</aside>
 
 <main>
   <h2>Welcome</h2>
-  <p>Select an option from sidebar</p>
-  <iframe id="contentFrame"></iframe>
+  <p>Select an option from the sidebar</p>
 </main>
 </div>
+</div>
+
+<!-- ======================
+     FULL SCREEN CONTAINER
+====================== -->
+
+<div class="overlay" id="pageOverlay">
+  <div class="overlay-header">
+    <button id="backBtn">⬅ Back</button>
+    <strong id="pageTitle">Administration</strong>
+  </div>
+  <iframe id="overlayFrame"></iframe>
 </div>
 
 <script>
 /* ===============================
    ACCESS CONTROL — MENTOR ONLY
 ================================ */
-
 const mentorId = localStorage.getItem("mentorId");
 if(!mentorId){
   document.body.innerHTML = `
     <h2 style="text-align:center;margin-top:20vh;color:red">
       ❌ Unauthorized Access
-    </h2>
-  `;
+    </h2>`;
   throw new Error("Mentor not logged in");
 }
 
 /* ===============================
-   SIDEBAR → IFRAME NAVIGATION
+   SIDEBAR → FULL SCREEN PAGE
 ================================ */
-
 const buttons = document.querySelectorAll(".nav button");
-const iframe  = document.getElementById("contentFrame");
+const overlay = document.getElementById("pageOverlay");
+const frame   = document.getElementById("overlayFrame");
+const titleEl = document.getElementById("pageTitle");
 
 buttons.forEach(btn=>{
-  btn.addEventListener("click",()=>{
-
-    // 🔑 VERY IMPORTANT — source mark
-    sessionStorage.setItem("accessSource","ad");
+  btn.onclick = ()=>{
+    sessionStorage.setItem("accessSource","ad"); // 🔐 security flag
 
     buttons.forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
 
-    iframe.src = btn.dataset.page;
-    iframe.style.display = "block";
-  });
+    titleEl.textContent = btn.innerText;
+    frame.src = btn.dataset.page;
+    overlay.style.display = "flex";
+  };
 });
+
+/* ===============================
+   BACK / CLOSE OVERLAY
+================================ */
+document.getElementById("backBtn").onclick = ()=>{
+  overlay.style.display = "none";
+  frame.src = "";
+  buttons.forEach(b=>b.classList.remove("active"));
+};
 
 /* ===============================
    LOGOUT
 ================================ */
-
 document.getElementById("logoutBtn").onclick = ()=>{
   if(confirm("Logout?")){
     localStorage.clear();
     sessionStorage.clear();
-    location.href = "/login.html";
+    location.href="/login.html";
   }
 };
 </script>
 
 </body>
 </html>
-
