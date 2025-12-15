@@ -235,10 +235,10 @@
 /* ===== MENTOR DATA FROM LOGIN ===== */
 const mentorId = localStorage.getItem("mentorId");
 const mentorName = localStorage.getItem("mentorName");
-
+const role       = localStorage.getItem("role");
 if(!mentorId){
   alert("Unauthorized access");
-  window.location.href="/login";
+  window.location.href="/login.html";
 }
 
 document.getElementById("mentorIdDisplay").textContent =

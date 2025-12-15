@@ -201,49 +201,69 @@ button:disabled{
 </div>
 
 <script>
-const form=document.getElementById("loginForm");
-const btn=document.getElementById("loginBtn");
+const form = document.getElementById("loginForm");
+const btn  = document.getElementById("loginBtn");
 
-form.addEventListener("submit",async(e)=>{
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  btn.disabled=true;
-  btn.innerHTML='<span class="spinner"></span>Processing your request...';
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Processing your request...';
 
-  const username=document.getElementById("username").value.trim();
-  const password=document.getElementById("password").value.trim();
-  const role=document.querySelector('input[name="role"]:checked').value;
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const role     = document.querySelector('input[name="role"]:checked').value;
 
-  let url="", bodyData={};
+  let url = "";
+  let bodyData = {};
 
-  if(role==="mentor"){
-    url="https://college-hwbb.onrender.com/api/login/mentor";
-    bodyData={mentorId:username,password};
-  }else{
-    url="https://college-hwbb.onrender.com/api/students/login";
-    bodyData={enrollment:username,password};
+  /* ===== API SELECT ===== */
+  if(role === "mentor"){
+    url = "https://college-hwbb.onrender.com/api/login/mentor";
+    bodyData = { mentorId: username, password };
+  } else {
+    url = "https://college-hwbb.onrender.com/api/students/login";
+    bodyData = { enrollment: username, password };
   }
 
-  try{
-    const res=await fetch(url,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(bodyData)
+  try {
+    const res  = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(bodyData)
     });
 
-    const data=await res.json();
+    const data = await res.json();
 
+    /* ===== SUCCESS ===== */
     if(res.ok && data.success){
-      if(role==="student") localStorage.setItem("enrollment",data.enrollment);
-      window.location.href=`${role}-dashboard.html`;
-    }else{
+
+      /* ---- STUDENT (UNCHANGED) ---- */
+      if(role === "student"){
+        localStorage.setItem("enrollment", data.enrollment);
+        localStorage.setItem("role", "student");
+        window.location.href = "student-dashboard.html";
+        return;
+      }
+
+      /* ---- MENTOR (FIXED) ---- */
+      if(role === "mentor"){
+        localStorage.setItem("mentorId", data.mentorId);
+        localStorage.setItem("mentorName", data.name || "Mentor");
+        localStorage.setItem("role", "mentor");
+        window.location.href = "mentor-dashboard.html";
+        return;
+      }
+
+    } else {
       alert(data.message || "Invalid credentials");
     }
-  }catch(err){
+
+  } catch (err) {
     alert("Server connection error");
-  }finally{
-    btn.disabled=false;
-    btn.innerHTML="Login";
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = "Login";
   }
 });
 </script>
