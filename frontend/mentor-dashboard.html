@@ -258,10 +258,16 @@ function closeMenu(){
 }
 
 /* ===== ADMIN PANEL REDIRECT ===== */
+// document.getElementById("adminPanelBtn").addEventListener("click", ()=>{
+//   localStorage.setItem("role","mentor");
+//   localStorage.setItem("secretKey","MENTOR_ACCESS_2025");
+//   window.location.href="/fghlwegfuhbcdkbfrufckjbfufgewufdbcadministration-pannelxyzabc";
+// });
+/* ===== ADMIN PANEL BUTTON ===== */
 document.getElementById("adminPanelBtn").addEventListener("click", ()=>{
-  localStorage.setItem("role","mentor");
-  localStorage.setItem("secretKey","MENTOR_ACCESS_2025");
-  window.location.href="/fghlwegfuhbcdkbfrufckjbfufgewufdbcadministration-pannelxyzabc";
+  // Mentor ID localStorage me already set hai login ke time
+  // Sirf redirect karna hai
+  window.location.href = "/fghlwegfuhbcdkbfrufckjbfufgewufdbcadministration-pannelxyzabc";
 });
 
 /* ===== LOGOUT ===== */
