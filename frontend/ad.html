@@ -90,6 +90,7 @@
 
 // Mentor ID check from localStorage
 const mentorId = localStorage.getItem("mentorId");
+const mentorName = localStorage.getItem("mentorName");
 
 // ❌ If no mentorId, block access
 if(!mentorId){
@@ -102,7 +103,7 @@ if(!mentorId){
 }
 
 // ✅ Display mentor info
-document.getElementById("mentorIdDisplay").textContent =
+// document.getElementById("mentorIdDisplay").textContent =
   `Mentor: ${mentorName || "Mentor"} (${mentorId})`;
 
 
