@@ -264,11 +264,20 @@ function closeMenu(){
 //   window.location.href="/fghlwegfuhbcdkbfrufckjbfufgewufdbcadministration-pannelxyzabc";
 // });
 /* ===== ADMIN PANEL BUTTON ===== */
-document.getElementById("adminPanelBtn").addEventListener("click", ()=>{
-  // Mentor ID localStorage me already set hai login ke time
-  // Sirf redirect karna hai
+document.getElementById("adminPanelBtn").addEventListener("click", () => {
+  const mentorId = localStorage.getItem("mentorId"); // already set at login
+  if (!mentorId) {
+    alert("Mentor ID not found. Cannot access Admin Panel.");
+    return;
+  }
+
+  // Option 1: Simple redirect, mentorId already in localStorage
   window.location.href = "/fghlwegfuhbcdkbfrufckjbfufgewufdbcadministration-pannelxyzabc";
+
+  // Option 2 (optional): pass mentorId via URL query string
+  // window.location.href = `/fghlwegfuhbcdkbfrufckjbfufgewufdbcadministration-pannelxyzabc?mentorId=${mentorId}`;
 });
+
 
 /* ===== LOGOUT ===== */
 function logout(){
