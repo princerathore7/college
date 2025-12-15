@@ -108,7 +108,6 @@ iframe{
   <button data-page="/notices.html">📢 Notices</button>
   <button data-page="/manage.html">⚙️ Manage</button>
 </nav>
-
 </aside>
 
 <main>
@@ -120,30 +119,32 @@ iframe{
 </div>
 
 <script>
-/* ============================
-   ACCESS CONTROL (MENTOR ONLY)
-============================ */
+/* ===============================
+   ACCESS CONTROL — MENTOR ONLY
+================================ */
 
 const mentorId = localStorage.getItem("mentorId");
 if(!mentorId){
   document.body.innerHTML = `
     <h2 style="text-align:center;margin-top:20vh;color:red">
       ❌ Unauthorized Access
-    </h2>`;
+    </h2>
+  `;
   throw new Error("Mentor not logged in");
 }
 
-/* ============================
-   SIDEBAR REDIRECTION
-============================ */
+/* ===============================
+   SIDEBAR → IFRAME NAVIGATION
+================================ */
 
 const buttons = document.querySelectorAll(".nav button");
-const iframe = document.getElementById("contentFrame");
+const iframe  = document.getElementById("contentFrame");
+
 buttons.forEach(btn=>{
   btn.addEventListener("click",()=>{
 
-    // 🔐 Mark that navigation came from admin panel
-    sessionStorage.setItem("fromAdminPanel", "yes");
+    // 🔑 VERY IMPORTANT — source mark
+    sessionStorage.setItem("accessSource","ad");
 
     buttons.forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
@@ -153,14 +154,15 @@ buttons.forEach(btn=>{
   });
 });
 
-/* ============================
+/* ===============================
    LOGOUT
-============================ */
+================================ */
 
 document.getElementById("logoutBtn").onclick = ()=>{
   if(confirm("Logout?")){
     localStorage.clear();
-    location.href="/login.html";
+    sessionStorage.clear();
+    location.href = "/login.html";
   }
 };
 </script>
