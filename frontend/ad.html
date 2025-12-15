@@ -97,17 +97,18 @@ iframe{
 <div class="grid">
 <aside>
 <nav class="nav">
-  <button data-page="/bibfewuicigehgewgegwgeadministrationstudentsxyzzxy">🎓 Students</button>
-  <button data-page="/bfewfebewfbewbadmin-marks">📊 Marks</button>
-  <button data-page="/wqbdbqwbdbfvgkevchuwihdeuieadministrationsdeexam-ringsxyzzxy">🧾 Exams</button>
-  <button data-page="/ehiuheigewuhdewdhadministrationstudentbusroutesxyzzxy">🚌 Bus Route</button>
-  <button data-page="/buiedeguideuiegadministrationsdesignsxyzzxy">📄 PDF</button>
-  <button data-page="/ewfgefgfudgebewuffadminsallaryxyzabc">💰 Salary</button>
-  <button data-page="/929u29192u198uihdwqdbdadministrationsdeesallrysxyzzxy">💰 Pending Fees</button>
-  <button data-page="/ewuhewbbewubewbeadmin-fine">💰 Fees Dues</button>
-  <button data-page="/nisjfewibfasdvkfdhasiucbdschsbdcbdscshdcbdb">📢 Notices</button>
-  <button data-page="/hsdbibdjvbsdkbdsbskkdsnd3h3u09adibdscbkhdbcreid">⚙️ Manage</button>
+  <button data-page="/admin-students.html">🎓 Students</button>
+  <button data-page="/admin-marks.html">📊 Marks</button>
+  <button data-page="/exam-ring.html">🧾 Exams</button>
+  <button data-page="/bus-route.html">🚌 Bus Route</button>
+  <button data-page="/design.html">📄 PDF</button>
+  <button data-page="/admin-salary.html">💰 Salary</button>
+  <button data-page="/pending.html">💰 Pending Fees</button>
+  <button data-page="/admin-fine.html">💰 Fees Dues</button>
+  <button data-page="/notices.html">📢 Notices</button>
+  <button data-page="/manage.html">⚙️ Manage</button>
 </nav>
+
 </aside>
 
 <main>
@@ -138,14 +139,17 @@ if(!mentorId){
 
 const buttons = document.querySelectorAll(".nav button");
 const iframe = document.getElementById("contentFrame");
-
 buttons.forEach(btn=>{
   btn.addEventListener("click",()=>{
+
+    // 🔐 Mark that navigation came from admin panel
+    sessionStorage.setItem("fromAdminPanel", "yes");
+
     buttons.forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
 
     iframe.src = btn.dataset.page;
-    iframe.style.display="block";
+    iframe.style.display = "block";
   });
 });
 

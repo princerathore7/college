@@ -25,6 +25,22 @@ a { display: block; text-align: center; margin-top: 20px; }
 </div>
 
 <script>
+    /* ===============================
+   ACCESS CONTROL — ADMIN PANEL
+================================ */
+
+const mentorId = localStorage.getItem("mentorId");
+const fromAdmin = sessionStorage.getItem("fromAdminPanel");
+
+if(!mentorId || fromAdmin !== "yes"){
+  document.body.innerHTML = `
+    <h2 style="text-align:center;margin-top:20vh;color:red">
+      ❌ Access Denied <br>
+      Please open this page from Administration Panel only
+    </h2>
+  `;
+  throw new Error("Unauthorized access");
+}
 const API_ROOT = "https://college-hwbb.onrender.com/api/bus";
 
 async function uploadPDF() {

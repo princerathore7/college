@@ -94,6 +94,22 @@
 </main>
 
 <script>
+  /* ===============================
+   ACCESS CONTROL — ADMIN PANEL
+================================ */
+
+const mentorId = localStorage.getItem("mentorId");
+const fromAdmin = sessionStorage.getItem("fromAdminPanel");
+
+if(!mentorId || fromAdmin !== "yes"){
+  document.body.innerHTML = `
+    <h2 style="text-align:center;margin-top:20vh;color:red">
+      ❌ Access Denied <br>
+      Please open this page from Administration Panel only
+    </h2>
+  `;
+  throw new Error("Unauthorized access");
+}
 async function saveSalary(){
   const mentorId = document.getElementById("mentorId").value.trim();
   const name = document.getElementById("name").value.trim();
