@@ -10,6 +10,9 @@ from routes.notifications import send_to_enrollment
 # Blueprint
 attendance_bp = Blueprint('attendance', __name__, url_prefix='/api/attendance')
 
+# Enable CORS for this blueprint
+CORS(attendance_bp, resources={r"/*": {"origins": "*"}})
+
 # MongoDB Connection
 client = MongoClient(os.getenv("MONGO_COLLEGE_DB_URI"))
 db = client["college_db"]
