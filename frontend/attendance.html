@@ -146,10 +146,10 @@ if(!mentorId || !ALLOWED_SOURCES.includes(source)){
 /* ===============================
    API CONFIG
 ================================ */
-const API_CLASS  = "https://college-hwbb.onrender.com/api/attendance/class/";
-const API_SUBMIT = "https://college-hwbb.onrender.com/api/attendance/mark";
+const API_STUDENTS = "https://college-hwbb.onrender.com/api/attendance/students";
+const API_SUBMIT   = "https://college-hwbb.onrender.com/api/attendance/mark";
 
-let marked = {}; // enrollment → P/A
+let marked = {}; // enrollment → P / A
 
 function logout(){
   localStorage.clear();
@@ -158,13 +158,35 @@ function logout(){
 }
 
 /* ===============================
-   RENDER STUDENTS (CLASS-WISE)
+   FETCH ALL STUDENTS (CACHE)
+================================ */
+async function fetchStudents(){
+  const cached = sessionStorage.getItem("att_students");
+  if(cached) return JSON.parse(cached);
+
+  try{
+    const res = await fetch(API_STUDENTS);
+    const data = await res.json();
+
+    if(data.success){
+      sessionStorage.setItem("att_students", JSON.stringify(data.students));
+      return data.students;
+    }
+  }catch(err){
+    console.error("Student fetch error:", err);
+  }
+
+  return [];
+}
+
+/* ===============================
+   RENDER STUDENTS (FILTERED)
 ================================ */
 async function render(){
   const body = document.getElementById("studentsBody");
 
-  const year = document.getElementById("year").value;
-  const branch = document.getElementById("branch").value.toLowerCase();
+  const year    = document.getElementById("year").value;
+  const branch  = document.getElementById("branch").value.toLowerCase();
   const section = document.getElementById("section").value;
 
   if(!year || !branch || !section){
@@ -177,13 +199,13 @@ async function render(){
 
   const students = await fetchStudents();
 
-  // 🔥 SAME FILTER LOGIC AS ADMIN STUDENTS
+  // 🔥 SAME LOGIC AS ADMIN STUDENTS PAGE
   const filtered = students.filter(s=>{
     let ok = true;
 
-    ok = ok && String(s.year) === year;
-    ok = ok && s.branch.toLowerCase().includes(branch);
-    ok = ok && String(s.section) === section;
+    if(year)    ok = ok && String(s.year) === year;
+    if(branch)  ok = ok && s.branch.toLowerCase().includes(branch);
+    if(section) ok = ok && String(s.section) === section;
 
     return ok;
   });
@@ -193,9 +215,7 @@ async function render(){
   if(!filtered.length){
     body.innerHTML = `
       <tr>
-        <td colspan="3" class="no-data">
-          No students found
-        </td>
+        <td colspan="3" class="no-data">No students found</td>
       </tr>`;
     return;
   }
@@ -216,14 +236,15 @@ async function render(){
   });
 }
 
-
 /* ===============================
    MARK ATTENDANCE
 ================================ */
 function mark(enr,status,btn){
   marked[enr] = status;
+
   btn.parentElement.querySelectorAll("button")
     .forEach(b=>b.classList.remove("selected"));
+
   btn.classList.add("selected");
 }
 
@@ -236,30 +257,22 @@ async function submitAttendance(){
     return;
   }
 
-  const res = await fetch(API_SUBMIT,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({ records: marked })
-  });
+  try{
+    const res = await fetch(API_SUBMIT,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ records: marked })
+    });
 
-  const d = await res.json();
-  alert(d.success ? "Attendance saved successfully" : "Error saving attendance");
-}
-async function fetchStudents(){
-  const cached = sessionStorage.getItem("att_students");
-  if(cached) return JSON.parse(cached);
-
-  const res = await fetch(API_STUDENTS);
-  const data = await res.json();
-
-  if(data.success){
-    sessionStorage.setItem("att_students", JSON.stringify(data.students));
-    return data.students;
+    const d = await res.json();
+    alert(d.success ? "✅ Attendance saved successfully" : "❌ Error saving attendance");
+  }catch(err){
+    console.error(err);
+    alert("❌ Server error");
   }
-  return [];
 }
-
 </script>
+
 
 </body>
 </html>

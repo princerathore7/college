@@ -221,3 +221,22 @@ def get_students_by_class():
         "count": len(students),
         "students": students
     }), 200
+@attendance_bp.route("/students", methods=["GET"])
+def get_all_students_for_attendance():
+    students = list(students_collection.find(
+        {},
+        {
+            "_id": 0,
+            "enrollment": 1,
+            "name": 1,
+            "year": 1,
+            "branch": 1,
+            "section": 1
+        }
+    ))
+
+    return jsonify({
+        "success": True,
+        "count": len(students),
+        "students": students
+    }), 200
