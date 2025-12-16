@@ -192,3 +192,31 @@ def edit_attendance_percentage():
     except Exception as e:
         print("❌ Error in edit_attendance_percentage:", e)
         return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
+@attendance_bp.route("/class", methods=["POST"])
+def get_students_by_class():
+    data = request.json
+
+    year = data.get("year")
+    branch = data.get("branch")
+    section = data.get("section")
+
+    if not year or not branch or not section:
+        return jsonify({
+            "success": False,
+            "message": "Year, branch and section are required"
+        }), 400
+
+    students = list(students_collection.find(
+        {
+            "year": int(year),
+            "branch": branch,
+            "section": section
+        },
+        {"_id": 0}
+    ))
+
+    return jsonify({
+        "success": True,
+        "count": len(students),
+        "students": students
+    }), 200

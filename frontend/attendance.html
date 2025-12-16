@@ -163,9 +163,9 @@ function logout(){
 async function render(){
   const body = document.getElementById("studentsBody");
 
-  const year    = document.getElementById("year").value;
-  const branch  = document.getElementById("branch").value;
-  const section = document.getElementById("section").value || "1";
+  const year = document.getElementById("year").value;
+  const branch = document.getElementById("branch").value;
+  const section = document.getElementById("section").value;
 
   if(!year || !branch || !section){
     alert("Please select Year, Branch and Section");
@@ -176,14 +176,25 @@ async function render(){
   marked = {};
 
   try{
-    const res = await fetch(`${API_CLASS}${year}/${branch}/${section}`);
+    const res = await fetch(API_CLASS,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({
+        year,
+        branch,
+        section
+      })
+    });
+
     const data = await res.json();
 
     if(!data.success || !data.students.length){
       body.innerHTML = `
-        <tr><td colspan="3" class="no-data">
-          No students found
-        </td></tr>`;
+        <tr>
+          <td colspan="3" class="no-data">
+            No students found for ${year} Year ${branch} Section ${section}
+          </td>
+        </tr>`;
       return;
     }
 
@@ -207,9 +218,9 @@ async function render(){
   }catch(err){
     console.error(err);
     body.innerHTML = `
-      <tr><td colspan="3" class="no-data">
-        Error loading students
-      </td></tr>`;
+      <tr>
+        <td colspan="3" class="no-data">Server error</td>
+      </tr>`;
   }
 }
 
