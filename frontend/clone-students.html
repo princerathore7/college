@@ -140,64 +140,20 @@ tr.absent-row{background:#fef2f2}
     <option value="CSBS">CSBS - Computer Science & Business Systems</option>
     <option value="IOT">IoT - Internet of Things</option>
 
-    <!-- Electrical / Electronics -->
-    <option value="ECE">ECE - Electronics & Communication</option>
-    <option value="EEE">EEE - Electrical & Electronics</option>
-    <option value="EE">EE - Electrical Engineering</option>
 
-    <!-- Mechanical / Automobile -->
-    <option value="ME">ME - Mechanical Engineering</option>
-    <option value="AU">AU - Automobile Engineering</option>
-    <option value="MT">MT - Mechatronics</option>
-
-    <!-- Civil / Core -->
-    <option value="CE">CE - Civil Engineering</option>
-    <option value="CHE">CHE - Chemical Engineering</option>
-    <option value="MIN">MIN - Mining Engineering</option>
-    <option value="PET">PET - Petroleum Engineering</option>
-
-    <!-- Bio / Agri -->
-    <option value="BT">BT - Biotechnology</option>
-    <option value="BME">BME - Biomedical Engineering</option>
-    <option value="AG">AG - Agriculture Engineering</option>
-    <option value="FT">FT - Food Technology</option>
-    <option value="ENV">ENV - Environmental Engineering</option>
-    <option value="TX">TX - Textile Engineering</option>
-
-    <!-- Management / Pharma -->
-    <option value="PIE">PIE - Production & Industrial Engineering</option>
-    <option value="IM">IM - Industrial Management</option>
-    <option value="DPHARMA">D.Pharmacy</option>
-    <option value="BPHARMA">B.Pharmacy</option>
-    <option value="MPHARMA">M.Pharmacy</option>
-    <option value="PHARMA-CHEM">Pharmaceutical Chemistry</option>
-    <option value="PHARMA-ANALYTICAL">Pharmaceutical Analysis</option>
-    <option value="PHARMA-QUALITY">Quality Assurance</option>
-    <option value="PHARMA-PHARMACO">Pharmacology</option>
-    <option value="PHARMA-PHARMACEUTICS">Pharmaceutics</option>
-    <option value="PHARMA-BIOTECH">Pharmaceutical Biotechnology</option>
-    <option value="PHARMA-REGULATORY">Regulatory Affairs</option>
-
-    <!-- Diploma -->
-    <option value="DCSE">Diploma - Computer Science Engineering</option>
-    <option value="DIT">Diploma - Information Technology</option>
-    <option value="DCYBER">Diploma - Cyber Security</option>
-    <option value="DECE">Diploma - Electronics & Communication</option>
-    <option value="DEEE">Diploma - Electrical & Electronics</option>
-    <option value="DEE">Diploma - Electrical Engineering</option>
-    <option value="DME">Diploma - Mechanical Engineering</option>
-    <option value="DCE">Diploma - Civil Engineering</option>
-    <option value="DMIN">Diploma - Mining Engineering</option>
-    <option value="DCHE">Diploma - Chemical Engineering</option>
-    <option value="DAG">Diploma - Agriculture Engineering</option>
-    <option value="DTX">Diploma - Textile Technology</option>
-    <option value="DPLASTIC">Diploma - Plastic Engineering</option>
-    <option value="DPOLY">Diploma - Polymer Engineering</option>
   </select>
 
   <button class="actionBtn" id="refreshBtn">Refresh</button>
 </div>
-
+<label>Select Section</label>
+<select id="section">
+  <option value="">-- select section --</option>
+  <option value="1">1</option>
+  <option value="2">2</option>
+  <option value="3">3</option>
+  <option value="4">4</option>
+  <option value="5">5</option>
+</select>
 <input
   type="text"
   id="searchEnrollment"
@@ -212,6 +168,21 @@ tr.absent-row{background:#fef2f2}
     outline:none;
   "
 >
+<div id="successMsg" style="
+display:none;
+margin-bottom:10px;
+padding:10px;
+background:#dcfce7;
+color:#166534;
+border-radius:8px;
+font-weight:600;
+text-align:center">
+Attendance Submitted ✅
+</div>
+
+<button onclick="submitAttendance()" style="margin-bottom:10px">
+Submit Attendance
+</button>
 
 <table>
 <thead>
@@ -232,7 +203,6 @@ tr.absent-row{background:#fef2f2}
 
 
 </head>
-
 <script>
 /* ===============================
    ACCESS CONTROL — ADMIN
@@ -256,6 +226,24 @@ if(!mentorId || !ALLOWED_SOURCES.includes(source)){
 ================================ */
 const API_STUDENTS = "https://college-hwbb.onrender.com/api/admin/students";
 const API_MARK_ATT = "https://college-hwbb.onrender.com/api/attendance/mark";
+
+/* ===============================
+   LOCAL STORAGE (DRAFT)
+================================ */
+const DRAFT_KEY = "attendance_draft";
+
+function loadDraft(){
+  const d = localStorage.getItem(DRAFT_KEY);
+  return d ? JSON.parse(d) : {};
+}
+function saveDraft(d){
+  localStorage.setItem(DRAFT_KEY, JSON.stringify(d));
+}
+function clearDraft(){
+  localStorage.removeItem(DRAFT_KEY);
+}
+
+let marked = loadDraft();
 
 /* ===============================
    LOGOUT
@@ -285,23 +273,36 @@ async function fetchStudents(force=false){
 }
 
 /* ===============================
-   MARK ATTENDANCE (P / A)
+   MARK ATTENDANCE (LOCAL ONLY)
 ================================ */
-async function markAttendance(enrollment, status){
+function markAttendance(enrollment, status){
+  marked[enrollment] = status;
+  saveDraft(marked);
+}
+
+/* ===============================
+   SUBMIT ALL ATTENDANCE
+================================ */
+async function submitAttendance(){
+  if(!Object.keys(marked).length){
+    alert("No attendance marked");
+    return;
+  }
+
   try{
     const res = await fetch(API_MARK_ATT,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({
-        records:{ [enrollment]: status }
-      })
+      body: JSON.stringify({ records: marked })
     });
 
     const data = await res.json();
     if(data.success){
-      alert(`Attendance marked: ${enrollment} → ${status}`);
+      clearDraft();
+      marked = {};
+      showSuccess();
     }else{
-      alert(data.message || "Failed");
+      alert(data.message || "Submission failed");
     }
   }catch(err){
     console.error(err);
@@ -310,30 +311,45 @@ async function markAttendance(enrollment, status){
 }
 
 /* ===============================
-   RENDER (UNTOUCHED LOGIC)
+   SUCCESS MESSAGE
+================================ */
+function showSuccess(){
+  const msg = document.getElementById("successMsg");
+  msg.style.display = "block";
+  setTimeout(()=>msg.style.display="none",3000);
+}
+
+/* ===============================
+   RENDER (LOGIC SAME + SECTION FIX)
 ================================ */
 async function render(refresh=false){
   const body = document.getElementById("studentsBody");
 
-  const yearVal = document.getElementById("year").value;
-  const branchVal = document.getElementById("branch").value.toLowerCase();
+  const yearVal   = document.getElementById("year").value;
+  const branchVal = document.getElementById("branch").value;
+  const sectionVal= document.getElementById("section").value;
   const searchEnr = document.getElementById("searchEnrollment").value.trim().toLowerCase();
 
   const students = await fetchStudents(refresh);
 
   let filtered = students.filter(s=>{
     let ok = true;
+
     if(yearVal) ok = ok && String(s.year) === yearVal;
-    if(branchVal) ok = ok && s.branch.toLowerCase().includes(branchVal);
-    if(searchEnr) ok = ok && s.enrollment.toLowerCase().includes(searchEnr);
+
+    // ✅ branch + section combined
+    if(branchVal && sectionVal){
+      ok = ok && `${s.branch}-${s.section}` === `${branchVal}-${sectionVal}`;
+    }else if(branchVal || sectionVal){
+      ok = false;
+    }
+
+    if(searchEnr){
+      ok = ok && s.enrollment.toLowerCase().includes(searchEnr);
+    }
+
     return ok;
   });
-
-  if(searchEnr){
-    filtered.sort((a,b)=>{
-      return a.enrollment.toLowerCase().startsWith(searchEnr) ? -1 : 1;
-    });
-  }
 
   body.innerHTML = "";
 
@@ -350,30 +366,25 @@ async function render(refresh=false){
         <td>${s.year}</td>
         <td>${s.branch}</td>
         <td>
-          <button class="actionBtn btnP"
-            onclick="markAttendance('${s.enrollment}','P')">P</button>
-          <button class="actionBtn btnA"
-            onclick="markAttendance('${s.enrollment}','A')">A</button>
+          <button onclick="markAttendance('${s.enrollment}','P')">P</button>
+          <button onclick="markAttendance('${s.enrollment}','A')">A</button>
         </td>
       </tr>
     `;
   }
-
-  localStorage.setItem("admin_students", JSON.stringify(students));
 }
 
 /* ===============================
    EVENTS
 ================================ */
-["year","branch"].forEach(id=>{
+["year","branch","section"].forEach(id=>{
   document.getElementById(id).addEventListener("change",()=>render(false));
 });
 refreshBtn.onclick = ()=>render(true);
 document.addEventListener("DOMContentLoaded",()=>render(false));
 </script>
 
-</body>
-</html>
+
 
 </body>
 </html>
