@@ -21,7 +21,7 @@ def serialize(fine):
 # 1️⃣ ADMIN — BULK ADD FINES
 # ---------------------------------------------------------
 @fine_bp.route("/bulk-add", methods=["POST"])
-def bulk_add_fines():
+def add_bulk_fines():
     try:
         data = request.get_json(force=True)
         fines = data.get("fines", [])
@@ -29,18 +29,18 @@ def bulk_add_fines():
         if not fines:
             return jsonify({"success": False, "message": "No fines provided"}), 400
 
-        docs = []
         for f in fines:
-            docs.append({
+            record = {
                 "enrollment": f.get("enrollment"),
-                "class": f.get("class"),   # frontend ke saath SAME rakho
+                "class": f.get("class"),
                 "fine": int(f.get("fine", 0)),
-                "reason": f.get("reason"),
+                "reason": f.get("reason", ""),
                 "status": "Unpaid",
-                "createdAt": datetime.now()
-            })
+                "createdAt": datetime.now(),
+                "updatedAt": datetime.now()
+            }
 
-        db.fine.insert_many(docs)
+            db.fine.insert_one(record)
 
         return jsonify({
             "success": True,
@@ -48,11 +48,9 @@ def bulk_add_fines():
         }), 200
 
     except Exception as e:
-        print("❌ Fine bulk-add error:", e)
-        return jsonify({
-            "success": False,
-            "message": "Server error while adding fines"
-        }), 500
+        print("❌ bulk-add error:", e)
+        return jsonify({"success": False, "message": "Server error"}), 500
+
 
 # ---------------------------------------------------------
 # 2️⃣ SEARCH FINES OF ONE STUDENT (ADMIN / TEACHER)
