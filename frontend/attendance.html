@@ -76,9 +76,10 @@ th{background:#eef3ff}
 
 <main>
 
+<!-- ================= FILTERS ================= -->
 <div class="controls">
   <select id="year">
-    <option value="">Select Year</option>
+    <option value="">All Years</option>
     <option value="1">1st Year</option>
     <option value="2">2nd Year</option>
     <option value="3">3rd Year</option>
@@ -86,7 +87,7 @@ th{background:#eef3ff}
   </select>
 
   <select id="branch">
-    <option value="">Select Branch</option>
+    <option value="">All Branches</option>
     <option value="CSE">CSE</option>
     <option value="IT">IT</option>
     <option value="ECE">ECE</option>
@@ -94,19 +95,28 @@ th{background:#eef3ff}
     <option value="CE">CE</option>
   </select>
 
-  <button onclick="loadStudents()">Load Students</button>
+  <select id="section">
+    <option value="">All Sections</option>
+    <option value="1">Section 1</option>
+    <option value="2">Section 2</option>
+    <option value="3">Section 3</option>
+    <option value="4">Section 4</option>
+  </select>
+
+  <button onclick="render()">Load Students</button>
 </div>
 
+<!-- ================= TABLE ================= -->
 <table>
 <thead>
 <tr>
   <th>Enrollment</th>
   <th>Name</th>
-  <th>Mark Attendance</th>
+  <th>Attendance</th>
 </tr>
 </thead>
-<tbody id="body">
-<tr><td colspan="3" class="no-data">Select year & branch</td></tr>
+<tbody id="studentsBody">
+<tr><td colspan="3" class="no-data">Select filters & load students</td></tr>
 </tbody>
 </table>
 
@@ -116,12 +126,12 @@ th{background:#eef3ff}
 </main>
 
 <script>
-    /* ===============================
-   ACCESS CONTROL — ADMIN PANEL
+/* ===============================
+   ACCESS CONTROL — ADMIN PAGES
 ================================ */
 const mentorId = localStorage.getItem("mentorId");
-const source = sessionStorage.getItem("accessSource");
-const ALLOWED_SOURCES = ["ad", "admin"];
+const source   = sessionStorage.getItem("accessSource");
+const ALLOWED_SOURCES = ["ad","admin"];
 
 if(!mentorId || !ALLOWED_SOURCES.includes(source)){
   document.body.innerHTML = `
@@ -132,45 +142,69 @@ if(!mentorId || !ALLOWED_SOURCES.includes(source)){
   `;
   throw new Error("Unauthorized access");
 }
+
+/* ===============================
+   API CONFIG
+================================ */
 const API_STUDENTS = "https://college-hwbb.onrender.com/api/admin/students";
-const API_SUBMIT = "https://college-hwbb.onrender.com/api/attendance/mark";
+const API_SUBMIT   = "https://college-hwbb.onrender.com/api/attendance/mark";
 
 let marked = {}; // enrollment → P/A
 
 function logout(){
   localStorage.clear();
+  sessionStorage.clear();
   location.href="login.html";
 }
 
-async function loadStudents(){
-  const year = document.getElementById("year").value;
-  const branch = document.getElementById("branch").value.toLowerCase();
-  const body = document.getElementById("body");
-
-  if(!year || !branch){
-    alert("Select year & branch");
-    return;
-  }
-
-  body.innerHTML = `<tr><td colspan="3">Loading...</td></tr>`;
+/* ===============================
+   FETCH STUDENTS (CACHED)
+================================ */
+async function fetchStudents(){
+  const cached = localStorage.getItem("admin_students");
+  if(cached) return JSON.parse(cached);
 
   const res = await fetch(API_STUDENTS);
   const data = await res.json();
 
-  let students = data.students.filter(s =>
-    String(s.year)===year &&
-    s.branch.toLowerCase().includes(branch)
-  );
+  if(data.success){
+    localStorage.setItem("admin_students", JSON.stringify(data.students));
+    return data.students;
+  }
+  return [];
+}
+
+/* ===============================
+   RENDER STUDENTS
+================================ */
+async function render(){
+  const body = document.getElementById("studentsBody");
+
+  const year = document.getElementById("year").value;
+  const branch = document.getElementById("branch").value.toLowerCase();
+  const section = document.getElementById("section").value;
+
+  body.innerHTML = `<tr><td colspan="3">Loading...</td></tr>`;
+
+  const students = await fetchStudents();
+
+  let filtered = students.filter(s=>{
+    let ok = true;
+    if(year) ok = ok && String(s.year) === year;
+    if(branch) ok = ok && s.branch.toLowerCase().includes(branch);
+    if(section) ok = ok && String(s.section) === section;
+    return ok;
+  });
 
   body.innerHTML = "";
   marked = {};
 
-  if(!students.length){
-    body.innerHTML = `<tr><td colspan="3" class="no-data">No students</td></tr>`;
+  if(!filtered.length){
+    body.innerHTML = `<tr><td colspan="3" class="no-data">No students found</td></tr>`;
     return;
   }
 
-  students.forEach(s=>{
+  filtered.forEach(s=>{
     body.innerHTML += `
       <tr>
         <td>${s.enrollment}</td>
@@ -186,6 +220,9 @@ async function loadStudents(){
   });
 }
 
+/* ===============================
+   MARK ATTENDANCE
+================================ */
 function mark(enr,status,btn){
   marked[enr] = status;
   btn.parentElement.querySelectorAll("button")
@@ -193,6 +230,9 @@ function mark(enr,status,btn){
   btn.classList.add("selected");
 }
 
+/* ===============================
+   SUBMIT
+================================ */
 async function submitAttendance(){
   if(!Object.keys(marked).length){
     alert("No attendance marked");
@@ -206,7 +246,7 @@ async function submitAttendance(){
   });
 
   const d = await res.json();
-  alert(d.success ? "Attendance saved" : "Error");
+  alert(d.success ? "Attendance saved successfully" : "Error saving attendance");
 }
 </script>
 
