@@ -20,12 +20,17 @@ attendance_collection = db["attendance"]
 # -----------------------------
 # 1️⃣ Get students by Branch + Section
 # -----------------------------
-@attendance_bp.route('/students/<string:branch>/<string:section>', methods=['GET'])
-def get_students_by_branch_section(branch, section):
+@attendance_bp.route('/class/<int:year>/<string:branch>/<string:section>', methods=['GET'])
+def get_students_by_class(year, branch, section):
     students = list(students_collection.find(
-        {"branch": branch, "section": section},
+        {
+            "year": year,
+            "branch": branch,
+            "section": section
+        },
         {"_id": 0}
     ))
+
     return jsonify({
         "success": True,
         "count": len(students),
@@ -41,20 +46,65 @@ def mark_attendance():
         data = request.json
         records = data.get("records", {})
 
+        if not records:
+            return jsonify({
+                "success": False,
+                "message": "No attendance records received"
+            }), 400
+
         today = datetime.now().strftime("%Y-%m-%d")
 
         for enrollment, status in records.items():
-            attendance_collection.insert_one({
+
+            # 🔍 Validate status
+            if status not in ["P", "A"]:
+                continue
+
+            # 🔍 Fetch student details
+            student = students_collection.find_one(
+                {"enrollment": enrollment},
+                {"_id": 0}
+            )
+
+            if not student:
+                continue  # skip invalid enrollment
+
+            # 🛑 Prevent duplicate attendance for same day
+            existing = attendance_collection.find_one({
                 "enrollment": enrollment,
-                "status": status,   # "P" or "A"
                 "date": today
             })
 
-        return jsonify({"success": True}), 200
+            if existing:
+                # 🔁 Update instead of insert
+                attendance_collection.update_one(
+                    {"_id": existing["_id"]},
+                    {"$set": {"status": status}}
+                )
+            else:
+                # ➕ Insert new attendance
+                attendance_collection.insert_one({
+                    "enrollment": enrollment,
+                    "name": student.get("name"),
+                    "year": student.get("year"),
+                    "branch": student.get("branch"),
+                    "section": student.get("section"),
+                    "status": status,   # "P" / "A"
+                    "date": today,
+                    "markedAt": datetime.now()
+                })
+
+        return jsonify({
+            "success": True,
+            "message": "Attendance marked successfully"
+        }), 200
 
     except Exception as e:
         print("❌ Attendance error:", e)
-        return jsonify({"success": False}), 500
+        return jsonify({
+            "success": False,
+            "message": "Server error while marking attendance"
+        }), 500
 
 # -----------------------------
 # 3️⃣ Get attendance summary of one student
