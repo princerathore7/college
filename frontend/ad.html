@@ -26,6 +26,12 @@ header{
   z-index:2;
 }
 header h1{margin:0;font-size:20px}
+
+.header-actions{
+  display:flex;
+  gap:10px;
+}
+
 header button{
   background:var(--accent);
   color:#fff;
@@ -33,6 +39,15 @@ header button{
   padding:8px 14px;
   border-radius:8px;
   cursor:pointer;
+}
+
+.back-btn{
+  background:#eef2ff;
+  color:#1e3a8a;
+  font-weight:600;
+}
+.back-btn:hover{
+  background:#e0e7ff;
 }
 
 .grid{
@@ -114,7 +129,10 @@ main{
 
 <header>
   <h1>Administration Panel</h1>
-  <button id="logoutBtn">Logout</button>
+  <div class="header-actions">
+    <button id="backToMentorBtn" class="back-btn">⬅ Dashboard</button>
+    <button id="logoutBtn">Logout</button>
+  </div>
 </header>
 
 <div class="grid">
@@ -123,7 +141,6 @@ main{
 
   <button data-page="/admin-students.html">🎓 Student Management</button>
   <button data-page="/clone-students.html.html">📋 Real time Attendance</button> 
-
   <button data-page="/admin-marks.html">📊 Marks & Results</button>
   <button data-page="/exam-ring.html">📝 Examination Setup</button>
   <button data-page="/bus-route.html">🚌 Transport / Bus Routes</button>
@@ -135,10 +152,7 @@ main{
   <button data-page="/manage.html">⚙️ System Management</button>
   <button data-page="/design.html">🎉 Post New Event</button>
   <button data-page="/notes-post.html">📚 Upload Study Notes</button>
-<!-- <button data-page="/attendance.html">📋 Attendance</button>-->
-<button data-page="/clone-students.html">📋 clone students</button> 
-<button data-page="/attendance.html">📋 attendace</button> 
-<button data-page="/class-attendance.html">📋 attu</button> 
+
 </nav>
 </aside>
 
@@ -155,7 +169,7 @@ main{
 
 <div class="overlay" id="pageOverlay">
   <div class="overlay-header">
-    <button id="backBtn">⬅ Back</button>
+    <button id="overlayBackBtn">⬅ Back</button>
     <strong id="pageTitle">Administration</strong>
   </div>
   <iframe id="overlayFrame"></iframe>
@@ -175,6 +189,19 @@ if(!mentorId){
 }
 
 /* ===============================
+   BACK TO MENTOR DASHBOARD
+================================ */
+document.getElementById("backToMentorBtn").onclick = () => {
+  const token = localStorage.getItem("mentor_token");
+  if(!token){
+    alert("Session expired. Please login again.");
+    location.href = "/mentor-login.html";
+    return;
+  }
+  location.href = "/mentor-dashboard.html";
+};
+
+/* ===============================
    SIDEBAR → FULL SCREEN PAGE
 ================================ */
 const buttons = document.querySelectorAll(".nav button");
@@ -184,7 +211,7 @@ const titleEl = document.getElementById("pageTitle");
 
 buttons.forEach(btn=>{
   btn.onclick = ()=>{
-    sessionStorage.setItem("accessSource","ad"); // 🔐 security flag
+    sessionStorage.setItem("accessSource","ad");
 
     buttons.forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
@@ -198,7 +225,7 @@ buttons.forEach(btn=>{
 /* ===============================
    BACK / CLOSE OVERLAY
 ================================ */
-document.getElementById("backBtn").onclick = ()=>{
+document.getElementById("overlayBackBtn").onclick = ()=>{
   overlay.style.display = "none";
   frame.src = "";
   buttons.forEach(b=>b.classList.remove("active"));
