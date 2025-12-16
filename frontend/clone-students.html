@@ -90,7 +90,10 @@ td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:center}
 const mentorId = localStorage.getItem("mentorId");
 const source = sessionStorage.getItem("accessSource");
 const ALLOWED_SOURCES = ["ad","admin"];
-if(!mentorId||!ALLOWED_SOURCES.includes(source)){document.body.innerHTML="<h2 style='text-align:center;margin-top:20vh;color:red'>❌ Access Denied<br>Please open via Administration Panel</h2>";throw new Error("Unauthorized access");}
+if(!mentorId||!ALLOWED_SOURCES.includes(source)){
+  document.body.innerHTML="<h2 style='text-align:center;margin-top:20vh;color:red'>❌ Access Denied<br>Please open via Administration Panel</h2>";
+  throw new Error("Unauthorized access");
+}
 
 const API_STUDENTS="https://college-hwbb.onrender.com/api/admin/students";
 const API_MARK_ATT="https://college-hwbb.onrender.com/api/attendance/mark";
@@ -110,8 +113,10 @@ async function fetchStudents(force=false){
   return [];
 }
 
+// MARK ATTENDANCE
 function markAttendance(enr,status){ marked[enr]=status; saveDraft(marked); render(false); }
 
+// SUBMIT ATTENDANCE
 function submitAttendance(){
   if(!Object.keys(marked).length){ alert("No attendance marked"); return; }
   const subMsg=document.getElementById("submitting");
@@ -131,6 +136,7 @@ function submitAttendance(){
   }).catch(err=>{subMsg.style.display="none";console.error(err);alert("Server error");});
 }
 
+// POPULATE SECTIONS
 function populateSections(students, branch){
   const sectionSelect=document.getElementById("section");
   sectionSelect.innerHTML=`<option value="">-- select section --</option>`;
@@ -139,6 +145,7 @@ function populateSections(students, branch){
   sections.forEach(sec=>{ const opt=document.createElement("option"); opt.value=sec; opt.textContent=sec; sectionSelect.appendChild(opt); });
 }
 
+// RENDER
 async function render(refresh=false){
   const body=document.getElementById("studentsBody");
   const yearVal=document.getElementById("year").value;
@@ -151,12 +158,19 @@ async function render(refresh=false){
   let filtered=students.filter(s=>{
     let ok=true;
     if(yearVal) ok=ok && String(s.year)===yearVal;
-    if(branchVal) ok=ok && s.branch===branchVal;
+
+    // ✅ Branch filter: check backend field or infer from enrollment number
+    if(branchVal){
+      const enrBranch = (s.enrollment.match(/[A-Z]+/g)||[]).join(""); // enrollment letters
+      ok = ok && (s.branch===branchVal || enrBranch.startsWith(branchVal));
+    }
+
     if(sectionVal) ok=ok && String(s.section)===sectionVal;
     if(searchEnr) ok=ok && s.enrollment.toLowerCase().includes(searchEnr);
     return ok;
   });
 
+  // SORT: enrollment numeric + section
   filtered.sort((a,b)=>{
     const numA=a.enrollment.replace(/\D/g,"");
     const numB=b.enrollment.replace(/\D/g,"");
@@ -184,11 +198,13 @@ async function render(refresh=false){
   }
 }
 
+// EVENTS
 ["year","branch","section"].forEach(id=>{document.getElementById(id).addEventListener("change",()=>render(false));});
 document.getElementById("refreshBtn").onclick=()=>render(true);
 document.getElementById("searchEnrollment").addEventListener("input",()=>render(false));
 document.addEventListener("DOMContentLoaded",()=>render(false));
 </script>
+
 
 </body>
 </html>
