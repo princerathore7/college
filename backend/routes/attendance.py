@@ -35,32 +35,26 @@ def get_students_by_branch_section(branch, section):
 # -----------------------------
 # 2️⃣ Mark Attendance (P / A)
 # -----------------------------
-@attendance_bp.route('/mark', methods=['POST'])
+@attendance_bp.route("/mark", methods=["POST"])
 def mark_attendance():
-    data = request.json
-    required = ["enrollment", "section", "status"]
+    try:
+        data = request.json
+        records = data.get("records", {})
 
-    if not all(key in data for key in required):
-        return jsonify({"success": False, "message": "Missing fields"}), 400
+        today = datetime.now().strftime("%Y-%m-%d")
 
-    record = {
-        "enrollment": data["enrollment"],
-        "section": data["section"],
-        "status": data["status"],
-        "date": datetime.now().strftime("%Y-%m-%d")
-    }
+        for enrollment, status in records.items():
+            attendance_collection.insert_one({
+                "enrollment": enrollment,
+                "status": status,   # "P" or "A"
+                "date": today
+            })
 
-    attendance_collection.insert_one(record)
+        return jsonify({"success": True}), 200
 
-    # 🔔 Send notification to student
-    title = "📢 Attendance Updated"
-    body = f"Your attendance for {record['date']} has been marked as {record['status']}."
-    send_to_enrollment(data["enrollment"], title, body, url="/attendance.html")
-
-    return jsonify({
-        "success": True,
-        "message": "Attendance marked successfully and notification sent"
-    }), 201
+    except Exception as e:
+        print("❌ Attendance error:", e)
+        return jsonify({"success": False}), 500
 
 # -----------------------------
 # 3️⃣ Get attendance summary of one student
