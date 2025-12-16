@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin — Clone Students</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#f4f6fb;
+  --card:#ffffff;
+  --accent:#4f46e5;
+  --muted:#6b7280;
+  --green:#16a34a;
+  --red:#dc2626;
+}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:#111}
+header{display:flex;justify-content:space-between;align-items:center;background:#fff;padding:12px 20px;border-bottom:1px solid #e6e9f2}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden}
+th,td{padding:10px 12px;border-bottom:1px solid #eee;font-size:14px;text-align:center}
+th{background:#f1f3f8}
+.controls{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.mark-btn{padding:4px 8px;font-size:12px;border:none;border-radius:6px;cursor:pointer;margin:0 2px}
+.present{background:var(--green);color:#fff}
+.absent{background:var(--red);color:#fff}
+.selected{outline:3px solid #00000022}
+.no-data{text-align:center;color:#888}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h2>Admin — Clone Students</h2>
+  <button onclick="logout()">Logout</button>
+</header>
+
+<main style="padding:20px;max-width:1400px;margin:auto">
+
+<div class="controls">
+  <select id="year">
+    <option value="">All Years</option>
+    <option value="1">1st Year</option>
+    <option value="2">2nd Year</option>
+    <option value="3">3rd Year</option>
+    <option value="4">4th Year</option>
+  </select>
+
+  <select id="branch">
+    <option value="">All Branches</option>
+    <option value="CSE">CSE</option>
+    <option value="IT">IT</option>
+    <option value="ECE">ECE</option>
+    <!-- Add more branches if needed -->
+  </select>
+
+  <select id="section">
+    <option value="">All Sections</option>
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+  </select>
+
+  <button id="refreshBtn">Refresh</button>
+</div>
+
+<input
+  type="text"
+  id="searchEnrollment"
+  placeholder="Search by Enrollment Number"
+  oninput="render(false)"
+  style="padding:8px 12px;border-radius:8px;border:1px solid #d1d5db;font-size:14px;min-width:220px;outline:none;"
+>
+
+<table>
+<thead>
+<tr>
+  <th>Enrollment</th>
+  <th>Name</th>
+  <th>Mark Attendance</th>
+</tr>
+</thead>
+<tbody id="studentsBody">
+<tr><td colspan="3" class="no-data">Loading...</td></tr>
+</tbody>
+</table>
+
+</main>
+
+<script>
+const mentorId = localStorage.getItem("mentorId");
+const source = sessionStorage.getItem("accessSource");
+if(!mentorId || !["ad","admin"].includes(source)){
+  document.body.innerHTML = "<h2 style='text-align:center;margin-top:20vh;color:red'>Access Denied</h2>";
+  throw new Error("Unauthorized access");
+}
+
+const API_STUDENTS = "https://college-hwbb.onrender.com/api/students"; // endpoint to fetch students
+let allStudents = [];
+let marked = {};
+
+function logout(){
+  localStorage.clear();
+  sessionStorage.clear();
+  location.href="login.html";
+}
+
+/* -------------------------
+   FETCH STUDENTS
+------------------------- */
+async function fetchStudents(force=false){
+  if(!force){
+    const cached = localStorage.getItem("clone_students");
+    if(cached){
+      allStudents = JSON.parse(cached);
+      return allStudents;
+    }
+  }
+  const res = await fetch(API_STUDENTS);
+  const data = await res.json();
+  if(data.success){
+    allStudents = data.students;
+    localStorage.setItem("clone_students", JSON.stringify(allStudents));
+    return allStudents;
+  }
+  return [];
+}
+
+/* -------------------------
+   RENDER STUDENTS
+------------------------- */
+function renderTable(){
+  const body = document.getElementById("studentsBody");
+  const yearVal = document.getElementById("year").value;
+  const branchVal = document.getElementById("branch").value.toLowerCase();
+  const sectionVal = document.getElementById("section").value;
+  const searchEnr = document.getElementById("searchEnrollment").value.trim().toLowerCase();
+
+  let filtered = allStudents.filter(s=>{
+    let ok = true;
+    if(yearVal) ok = ok && String(s.year) === yearVal;
+    if(branchVal) ok = ok && s.branch.toLowerCase() === branchVal;
+    if(sectionVal) ok = ok && s.section == sectionVal;
+    if(searchEnr) ok = ok && s.enrollment.toLowerCase().includes(searchEnr);
+    return ok;
+  });
+
+  if(searchEnr){
+    filtered.sort((a,b)=> a.enrollment.toLowerCase().startsWith(searchEnr) ? -1 : 1);
+  }
+
+  body.innerHTML = "";
+  if(!filtered.length){
+    body.innerHTML = `<tr><td colspan="3" class="no-data">No students found</td></tr>`;
+    return;
+  }
+
+  for(const s of filtered){
+    body.innerHTML += `
+      <tr>
+        <td>${s.enrollment}</td>
+        <td>${s.name}</td>
+        <td>
+          <button class="mark-btn present" onclick="mark('${s.enrollment}','P',this)">P</button>
+          <button class="mark-btn absent" onclick="mark('${s.enrollment}','A',this)">A</button>
+        </td>
+      </tr>
+    `;
+  }
+}
+
+/* -------------------------
+   MARK ATTENDANCE
+------------------------- */
+function mark(enr,status,btn){
+  marked[enr] = status;
+  btn.parentElement.querySelectorAll("button").forEach(b=>b.classList.remove("selected"));
+  btn.classList.add("selected");
+}
+
+/* -------------------------
+   INITIAL LOAD + REFRESH
+------------------------- */
+document.getElementById("refreshBtn").addEventListener("click", async ()=>{
+  await fetchStudents(true);
+  renderTable();
+});
+
+document.getElementById("year").addEventListener("change",()=>renderTable());
+document.getElementById("branch").addEventListener("change",()=>renderTable());
+document.getElementById("section").addEventListener("change",()=>renderTable());
+document.getElementById("searchEnrollment").addEventListener("input",()=>renderTable());
+
+document.addEventListener("DOMContentLoaded", async ()=>{
+  await fetchStudents();
+  renderTable();
+});
+</script>
+
+</body>
+</html>
