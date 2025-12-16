@@ -31,6 +31,8 @@ from routes.notifications import notifications_bp
 # FLASK APP SETUP
 # ---------------------------------------------
 app = Flask(__name__, template_folder="templates", static_folder="static")
+app.url_map.strict_slashes = False
+
 CORS(app, resources={r"/*": {
     "origins": [
         "https://acropoliss.netlify.app",
