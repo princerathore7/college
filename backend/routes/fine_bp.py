@@ -20,7 +20,7 @@ def serialize(fine):
 # ---------------------------------------------------------
 # 1️⃣ ADMIN — BULK ADD FINES
 # ---------------------------------------------------------
-@fine_bp.route("/api/fines/bulk-add", methods=["POST"])
+@fine_bp.route("/bulk-add", methods=["POST"])
 def bulk_add_fines():
     try:
         data = request.get_json(force=True)
@@ -33,18 +33,19 @@ def bulk_add_fines():
         for f in fines:
             docs.append({
                 "enrollment": f.get("enrollment"),
-                "class_name": f.get("class"),   # 👈 class → class_name
+                "class": f.get("class"),   # frontend ke saath SAME rakho
                 "fine": int(f.get("fine", 0)),
                 "reason": f.get("reason"),
-                "date": datetime.now().strftime("%Y-%m-%d")
+                "status": "Unpaid",
+                "createdAt": datetime.now()
             })
 
-        fine_collection.insert_many(docs)
+        db.fine.insert_many(docs)
 
         return jsonify({
             "success": True,
             "message": "Fines added successfully"
-        })
+        }), 200
 
     except Exception as e:
         print("❌ Fine bulk-add error:", e)
@@ -52,7 +53,6 @@ def bulk_add_fines():
             "success": False,
             "message": "Server error while adding fines"
         }), 500
-
 
 # ---------------------------------------------------------
 # 2️⃣ SEARCH FINES OF ONE STUDENT (ADMIN / TEACHER)
@@ -70,43 +70,36 @@ def get_student_fines(enrollment):
 # 3️⃣ TEACHER — UPDATE SINGLE FINE USING ID
 # ---------------------------------------------------------
 @fine_bp.route("/update/<fine_id>", methods=["PUT"])
-@cross_origin()
 def update_fine(fine_id):
-    data = request.json
+    try:
+        data = request.get_json(force=True)
 
-    fine_amount = int(data.get("fine"))
-    reason = data.get("reason", "Fine updated")
+        fine_amount = int(data.get("fine", 0))
+        reason = data.get("reason", "Fine updated")
 
-    # 🔍 Get existing fine (for enrollment)
-    fine_record = db.fine.find_one({"_id": ObjectId(fine_id)})
-    if not fine_record:
-        return jsonify({"success": False, "message": "Fine not found"}), 404
+        fine_record = db.fine.find_one({"_id": ObjectId(fine_id)})
+        if not fine_record:
+            return jsonify({"success": False, "message": "Fine not found"}), 404
 
-    enrollment = fine_record.get("enrollment")
+        enrollment = fine_record["enrollment"]
 
-    update_fields = {
-        "fine": fine_amount,
-        "reason": reason,
-        "updatedAt": datetime.now()
-    }
+        db.fine.update_one(
+            {"_id": ObjectId(fine_id)},
+            {"$set": {
+                "fine": fine_amount,
+                "reason": reason,
+                "updatedAt": datetime.now()
+            }}
+        )
 
-    db.fine.update_one(
-        {"_id": ObjectId(fine_id)},
-        {"$set": update_fields}
-    )
+        return jsonify({
+            "success": True,
+            "message": "Fine updated successfully"
+        }), 200
 
-    # 🔔 SEND NOTIFICATION TO THAT STUDENT ONLY
-    send_notification_to_enrollment(
-        enrollment=enrollment,
-        title="💰 Fine Updated",
-        body=f"Your fine has been updated to ₹{fine_amount}. Reason: {reason}",
-        url="/fine.html"
-    )
-
-    return jsonify({
-        "success": True,
-        "message": "Fine updated and notification sent"
-    }), 200
+    except Exception as e:
+        print("❌ Update fine error:", e)
+        return jsonify({"success": False, "message": "Server error"}), 500
 
 # ---------------------------------------------------------
 # 4️⃣ DELETE FINE BY ID
