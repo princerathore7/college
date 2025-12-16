@@ -148,12 +148,8 @@ tr.absent-row{background:#fef2f2}
 <label>Select Section</label>
 <select id="section">
   <option value="">-- select section --</option>
-  <option value="1">1</option>
-  <option value="2">2</option>
-  <option value="3">3</option>
-  <option value="4">4</option>
-  <option value="5">5</option>
 </select>
+
 <input
   type="text"
   id="searchEnrollment"
@@ -278,6 +274,29 @@ async function fetchStudents(force=false){
 function markAttendance(enrollment, status){
   marked[enrollment] = status;
   saveDraft(marked);
+}
+
+/* ===============================
+   ALL THE SECTIONS IN DB
+================================ */
+function populateSections(students, branch){
+  const sectionSelect = document.getElementById("section");
+  sectionSelect.innerHTML = `<option value="">-- select section --</option>`;
+
+  if(!branch) return;
+
+  const sections = [...new Set(
+    students
+      .filter(s => s.branch === branch)
+      .map(s => String(s.section))
+  )].sort();
+
+  sections.forEach(sec=>{
+    const opt = document.createElement("option");
+    opt.value = sec;
+    opt.textContent = sec;
+    sectionSelect.appendChild(opt);
+  });
 }
 
 /* ===============================
