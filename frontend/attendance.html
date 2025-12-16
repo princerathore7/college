@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Attendance</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 <style>
 body{font-family:Inter,system-ui,sans-serif;background:#f5f6fc;margin:0;padding:20px}
 header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
@@ -17,6 +18,7 @@ th{background:#eef3ff}
 .absent{background:#dc2626;color:#fff}
 .selected{outline:3px solid #00000022}
 .no-data{color:#666}
+.controls{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
 </style>
 </head>
 
@@ -27,7 +29,7 @@ th{background:#eef3ff}
   <button onclick="logout()">Logout</button>
 </header>
 
-<div style="display:flex;gap:10px;margin-bottom:15px">
+<div class="controls">
   <select id="year">
     <option value="">Year</option>
     <option value="1">1st</option>
@@ -50,7 +52,8 @@ th{background:#eef3ff}
     <option value="3">3</option>
   </select>
 
-  <button onclick="render()">Load Students</button>
+  <button id="loadBtn">Load Students</button>
+  <button id="refreshBtn">Refresh Data</button>
 </div>
 
 <table>
@@ -85,71 +88,73 @@ if(!mentorId || !["ad","admin"].includes(source)){
 /* ===============================
    API CONFIG
 ================================ */
-const API_STUDENTS = "https://college-hwbb.onrender.com/api/admin/students";
-const API_SUBMIT   = "https://college-hwbb.onrender.com/api/attendance/mark";
+const API_ALL_STUDENTS = "https://college-hwbb.onrender.com/api/students"; // fetch all
+const API_SUBMIT       = "https://college-hwbb.onrender.com/api/attendance/mark";
 
+let allStudents = []; // all students cached
 let marked = {};
 
 /* ===============================
-   RENDER (STUDENT STYLE)
+   FETCH ALL STUDENTS (CACHE)
 ================================ */
-async function render(){
-  const body = document.getElementById("studentsBody");
+async function fetchAllStudents(force=false){
+  if(!force){
+    const cached = localStorage.getItem("attendance_students");
+    if(cached){
+      allStudents = JSON.parse(cached);
+      return allStudents;
+    }
+  }
 
+  try{
+    const res = await fetch(API_ALL_STUDENTS);
+    const data = await res.json();
+    if(data.success){
+      allStudents = data.students;
+      localStorage.setItem("attendance_students", JSON.stringify(allStudents));
+      return allStudents;
+    }
+    return [];
+  }catch(err){
+    console.error(err);
+    return [];
+  }
+}
+
+/* ===============================
+   RENDER STUDENTS WITH FILTER
+================================ */
+function renderTable(){
+  const body = document.getElementById("studentsBody");
   const year = document.getElementById("year").value;
-  const branch = document.getElementById("branch").value;
+  const branch = document.getElementById("branch").value.toLowerCase();
   const section = document.getElementById("section").value;
 
-  if(!year || !branch || !section){
-    alert("Select Year, Branch & Section");
+  let filtered = allStudents.filter(s=>{
+    let ok = true;
+    if(year) ok = ok && String(s.year) === year;
+    if(branch) ok = ok && s.branch.toLowerCase() === branch;
+    if(section) ok = ok && s.section == section;
+    return ok;
+  });
+
+  body.innerHTML = "";
+  if(!filtered.length){
+    body.innerHTML = `<tr><td colspan="3" class="no-data">No students found</td></tr>`;
     return;
   }
 
-  body.innerHTML = `<tr><td colspan="3">Loading...</td></tr>`;
-  marked = {};
-
-  try{
-    const cls = `${branch}-${section}`;
-    const res = await fetch(`${API_STUDENTS}/${cls}`);
-    const data = await res.json();
-
-    let students = data.students || [];
-
-    // 🔹 SAME FILTER STYLE AS students.html
-    let filtered = students.filter(s=>{
-      let ok = true;
-      ok = ok && String(s.year) === year;
-      ok = ok && s.branch.toLowerCase().includes(branch.toLowerCase());
-      return ok;
-    });
-
-    body.innerHTML = "";
-
-    if(!filtered.length){
-      body.innerHTML =
-        `<tr><td colspan="3" class="no-data">No students found</td></tr>`;
-      return;
-    }
-
-    for(const s of filtered){
-      body.innerHTML += `
-        <tr>
-          <td>${s.enrollment}</td>
-          <td>${s.name}</td>
-          <td>
-            <button class="mark-btn present"
-              onclick="mark('${s.enrollment}','P',this)">P</button>
-            <button class="mark-btn absent"
-              onclick="mark('${s.enrollment}','A',this)">A</button>
-          </td>
-        </tr>
-      `;
-    }
-
-  }catch(err){
-    console.error(err);
-    body.innerHTML =
-      `<tr><td colspan="3" class="no-data">Server error</td></tr>`;
+  for(const s of filtered){
+    body.innerHTML += `
+      <tr>
+        <td>${s.enrollment}</td>
+        <td>${s.name}</td>
+        <td>
+          <button class="mark-btn present" onclick="mark('${s.enrollment}','P',this)">P</button>
+          <button class="mark-btn absent" onclick="mark('${s.enrollment}','A',this)">A</button>
+        </td>
+      </tr>
+    `;
   }
 }
 
@@ -159,12 +164,12 @@ async function render(){
 function mark(enr,status,btn){
   marked[enr] = status;
   btn.parentElement.querySelectorAll("button")
-    .forEach(b=>b.classList.remove("selected"));
+     .forEach(b=>b.classList.remove("selected"));
   btn.classList.add("selected");
 }
 
 /* ===============================
-   SUBMIT
+   SUBMIT ATTENDANCE
 ================================ */
 async function submitAttendance(){
   if(!Object.keys(marked).length){
@@ -172,16 +177,39 @@ async function submitAttendance(){
     return;
   }
 
-  const res = await fetch(API_SUBMIT,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ records: marked })
-  });
-
-  const d = await res.json();
-  alert(d.success ? "Attendance Saved" : "Error saving attendance");
+  try{
+    const res = await fetch(API_SUBMIT,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({records:marked})
+    });
+    const d = await res.json();
+    alert(d.success ? "Attendance Saved" : "Error saving attendance");
+  }catch(err){
+    console.error(err);
+    alert("Server error");
+  }
 }
 
+/* ===============================
+   LOAD & REFRESH BUTTONS
+================================ */
+document.getElementById("loadBtn").addEventListener("click",()=>{
+  renderTable();
+});
+
+document.getElementById("refreshBtn").addEventListener("click",async()=>{
+  await fetchAllStudents(true); // force fetch from API
+  renderTable();
+});
+
+/* ===============================
+   INITIAL LOAD (CACHE)
+================================ */
+document.addEventListener("DOMContentLoaded",async()=>{
+  await fetchAllStudents();
+});
+  
 function logout(){
   localStorage.clear();
   sessionStorage.clear();
