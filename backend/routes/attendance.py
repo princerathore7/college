@@ -24,14 +24,13 @@ attendance_collection = db["attendance"]
 # -----------------------------
 # 1️⃣ Get students by Branch + Section
 # -----------------------------
-@attendance_bp.route('/class/<int:year>/<string:branch>/<string:section>', methods=['GET'])
-def get_students_by_class_post(year, branch, section):
+@attendance_bp.route('/class/<string:class_name>', methods=['GET'])
+def get_students_by_class_get(class_name):
+    # example URL:
+    # /api/attendance/class/2nd%20Year%20IT2
+
     students = list(students_collection.find(
-        {
-            "year": year,
-            "branch": branch,
-            "section": section
-        },
+        {"class": class_name},
         {"_id": 0}
     ))
 
@@ -40,6 +39,7 @@ def get_students_by_class_post(year, branch, section):
         "count": len(students),
         "students": students
     }), 200
+
 
 # -----------------------------
 # 2️⃣ Mark Attendance (P / A)
@@ -197,28 +197,22 @@ def edit_attendance_percentage():
         print("❌ Error in edit_attendance_percentage:", e)
         return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
 @attendance_bp.route("/class", methods=["POST", "OPTIONS"])
-@cross_origin()  # ensures OPTIONS handled
+@cross_origin()
 def get_students_by_class():
     if request.method == "OPTIONS":
         return "", 200
+
     data = request.json
+    class_name = data.get("class")   # 🔥 IMPORTANT
 
-    year = data.get("year")
-    branch = data.get("branch")
-    section = data.get("section")
-
-    if not year or not branch or not section:
+    if not class_name:
         return jsonify({
             "success": False,
-            "message": "Year, branch and section are required"
+            "message": "Class is required (e.g. '2nd Year IT2')"
         }), 400
 
     students = list(students_collection.find(
-        {
-            "year": int(year),
-            "branch": branch,
-            "section": section
-        },
+        {"class": class_name},
         {"_id": 0}
     ))
 

@@ -163,14 +163,24 @@ function logout(){
 async function render(){
   const body = document.getElementById("studentsBody");
 
-  const year = document.getElementById("year").value;
-  const branch = document.getElementById("branch").value;
+  const yearVal = document.getElementById("year").value;
+  const branch  = document.getElementById("branch").value;
   const section = document.getElementById("section").value;
 
-  if(!year || !branch || !section){
+  if(!yearVal || !branch || !section){
     alert("Please select Year, Branch and Section");
     return;
   }
+
+  // 🔥 BUILD CLASS STRING (MATCHES DB)
+  const yearText =
+    yearVal === "1" ? "1st Year" :
+    yearVal === "2" ? "2nd Year" :
+    yearVal === "3" ? "3rd Year" :
+    yearVal === "4" ? "4th Year" : "";
+
+  const className = `${yearText} ${branch}${section}`;
+  // example: "2nd Year IT2"
 
   body.innerHTML = `<tr><td colspan="3">Loading students...</td></tr>`;
   marked = {};
@@ -179,11 +189,7 @@ async function render(){
     const res = await fetch(API_CLASS,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({
-        year,
-        branch,
-        section
-      })
+      body: JSON.stringify({ class: className })
     });
 
     const data = await res.json();
@@ -192,7 +198,7 @@ async function render(){
       body.innerHTML = `
         <tr>
           <td colspan="3" class="no-data">
-            No students found for ${year} Year ${branch} Section ${section}
+            No students found for ${className}
           </td>
         </tr>`;
       return;
