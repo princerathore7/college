@@ -370,6 +370,16 @@ async function render(refresh=false){
     return ok;
   });
 
+  // 🔹 SORT LOGIC
+  filtered.sort((a, b) => {
+    // 1️⃣ Compare by enrollment numbers (extract numeric part)
+    const numA = a.enrollment.replace(/\D/g, ""); // keep only digits
+    const numB = b.enrollment.replace(/\D/g, "");
+    if(Number(numA) !== Number(numB)) return Number(numA) - Number(numB);
+
+    // 2️⃣ If enrollment numbers equal, compare by section ascending
+    return Number(a.section) - Number(b.section);
+  });
   body.innerHTML = "";
 
   if(!filtered.length){
