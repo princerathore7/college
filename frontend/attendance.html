@@ -2,35 +2,21 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Admin — Attendance</title>
+<title>Attendance</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-
 <style>
-body{margin:0;font-family:Inter,system-ui,sans-serif;background:#f4f6fb}
-header{
-  background:#003366;color:#fff;
-  padding:14px 20px;
-  display:flex;justify-content:space-between;align-items:center
-}
-main{padding:20px;max-width:1100px;margin:auto}
-.controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px}
+body{font-family:Inter,system-ui,sans-serif;background:#f5f6fc;margin:0;padding:20px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
 select,button{padding:8px 12px;border-radius:6px;border:1px solid #ccc}
 button{background:#003366;color:#fff;cursor:pointer}
-button:hover{background:#0057ad}
-
-table{
-  width:100%;border-collapse:collapse;background:#fff;
-  border-radius:10px;overflow:hidden
-}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden}
 th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:center}
 th{background:#eef3ff}
-
-.mark-btn{padding:6px 12px;border-radius:6px;border:none;cursor:pointer}
+.mark-btn{padding:6px 12px;border:none;border-radius:6px;cursor:pointer}
 .present{background:#16a34a;color:#fff}
 .absent{background:#dc2626;color:#fff}
 .selected{outline:3px solid #00000022}
-.no-data{text-align:center;color:#666}
+.no-data{color:#666}
 </style>
 </head>
 
@@ -41,15 +27,13 @@ th{background:#eef3ff}
   <button onclick="logout()">Logout</button>
 </header>
 
-<main>
-
-<div class="controls">
+<div style="display:flex;gap:10px;margin-bottom:15px">
   <select id="year">
     <option value="">Year</option>
-    <option value="1">1st Year</option>
-    <option value="2">2nd Year</option>
-    <option value="3">3rd Year</option>
-    <option value="4">4th Year</option>
+    <option value="1">1st</option>
+    <option value="2">2nd</option>
+    <option value="3">3rd</option>
+    <option value="4">4th</option>
   </select>
 
   <select id="branch">
@@ -57,8 +41,6 @@ th{background:#eef3ff}
     <option value="CSE">CSE</option>
     <option value="IT">IT</option>
     <option value="ECE">ECE</option>
-    <option value="ME">ME</option>
-    <option value="CE">CE</option>
   </select>
 
   <select id="section">
@@ -66,10 +48,9 @@ th{background:#eef3ff}
     <option value="1">1</option>
     <option value="2">2</option>
     <option value="3">3</option>
-    <option value="4">4</option>
   </select>
 
-  <button onclick="loadStudents()">Load Students</button>
+  <button onclick="render()">Load Students</button>
 </div>
 
 <table>
@@ -88,20 +69,16 @@ th{background:#eef3ff}
 <br>
 <button onclick="submitAttendance()">Submit Attendance</button>
 
-</main>
-
 <script>
 /* ===============================
-   ACCESS CONTROL — ADMIN
+   ACCESS CONTROL
 ================================ */
 const mentorId = localStorage.getItem("mentorId");
 const source = sessionStorage.getItem("accessSource");
 
 if(!mentorId || !["ad","admin"].includes(source)){
-  document.body.innerHTML = `
-    <h2 style="text-align:center;margin-top:20vh;color:red">
-      ❌ Access Denied
-    </h2>`;
+  document.body.innerHTML =
+    "<h2 style='text-align:center;margin-top:20vh;color:red'>Access Denied</h2>";
   throw new Error("Unauthorized");
 }
 
@@ -111,26 +88,20 @@ if(!mentorId || !["ad","admin"].includes(source)){
 const API_STUDENTS = "https://college-hwbb.onrender.com/api/students";
 const API_SUBMIT   = "https://college-hwbb.onrender.com/api/attendance/mark";
 
-let marked = {}; // enrollment → P / A
-
-function logout(){
-  localStorage.clear();
-  sessionStorage.clear();
-  location.href = "login.html";
-}
+let marked = {};
 
 /* ===============================
-   LOAD STUDENTS (CLASS WISE)
+   RENDER (STUDENT STYLE)
 ================================ */
-async function loadStudents(){
+async function render(){
   const body = document.getElementById("studentsBody");
 
-  const year    = document.getElementById("year").value;
-  const branch  = document.getElementById("branch").value;
+  const year = document.getElementById("year").value;
+  const branch = document.getElementById("branch").value;
   const section = document.getElementById("section").value;
 
   if(!year || !branch || !section){
-    alert("Please select Year, Branch and Section");
+    alert("Select Year, Branch & Section");
     return;
   }
 
@@ -138,20 +109,29 @@ async function loadStudents(){
   marked = {};
 
   try{
-    // backend expects: IT-2, CSE-1 etc.
     const cls = `${branch}-${section}`;
-
     const res = await fetch(`${API_STUDENTS}/${cls}`);
     const data = await res.json();
 
-    if(!data.success || !data.students.length){
-      body.innerHTML = `
-        <tr><td colspan="3" class="no-data">No students found</td></tr>`;
+    let students = data.students || [];
+
+    // 🔹 SAME FILTER STYLE AS students.html
+    let filtered = students.filter(s=>{
+      let ok = true;
+      ok = ok && String(s.year) === year;
+      ok = ok && s.branch.toLowerCase().includes(branch.toLowerCase());
+      return ok;
+    });
+
+    body.innerHTML = "";
+
+    if(!filtered.length){
+      body.innerHTML =
+        `<tr><td colspan="3" class="no-data">No students found</td></tr>`;
       return;
     }
 
-    body.innerHTML = "";
-    data.students.forEach(s=>{
+    for(const s of filtered){
       body.innerHTML += `
         <tr>
           <td>${s.enrollment}</td>
@@ -162,13 +142,14 @@ async function loadStudents(){
             <button class="mark-btn absent"
               onclick="mark('${s.enrollment}','A',this)">A</button>
           </td>
-        </tr>`;
-    });
+        </tr>
+      `;
+    }
 
   }catch(err){
     console.error(err);
-    body.innerHTML = `
-      <tr><td colspan="3" class="no-data">Server error</td></tr>`;
+    body.innerHTML =
+      `<tr><td colspan="3" class="no-data">Server error</td></tr>`;
   }
 }
 
@@ -183,7 +164,7 @@ function mark(enr,status,btn){
 }
 
 /* ===============================
-   SUBMIT ATTENDANCE
+   SUBMIT
 ================================ */
 async function submitAttendance(){
   if(!Object.keys(marked).length){
@@ -191,19 +172,20 @@ async function submitAttendance(){
     return;
   }
 
-  try{
-    const res = await fetch(API_SUBMIT,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ records: marked })
-    });
+  const res = await fetch(API_SUBMIT,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ records: marked })
+  });
 
-    const d = await res.json();
-    alert(d.success ? "✅ Attendance saved" : "❌ Error saving attendance");
-  }catch(err){
-    console.error(err);
-    alert("❌ Server error");
-  }
+  const d = await res.json();
+  alert(d.success ? "Attendance Saved" : "Error saving attendance");
+}
+
+function logout(){
+  localStorage.clear();
+  sessionStorage.clear();
+  location.href="login.html";
 }
 </script>
 
