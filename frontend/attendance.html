@@ -200,15 +200,22 @@ async function render(){
   const students = await fetchStudents();
 
   // 🔥 SAME LOGIC AS ADMIN STUDENTS PAGE
-  const filtered = students.filter(s=>{
-    let ok = true;
+const filtered = students.filter(s => {
+  let ok = true;
 
-    if(year)    ok = ok && String(s.year) === year;
-    if(branch)  ok = ok && s.branch.toLowerCase().includes(branch);
-    if(section) ok = ok && String(s.section) === section;
+  // Year exact match
+  if (year) {
+    ok = ok && String(s.year) === String(year);
+  }
 
-    return ok;
-  });
+  // Branch + Section combined (IT + 2 => IT2)
+  if (branch && section) {
+    const expectedClass = (branch + section).toLowerCase();
+    ok = ok && String(s.branch).toLowerCase() === expectedClass;
+  }
+
+  return ok;
+});
 
   body.innerHTML = "";
 
