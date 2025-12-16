@@ -3,6 +3,7 @@ from datetime import datetime
 from pymongo import MongoClient
 from flask_cors import CORS
 import os
+from flask_cors import cross_origin
 
 # 🔔 Import notifications helper
 from routes.notifications import send_to_enrollment
@@ -195,8 +196,11 @@ def edit_attendance_percentage():
     except Exception as e:
         print("❌ Error in edit_attendance_percentage:", e)
         return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
-@attendance_bp.route("/class", methods=["POST"])
+@attendance_bp.route("/class", methods=["POST", "OPTIONS"])
+@cross_origin()  # ensures OPTIONS handled
 def get_students_by_class():
+    if request.method == "OPTIONS":
+        return "", 200
     data = request.json
 
     year = data.get("year")
