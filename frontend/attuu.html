@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin — Class Attendance</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+body{font-family:Inter,system-ui,sans-serif;background:#f5f6fc;margin:0;padding:20px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+select,button{padding:9px 14px;border-radius:8px;border:1px solid #cbd5e1;font-size:14px}
+button{background:#003366;color:#fff;cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+.controls{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
+.summary{display:flex;gap:15px;margin-bottom:10px;font-weight:600}
+.summary span{padding:6px 12px;border-radius:8px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.06)}
+.present-box{color:#16a34a;font-weight:600}
+.absent-box{color:#dc2626;font-weight:600}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden}
+thead{position:sticky;top:0;z-index:2}
+th{background:#eef3ff;padding:12px;font-size:14px}
+td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:center}
+tr.present-row{background:#ecfdf5;transition:background 0.3s;}
+tr.absent-row{background:#fee2e2;transition:background 0.3s;}
+.mark-btn{padding:6px 14px;border:none;border-radius:20px;cursor:pointer;font-weight:600;transition:all 0.2s;}
+.present{background:#16a34a;color:#fff}
+.absent{background:#dc2626;color:#fff}
+.selected{outline:3px solid #00000022}
+.no-data{color:#666}
+.actionBtn{padding:6px 10px;margin-left:5px;border-radius:6px;background:#1e40af;color:#fff;border:none;cursor:pointer;font-size:12px;transition:all 0.2s}
+.badge{padding:4px 8px;border-radius:6px;color:#fff;font-weight:600;margin-right:5px}
+.green{background:#16a34a}
+.yellow{background:#facc15;color:#000}
+.red{background:#dc2626}
+#submitMsg{display:none;padding:10px;margin-bottom:10px;border-radius:8px;text-align:center;font-weight:600;}
+#submitting{display:none;background:#fef3c7;color:#78350f;}
+#successSubmit{display:none;background:#dcfce7;color:#166534;}
+</style>
+</head>
+<body>
+
+<header>
+<h2>Admin — Class Attendance</h2>
+<button class="actionBtn" onclick="logout()">Logout</button>
+</header>
+
+<main style="padding:20px;max-width:1400px;margin:auto">
+
+<div class="controls">
+<select id="year"><option value="">All Years</option><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
+<select id="branch"><option value="">All Branches</option></select>
+<select id="section"><option value="">-- Select Section --</option></select>
+<input type="text" id="searchEnrollment" placeholder="Search Enrollment Number" style="padding:8px 12px;border-radius:8px;border:1px solid #d1d5db;min-width:220px;outline:none">
+<button id="refreshBtn">Refresh</button>
+</div>
+
+<div id="submitMsg">
+  <span id="submitting">Submitting, please wait...</span>
+  <span id="successSubmit"></span>
+</div>
+
+<table>
+<thead>
+<tr>
+  <th>Enrollment</th>
+  <th>Name</th>
+  <th>Year</th>
+  <th>Branch</th>
+  <th>Attendance</th>
+  <th>Pending Fees</th>
+  <th>Fine</th>
+</tr>
+</thead>
+<tbody id="studentsBody"><tr><td colspan="7" class="no-data">Loading...</td></tr></tbody>
+</table>
+
+</main>
+
+<script>
+const mentorId = localStorage.getItem("mentorId");
+const source = sessionStorage.getItem("accessSource");
+const ALLOWED_SOURCES=["ad","admin"];
+if(!mentorId||!ALLOWED_SOURCES.includes(source)){
+  document.body.innerHTML=`<h2 style="text-align:center;margin-top:20vh;color:red">❌ Access Denied<br>Please open this page via Administration Panel</h2>`;
+  throw new Error("Unauthorized access");
+}
+
+const API_STUDENTS="https://college-hwbb.onrender.com/api/admin/students";
+const API_MARK_ATT="https://college-hwbb.onrender.com/api/attendance/mark";
+
+const DRAFT_KEY="attendance_draft";
+function loadDraft(){const d=localStorage.getItem(DRAFT_KEY);return d?JSON.parse(d):{}}
+function saveDraft(d){localStorage.setItem(DRAFT_KEY,JSON.stringify(d))}
+function clearDraft(){localStorage.removeItem(DRAFT_KEY)}
+let marked=loadDraft();
+
+function logout(){localStorage.clear();location.href="login.html";}
+
+async function fetchStudents(force=false){
+  if(!force){ const cached=localStorage.getItem("admin_students"); if(cached) return JSON.parse(cached);}
+  const res=await fetch(API_STUDENTS);
+  const data=await res.json();
+  if(data.success){localStorage.setItem("admin_students",JSON.stringify(data.students)); return data.students;}
+  return [];
+}
+
+function markAttendance(enrollment,status){
+  marked[enrollment]=status;
+  saveDraft(marked);
+  render(false);
+}
+
+async function submitAttendance(){
+  if(!Object.keys(marked).length){ alert("No attendance marked"); return; }
+  const subMsg=document.getElementById("submitting");
+  const successMsg=document.getElementById("successSubmit");
+  subMsg.style.display="inline";
+  successMsg.style.display="none";
+  try{
+    const res=await fetch(API_MARK_ATT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({records:marked})});
+    const data=await res.json();
+    subMsg.style.display="none";
+    if(data.success){
+      const count=Object.keys(marked).length;
+      successMsg.innerText=`${count} student(s) attendance registered ✅`;
+      successMsg.style.display="inline";
+      clearDraft(); marked={}; render(false);
+      setTimeout(()=>{successMsg.style.display="none";},4000);
+    } else { alert(data.message||"Submission failed"); }
+  }catch(err){subMsg.style.display="none";console.error(err);alert("Server error");}
+}
+
+function populateBranches(students){
+  const branchSelect=document.getElementById("branch");
+  const branches=[...new Set(students.map(s=>s.enrollment.replace(/[0-9]/g,"")))].sort();
+  branchSelect.innerHTML=`<option value="">All Branches</option>`;
+  branches.forEach(b=>{ const opt=document.createElement("option"); opt.value=b; opt.textContent=b; branchSelect.appendChild(opt); });
+}
+
+function populateSections(students,branch){
+  const sectionSelect=document.getElementById("section");
+  sectionSelect.innerHTML=`<option value="">-- Select Section --</option>`;
+  if(!branch) return;
+  const sections=[...new Set(students.filter(s=>s.enrollment.startsWith(branch)).map(s=>String(s.section)))].sort();
+  sections.forEach(sec=>{ const opt=document.createElement("option"); opt.value=sec; opt.textContent=sec; sectionSelect.appendChild(opt); });
+}
+
+async function render(refresh=false){
+  const body=document.getElementById("studentsBody");
+  const yearVal=document.getElementById("year").value;
+  const branchVal=document.getElementById("branch").value;
+  const sectionVal=document.getElementById("section").value;
+  const searchEnr=document.getElementById("searchEnrollment").value.trim().toLowerCase();
+  const students=await fetchStudents(refresh);
+  populateBranches(students);
+  populateSections(students,branchVal);
+
+  let filtered=students.filter(s=>{
+    let ok=true;
+    if(yearVal) ok=ok && String(s.year)===yearVal;
+    if(branchVal) ok=ok && s.enrollment.toUpperCase().startsWith(branchVal.toUpperCase());
+    if(sectionVal) ok=ok && String(s.section)===sectionVal;
+    if(searchEnr) ok=ok && s.enrollment.toLowerCase().includes(searchEnr);
+    return ok;
+  });
+
+  if(searchEnr){
+    filtered.sort((a,b)=>{
+      const aStarts=a.enrollment.toLowerCase().startsWith(searchEnr);
+      const bStarts=b.enrollment.toLowerCase().startsWith(searchEnr);
+      return aStarts===bStarts?0:aStarts?-1:1;
+    });
+  } else {
+    filtered.sort((a,b)=>{
+      const numA=a.enrollment.replace(/\D/g,"");
+      const numB=b.enrollment.replace(/\D/g,"");
+      if(Number(numA)!==Number(numB)) return Number(numA)-Number(numB);
+      return Number(a.section)-Number(b.section);
+    });
+  }
+
+  body.innerHTML="";
+  if(!filtered.length){ body.innerHTML=`<tr><td colspan="7" class="no-data">No students found</td></tr>`; return; }
+
+  for(const s of filtered){
+    const att=marked[s.enrollment]??null;
+    const badge=att?`<span class="badge ${att==="P"?"green":"red"}">${att}</span>`:"—";
+    body.innerHTML+=`
+      <tr class="${att==="P"?"present-row":att==="A"?"absent-row":""}">
+        <td>${s.enrollment}</td>
+        <td>${s.name}</td>
+        <td>${s.year}</td>
+        <td>${s.enrollment.replace(/[0-9]/g,"")}</td>
+        <td>
+          <button class="mark-btn present ${att==="P"?"selected":""}" onclick="markAttendance('${s.enrollment}','P')">P</button>
+          <button class="mark-btn absent ${att==="A"?"selected":""}" onclick="markAttendance('${s.enrollment}','A')">A</button>
+        </td>
+        <td>₹ ${s.pendingFees??0}</td>
+        <td>₹ ${s.fine??0}</td>
+      </tr>
+    `;
+  }
+}
+
+["year","branch","section"].forEach(id=>{document.getElementById(id).addEventListener("change",()=>render(false));});
+document.getElementById("refreshBtn").onclick=()=>render(true);
+document.getElementById("searchEnrollment").addEventListener("input",()=>render(false));
+document.addEventListener("DOMContentLoaded",()=>render(false));
+</script>
+
+</body>
+</html>
