@@ -119,11 +119,7 @@ tr.absent-row{background:#fef2f2}
 </header>
 
 <main style="padding:20px;max-width:1400px;margin:auto">
-<div class="summary">
-  <span>Total: <b id="totalCount">0</b></span>
-  <span class="present-box">Present: <b id="presentCount">0</b></span>
-  <span class="absent-box">Absent: <b id="absentCount">0</b></span>
-</div>
+
 <div class="controls">
   <select id="year">
     <option value="">All Years</option>
@@ -291,30 +287,26 @@ async function fetchStudents(force=false){
 /* ===============================
    MARK ATTENDANCE (P / A)
 ================================ */
-function mark(enr,status,btn){
-  marked[enr] = status;
+async function markAttendance(enrollment, status){
+  try{
+    const res = await fetch(API_MARK_ATT,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        records:{ [enrollment]: status }
+      })
+    });
 
-  const row = btn.closest("tr");
-  row.classList.remove("present-row","absent-row");
-  row.classList.add(status==="P" ? "present-row" : "absent-row");
-
-  btn.parentElement.querySelectorAll("button")
-    .forEach(b=>b.classList.remove("selected"));
-  btn.classList.add("selected");
-
-  updateSummary();
-}
-/* ===============================
-   SUMMURY (P / A)
-================================ */
-function updateSummary(){
-  const values = Object.values(marked);
-  const p = values.filter(v=>v==="P").length;
-  const a = values.filter(v=>v==="A").length;
-
-  document.getElementById("presentCount").innerText = p;
-  document.getElementById("absentCount").innerText = a;
-  document.getElementById("submitBtn").disabled = (p+a) === 0;
+    const data = await res.json();
+    if(data.success){
+      alert(`Attendance marked: ${enrollment} → ${status}`);
+    }else{
+      alert(data.message || "Failed");
+    }
+  }catch(err){
+    console.error(err);
+    alert("Server error");
+  }
 }
 
 /* ===============================
@@ -369,10 +361,6 @@ async function render(refresh=false){
 
   localStorage.setItem("admin_students", JSON.stringify(students));
 }
-document.getElementById("totalCount").innerText = filtered.length;
-marked = {};
-updateSummary();
-
 
 /* ===============================
    EVENTS
