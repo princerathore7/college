@@ -19,11 +19,11 @@ td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:center}
 .mark-btn{padding:6px 14px;border:none;border-radius:20px;cursor:pointer;font-weight:600;transition:all 0.2s;margin:2px}
 .present{background:#16a34a;color:#fff}
 .absent{background:#dc2626;color:#fff}
-.selected{outline:3px solid #00000022}
+.selected{outline:3px solid #facc15} /* Yellow outline for marked */
 .no-data{color:#666}
 #submitMsg{display:none;padding:10px;margin-bottom:10px;border-radius:8px;text-align:center;font-weight:600;}
-#submitting{display:none;background:#fef3c7;color:#78350f;}
-#successSubmit{display:none;background:#dcfce7;color:#166534;}
+#submitting{display:none;background:#fef3c7;color:#78350f;padding:6px 12px;border-radius:6px;margin-right:5px;}
+#successSubmit{display:none;background:#dcfce7;color:#166534;padding:6px 12px;border-radius:6px;}
 </style>
 </head>
 <body>
@@ -51,8 +51,8 @@ td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:center}
     <option value="CSE3">CSE3</option>
     <option value="CSE4">CSE4</option>
     <option value="CSE5">CSE5</option>
-    
-    <option value="IT1">IT1</option>
+    <option value="IT2">IT2</option>
+        <option value="IT1">IT1</option>
     <option value="IT2">IT2</option>
     <option value="IT3">IT3</option>
     <option value="IT4">IT4</option>
@@ -192,13 +192,10 @@ td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:center}
   
   </select>
 
+  </select>
+
   <button id="refreshBtn">Refresh</button>
 </div>
-
-<label>Select Section</label>
-<select id="section">
-  <option value="">-- select section --</option>
-</select>
 
 <input type="text" id="searchEnrollment" placeholder="Search by Enrollment Number" style="padding:8px 12px;border-radius:8px;border:1px solid #d1d5db;font-size:14px;min-width:220px;outline:none">
 
@@ -274,21 +271,11 @@ function submitAttendance(){
   }).catch(err=>{subMsg.style.display="none";console.error(err);alert("Server error");});
 }
 
-// POPULATE SECTIONS
-function populateSections(students, branch){
-  const sectionSelect=document.getElementById("section");
-  sectionSelect.innerHTML=`<option value="">-- select section --</option>`;
-  if(!branch) return;
-  const sections=[...new Set(students.filter(s=>s.branch===branch).map(s=>String(s.section)))].sort();
-  sections.forEach(sec=>{ const opt=document.createElement("option"); opt.value=sec; opt.textContent=sec; sectionSelect.appendChild(opt); });
-}
-
 // RENDER
 async function render(refresh=false){
   const body=document.getElementById("studentsBody");
   const yearVal=document.getElementById("year").value;
   const branchVal=document.getElementById("branch").value;
-  const sectionVal=document.getElementById("section").value;
   const searchEnr=document.getElementById("searchEnrollment").value.trim().toLowerCase();
 
   const students=await fetchStudents(refresh);
@@ -296,24 +283,19 @@ async function render(refresh=false){
   let filtered=students.filter(s=>{
     let ok=true;
     if(yearVal) ok=ok && String(s.year)===yearVal;
-
-    // ✅ Branch filter: check backend field or infer from enrollment number
     if(branchVal){
-      const enrBranch = (s.enrollment.match(/[A-Z]+/g)||[]).join(""); // enrollment letters
+      const enrBranch = (s.enrollment.match(/[A-Z]+/g)||[]).join("");
       ok = ok && (s.branch===branchVal || enrBranch.startsWith(branchVal));
     }
-
-    if(sectionVal) ok=ok && String(s.section)===sectionVal;
     if(searchEnr) ok=ok && s.enrollment.toLowerCase().includes(searchEnr);
     return ok;
   });
 
-  // SORT: enrollment numeric + section
   filtered.sort((a,b)=>{
     const numA=a.enrollment.replace(/\D/g,"");
     const numB=b.enrollment.replace(/\D/g,"");
     if(Number(numA)!==Number(numB)) return Number(numA)-Number(numB);
-    return Number(a.section)-Number(b.section);
+    return 0;
   });
 
   body.innerHTML="";
@@ -337,12 +319,11 @@ async function render(refresh=false){
 }
 
 // EVENTS
-["year","branch","section"].forEach(id=>{document.getElementById(id).addEventListener("change",()=>render(false));});
+["year","branch"].forEach(id=>{document.getElementById(id).addEventListener("change",()=>render(false));});
 document.getElementById("refreshBtn").onclick=()=>render(true);
 document.getElementById("searchEnrollment").addEventListener("input",()=>render(false));
 document.addEventListener("DOMContentLoaded",()=>render(false));
 </script>
-
 
 </body>
 </html>
