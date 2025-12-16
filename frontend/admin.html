@@ -88,7 +88,10 @@
     <input type="text" id="enrollment" placeholder="Enter Enrollment Number" />
     <button onclick="fetchStudent()">Search</button>
     <button id="backBtn" onclick="resetForm()">Back</button>
-
+<div id="requestingContainer" style="position:fixed;top:10px;right:10px;width:300px;z-index:999;">
+  <h4 style="margin:0 0 5px 0;font-size:14px;">Requesting Queue</h4>
+  <ul id="requestingList" style="list-style:none;padding:0;margin:0;"></ul>
+</div>
     <div id="studentInfo" style="display:none;">
       <p><strong>Name:</strong> <span id="sName"></span></p>
       <p><strong>Year:</strong></p>
@@ -279,6 +282,90 @@
   </div>
 
   <script>
+    const requestQueue = []; // pending requests
+
+function addRequest(enrollment, type, payloadFn) {
+  const reqId = Date.now() + Math.random(); // unique id
+  const listEl = document.getElementById("requestingList");
+
+  // Create list item
+  const li = document.createElement("li");
+  li.id = "req_" + reqId;
+  li.style = "background:#eef3ff;margin:3px 0;padding:6px 8px;border-radius:6px;font-size:13px;display:flex;justify-content:space-between;align-items:center;";
+  li.innerHTML = `
+    <span>${type} - ${enrollment} ⏳</span>
+    <button style="background:none;border:none;color:red;font-weight:bold;cursor:pointer;">❌</button>
+  `;
+  const cancelBtn = li.querySelector("button");
+  cancelBtn.onclick = () => {
+    // Remove from queue
+    const idx = requestQueue.findIndex(r => r.id === reqId);
+    if(idx >= 0) requestQueue.splice(idx,1);
+    li.remove();
+  };
+  listEl.appendChild(li);
+
+  const requestObj = {id:reqId,enrollment,type,li};
+  requestQueue.push(requestObj);
+
+  // Execute the request async
+  (async ()=>{
+    try {
+      const payload = payloadFn();
+      const res = await fetch(payload.url, payload.options);
+      const data = await res.json();
+      li.querySelector("span").textContent = `${type} - ${enrollment} ${data.success ? "✅" : "❌"}`;
+    } catch(err) {
+      console.error(err);
+      li.querySelector("span").textContent = `${type} - ${enrollment} ❌`;
+    } finally {
+      // Remove from queue after 3s
+      setTimeout(()=>{ li.remove(); const idx = requestQueue.findIndex(r=>r.id===reqId); if(idx>=0) requestQueue.splice(idx,1); },3000);
+    }
+  })();
+}
+
+// ✅ Hook into updateClass
+const origUpdateClass = updateClass; // keep existing function
+updateClass = function(){
+  const enrollment = document.getElementById("enrollment").value.trim();
+  const newClass = document.getElementById("newClass").value;
+  const year = document.getElementById("yearSelect").value;
+
+  if(!newClass || !year || !enrollment) return;
+
+  addRequest(enrollment,"Class Update", ()=>({
+    url: `https://college-hwbb.onrender.com/api/students/${enrollment}/class`,
+    options:{
+      method:"PUT",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ class:`${year} ${newClass}` })
+    }
+  }));
+
+  // Call original to update local display instantly if needed
+  origUpdateClass();
+};
+
+// ✅ Hook into editAttendance
+const origEditAttendance = editAttendance;
+editAttendance = function(enrollment){
+  let total = parseInt(prompt("Enter total days:"));
+  let present = parseInt(prompt("Enter present days:"));
+  if(isNaN(total)||isNaN(present)||total<0||present<0||present>total) { alert("Invalid input!"); return; }
+
+  addRequest(enrollment,"Attendance Update", ()=>({
+    url:"https://college-hwbb.onrender.com/api/attendance/edit_percentage",
+    options:{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ enrollment,total,present })
+    }
+  }));
+
+  // Call original for local display update if needed
+  origEditAttendance(enrollment);
+};
     /* ===============================
    ACCESS CONTROL — ADMIN PAGES
 ================================ */
