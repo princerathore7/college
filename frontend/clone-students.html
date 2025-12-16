@@ -8,28 +8,107 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 
 <style>
-:root{
-  --bg:#f4f6fb;
-  --card:#ffffff;
-  --accent:#4f46e5;
-  --muted:#6b7280;
-  --green:#16a34a;
-  --yellow:#ca8a04;
-  --red:#dc2626;
+body{
+  font-family:Inter,system-ui,sans-serif;
+  background:#f5f6fc;
+  margin:0;
+  padding:20px
 }
-body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:#111}
-header{display:flex;justify-content:space-between;align-items:center;background:#fff;padding:12px 20px;border-bottom:1px solid #e6e9f2}
-table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden}
-th,td{padding:10px 12px;border-bottom:1px solid #eee;font-size:14px}
-th{background:#f1f3f8}
-.controls{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
-.badge{padding:4px 8px;border-radius:12px;font-size:12px;font-weight:600;color:#fff}
-.green{background:var(--green)}
-.yellow{background:var(--yellow)}
-.red{background:var(--red)}
-.actionBtn{padding:4px 8px;font-size:12px;border:0;border-radius:6px;cursor:pointer;background:var(--accent);color:#fff;margin-left:4px}
-.no-data{text-align:center;color:#888}
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px
+}
+select,button{
+  padding:9px 14px;
+  border-radius:8px;
+  border:1px solid #cbd5e1;
+  font-size:14px
+}
+button{
+  background:#003366;
+  color:#fff;
+  cursor:pointer
+}
+button:disabled{
+  opacity:.5;
+  cursor:not-allowed
+}
+
+.controls{
+  display:flex;
+  gap:10px;
+  margin-bottom:15px;
+  flex-wrap:wrap
+}
+
+/* SUMMARY */
+.summary{
+  display:flex;
+  gap:15px;
+  margin-bottom:10px;
+  font-weight:600
+}
+.summary span{
+  padding:6px 12px;
+  border-radius:8px;
+  background:#fff;
+  box-shadow:0 2px 6px rgba(0,0,0,.06)
+}
+.present-box{color:#15803d}
+.absent-box{color:#b91c1c}
+
+/* TABLE */
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+  border-radius:12px;
+  overflow:hidden
+}
+thead{
+  position:sticky;
+  top:0;
+  z-index:2
+}
+th{
+  background:#eef3ff;
+  padding:12px;
+  font-size:14px
+}
+td{
+  padding:10px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:center
+}
+
+/* ROW STATES */
+tr.present-row{background:#ecfdf5}
+tr.absent-row{background:#fef2f2}
+
+/* BUTTONS */
+.mark-btn{
+  padding:6px 14px;
+  border:none;
+  border-radius:20px;
+  cursor:pointer;
+  font-weight:600
+}
+.present{
+  background:#16a34a;
+  color:#fff
+}
+.absent{
+  background:#dc2626;
+  color:#fff
+}
+.selected{
+  outline:3px solid #00000022
+}
+.no-data{color:#666}
 </style>
+
 </head>
 
 <body>
@@ -40,7 +119,11 @@ th{background:#f1f3f8}
 </header>
 
 <main style="padding:20px;max-width:1400px;margin:auto">
-
+<div class="summary">
+  <span>Total: <b id="totalCount">0</b></span>
+  <span class="present-box">Present: <b id="presentCount">0</b></span>
+  <span class="absent-box">Absent: <b id="absentCount">0</b></span>
+</div>
 <div class="controls">
   <select id="year">
     <option value="">All Years</option>
@@ -151,140 +234,8 @@ th{background:#f1f3f8}
 
 </main>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Admin — Students Management</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-
-<style>
-:root{
-  --bg:#f4f6fb;
-  --card:#ffffff;
-  --accent:#4f46e5;
-  --muted:#6b7280;
-  --green:#16a34a;
-  --red:#dc2626;
-}
-body{
-  margin:0;
-  font-family:Inter,system-ui,sans-serif;
-  background:var(--bg);
-  color:#111
-}
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  background:#fff;
-  padding:12px 20px;
-  border-bottom:1px solid #e6e9f2
-}
-table{
-  width:100%;
-  border-collapse:collapse;
-  background:#fff;
-  border-radius:8px;
-  overflow:hidden
-}
-th,td{
-  padding:10px 12px;
-  border-bottom:1px solid #eee;
-  font-size:14px
-}
-th{
-  background:#f1f3f8
-}
-.controls{
-  display:flex;
-  gap:10px;
-  margin-bottom:14px;
-  flex-wrap:wrap
-}
-.actionBtn{
-  padding:6px 10px;
-  font-size:12px;
-  border:0;
-  border-radius:6px;
-  cursor:pointer;
-  background:var(--accent);
-  color:#fff;
-  margin-right:4px
-}
-.no-data{
-  text-align:center;
-  color:#888
-}
-.btnP{ background:var(--green) }
-.btnA{ background:var(--red) }
-</style>
 </head>
-
-<body>
-
-<header>
-  <h2>Admin — Students</h2>
-  <button class="actionBtn" onclick="logout()">Logout</button>
-</header>
-
-<main style="padding:20px;max-width:1400px;margin:auto">
-
-<div class="controls">
-  <select id="year">
-    <option value="">All Years</option>
-    <option value="1">1st Year</option>
-    <option value="2">2nd Year</option>
-    <option value="3">3rd Year</option>
-    <option value="4">4th Year</option>
-  </select>
-
-  <select id="branch">
-    <option value="">All Branches</option>
-    <option value="CSE">CSE</option>
-    <option value="IT">IT</option>
-    <option value="ECE">ECE</option>
-    <option value="EE">EE</option>
-    <option value="ME">ME</option>
-    <option value="CE">CE</option>
-  </select>
-
-  <button class="actionBtn" id="refreshBtn">Refresh</button>
-</div>
-
-<input
-  type="text"
-  id="searchEnrollment"
-  placeholder="Search by Enrollment Number"
-  oninput="render(false)"
-  style="
-    padding:8px 12px;
-    border-radius:8px;
-    border:1px solid #d1d5db;
-    font-size:14px;
-    min-width:220px;
-    outline:none;
-  "
->
-
-<table>
-<thead>
-<tr>
-  <th>Enrollment</th>
-  <th>Name</th>
-  <th>Year</th>
-  <th>Branch</th>
-  <th>Attendance</th>
-</tr>
-</thead>
-<tbody id="studentsBody">
-<tr><td colspan="5" class="no-data">Loading...</td></tr>
-</tbody>
-</table>
-
-</main>
 
 <script>
 /* ===============================
@@ -340,26 +291,30 @@ async function fetchStudents(force=false){
 /* ===============================
    MARK ATTENDANCE (P / A)
 ================================ */
-async function markAttendance(enrollment, status){
-  try{
-    const res = await fetch(API_MARK_ATT,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({
-        records:{ [enrollment]: status }
-      })
-    });
+function mark(enr,status,btn){
+  marked[enr] = status;
 
-    const data = await res.json();
-    if(data.success){
-      alert(`Attendance marked: ${enrollment} → ${status}`);
-    }else{
-      alert(data.message || "Failed");
-    }
-  }catch(err){
-    console.error(err);
-    alert("Server error");
-  }
+  const row = btn.closest("tr");
+  row.classList.remove("present-row","absent-row");
+  row.classList.add(status==="P" ? "present-row" : "absent-row");
+
+  btn.parentElement.querySelectorAll("button")
+    .forEach(b=>b.classList.remove("selected"));
+  btn.classList.add("selected");
+
+  updateSummary();
+}
+/* ===============================
+   SUMMURY (P / A)
+================================ */
+function updateSummary(){
+  const values = Object.values(marked);
+  const p = values.filter(v=>v==="P").length;
+  const a = values.filter(v=>v==="A").length;
+
+  document.getElementById("presentCount").innerText = p;
+  document.getElementById("absentCount").innerText = a;
+  document.getElementById("submitBtn").disabled = (p+a) === 0;
 }
 
 /* ===============================
@@ -414,6 +369,10 @@ async function render(refresh=false){
 
   localStorage.setItem("admin_students", JSON.stringify(students));
 }
+document.getElementById("totalCount").innerText = filtered.length;
+marked = {};
+updateSummary();
+
 
 /* ===============================
    EVENTS
