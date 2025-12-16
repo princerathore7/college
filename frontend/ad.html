@@ -225,11 +225,20 @@ buttons.forEach(btn=>{
 /* ===============================
    BACK / CLOSE OVERLAY
 ================================ */
-document.getElementById("overlayBackBtn").onclick = ()=>{
-  overlay.style.display = "none";
-  frame.src = "";
-  buttons.forEach(b=>b.classList.remove("active"));
+document.getElementById("overlayBackBtn").onclick = () => {
+  const token = localStorage.getItem("mentor_token");
+  const mentorId = localStorage.getItem("mentorId");
+
+  if (!token || !mentorId) {
+    alert("Session expired. Please login again.");
+    window.location.href = "/mentor-login.html";
+    return;
+  }
+
+  // 🔁 Mentor dashboard redirect (same session)
+  window.location.href = "/mentor-dashboard.html";
 };
+
 
 /* ===============================
    LOGOUT
