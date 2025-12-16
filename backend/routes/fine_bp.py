@@ -20,50 +20,38 @@ def serialize(fine):
 # ---------------------------------------------------------
 # 1️⃣ ADMIN — BULK ADD FINES
 # ---------------------------------------------------------
-@fine_bp.route("/bulk-add", methods=["POST", "OPTIONS"])
-@cross_origin(
-    origins="https://acropoliss.netlify.app",
-    methods=["POST", "OPTIONS"],
-    allow_headers=["Content-Type"]
-)
-def add_bulk_fines():
-    if request.method == "OPTIONS":
-        return "", 200   # ✅ VERY IMPORTANT
+@fine_bp.route("/api/fines/bulk-add", methods=["POST"])
+def bulk_add_fines():
+    try:
+        data = request.get_json(force=True)
+        fines = data.get("fines", [])
 
-    data = request.json
-    fines = data.get("fines", [])
+        if not fines:
+            return jsonify({"success": False, "message": "No fines provided"}), 400
 
-    if not fines or not isinstance(fines, list):
-        return jsonify({"success": False, "message": "Invalid fines format"}), 400
+        docs = []
+        for f in fines:
+            docs.append({
+                "enrollment": f.get("enrollment"),
+                "class_name": f.get("class"),   # 👈 class → class_name
+                "fine": int(f.get("fine", 0)),
+                "reason": f.get("reason"),
+                "date": datetime.now().strftime("%Y-%m-%d")
+            })
 
-    for f in fines:
-        enrollment = f.get("enrollment")
-        fine_amount = int(f.get("fine", 0))
-        reason = f.get("reason", "Fine added")
+        fine_collection.insert_many(docs)
 
-        record = {
-            "enrollment": enrollment,
-            "class": f.get("class"),
-            "fine": fine_amount,
-            "reason": reason,
-            "status": "Pending",
-            "createdAt": datetime.now(),
-            "updatedAt": datetime.now()
-        }
+        return jsonify({
+            "success": True,
+            "message": "Fines added successfully"
+        })
 
-        db.fine.insert_one(record)
-
-        notify_fine(
-            enrollment=enrollment,
-            title="💰 New Fine Added",
-            body=f"A fine of ₹{fine_amount} has been added. Reason: {reason}",
-            url="/fine.html"
-        )
-
-    return jsonify({
-        "success": True,
-        "message": "Fines added successfully"
-    }), 201
+    except Exception as e:
+        print("❌ Fine bulk-add error:", e)
+        return jsonify({
+            "success": False,
+            "message": "Server error while adding fines"
+        }), 500
 
 
 # ---------------------------------------------------------
