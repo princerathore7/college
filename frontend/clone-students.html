@@ -339,7 +339,7 @@ async function render(refresh=false){
 
     // ✅ branch + section combined
     if(branchVal && sectionVal){
-      ok = ok && `${s.branch}-${s.section}` === `${branchVal}-${sectionVal}`;
+      ok = ok && `${s.branch}${s.section}` === `${branchVal}${sectionVal}`;
     }else if(branchVal || sectionVal){
       ok = false;
     }
