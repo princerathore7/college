@@ -305,7 +305,7 @@ function renderFinesTable(fines) {
 // -----------------------------
 async function updateFine(id) {
     const newFine = Number(document.getElementById(`editFine-${id}`).value) || 0;
-const newReason = document.getElementById(`editReason-${id}`).value.trim() || "Fine updated";
+    const newReason = document.getElementById(`editReason-${id}`).value.trim() || "Fine updated";
 
     try {
         const res = await fetch(`${API_URL}/api/fines/update/${id}`, {
@@ -314,13 +314,18 @@ const newReason = document.getElementById(`editReason-${id}`).value.trim() || "F
             body:JSON.stringify({ fine:newFine, reason:newReason })
         });
         const data = await res.json();
-        alert(data.message || "Updated!");
-        refreshFines(true);
+        if(data.success){
+            alert(data.message);
+            refreshFines(true);
+        }else{
+            alert(data.message || "Error updating fine");
+        }
     } catch(e) {
         console.error(e);
         alert("Error updating fine!");
     }
 }
+
 
 // -----------------------------
 // DELETE FINE

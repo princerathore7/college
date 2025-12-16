@@ -20,9 +20,16 @@ def serialize(fine):
 # ---------------------------------------------------------
 # 1️⃣ ADMIN — BULK ADD FINES
 # ---------------------------------------------------------
-@fine_bp.route("/bulk-add", methods=["POST"])
-@cross_origin()
+@fine_bp.route("/bulk-add", methods=["POST", "OPTIONS"])
+@cross_origin(
+    origins="https://acropoliss.netlify.app",
+    methods=["POST", "OPTIONS"],
+    allow_headers=["Content-Type"]
+)
 def add_bulk_fines():
+    if request.method == "OPTIONS":
+        return "", 200   # ✅ VERY IMPORTANT
+
     data = request.json
     fines = data.get("fines", [])
 
@@ -46,7 +53,6 @@ def add_bulk_fines():
 
         db.fine.insert_one(record)
 
-        # 🔔 SEND NOTIFICATION (ENROLLMENT WISE)
         notify_fine(
             enrollment=enrollment,
             title="💰 New Fine Added",
@@ -56,7 +62,7 @@ def add_bulk_fines():
 
     return jsonify({
         "success": True,
-        "message": "Fines added successfully and notifications sent!"
+        "message": "Fines added successfully"
     }), 201
 
 

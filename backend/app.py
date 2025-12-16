@@ -33,16 +33,23 @@ from routes.notifications import notifications_bp
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.url_map.strict_slashes = False
 
-CORS(app, resources={r"/*": {
-    "origins": [
-        "https://acropoliss.netlify.app",
-        "https://college-hwbb.onrender.com",
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
-    "supports_credentials": True
-}})
 
+CORS(
+    app,
+    resources={
+        r"/api/*": {
+            "origins": [
+                "https://acropoliss.netlify.app",
+                "https://college-hwbb.onrender.com",
+                "http://localhost:5173",
+                "http://127.0.0.1:5173"
+            ],
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"]
+        }
+    },
+    supports_credentials=True
+)
 # ---------------------------------------------
 # MONGODB CONNECTION
 # ---------------------------------------------
