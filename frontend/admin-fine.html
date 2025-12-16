@@ -304,8 +304,8 @@ function renderFinesTable(fines) {
 // UPDATE FINE
 // -----------------------------
 async function updateFine(id) {
-    const newFine = document.getElementById(`editFine-${id}`).value;
-    const newReason = document.getElementById(`editReason-${id}`).value;
+    const newFine = Number(document.getElementById(`editFine-${id}`).value) || 0;
+const newReason = document.getElementById(`editReason-${id}`).value.trim() || "Fine updated";
 
     try {
         const res = await fetch(`${API_URL}/api/fines/update/${id}`, {
