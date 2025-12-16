@@ -3,7 +3,160 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Admin — Clone Students</title>
+<title>Admin — Students Management</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#f4f6fb;
+  --card:#ffffff;
+  --accent:#4f46e5;
+  --muted:#6b7280;
+  --green:#16a34a;
+  --yellow:#ca8a04;
+  --red:#dc2626;
+}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:#111}
+header{display:flex;justify-content:space-between;align-items:center;background:#fff;padding:12px 20px;border-bottom:1px solid #e6e9f2}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden}
+th,td{padding:10px 12px;border-bottom:1px solid #eee;font-size:14px}
+th{background:#f1f3f8}
+.controls{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.badge{padding:4px 8px;border-radius:12px;font-size:12px;font-weight:600;color:#fff}
+.green{background:var(--green)}
+.yellow{background:var(--yellow)}
+.red{background:var(--red)}
+.actionBtn{padding:4px 8px;font-size:12px;border:0;border-radius:6px;cursor:pointer;background:var(--accent);color:#fff;margin-left:4px}
+.no-data{text-align:center;color:#888}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h2>Admin — Students</h2>
+  <button class="actionBtn" onclick="logout()">Logout</button>
+</header>
+
+<main style="padding:20px;max-width:1400px;margin:auto">
+
+<div class="controls">
+  <select id="year">
+    <option value="">All Years</option>
+    <option value="1">1st Year</option>
+    <option value="2">2nd Year</option>
+    <option value="3">3rd Year</option>
+    <option value="4">4th Year</option>
+  </select>
+
+  <select id="branch">
+    <option value="">All Branches</option>
+
+    <!-- Computer / IT -->
+    <option value="CSE">CSE - Computer Science Engineering</option>
+    <option value="IT">IT - Information Technology</option>
+    <option value="AIML">AIML - Artificial Intelligence & Machine Learning</option>
+    <option value="AIDS">AIDS - Artificial Intelligence & Data Science</option>
+    <option value="CSBS">CSBS - Computer Science & Business Systems</option>
+    <option value="IOT">IoT - Internet of Things</option>
+
+    <!-- Electrical / Electronics -->
+    <option value="ECE">ECE - Electronics & Communication</option>
+    <option value="EEE">EEE - Electrical & Electronics</option>
+    <option value="EE">EE - Electrical Engineering</option>
+
+    <!-- Mechanical / Automobile -->
+    <option value="ME">ME - Mechanical Engineering</option>
+    <option value="AU">AU - Automobile Engineering</option>
+    <option value="MT">MT - Mechatronics</option>
+
+    <!-- Civil / Core -->
+    <option value="CE">CE - Civil Engineering</option>
+    <option value="CHE">CHE - Chemical Engineering</option>
+    <option value="MIN">MIN - Mining Engineering</option>
+    <option value="PET">PET - Petroleum Engineering</option>
+
+    <!-- Bio / Agri -->
+    <option value="BT">BT - Biotechnology</option>
+    <option value="BME">BME - Biomedical Engineering</option>
+    <option value="AG">AG - Agriculture Engineering</option>
+    <option value="FT">FT - Food Technology</option>
+    <option value="ENV">ENV - Environmental Engineering</option>
+    <option value="TX">TX - Textile Engineering</option>
+
+    <!-- Management / Pharma -->
+    <option value="PIE">PIE - Production & Industrial Engineering</option>
+    <option value="IM">IM - Industrial Management</option>
+    <option value="DPHARMA">D.Pharmacy</option>
+    <option value="BPHARMA">B.Pharmacy</option>
+    <option value="MPHARMA">M.Pharmacy</option>
+    <option value="PHARMA-CHEM">Pharmaceutical Chemistry</option>
+    <option value="PHARMA-ANALYTICAL">Pharmaceutical Analysis</option>
+    <option value="PHARMA-QUALITY">Quality Assurance</option>
+    <option value="PHARMA-PHARMACO">Pharmacology</option>
+    <option value="PHARMA-PHARMACEUTICS">Pharmaceutics</option>
+    <option value="PHARMA-BIOTECH">Pharmaceutical Biotechnology</option>
+    <option value="PHARMA-REGULATORY">Regulatory Affairs</option>
+
+    <!-- Diploma -->
+    <option value="DCSE">Diploma - Computer Science Engineering</option>
+    <option value="DIT">Diploma - Information Technology</option>
+    <option value="DCYBER">Diploma - Cyber Security</option>
+    <option value="DECE">Diploma - Electronics & Communication</option>
+    <option value="DEEE">Diploma - Electrical & Electronics</option>
+    <option value="DEE">Diploma - Electrical Engineering</option>
+    <option value="DME">Diploma - Mechanical Engineering</option>
+    <option value="DCE">Diploma - Civil Engineering</option>
+    <option value="DMIN">Diploma - Mining Engineering</option>
+    <option value="DCHE">Diploma - Chemical Engineering</option>
+    <option value="DAG">Diploma - Agriculture Engineering</option>
+    <option value="DTX">Diploma - Textile Technology</option>
+    <option value="DPLASTIC">Diploma - Plastic Engineering</option>
+    <option value="DPOLY">Diploma - Polymer Engineering</option>
+  </select>
+
+  <button class="actionBtn" id="refreshBtn">Refresh</button>
+</div>
+
+<input
+  type="text"
+  id="searchEnrollment"
+  placeholder="Search by Enrollment Number"
+  oninput="render(false)"
+  style="
+    padding:8px 12px;
+    border-radius:8px;
+    border:1px solid #d1d5db;
+    font-size:14px;
+    min-width:220px;
+    outline:none;
+  "
+>
+
+<table>
+<thead>
+<tr>
+  <th>Enrollment</th>
+  <th>Name</th>
+  <th>Year</th>
+  <th>Branch</th>
+  <th>Attendance</th>
+</tr>
+</thead>
+<tbody id="studentsBody">
+<tr><td colspan="7" class="no-data">Loading...</td></tr>
+</tbody>
+</table>
+
+</main>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin — Students Management</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 
@@ -16,25 +169,65 @@
   --green:#16a34a;
   --red:#dc2626;
 }
-body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:#111}
-header{display:flex;justify-content:space-between;align-items:center;background:#fff;padding:12px 20px;border-bottom:1px solid #e6e9f2}
-table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden}
-th,td{padding:10px 12px;border-bottom:1px solid #eee;font-size:14px;text-align:center}
-th{background:#f1f3f8}
-.controls{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
-.mark-btn{padding:4px 8px;font-size:12px;border:none;border-radius:6px;cursor:pointer;margin:0 2px}
-.present{background:var(--green);color:#fff}
-.absent{background:var(--red);color:#fff}
-.selected{outline:3px solid #00000022}
-.no-data{text-align:center;color:#888}
+body{
+  margin:0;
+  font-family:Inter,system-ui,sans-serif;
+  background:var(--bg);
+  color:#111
+}
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#fff;
+  padding:12px 20px;
+  border-bottom:1px solid #e6e9f2
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+  border-radius:8px;
+  overflow:hidden
+}
+th,td{
+  padding:10px 12px;
+  border-bottom:1px solid #eee;
+  font-size:14px
+}
+th{
+  background:#f1f3f8
+}
+.controls{
+  display:flex;
+  gap:10px;
+  margin-bottom:14px;
+  flex-wrap:wrap
+}
+.actionBtn{
+  padding:6px 10px;
+  font-size:12px;
+  border:0;
+  border-radius:6px;
+  cursor:pointer;
+  background:var(--accent);
+  color:#fff;
+  margin-right:4px
+}
+.no-data{
+  text-align:center;
+  color:#888
+}
+.btnP{ background:var(--green) }
+.btnA{ background:var(--red) }
 </style>
 </head>
 
 <body>
 
 <header>
-  <h2>Admin — Clone Students</h2>
-  <button onclick="logout()">Logout</button>
+  <h2>Admin — Students</h2>
+  <button class="actionBtn" onclick="logout()">Logout</button>
 </header>
 
 <main style="padding:20px;max-width:1400px;margin:auto">
@@ -53,17 +246,12 @@ th{background:#f1f3f8}
     <option value="CSE">CSE</option>
     <option value="IT">IT</option>
     <option value="ECE">ECE</option>
-    <!-- Add more branches if needed -->
+    <option value="EE">EE</option>
+    <option value="ME">ME</option>
+    <option value="CE">CE</option>
   </select>
 
-  <select id="section">
-    <option value="">All Sections</option>
-    <option value="1">1</option>
-    <option value="2">2</option>
-    <option value="3">3</option>
-  </select>
-
-  <button id="refreshBtn">Refresh</button>
+  <button class="actionBtn" id="refreshBtn">Refresh</button>
 </div>
 
 <input
@@ -71,7 +259,14 @@ th{background:#f1f3f8}
   id="searchEnrollment"
   placeholder="Search by Enrollment Number"
   oninput="render(false)"
-  style="padding:8px 12px;border-radius:8px;border:1px solid #d1d5db;font-size:14px;min-width:220px;outline:none;"
+  style="
+    padding:8px 12px;
+    border-radius:8px;
+    border:1px solid #d1d5db;
+    font-size:14px;
+    min-width:220px;
+    outline:none;
+  "
 >
 
 <table>
@@ -79,81 +274,124 @@ th{background:#f1f3f8}
 <tr>
   <th>Enrollment</th>
   <th>Name</th>
-  <th>Mark Attendance</th>
+  <th>Year</th>
+  <th>Branch</th>
+  <th>Attendance</th>
 </tr>
 </thead>
 <tbody id="studentsBody">
-<tr><td colspan="3" class="no-data">Loading...</td></tr>
+<tr><td colspan="5" class="no-data">Loading...</td></tr>
 </tbody>
 </table>
 
 </main>
 
 <script>
+/* ===============================
+   ACCESS CONTROL — ADMIN
+================================ */
 const mentorId = localStorage.getItem("mentorId");
-const source = sessionStorage.getItem("accessSource");
-if(!mentorId || !["ad","admin"].includes(source)){
-  document.body.innerHTML = "<h2 style='text-align:center;margin-top:20vh;color:red'>Access Denied</h2>";
+const source   = sessionStorage.getItem("accessSource");
+const ALLOWED_SOURCES = ["ad","admin"];
+
+if(!mentorId || !ALLOWED_SOURCES.includes(source)){
+  document.body.innerHTML = `
+    <h2 style="text-align:center;margin-top:20vh;color:red">
+      ❌ Access Denied <br>
+      Please open this page via Administration Panel
+    </h2>
+  `;
   throw new Error("Unauthorized access");
 }
 
-const API_STUDENTS = "https://college-hwbb.onrender.com/api/students"; // endpoint to fetch students
-let allStudents = [];
-let marked = {};
+/* ===============================
+   API ENDPOINTS
+================================ */
+const API_STUDENTS = "https://college-hwbb.onrender.com/api/admin/students";
+const API_MARK_ATT = "https://college-hwbb.onrender.com/api/attendance/mark";
 
+/* ===============================
+   LOGOUT
+================================ */
 function logout(){
   localStorage.clear();
-  sessionStorage.clear();
-  location.href="login.html";
+  location.href = "login.html";
 }
 
-/* -------------------------
-   FETCH STUDENTS
-------------------------- */
+/* ===============================
+   FETCH STUDENTS (CACHE)
+================================ */
 async function fetchStudents(force=false){
   if(!force){
-    const cached = localStorage.getItem("clone_students");
-    if(cached){
-      allStudents = JSON.parse(cached);
-      return allStudents;
-    }
+    const cached = localStorage.getItem("admin_students");
+    if(cached) return JSON.parse(cached);
   }
+
   const res = await fetch(API_STUDENTS);
   const data = await res.json();
+
   if(data.success){
-    allStudents = data.students;
-    localStorage.setItem("clone_students", JSON.stringify(allStudents));
-    return allStudents;
+    localStorage.setItem("admin_students", JSON.stringify(data.students));
+    return data.students;
   }
   return [];
 }
 
-/* -------------------------
-   RENDER STUDENTS
-------------------------- */
-function renderTable(){
+/* ===============================
+   MARK ATTENDANCE (P / A)
+================================ */
+async function markAttendance(enrollment, status){
+  try{
+    const res = await fetch(API_MARK_ATT,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        records:{ [enrollment]: status }
+      })
+    });
+
+    const data = await res.json();
+    if(data.success){
+      alert(`Attendance marked: ${enrollment} → ${status}`);
+    }else{
+      alert(data.message || "Failed");
+    }
+  }catch(err){
+    console.error(err);
+    alert("Server error");
+  }
+}
+
+/* ===============================
+   RENDER (UNTOUCHED LOGIC)
+================================ */
+async function render(refresh=false){
   const body = document.getElementById("studentsBody");
+
   const yearVal = document.getElementById("year").value;
   const branchVal = document.getElementById("branch").value.toLowerCase();
-  const sectionVal = document.getElementById("section").value;
   const searchEnr = document.getElementById("searchEnrollment").value.trim().toLowerCase();
 
-  let filtered = allStudents.filter(s=>{
+  const students = await fetchStudents(refresh);
+
+  let filtered = students.filter(s=>{
     let ok = true;
     if(yearVal) ok = ok && String(s.year) === yearVal;
-    if(branchVal) ok = ok && s.branch.toLowerCase() === branchVal;
-    if(sectionVal) ok = ok && s.section == sectionVal;
+    if(branchVal) ok = ok && s.branch.toLowerCase().includes(branchVal);
     if(searchEnr) ok = ok && s.enrollment.toLowerCase().includes(searchEnr);
     return ok;
   });
 
   if(searchEnr){
-    filtered.sort((a,b)=> a.enrollment.toLowerCase().startsWith(searchEnr) ? -1 : 1);
+    filtered.sort((a,b)=>{
+      return a.enrollment.toLowerCase().startsWith(searchEnr) ? -1 : 1;
+    });
   }
 
   body.innerHTML = "";
+
   if(!filtered.length){
-    body.innerHTML = `<tr><td colspan="3" class="no-data">No students found</td></tr>`;
+    body.innerHTML = `<tr><td colspan="5" class="no-data">No students found</td></tr>`;
     return;
   }
 
@@ -162,42 +400,33 @@ function renderTable(){
       <tr>
         <td>${s.enrollment}</td>
         <td>${s.name}</td>
+        <td>${s.year}</td>
+        <td>${s.branch}</td>
         <td>
-          <button class="mark-btn present" onclick="mark('${s.enrollment}','P',this)">P</button>
-          <button class="mark-btn absent" onclick="mark('${s.enrollment}','A',this)">A</button>
+          <button class="actionBtn btnP"
+            onclick="markAttendance('${s.enrollment}','P')">P</button>
+          <button class="actionBtn btnA"
+            onclick="markAttendance('${s.enrollment}','A')">A</button>
         </td>
       </tr>
     `;
   }
+
+  localStorage.setItem("admin_students", JSON.stringify(students));
 }
 
-/* -------------------------
-   MARK ATTENDANCE
-------------------------- */
-function mark(enr,status,btn){
-  marked[enr] = status;
-  btn.parentElement.querySelectorAll("button").forEach(b=>b.classList.remove("selected"));
-  btn.classList.add("selected");
-}
-
-/* -------------------------
-   INITIAL LOAD + REFRESH
-------------------------- */
-document.getElementById("refreshBtn").addEventListener("click", async ()=>{
-  await fetchStudents(true);
-  renderTable();
+/* ===============================
+   EVENTS
+================================ */
+["year","branch"].forEach(id=>{
+  document.getElementById(id).addEventListener("change",()=>render(false));
 });
-
-document.getElementById("year").addEventListener("change",()=>renderTable());
-document.getElementById("branch").addEventListener("change",()=>renderTable());
-document.getElementById("section").addEventListener("change",()=>renderTable());
-document.getElementById("searchEnrollment").addEventListener("input",()=>renderTable());
-
-document.addEventListener("DOMContentLoaded", async ()=>{
-  await fetchStudents();
-  renderTable();
-});
+refreshBtn.onclick = ()=>render(true);
+document.addEventListener("DOMContentLoaded",()=>render(false));
 </script>
+
+</body>
+</html>
 
 </body>
 </html>
