@@ -21,7 +21,7 @@ attendance_collection = db["attendance"]
 # 1️⃣ Get students by Branch + Section
 # -----------------------------
 @attendance_bp.route('/class/<int:year>/<string:branch>/<string:section>', methods=['GET'])
-def get_students_by_class(year, branch, section):
+def get_students_by_class_post(year, branch, section):
     students = list(students_collection.find(
         {
             "year": year,
