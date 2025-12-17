@@ -158,7 +158,7 @@ def edit_attendance():
 # 5️⃣ Edit attendance percentage (Admin)
 # -----------------------------
 @attendance_bp.route("/mark", methods=["POST"])
-def mark_attendance():
+def mark_attendance_api():
     try:
         data = request.json
         records = data.get("records", {})
