@@ -200,9 +200,10 @@ td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:center}
 <input type="text" id="searchEnrollment" placeholder="Search by Enrollment Number" style="padding:8px 12px;border-radius:8px;border:1px solid #d1d5db;font-size:14px;min-width:220px;outline:none">
 
 <div id="submitMsg">
-  <span id="submitting">Submitting, please wait...</span>
-  <span id="successSubmit"></span>
+  <span id="submitting" style="display:none">Submitting, please wait...</span>
+  <span id="successSubmit" style="display:none;font-weight:600;color:green"></span>
 </div>
+
 
 <button onclick="submitAttendance()" style="margin-bottom:10px">Submit Attendance</button>
 
@@ -266,47 +267,38 @@ function submitAttendance() {
 
   fetch(API_MARK_ATT, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ records: marked })
   })
-  .then(async res => {
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.message || "Request failed");
-    }
-
-    return data;
-  })
+  .then(res => res.json())
   .then(data => {
     subMsg.style.display = "none";
 
-    if (data.success) {
-      const count = Object.keys(marked).length;
+    if (!data.success) {
+      alert(data.message || "Submission failed");
+      return;
+    }
 
-      successMsg.innerText = `${count} student(s) attendance registered ✅`;
-      successMsg.style.display = "inline";
+    const count = Object.keys(marked).length;
 
+    // ✅ SHOW MESSAGE FIRST
+    successMsg.innerText = `${count} student(s) attendance registered ✅`;
+    successMsg.style.display = "inline";
+
+    // ✅ DELAY heavy UI updates
+    setTimeout(() => {
+      successMsg.style.display = "none";
       clearDraft();
       marked = {};
       render(false);
-
-      setTimeout(() => {
-        successMsg.style.display = "none";
-      }, 4000);
-    } else {
-      alert(data.message || "Submission failed");
-    }
+    }, 3500);
   })
   .catch(err => {
     subMsg.style.display = "none";
     console.error("Attendance error:", err);
-    alert(err.message || "Server error");
+    alert("Server error");
   });
 }
-
 
 // RENDER
 async function render(refresh=false){
