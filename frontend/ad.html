@@ -2,124 +2,199 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Administration — Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Acropolis Admin — Stable Dashboard</title>
 
 <style>
-:root{
-  --bg:#f4f6fb;
-  --card:#ffffff;
-  --accent:#4f46e5;
-}
-*{box-sizing:border-box;font-family:Inter,system-ui,Arial,sans-serif}
-body{margin:0;background:var(--bg);color:#111}
-
-.wrap{min-height:100vh;display:flex;flex-direction:column}
-
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  background:var(--card);
-  padding:12px 20px;
-  border-bottom:1px solid #e6e9f2;
-  z-index:2;
-}
-header h1{margin:0;font-size:20px}
-
-.header-actions{
-  display:flex;
-  gap:10px;
+:root {
+  --navy-dark: #001f3f;
+  --navy-light: #003366;
+  --accent-gold: #daa520;
+  --bg-gradient: linear-gradient(135deg, #f8f9ff 0%, #e2e8f0 100%);
+  --sidebar-width: 280px;
 }
 
-header button{
-  background:var(--accent);
-  color:#fff;
-  border:0;
-  padding:8px 14px;
-  border-radius:8px;
-  cursor:pointer;
+* {
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+  /* Prevent text selection during fast clicks */
+  -webkit-tap-highlight-color: transparent;
 }
 
-.back-btn{
-  background:#eef2ff;
-  color:#1e3a8a;
-  font-weight:600;
-}
-.back-btn:hover{
-  background:#e0e7ff;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:240px 1fr;
-  flex:1;
+body {
+  margin: 0;
+  background: var(--bg-gradient);
+  color: #333;
+  height: 100vh;
+  overflow: hidden; /* Desktop stability: no body scroll */
 }
 
-aside{
-  background:#fff;
-  border-right:1px solid #e6e9f2;
-  padding:12px;
+.wrap {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-.nav{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-.nav button{
-  padding:10px;
-  border:0;
-  border-radius:8px;
-  background:transparent;
-  text-align:left;
-  cursor:pointer;
-}
-.nav button:hover,
-.nav button.active{
-  background:linear-gradient(90deg,var(--accent),#7c6cff);
-  color:#fff;
+/* --- HEADER --- */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--navy-dark);
+  padding: 10px 25px;
+  color: white;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  z-index: 10;
 }
 
-main{
-  padding:20px;
+header h1 {
+  margin: 0;
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+  font-weight: 500;
 }
 
-/* ======================
-   FULL SCREEN OVERLAY
-====================== */
-
-.overlay{
-  position:fixed;
-  inset:0;
-  background:#fff;
-  z-index:999;
-  display:none;
-  flex-direction:column;
+.header-actions {
+  display: flex;
+  gap: 12px;
 }
 
-.overlay-header{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:12px 16px;
-  background:var(--card);
-  border-bottom:1px solid #e6e9f2;
+header button {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
-.overlay-header button{
-  background:#eee;
-  border:0;
-  padding:8px 12px;
-  border-radius:8px;
-  cursor:pointer;
-  font-weight:600;
+header button:hover {
+  background: var(--accent-gold);
+  color: #001f3f;
+  border-color: var(--accent-gold);
 }
 
-.overlay iframe{
-  flex:1;
-  width:100%;
-  border:none;
+/* --- LAYOUT GRID --- */
+.grid {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* --- SIDEBAR --- */
+aside {
+  background: #fff;
+  border-right: 1px solid #d1d5db;
+  padding: 15px;
+  overflow-y: auto;
+  transition: 0.3s;
+}
+
+/* Custom scrollbar for Sidebar */
+aside::-webkit-scrollbar { width: 5px; }
+aside::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nav button {
+  padding: 12px 15px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  color: #475569;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav button:hover {
+  background: #f1f5f9;
+  color: var(--navy-dark);
+  transform: translateX(5px);
+}
+
+.nav button.active {
+  background: var(--navy-dark);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0,31,63,0.3);
+}
+
+/* --- MAIN CONTENT --- */
+main {
+  padding: 30px;
+  overflow-y: auto;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+main h2 { color: var(--navy-dark); margin-bottom: 10px; }
+
+/* --- OVERLAY (Full Screen) --- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  z-index: 1000;
+  display: none;
+  flex-direction: column;
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.overlay-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px 20px;
+  background: var(--navy-dark);
+  color: white;
+}
+
+.overlay-header button {
+  background: var(--accent-gold);
+  border: 0;
+  padding: 6px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.overlay iframe {
+  flex: 1;
+  width: 100%;
+  border: none;
+  background: #fff;
+}
+
+/* --- MOBILE STABILITY --- */
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  aside {
+    display: block; /* Normal mobile behavior */
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+  }
+  body { overflow: auto; } /* Allow scroll on mobile */
 }
 </style>
 </head>
@@ -128,82 +203,78 @@ main{
 <div class="wrap">
 
 <header>
-  <h1>Administration Panel</h1>
+  <h1>Acropolis Admin Panel</h1>
   <div class="header-actions">
-    <button id="backToMentorBtn" class="back-btn">⬅ Dashboard</button>
-    <button id="logoutBtn">.</button>
+    <button id="backToMentorBtn">⬅ Dashboard</button>
+    <button id="logoutBtn" title="Logout">Logout</button>
   </div>
 </header>
 
 <div class="grid">
 <aside>
 <nav class="nav">
-
   <button data-page="/admin-students.html">🎓 Student Management</button>
-  <button data-page="/clone-students.html.html">📋 Real time Attendance</button> 
-    <button data-page="/notes-post.html">📚 Upload Study Notes</button>
+  <button data-page="/clone-students.html.html">📋 Attendance Records</button> 
+  <button data-page="/notes-post.html">📚 Upload Study Notes</button>
   <button data-page="/admin-marks.html">📊 Marks & Results</button>
   <button data-page="/exam-ring.html">📝 Examination Setup</button>
-  <button data-page="/bus-route.html">🚌 Transport / Bus Routes</button>
-  <button data-page="/admin.html">🧑‍🏫 Attendance & Class Control</button>
+  <button data-page="/bus-route.html">🚌 Transport Routes</button>
+  <button data-page="/admin.html">🧑‍🏫 Class Control</button>
   <button data-page="/admin-salary.html">💰 Staff Salary</button>
   <button data-page="/pending.html">⏳ Pending Fees</button>
   <button data-page="/admin-fine.html">💳 Fines & Dues</button>
   <button data-page="/notice.html">📢 Notice Board</button>
   <button data-page="/manage.html">⚙️ System Management</button>
   <button data-page="/design.html">🎉 Post New Event</button>
-  <button data-page="/mentor-signup.html"> Create a new Mentor ID</button>
-
+  <button data-page="/mentor-signup.html">➕ Create Mentor ID</button>
 </nav>
 </aside>
 
 <main>
-  <h2>Welcome</h2>
-  <p>Select an option from the sidebar</p>
+  <div id="welcomeScreen">
+    <h2>Welcome to Administration</h2>
+    <p>Please select a module from the left menu to manage operations.</p>
+    <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
+  </div>
 </main>
 </div>
 </div>
 
-<!-- ======================
-     FULL SCREEN CONTAINER
-====================== -->
-
 <div class="overlay" id="pageOverlay">
   <div class="overlay-header">
-    <button id="overlayBackBtn">⬅ Back</button>
-    <strong id="pageTitle">Administration</strong>
+    <button id="overlayBackBtn">⬅ Close</button>
+    <strong id="pageTitle">Module Loading...</strong>
   </div>
   <iframe id="overlayFrame"></iframe>
 </div>
 
 <script>
+// --- Stable Screen Logic: Anti-Zoom (Prevent accidental zooming on laptop trackpads) ---
+document.addEventListener('wheel', (e) => {
+  if (e.ctrlKey) e.preventDefault();
+}, { passive: false });
+
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '0')) {
+    e.preventDefault();
+  }
+});
+
 /* ===============================
-   ACCESS CONTROL — MENTOR ONLY
+   ACCESS CONTROL
 ================================ */
 const mentorId = localStorage.getItem("mentorId");
 if(!mentorId){
-  document.body.innerHTML = `
-    <h2 style="text-align:center;margin-top:20vh;color:red">
-      ❌ Unauthorized Access
-    </h2>`;
-  throw new Error("Mentor not logged in");
+  document.body.innerHTML = `<h2 style="text-align:center;margin-top:20vh;color:#001f3f">❌ Unauthorized</h2>`;
+  window.location.href = "/login.html";
 }
 
-/* 
-   BACK TO MENTOR DASHBOARD
- */
+/* DASHBOARD NAVIGATION */
 document.getElementById("backToMentorBtn").onclick = () => {
-  const token = localStorage.getItem("mentor_token");
-  if(!token){
-    alert("");
-    location.href = "/login.html";
-    return;
-  }
   location.href = "/mentor-dashboard.html";
 };
 
-/* 
-   SIDEBAR → FULL SCREEN PAGE */
+/* SIDEBAR ACTIONS */
 const buttons = document.querySelectorAll(".nav button");
 const overlay = document.getElementById("pageOverlay");
 const frame   = document.getElementById("overlayFrame");
@@ -212,45 +283,32 @@ const titleEl = document.getElementById("pageTitle");
 buttons.forEach(btn=>{
   btn.onclick = ()=>{
     sessionStorage.setItem("accessSource","ad");
-
+    
+    // UI Update
     buttons.forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
 
+    // Open Page
     titleEl.textContent = btn.innerText;
     frame.src = btn.dataset.page;
     overlay.style.display = "flex";
   };
 });
 
-/*
-   BACK / CLOSE OVERLAY
- */
+/* CLOSE OVERLAY */
 document.getElementById("overlayBackBtn").onclick = () => {
-  const token = localStorage.getItem("mentor_token");
-  const mentorId = localStorage.getItem("mentorId");
-
-  if (!token || !mentorId) {
-    alert("Session expired. Please login again.");
-    window.location.href = "/ad.html";
-    return;
-  }
-
-  // 🔁 Mentor dashboard redirect (same session)
-  window.location.href = "/ad.html";
+  overlay.style.display = "none";
+  frame.src = ""; // Stop loading
 };
 
-
-/* 
-   LOGOUT
- */
+/* LOGOUT */
 document.getElementById("logoutBtn").onclick = ()=>{
-  if(confirm("Logout?")){
+  if(confirm("Are you sure you want to logout?")){
     localStorage.clear();
     sessionStorage.clear();
     location.href="/login.html";
   }
 };
 </script>
-
 </body>
 </html>
