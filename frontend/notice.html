@@ -85,49 +85,75 @@
   <hr />
   <h3>All Notices</h3>
   <div id="noticeList"></div>
-</div>
-
-<script>
+</div><script>
 const API = "https://college-hwbb.onrender.com/api/notices/";
 
 const el = id => document.getElementById(id);
 
+/* =============================
+   LOAD NOTICES
+============================= */
 async function loadNotices(){
-  const res = await fetch(API);
-  const data = await res.json();
-  const box = el("noticeList");
-  box.innerHTML = "";
+  try{
+    const res = await fetch(API);
+    const data = await res.json();
+    const box = el("noticeList");
+    box.innerHTML = "";
 
-  if(!data.success) return;
+    if(!data.success) return;
 
-  data.notices.forEach(n=>{
-    box.innerHTML += `
-      <div class="notice">
-        <h3>${n.title}</h3>
-        <div>${n.message}</div>
-        ${n.imageUrl ? `<img src="${n.imageUrl}" style="max-width:100%;margin-top:8px">` : ""}
-        <div class="meta">
-          Target: ${n.target}
-          ${n.targetClass ? " | Class: " + n.targetClass : ""}
-          | ${n.sender} | ${n.timestamp}
-        </div>
-        <button class="del" onclick="deleteNotice('${encodeURIComponent(n.title)}')">Delete</button>
-      </div>`;
-  });
+    data.notices.forEach(n=>{
+      box.innerHTML += `
+        <div class="notice">
+          <h3>${n.title}</h3>
+          <div>${n.message}</div>
+
+          ${n.imageUrl ? `
+            <img src="${n.imageUrl}" 
+                 style="max-width:100%;margin-top:8px;border-radius:6px">
+          ` : ""}
+
+          <div class="meta">
+            Target: ${n.target}
+            ${n.targetClass ? " | Class: " + n.targetClass : ""}
+            | ${n.sender || "System"}
+            | ${new Date(n.timestamp).toLocaleString()}
+          </div>
+
+          <button class="del" onclick="deleteNotice('${encodeURIComponent(n.title)}')">
+            Delete
+          </button>
+        </div>`;
+    });
+  }catch(err){
+    console.error("Load notice error:", err);
+  }
 }
 
+/* =============================
+   DELETE NOTICE
+============================= */
 async function deleteNotice(title){
   if(!confirm("Delete this notice?")) return;
+
   const res = await fetch(API + title, { method: "DELETE" });
   const data = await res.json();
-  alert(data.message);
+
+  alert(data.message || "Deleted");
   loadNotices();
 }
 
+/* =============================
+   ADD NOTICE
+============================= */
 el("addNotice").onclick = async ()=>{
   const title = el("title").value.trim();
   const message = el("message").value.trim();
-  if(!title || !message) return alert("Title & message required");
+
+  if(!title || !message){
+    alert("Title & message required");
+    return;
+  }
 
   const year = el("year").value;
   const branch = el("branch").value;
@@ -138,48 +164,61 @@ el("addNotice").onclick = async ()=>{
     targetClass = `${year} ${branch}${section}`.trim();
   }
 
-  // 🔹 Prepare request payload for backend
-  const payload = {
-    title,
-    body: message,
-    target: el("target").value,      // student / mentor / all
-    class: targetClass || undefined, // 🔹 backend expects 'class' not 'targetClass'
-    sender: "Admin"
-  };
-
-  // 🔹 If image is present, use FormData; else JSON
-  let fetchOptions = {};
-  if(el("image").files[0]){
-    const fd = new FormData();
-    fd.append("title", title);
-    fd.append("message", message);
-    fd.append("target", el("target").value);
-    if(targetClass) fd.append("targetClass", targetClass); // optional for image
-    fd.append("sender", "Admin");
-    fd.append("image", el("image").files[0]);
-    fetchOptions = { method: "POST", body: fd };
-  } else {
-    fetchOptions = {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    };
-  }
-
   el("processing").style.display = "block";
-  const res = await fetch(API, fetchOptions);
-  const data = await res.json();
-  el("processing").style.display = "none";
 
-  alert(data.message);
-  if(data.success){
-    ["title","message","year","branch","section","image"].forEach(i=>el(i).value="");
-    loadNotices();
+  try{
+    let res, data;
+
+    /* ===== IMAGE OPTIONAL ===== */
+    if(el("image").files.length > 0){
+      const fd = new FormData();
+      fd.append("title", title);
+      fd.append("message", message);
+      fd.append("target", el("target").value);
+      if(targetClass) fd.append("class", targetClass); // 🔥 backend expects 'class'
+      fd.append("sender", "Admin");
+      fd.append("image", el("image").files[0]);
+
+      res = await fetch(API, { method: "POST", body: fd });
+    }else{
+      const payload = {
+        title,
+        body: message,
+        target: el("target").value,
+        sender: "Admin"
+      };
+
+      if(targetClass) payload.class = targetClass; // 🔥 correct key
+
+      res = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    }
+
+    data = await res.json();
+    alert(data.message);
+
+    if(data.success){
+      ["title","message","year","branch","section","image"]
+        .forEach(i => el(i).value = "");
+      loadNotices();
+    }
+  }catch(err){
+    console.error("Add notice error:", err);
+    alert("Server error");
   }
+
+  el("processing").style.display = "none";
 };
 
+/* =============================
+   INIT
+============================= */
 window.onload = loadNotices;
 </script>
+
 
 </body>
 </html>
