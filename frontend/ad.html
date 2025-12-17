@@ -141,6 +141,7 @@ main{
 
   <button data-page="/admin-students.html">🎓 Student Management</button>
   <button data-page="/clone-students.html.html">📋 Real time Attendance</button> 
+    <button data-page="/notes-post.html">📚 Upload Study Notes</button>
   <button data-page="/admin-marks.html">📊 Marks & Results</button>
   <button data-page="/exam-ring.html">📝 Examination Setup</button>
   <button data-page="/bus-route.html">🚌 Transport / Bus Routes</button>
@@ -151,7 +152,7 @@ main{
   <button data-page="/notice.html">📢 Notice Board</button>
   <button data-page="/manage.html">⚙️ System Management</button>
   <button data-page="/design.html">🎉 Post New Event</button>
-  <button data-page="/notes-post.html">📚 Upload Study Notes</button>
+  <button data-page="/mentor-signup.html"> Create a new Mentor ID</button>
 
 </nav>
 </aside>
@@ -188,9 +189,9 @@ if(!mentorId){
   throw new Error("Mentor not logged in");
 }
 
-/* ===============================
+/* 
    BACK TO MENTOR DASHBOARD
-================================ */
+ */
 document.getElementById("backToMentorBtn").onclick = () => {
   const token = localStorage.getItem("mentor_token");
   if(!token){
@@ -201,9 +202,8 @@ document.getElementById("backToMentorBtn").onclick = () => {
   location.href = "/mentor-dashboard.html";
 };
 
-/* ===============================
-   SIDEBAR → FULL SCREEN PAGE
-================================ */
+/* 
+   SIDEBAR → FULL SCREEN PAGE */
 const buttons = document.querySelectorAll(".nav button");
 const overlay = document.getElementById("pageOverlay");
 const frame   = document.getElementById("overlayFrame");
@@ -222,27 +222,27 @@ buttons.forEach(btn=>{
   };
 });
 
-/* ===============================
+/*
    BACK / CLOSE OVERLAY
-================================ */
+ */
 document.getElementById("overlayBackBtn").onclick = () => {
   const token = localStorage.getItem("mentor_token");
   const mentorId = localStorage.getItem("mentorId");
 
   if (!token || !mentorId) {
     alert("Session expired. Please login again.");
-    window.location.href = "/mentor-dashboard.html";
+    window.location.href = "/ad.html";
     return;
   }
 
   // 🔁 Mentor dashboard redirect (same session)
-  window.location.href = "/mentor-dashboard.html";
+  window.location.href = "/ad.html";
 };
 
 
-/* ===============================
+/* 
    LOGOUT
-================================ */
+ */
 document.getElementById("logoutBtn").onclick = ()=>{
   if(confirm("Logout?")){
     localStorage.clear();

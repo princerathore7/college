@@ -28,6 +28,26 @@
 </main>
 
 <script>
+  
+    /* ===============================
+   ACCESS CONTROL — ADMIN PAGES
+================================ */
+
+const mentorId = localStorage.getItem("mentorId");
+const source   = sessionStorage.getItem("accessSource");
+
+// allowed sources
+const ALLOWED_SOURCES = ["ad", "admin"];
+
+if(!mentorId || !ALLOWED_SOURCES.includes(source)){
+  document.body.innerHTML = `
+    <h2 style="text-align:center;margin-top:20vh;color:red">
+      ❌ Access Denied <br>
+      Please open this page via Administration Panel
+    </h2>
+  `;
+  throw new Error("Unauthorized access");
+}
 async function loadEvents() {
   try {
     const res = await fetch("https://college-hwbb.onrender.com/api/events");
