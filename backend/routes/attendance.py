@@ -46,41 +46,69 @@ def get_students_by_class_get(class_name):
 # -----------------------------
 @attendance_bp.route("/mark", methods=["POST"])
 def mark_attendance():
-    data = request.json
-    records = data.get("records", {})
-    lecture_id = data.get("lectureId")
-    if not records or not lecture_id:
-        return jsonify({"success": False, "message": "Records or lectureId missing"}), 400
-    today = datetime.now().strftime("%Y-%m-%d")
-    for enrollment, status in records.items():
-        if status not in ["P","A"]: continue
-        # Update or insert individual record
-        existing = attendance_collection.find_one({
-            "enrollment": enrollment, "date": today, "lectureId": lecture_id
-        })
-        if existing:
-            attendance_collection.update_one({"_id": existing["_id"]}, {"$set":{"status":status}})
-        else:
-            student = students_collection.find_one({"enrollment": enrollment})
-            if not student: continue
-            attendance_collection.insert_one({
-                "enrollment": enrollment,
-                "name": student["name"],
-                "year": student["year"],
-                "branch": student["branch"],
-                "section": student["section"],
-                "status": status,
-                "date": today,
-                "lectureId": lecture_id,
-                "markedAt": datetime.now()
-            })
-        # Increment counters
-        inc_fields = {"totalLectures":1}
-        if status=="P": inc_fields["presentLectures"]=1
-        else: inc_fields["absentLectures"]=1
-        students_collection.update_one({"enrollment": enrollment},{"$inc":inc_fields})
-    return jsonify({"success":True,"message":"Attendance updated successfully"}), 200
+    try:
+        data = request.json
+        records = data.get("records", {})
 
+        if not records:
+            return jsonify({
+                "success": False,
+                "message": "No attendance records received"
+            }), 400
+
+        today = datetime.now().strftime("%Y-%m-%d")
+
+        for enrollment, status in records.items():
+
+            # 🔍 Validate status
+            if status not in ["P", "A"]:
+                continue
+
+            # 🔍 Fetch student details
+            student = students_collection.find_one(
+                {"enrollment": enrollment},
+                {"_id": 0}
+            )
+
+            if not student:
+                continue  # skip invalid enrollment
+
+            # 🛑 Prevent duplicate attendance for same day
+            existing = attendance_collection.find_one({
+                "enrollment": enrollment,
+                "date": today
+            })
+
+            if existing:
+                # 🔁 Update instead of insert
+                attendance_collection.update_one(
+                    {"_id": existing["_id"]},
+                    {"$set": {"status": status}}
+                )
+            else:
+                # ➕ Insert new attendance
+                attendance_collection.insert_one({
+                    "enrollment": enrollment,
+                    "name": student.get("name"),
+                    "year": student.get("year"),
+                    "branch": student.get("branch"),
+                    "section": student.get("section"),
+                    "status": status,   # "P" / "A"
+                    "date": today,
+                    "markedAt": datetime.now()
+                })
+
+        return jsonify({
+            "success": True,
+            "message": "Attendance marked successfully"
+        }), 200
+
+    except Exception as e:
+        print("❌ Attendance error:", e)
+        return jsonify({
+            "success": False,
+            "message": "Server error while marking attendance"
+        }), 500
 
 # -----------------------------
 # 3️⃣ Get attendance summary of one student
@@ -127,56 +155,47 @@ def edit_attendance():
 
     return jsonify({"success": True, "message": "Attendance updated and notification sent"}), 200
 
-# # -----------------------------
-# # 5️⃣ Edit attendance percentage (Admin)
-# # -----------------------------
-# @attendance_bp.route("/mark", methods=["POST"])
-# def mark_attendance_api():
-#     try:
-#         data = request.json
-#         records = data.get("records", {})
+# -----------------------------
+# 5️⃣ Edit attendance percentage (Admin)
+# -----------------------------
+@attendance_bp.route('/edit_percentage', methods=['POST'])
+def edit_attendance_percentage():
+    try:
+        data = request.json
+        enrollment = data.get("enrollment")
+        total = data.get("total")
+        present = data.get("present")
 
-#         if not records:
-#             return jsonify({
-#                 "success": False,
-#                 "message": "No attendance records received"
-#             }), 400
+        if not all([enrollment is not None, total is not None, present is not None]):
+            return jsonify({"success": False, "message": "Missing fields"}), 400
 
-#         for enrollment, status in records.items():
+        # Remove old records
+        attendance_collection.delete_many({"enrollment": enrollment})
 
-#             if status not in ["P", "A"]:
-#                 continue
+        # Fetch student section
+        student = students_collection.find_one({"enrollment": enrollment})
+        section = student.get("section", "") if student else ""
 
-#             # 🔥 Build increment object
-#             inc_fields = {
-#                 "totalLectures": 1
-#             }
+        # Generate new attendance history
+        for i in range(total):
+            status = "P" if i < present else "A"
+            attendance_collection.insert_one({
+                "enrollment": enrollment,
+                "section": section,
+                "status": status,
+                "date": f"2025-01-{i+1:02d}"
+            })
 
-#             if status == "P":
-#                 inc_fields["presentLectures"] = 1
-#             else:
-#                 inc_fields["absentLectures"] = 1
+        # 🔔 Send notification about percentage update
+        title = "📢 Attendance History Updated"
+        body = f"Your attendance record has been updated. Present: {present}, Total: {total}"
+        send_to_enrollment(enrollment, title, body, url="/student-dashboard.html")
 
-#             # 🔥 ATOMIC UPDATE
-#             students_collection.update_one(
-#                 {"enrollment": enrollment},
-#                 {
-#                     "$inc": inc_fields
-#                 }
-#             )
+        return jsonify({"success": True, "message": "Attendance percentage updated and notification sent"}), 200
 
-#         return jsonify({
-#             "success": True,
-#             "message": "Attendance counters updated successfully"
-#         }), 200
-
-#     except Exception as e:
-#         print("❌ Attendance error:", e)
-#         return jsonify({
-#             "success": False,
-#             "message": "Server error"
-#         }), 500
-
+    except Exception as e:
+        print("❌ Error in edit_attendance_percentage:", e)
+        return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
 @attendance_bp.route("/class", methods=["POST", "OPTIONS"])
 @cross_origin()
 def get_students_by_class():
