@@ -3,206 +3,253 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Acropolis College - Mentor Signup</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <title>Acropolis - Mentor Registration</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary-navy: #001f3f;
+      --accent-gold: #daa520;
+      --glass-white: rgba(255, 255, 255, 0.9);
+      --input-bg: rgba(240, 244, 248, 0.8);
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #f0f0f0, #dcdcdc);
-      color: #2c2c2c;
+      /* Dynamic Navy Gradient Background */
+      background: linear-gradient(135deg, #001f3f 0%, #003366 50%, #001f3f 100%);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      overflow-x: hidden;
     }
 
-    .signup-container {
-      background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(12px);
-      padding: 40px 30px;
-      border-radius: 18px;
-      width: 400px;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .signup-card {
+      background: var(--glass-white);
+      width: 450px;
+      padding: 40px;
+      border-radius: 24px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+      transform: translateY(30px);
+      opacity: 0;
+      animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
       text-align: center;
+      position: relative;
     }
 
-    .signup-container img {
-      width: 120px;
-      margin-bottom: 20px;
-      border-radius: 50%;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    @keyframes slideUp {
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Logo Styling - No Border */
+    .logo-container img {
+      width: 180px; /* Adjusted for clarity */
+      height: auto;
+      margin-bottom: 15px;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
     }
 
     h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.8rem;
-      margin-bottom: 10px;
-      color: #6d1b1b;
+      color: var(--primary-navy);
+      font-weight: 600;
+      font-size: 24px;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
     }
 
-    p.subtitle {
-      font-size: 0.95rem;
-      color: #555;
-      margin-bottom: 25px;
+    .subtitle {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 30px;
     }
 
     form {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: 1fr 1fr; /* Two column layout for better look */
       gap: 15px;
     }
 
-    input, select {
-      padding: 12px 15px;
-      border-radius: 12px;
-      border: 1.5px solid #a1887f;
-      font-size: 15px;
-      background: #fafafa;
-      color: #3e2723;
-      transition: all 0.3s ease;
-    }
+    /* Full width inputs for specific fields */
+    .full-width { grid-column: span 2; }
 
-    input:focus, select:focus {
-      border-color: #6d1b1b;
-      box-shadow: 0 0 6px rgba(109,27,27,0.3);
+    input, select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 14px;
+      background: var(--input-bg);
+      transition: all 0.3s ease;
       outline: none;
     }
 
-    button {
-      padding: 12px;
-      border-radius: 12px;
+    input:focus, select:focus {
+      border-color: var(--primary-navy);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(0, 31, 63, 0.1);
+      transform: scale(1.02);
+    }
+
+    button.signup-btn {
+      grid-column: span 2;
+      padding: 14px;
+      margin-top: 10px;
       border: none;
-      cursor: pointer;
-      font-size: 16px;
+      border-radius: 10px;
+      background: var(--primary-navy);
+      color: white;
       font-weight: 600;
-      background: linear-gradient(135deg, #8d6e63, #6d1b1b);
-      color: #fff;
-      transition: all 0.3s ease;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.4s ease;
+      box-shadow: 0 4px 15px rgba(0, 31, 63, 0.3);
     }
 
-    button:hover {
-      background: linear-gradient(135deg, #6d1b1b, #3e2723);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+    button.signup-btn:hover {
+      background: #003366;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 31, 63, 0.4);
     }
 
-    .login-student {
+    .footer-link {
+      grid-column: span 2;
       margin-top: 20px;
-      font-size: 0.95rem;
+      font-size: 13px;
     }
 
-    .login-student button {
-      background: linear-gradient(135deg, #DAA520, #B8860B);
+    .footer-link button {
+      background: none;
+      border: none;
+      color: var(--accent-gold);
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
     }
 
-    @media(max-width: 420px){
-      .signup-container { width: 90%; padding: 30px 20px; }
-      h1 { font-size: 1.5rem; }
+    /* Responsive */
+    @media (max-width: 500px) {
+      .signup-card { width: 90%; padding: 25px; }
+      form { grid-template-columns: 1fr; }
+      .full-width { grid-column: span 1; }
+      button.signup-btn { grid-column: span 1; }
     }
   </style>
 </head>
 <body>
 
-  <div class="signup-container">
-    <img src="logo.jpg" alt="Acropolis College Logo">
+  <div class="signup-card">
+    <div class="logo-container">
+      <img src="logo.jpg" alt="Acropolis Logo">
+    </div>
     <h1>Mentor Signup</h1>
-    <p class="subtitle">Register your mentor account to manage classes and assignments</p>
+    <p class="subtitle">Join the academic excellence portal</p>
 
     <form id="mentorSignupForm">
-      <input type="text" id="mentorId" placeholder="Mentor ID" required>
-      <input type="text" id="name" placeholder="Full Name" required>
-      <input type="email" id="email" placeholder="Email" required>
+      <input type="text" id="mentorId" placeholder="Mentor ID" required class="full-width">
+      <input type="text" id="name" placeholder="Full Name" required class="full-width">
+      <input type="email" id="email" placeholder="Email Address" required>
       <input type="tel" id="phone" placeholder="Phone Number" required>
+      
       <select id="subject" required>
-        <option value="" disabled selected>Select Subject</option>
+        <option value="" disabled selected>Subject</option>
         <option value="DBMS">DBMS</option>
         <option value="Mathematics">Mathematics</option>
         <option value="Programming">Programming</option>
-        <option value="Physics">Physics</option>
       </select>
+      
       <select id="branch" required>
-        <option value="" disabled selected>Select Branch</option>
+        <option value="" disabled selected>Branch</option>
         <option value="CSE">CSE</option>
         <option value="ECE">ECE</option>
         <option value="ME">ME</option>
-        <option value="CE">CE</option>
       </select>
-      <select id="classAssigned" required>
+
+      <select id="classAssigned" required class="full-width">
         <option value="" disabled selected>Select Class Assigned</option>
         <option value="1st Year - A">1st Year - A</option>
         <option value="2nd Year - A">2nd Year - A</option>
         <option value="3rd Year - A">3rd Year - A</option>
-        <option value="3rd Year - B">3rd Year - B</option>
       </select>
+
       <input type="password" id="password" placeholder="Password" required>
       <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
-      <button type="submit">Signup</button>
-    </form>
 
-    <div class="login-student">
-      Already a student? <button onclick="window.location.href='/student-signup'">Student Signup/Login</button>
-    </div>
+      <button type="submit" class="signup-btn">Create Mentor Account</button>
+      
+      <div class="footer-link">
+        Already have an account? 
+        <button type="button" onclick="window.location.href='/mentor-login'">Login here</button>
+      </div>
+    </form>
   </div>
 
   <script>
+    // --- Access Control Logic ---
+    const mentorIdStorage = localStorage.getItem("mentorId");
+    const source = sessionStorage.getItem("accessSource");
+    const ALLOWED_SOURCES = ["ad", "admin"];
+
+    if(!mentorIdStorage || !ALLOWED_SOURCES.includes(source)){
+      document.body.innerHTML = `
+        <div style="color:white; text-align:center; padding:50px;">
+          <h2 style="font-size:40px;">🚫</h2>
+          <h2>Access Denied</h2>
+          <p>Please register via the Admin Dashboard.</p>
+        </div>
+      `;
+      throw new Error("Unauthorized");
+    }
+
+    // --- Form Submission ---
     const form = document.getElementById('mentorSignupForm');
-
-    /* ===============================
-   ACCESS CONTROL — ADMIN PAGES
-================================ */
-
-const mentorId = localStorage.getItem("mentorId");
-const source   = sessionStorage.getItem("accessSource");
-
-// allowed sources
-const ALLOWED_SOURCES = ["ad", "admin"];
-
-if(!mentorId || !ALLOWED_SOURCES.includes(source)){
-  document.body.innerHTML = `
-    <h2 style="text-align:center;margin-top:20vh;color:red">
-      ❌ Access Denied <br>
-      Please open this page via Administration Panel
-    </h2>
-  `;
-  throw new Error("Unauthorized access");
-}
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const mentorId = document.getElementById('mentorId').value;
-      const name = document.getElementById('name').value;
-      const email = document.getElementById('email').value;
-      const phone = document.getElementById('phone').value;
-      const subject = document.getElementById('subject').value;
-      const branch = document.getElementById('branch').value;
-      const classAssigned = document.getElementById('classAssigned').value;
       const password = document.getElementById('password').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
 
       if(password !== confirmPassword){
-        alert("Passwords do not match!");
+        alert("❌ Passwords do not match!");
         return;
       }
+
+      const formData = {
+        mentorId: document.getElementById('mentorId').value,
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        subject: document.getElementById('subject').value,
+        branch: document.getElementById('branch').value,
+        classAssigned: document.getElementById('classAssigned').value,
+        password: password
+      };
 
       try {
         const res = await fetch("https://college-hwbb.onrender.com/api/signup/mentor", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ mentorId, name, email, phone, subject, branch, classAssigned, password })
+          body: JSON.stringify(formData)
         });
 
         const data = await res.json();
         if(res.ok){
-          alert("Mentor signup successful! Redirecting to login...");
+          alert("✅ Mentor Registered Successfully!");
           window.location.href = '/mentor-login';
         } else {
-          alert(data.message || "Signup failed!");
+          alert("⚠️ " + (data.message || "Signup failed"));
         }
       } catch(err){
-        console.error(err);
-        alert("Error connecting to server");
+        alert("❌ Server connection error");
       }
     });
   </script>
