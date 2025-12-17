@@ -19,16 +19,9 @@ td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:center}
 .mark-btn{padding:6px 14px;border:none;border-radius:20px;cursor:pointer;font-weight:600;transition:all 0.2s;margin:2px}
 .present{background:#16a34a;color:#fff}
 .absent{background:#dc2626;color:#fff}
-.selected{outline:3px solid #000000} /* Yellow outline for marked */
+.selected{outline:3px solid #000000}
 .no-data{color:#666}
-#submitMsg{
-  padding:10px;
-  margin-bottom:10px;
-  border-radius:8px;
-  text-align:center;
-  font-weight:600;
-}
-
+#submitMsg{padding:10px;margin-bottom:10px;border-radius:8px;text-align:center;font-weight:600;}
 #submitting{display:none;background:#fef3c7;color:#78350f;padding:6px 12px;border-radius:6px;margin-right:5px;}
 #successSubmit{display:none;background:#dcfce7;color:#166534;padding:6px 12px;border-radius:6px;}
 </style>
@@ -58,13 +51,12 @@ td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:center}
     <option value="CSE3">CSE3</option>
     <option value="CSE4">CSE4</option>
     <option value="CSE5">CSE5</option>
-    <option value="IT2">IT2</option>
-        <option value="IT1">IT1</option>
+    <option value="IT1">IT1</option>
     <option value="IT2">IT2</option>
     <option value="IT3">IT3</option>
     <option value="IT4">IT4</option>
     <option value="IT5">IT5</option>
-    
+        
     <option value="AIML1">AIML1</option>
     <option value="AIML2">AIML2</option>
     <option value="AIML3">AIML3</option>
@@ -198,7 +190,6 @@ td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:center}
     <option value="IM5">IM5</option>
   
   </select>
-
   </select>
 
   <button id="refreshBtn">Refresh</button>
@@ -210,7 +201,6 @@ td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:center}
   <span id="submitting" style="display:none">Submitting, please wait...</span>
   <span id="successSubmit" style="display:none;font-weight:600;color:green"></span>
 </div>
-
 
 <button onclick="submitAttendance()" style="margin-bottom:10px">Submit Attendance</button>
 
@@ -247,6 +237,12 @@ function saveDraft(d){localStorage.setItem(DRAFT_KEY,JSON.stringify(d))}
 function clearDraft(){localStorage.removeItem(DRAFT_KEY)}
 let marked=loadDraft();
 
+// local storage for device tracking
+const DEVICE_KEY="attendance_device_count";
+function loadDeviceData(){const d=localStorage.getItem(DEVICE_KEY);return d?JSON.parse(d):{}}
+function saveDeviceData(d){localStorage.setItem(DEVICE_KEY,JSON.stringify(d))}
+let deviceData=loadDeviceData();
+
 function logout(){localStorage.clear();location.href="login.html";}
 
 async function fetchStudents(force=false){
@@ -257,7 +253,17 @@ async function fetchStudents(force=false){
 }
 
 // MARK ATTENDANCE
-function markAttendance(enr,status){ marked[enr]=status; saveDraft(marked); render(false); }
+function markAttendance(enr,status){
+  marked[enr]=status;
+  saveDraft(marked);
+
+  // local device counter
+  if(!deviceData[enr]) deviceData[enr]={P:0,A:0};
+  deviceData[enr][status]+=1;
+  saveDeviceData(deviceData);
+
+  render(false);
+}
 
 // SUBMIT ATTENDANCE
 function submitAttendance() {
@@ -274,8 +280,11 @@ function submitAttendance() {
 
   fetch(API_MARK_ATT, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ records: marked })
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      lectureId: "IT2-DSA-3", // unique per lecture
+      records: marked
+    })
   })
   .then(res => res.json())
   .then(data => {
@@ -288,11 +297,11 @@ function submitAttendance() {
 
     const count = Object.keys(marked).length;
 
-    // ✅ SHOW MESSAGE FIRST
+    // show success
     successMsg.innerText = `${count} student(s) attendance registered ✅`;
     successMsg.style.display = "inline";
 
-    // ✅ DELAY heavy UI updates
+    // reset after 3.5s
     setTimeout(() => {
       successMsg.style.display = "none";
       clearDraft();
@@ -339,6 +348,7 @@ async function render(refresh=false){
 
   for(const s of filtered){
     const att=marked[s.enrollment]??null;
+    const deviceCount = deviceData[s.enrollment] || {P:0,A:0};
     body.innerHTML+=`
       <tr class="${att==="P"?"present-row":att==="A"?"absent-row":""}">
         <td>${s.enrollment}</td>
@@ -346,8 +356,8 @@ async function render(refresh=false){
         <td>${s.year}</td>
         <td>${s.branch}</td>
         <td>
-          <button class="mark-btn present ${att==="P"?"selected":""}" onclick="markAttendance('${s.enrollment}','P')">P</button>
-          <button class="mark-btn absent ${att==="A"?"selected":""}" onclick="markAttendance('${s.enrollment}','A')">A</button>
+          <button class="mark-btn present ${att==="P"?"selected":""}" onclick="markAttendance('${s.enrollment}','P')">P (${deviceCount.P})</button>
+          <button class="mark-btn absent ${att==="A"?"selected":""}" onclick="markAttendance('${s.enrollment}','A')">A (${deviceCount.A})</button>
         </td>
       </tr>
     `;
