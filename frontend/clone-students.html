@@ -252,24 +252,61 @@ async function fetchStudents(force=false){
 function markAttendance(enr,status){ marked[enr]=status; saveDraft(marked); render(false); }
 
 // SUBMIT ATTENDANCE
-function submitAttendance(){
-  if(!Object.keys(marked).length){ alert("No attendance marked"); return; }
-  const subMsg=document.getElementById("submitting");
-  const successMsg=document.getElementById("successSubmit");
-  subMsg.style.display="inline"; successMsg.style.display="none";
-  fetch(API_MARK_ATT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({records:marked})})
-  .then(res=>res.json())
-  .then(data=>{
-    subMsg.style.display="none";
-    if(data.success){
-      const count=Object.keys(marked).length;
-      successMsg.innerText=`${count} student(s) attendance registered ✅`;
-      successMsg.style.display="inline";
-      clearDraft(); marked={}; render(false);
-      setTimeout(()=>{successMsg.style.display="none"},4000);
-    }else{ alert(data.message||"Submission failed"); }
-  }).catch(err=>{subMsg.style.display="none";console.error(err);alert("Server error");});
+function submitAttendance() {
+  if (!Object.keys(marked).length) {
+    alert("No attendance marked");
+    return;
+  }
+
+  const subMsg = document.getElementById("submitting");
+  const successMsg = document.getElementById("successSubmit");
+
+  subMsg.style.display = "inline";
+  successMsg.style.display = "none";
+
+  fetch(API_MARK_ATT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ records: marked })
+  })
+  .then(async res => {
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "Request failed");
+    }
+
+    return data;
+  })
+  .then(data => {
+    subMsg.style.display = "none";
+
+    if (data.success) {
+      const count = Object.keys(marked).length;
+
+      successMsg.innerText = `${count} student(s) attendance registered ✅`;
+      successMsg.style.display = "inline";
+
+      clearDraft();
+      marked = {};
+      render(false);
+
+      setTimeout(() => {
+        successMsg.style.display = "none";
+      }, 4000);
+    } else {
+      alert(data.message || "Submission failed");
+    }
+  })
+  .catch(err => {
+    subMsg.style.display = "none";
+    console.error("Attendance error:", err);
+    alert(err.message || "Server error");
+  });
 }
+
 
 // RENDER
 async function render(refresh=false){
