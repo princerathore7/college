@@ -158,44 +158,53 @@ def edit_attendance():
 # -----------------------------
 # 5️⃣ Edit attendance percentage (Admin)
 # -----------------------------
-@attendance_bp.route('/edit_percentage', methods=['POST'])
-def edit_attendance_percentage():
+@attendance_bp.route("/mark", methods=["POST"])
+def mark_attendance():
     try:
         data = request.json
-        enrollment = data.get("enrollment")
-        total = data.get("total")
-        present = data.get("present")
+        records = data.get("records", {})
 
-        if not all([enrollment is not None, total is not None, present is not None]):
-            return jsonify({"success": False, "message": "Missing fields"}), 400
+        if not records:
+            return jsonify({
+                "success": False,
+                "message": "No attendance records received"
+            }), 400
 
-        # Remove old records
-        attendance_collection.delete_many({"enrollment": enrollment})
+        for enrollment, status in records.items():
 
-        # Fetch student section
-        student = students_collection.find_one({"enrollment": enrollment})
-        section = student.get("section", "") if student else ""
+            if status not in ["P", "A"]:
+                continue
 
-        # Generate new attendance history
-        for i in range(total):
-            status = "P" if i < present else "A"
-            attendance_collection.insert_one({
-                "enrollment": enrollment,
-                "section": section,
-                "status": status,
-                "date": f"2025-01-{i+1:02d}"
-            })
+            # 🔥 Build increment object
+            inc_fields = {
+                "totalLectures": 1
+            }
 
-        # 🔔 Send notification about percentage update
-        title = "📢 Attendance History Updated"
-        body = f"Your attendance record has been updated. Present: {present}, Total: {total}"
-        send_to_enrollment(enrollment, title, body, url="/student-dashboard.html")
+            if status == "P":
+                inc_fields["presentLectures"] = 1
+            else:
+                inc_fields["absentLectures"] = 1
 
-        return jsonify({"success": True, "message": "Attendance percentage updated and notification sent"}), 200
+            # 🔥 ATOMIC UPDATE
+            students_collection.update_one(
+                {"enrollment": enrollment},
+                {
+                    "$inc": inc_fields
+                }
+            )
+
+        return jsonify({
+            "success": True,
+            "message": "Attendance counters updated successfully"
+        }), 200
 
     except Exception as e:
-        print("❌ Error in edit_attendance_percentage:", e)
-        return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
+        print("❌ Attendance error:", e)
+        return jsonify({
+            "success": False,
+            "message": "Server error"
+        }), 500
+
 @attendance_bp.route("/class", methods=["POST", "OPTIONS"])
 @cross_origin()
 def get_students_by_class():
