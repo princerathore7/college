@@ -311,6 +311,8 @@ function editFine(enr){
   localStorage.setItem("selectedEnrollment", enr);
   window.location.href = "admin-fine.html";
 }
+localStorage.removeItem("admin_students");
+render(true);   // force refresh
 
 /* -------------------------
    FILTERS + REFRESH

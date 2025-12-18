@@ -543,6 +543,9 @@ if(!mentorId || !ALLOWED_SOURCES.includes(source)){
         fetchStudent(); // auto fetch
       }
     });
+    localStorage.removeItem("admin_students");
+render(true);   // force refresh
+
 </script>
 <script src="/static/js/notifications.js"></script>
 

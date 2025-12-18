@@ -47,21 +47,22 @@ def get_students_by_class_get(class_name):
 @attendance_bp.route("/mark", methods=["POST"])
 def mark_attendance():
     try:
-        data = request.json
-        records = data.get("records", {})
-        lecture_id = data.get("lectureId")   # 🔥 ADD THIS
+        data = request.json or {}
+        records = data.get("records")
+        lecture_id = data.get("lectureId")
 
         if not records or not lecture_id:
             return jsonify({
                 "success": False,
-                "message": "Records or lectureId missing"
+                "message": "records or lectureId missing"
             }), 400
 
         today = datetime.now().strftime("%Y-%m-%d")
 
         for enrollment, status in records.items():
 
-            if status not in ["P", "A"]:
+            # 🔐 validate
+            if status not in ("P", "A"):
                 continue
 
             student = students_collection.find_one(
@@ -71,34 +72,29 @@ def mark_attendance():
             if not student:
                 continue
 
-            # 🔥 FIX: lecture-wise uniqueness
-            existing = attendance_collection.find_one({
-                "enrollment": enrollment,
-                "date": today,
-                "lectureId": lecture_id
-            })
-
-            if existing:
-                attendance_collection.update_one(
-                    {"_id": existing["_id"]},
-                    {"$set": {"status": status}}
-                )
-            else:
-                attendance_collection.insert_one({
+            # 🔥 lecture + date + enrollment uniqueness
+            attendance_collection.update_one(
+                {
                     "enrollment": enrollment,
-                    "name": student.get("name"),
-                    "year": student.get("year"),
-                    "branch": student.get("branch"),
-                    "section": student.get("section"),
-                    "status": status,
                     "date": today,
-                    "lectureId": lecture_id,   # 🔥 ADD THIS
-                    "markedAt": datetime.now()
-                })
+                    "lectureId": lecture_id
+                },
+                {
+                    "$set": {
+                        "status": status,
+                        "name": student["name"],
+                        "year": student["year"],
+                        "branch": student["branch"],
+                        "section": student.get("section"),
+                        "markedAt": datetime.utcnow()
+                    }
+                },
+                upsert=True   # 🔥 THIS IS THE KEY
+            )
 
         return jsonify({
             "success": True,
-            "message": "Attendance marked successfully"
+            "message": "Attendance updated successfully"
         }), 200
 
     except Exception as e:
@@ -107,6 +103,7 @@ def mark_attendance():
             "success": False,
             "message": "Server error while marking attendance"
         }), 500
+
 
 # -----------------------------
 # 3️⃣ Get attendance summary of one student
