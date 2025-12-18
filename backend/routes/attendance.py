@@ -64,14 +64,6 @@ def mark_attendance():
             if not student:
                 continue
 
-            # --------- CHECK OLD RECORD ----------
-            old = attendance_collection.find_one({
-                "enrollment": enrollment,
-                "date": today,
-                "lectureId": lecture_id
-            })
-
-            # --------- SAVE HISTORY ----------
             attendance_collection.update_one(
                 {
                     "enrollment": enrollment,
@@ -81,50 +73,23 @@ def mark_attendance():
                 {
                     "$set": {
                         "status": status,
+                        "year": student.get("year"),
+                        "branch": student.get("branch"),
+                        "section": student.get("section"),
                         "markedAt": datetime.utcnow()
                     }
                 },
                 upsert=True
             )
 
-            # --------- CALCULATE SUMMARY ----------
-            total = student.get("total", 0)
-            present = student.get("present", 0)
-
-            if not old:
-                total += 1
-                if status == "P":
-                    present += 1
-            else:
-                if old["status"] != status:
-                    if status == "P":
-                        present += 1
-                    else:
-                        present -= 1
-
-            percentage = round((present / total) * 100, 2) if total else 0
-
-            # --------- UPDATE STUDENT SUMMARY ----------
-            students_collection.update_one(
-                {"enrollment": enrollment},
-                {
-                    "$set": {
-                        "total": total,
-                        "present": present,
-                        "percentage": percentage
-                    }
-                }
-            )
-
         return jsonify({
             "success": True,
-            "message": "Attendance marked & synced"
+            "message": "Attendance marked successfully"
         }), 200
 
     except Exception as e:
         print("❌ Attendance error:", e)
         return jsonify({"success": False}), 500
-
 
 # -----------------------------
 # 3️⃣ Get attendance summary of one student
@@ -132,16 +97,22 @@ def mark_attendance():
 @attendance_bp.route('/student/<string:enrollment>', methods=['GET'])
 def get_student_attendance(enrollment):
     total = attendance_collection.count_documents({"enrollment": enrollment})
-    present = attendance_collection.count_documents({"enrollment": enrollment, "status": "P"})
-    percentage = (present / total * 100) if total > 0 else 0
+    present = attendance_collection.count_documents({
+        "enrollment": enrollment,
+        "status": "P"
+    })
+
+    percentage = round((present / total) * 100, 2) if total else 0
+
     return jsonify({
         "success": True,
         "attendance": {
             "total": total,
             "present": present,
-            "percentage": round(percentage, 2)
+            "percentage": percentage
         }
     }), 200
+
 
 # -----------------------------
 # 4️⃣ Edit attendance manually (Admin)
