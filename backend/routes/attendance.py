@@ -49,52 +49,50 @@ def mark_attendance():
     try:
         data = request.json
         records = data.get("records", {})
+        lecture_id = data.get("lectureId")   # 🔥 ADD THIS
 
-        if not records:
+        if not records or not lecture_id:
             return jsonify({
                 "success": False,
-                "message": "No attendance records received"
+                "message": "Records or lectureId missing"
             }), 400
 
         today = datetime.now().strftime("%Y-%m-%d")
 
         for enrollment, status in records.items():
 
-            # 🔍 Validate status
             if status not in ["P", "A"]:
                 continue
 
-            # 🔍 Fetch student details
             student = students_collection.find_one(
                 {"enrollment": enrollment},
                 {"_id": 0}
             )
-
             if not student:
-                continue  # skip invalid enrollment
+                continue
 
-            # 🛑 Prevent duplicate attendance for same day
+            # 🔥 FIX: lecture-wise uniqueness
             existing = attendance_collection.find_one({
                 "enrollment": enrollment,
-                "date": today
+                "date": today,
+                "lectureId": lecture_id
             })
 
             if existing:
-                # 🔁 Update instead of insert
                 attendance_collection.update_one(
                     {"_id": existing["_id"]},
                     {"$set": {"status": status}}
                 )
             else:
-                # ➕ Insert new attendance
                 attendance_collection.insert_one({
                     "enrollment": enrollment,
                     "name": student.get("name"),
                     "year": student.get("year"),
                     "branch": student.get("branch"),
                     "section": student.get("section"),
-                    "status": status,   # "P" / "A"
+                    "status": status,
                     "date": today,
+                    "lectureId": lecture_id,   # 🔥 ADD THIS
                     "markedAt": datetime.now()
                 })
 
