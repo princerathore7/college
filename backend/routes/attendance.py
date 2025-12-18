@@ -48,31 +48,30 @@ def get_students_by_class_get(class_name):
 def mark_attendance():
     try:
         data = request.json or {}
-        records = data.get("records")
+        records = data.get("records", {})
         lecture_id = data.get("lectureId")
 
         if not records or not lecture_id:
-            return jsonify({
-                "success": False,
-                "message": "records or lectureId missing"
-            }), 400
+            return jsonify({"success": False, "message": "Missing data"}), 400
 
         today = datetime.now().strftime("%Y-%m-%d")
 
         for enrollment, status in records.items():
-
-            # 🔐 validate
             if status not in ("P", "A"):
                 continue
 
-            student = students_collection.find_one(
-                {"enrollment": enrollment},
-                {"_id": 0}
-            )
+            student = students_collection.find_one({"enrollment": enrollment})
             if not student:
                 continue
 
-            # 🔥 lecture + date + enrollment uniqueness
+            # --------- CHECK OLD RECORD ----------
+            old = attendance_collection.find_one({
+                "enrollment": enrollment,
+                "date": today,
+                "lectureId": lecture_id
+            })
+
+            # --------- SAVE HISTORY ----------
             attendance_collection.update_one(
                 {
                     "enrollment": enrollment,
@@ -82,27 +81,49 @@ def mark_attendance():
                 {
                     "$set": {
                         "status": status,
-                        "name": student["name"],
-                        "year": student["year"],
-                        "branch": student["branch"],
-                        "section": student.get("section"),
                         "markedAt": datetime.utcnow()
                     }
                 },
-                upsert=True   # 🔥 THIS IS THE KEY
+                upsert=True
+            )
+
+            # --------- CALCULATE SUMMARY ----------
+            total = student.get("total", 0)
+            present = student.get("present", 0)
+
+            if not old:
+                total += 1
+                if status == "P":
+                    present += 1
+            else:
+                if old["status"] != status:
+                    if status == "P":
+                        present += 1
+                    else:
+                        present -= 1
+
+            percentage = round((present / total) * 100, 2) if total else 0
+
+            # --------- UPDATE STUDENT SUMMARY ----------
+            students_collection.update_one(
+                {"enrollment": enrollment},
+                {
+                    "$set": {
+                        "total": total,
+                        "present": present,
+                        "percentage": percentage
+                    }
+                }
             )
 
         return jsonify({
             "success": True,
-            "message": "Attendance updated successfully"
+            "message": "Attendance marked & synced"
         }), 200
 
     except Exception as e:
         print("❌ Attendance error:", e)
-        return jsonify({
-            "success": False,
-            "message": "Server error while marking attendance"
-        }), 500
+        return jsonify({"success": False}), 500
 
 
 # -----------------------------
