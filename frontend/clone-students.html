@@ -203,6 +203,10 @@ td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:center}
 </div>
 
 <button onclick="submitAttendance()" style="margin-bottom:10px">Submit Attendance</button>
+<button onclick="clearDeviceAttendance()" 
+        style="margin-bottom:10px;background:#7c2d12">
+  Clear Device Attendance Count
+</button>
 
 <table>
 <thead>
@@ -362,6 +366,15 @@ async function render(refresh=false){
       </tr>
     `;
   }
+}
+function clearDeviceAttendance(){
+  if(!confirm("Clear all local device attendance counts?")) return;
+
+  localStorage.removeItem("attendance_device_count");
+  deviceData = {}; // reset in-memory object
+
+  alert("Device attendance count cleared ✅");
+  render(false);
 }
 
 // EVENTS
