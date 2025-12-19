@@ -35,11 +35,16 @@ def normalize_class_name(class_name):
     return class_name
 
 # -----------------------------
-# GET all assignments
+# GET all ACTIVE assignments
 # -----------------------------
 @assignments_bp.route("", methods=["GET"])
 def get_all_assignments():
-    assignments = list(assignments_collection.find({}, {"_id": 0}))
+    assignments = list(
+        assignments_collection.find(
+            {"active": True},     # ✅ IMPORTANT FILTER
+            {"_id": 0}
+        )
+    )
     return jsonify({
         "success": True,
         "assignments": assignments
@@ -48,19 +53,28 @@ def get_all_assignments():
 # -----------------------------
 # GET assignments by class
 # -----------------------------
+# -----------------------------
+# GET ACTIVE assignments by class
+# -----------------------------
 @assignments_bp.route("/class/<class_name>", methods=["GET"])
 def get_assignments_by_class(class_name):
     normalized_class = normalize_class_name(class_name)
+
     assignments = list(
         assignments_collection.find(
-            {"class_normalized": normalized_class},
+            {
+                "class_normalized": normalized_class,
+                "active": True     # ✅ IMPORTANT FILTER
+            },
             {"_id": 0}
         )
     )
+
     return jsonify({
         "success": True,
         "assignments": assignments
     }), 200
+
 
 # -----------------------------
 # POST new assignment

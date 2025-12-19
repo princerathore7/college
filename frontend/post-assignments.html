@@ -3,271 +3,237 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Post Assignments — Acropolis College</title>
+<title>Post Assignments — Admin</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
 <style>
-/* ---------------- RESET ---------------- */
-* {box-sizing: border-box; margin:0; padding:0; font-family: 'Poppins', sans-serif;}
-body {background: #f6f8fb; color: #222; overflow-y: auto;}
+*{box-sizing:border-box;font-family:Poppins,sans-serif}
+body{margin:0;background:#f4f7fb}
 
-/* ---------------- HEADER ---------------- */
-header {
-    background: linear-gradient(135deg,#004d40,#009688);
-    color: #fff;
-    padding: 14px 18px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.12);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+/* HEADER */
+header{
+  background:linear-gradient(135deg,#001f3f,#003366);
+  color:#fff;
+  padding:14px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
-header h1 {font-family: 'Playfair Display', serif; font-size: 1.4rem;}
-header .back-btn, header .logout-btn {
-    padding: 8px 14px;
-    border-radius: 6px;
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s;
+header h1{font-family:Playfair Display;font-size:1.4rem}
+header button{
+  padding:8px 14px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:600;
 }
-header .back-btn {background:#fff; color:#004d40; margin-right:10px;}
-header .back-btn:hover {background:#b2dfdb;}
-header .logout-btn {background:#fff; color:#004d40;}
-header .logout-btn:hover {background:#b2dfdb;}
+.back-btn{background:#fff;color:#001f3f}
+.logout-btn{background:#fff;color:#001f3f}
 
-/* ---------------- MAIN ---------------- */
-main {
-    max-width: 1000px;
-    margin: 28px auto;
-    padding: 20px;
+/* MAIN */
+main{max-width:1000px;margin:30px auto;padding:20px}
+.section{
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 6px 16px rgba(0,0,0,.08);
+  margin-bottom:20px;
 }
-.section {
-    background: #fff;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 6px 14px rgba(0,0,0,0.06);
-    margin-bottom: 20px;
+.section-title{
+  font-family:Playfair Display;
+  color:#001f3f;
+  margin-bottom:15px;
 }
-h2.section-title {font-family: 'Playfair Display', serif; color: #004d40; margin-bottom: 12px;}
 
-/* ---------------- FORM ---------------- */
-form {display: flex; flex-direction: column; gap: 10px;}
-form label {font-weight: 500;}
-form input, form select {padding: 10px; border-radius: 8px; border:1px solid #ccc;}
-button.submitBtn {
-    background:#004d40;
-    color:#fff;
-    padding:10px;
-    border:none;
-    border-radius:8px;
-    font-weight:600;
-    cursor:pointer;
-    transition:0.3s;
+/* FORM */
+form{display:flex;flex-direction:column;gap:10px}
+label{font-weight:500}
+input,select{
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
 }
-button.submitBtn:hover {background:#009688;}
-button.submitBtn:disabled {opacity:0.6; cursor:not-allowed;}
-.message {margin-top:10px; font-weight:600;}
+.submitBtn{
+  background:#001f3f;
+  color:#fff;
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  font-weight:600;
+  cursor:pointer;
+}
+.submitBtn:hover{background:#003366}
+.message{margin-top:10px;font-weight:600}
 
-/* ---------------- TABLE ---------------- */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
+/* TABLE */
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{padding:10px;border-bottom:1px solid #eee}
+th{background:#e3ecf7;color:#001f3f}
+.deleteBtn{
+  background:#d32f2f;
+  color:#fff;
+  border:none;
+  padding:6px 12px;
+  border-radius:6px;
+  cursor:pointer;
 }
-table th, table td {
-    padding: 10px;
-    border-bottom:1px solid #eee;
-    text-align:left;
-}
-table th {background:#e0f2f1; color:#004d40;}
-button.deleteBtn {
-    background:#f44336;
-    color:#fff;
-    border:none;
-    padding:6px 12px;
-    border-radius:6px;
-    cursor:pointer;
-    font-weight:600;
-}
-button.deleteBtn:hover {background:#d32f2f;}
-
-/* ---------------- RESPONSIVE ---------------- */
-@media (max-width: 900px) {
-    header h1 {font-size:1.2rem;}
-}
-@media (max-width:600px) {
-    header {padding:10px;}
-    button.submitBtn {padding:8px;}
-    table th, table td {padding:6px; font-size:0.85rem;}
-}
+.deleteBtn:hover{background:#b71c1c}
 </style>
 </head>
+
 <body>
 
 <header>
-    <div>
-        <button class="back-btn" onclick="goBack()">← Back</button>
-        <h1>Post Assignment</h1>
-    </div>
-    <button class="logout-btn" onclick="logout()">Logout</button>
+  <button class="back-btn" onclick="history.back()">← Back</button>
+  <h1>Post Assignments</h1>
+  <button class="logout-btn" onclick="logout()">Logout</button>
 </header>
 
 <main>
-    <div class="section">
-        <h2 class="section-title">Add New Assignment</h2>
-        <form id="assignmentForm">
-            <label for="class">Class / Branch</label>
-            <input type="text" id="class" placeholder="e.g. 1yearIT1 = 1st year IT 1" required>
 
-            <label for="title">Assignment Title</label>
-            <input type="text" id="title" placeholder="Assignment title" required>
+<!-- ADD ASSIGNMENT -->
+<div class="section">
+<h2 class="section-title">Add New Assignment</h2>
 
-            <label for="subject">Subject</label>
-            <input type="text" id="subject" placeholder="Subject name" required>
+<form id="assignmentForm">
 
-            <label for="deadline">Deadline</label>
-            <input type="date" id="deadline" required>
+<label>Year</label>
+<select id="year">
+  <option value="">Select Year</option>
+  <option value="1">1st Year</option>
+  <option value="2">2nd Year</option>
+  <option value="3">3rd Year</option>
+  <option value="4">4th Year</option>
+</select>
 
-            <button type="submit" class="submitBtn">Post Assignment</button>
-        </form>
-        <div class="message" id="message"></div>
-    </div>
+<label>Branch</label>
+<select id="branch">
+  <option value="">Select Branch</option>
+  <option value="CSE">CSE</option>
+  <option value="IT">IT</option>
+  <option value="AIML">AIML</option>
+  <option value="DS">DS</option>
+</select>
 
-    <div class="section">
-        <h2 class="section-title">All Posted Assignments</h2>
-        <table id="postedAssignmentsTable">
-            <thead>
-                <tr>
-                    <th>Class</th>
-                    <th>Title</th>
-                    <th>Subject</th>
-                    <th>Deadline</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr><td colspan="5" style="text-align:center; color:gray;">Loading...</td></tr>
-            </tbody>
-        </table>
-    </div>
+<label>Section</label>
+<select id="section">
+  <option value="">Select Section</option>
+  <option value="1">1</option>
+  <option value="2">2</option>
+  <option value="3">3</option>
+</select>
+
+<label>Title</label>
+<input id="title" required>
+
+<label>Subject</label>
+<input id="subject" required>
+
+<label>Deadline</label>
+<input type="date" id="deadline" required>
+
+<button class="submitBtn">Post Assignment</button>
+</form>
+
+<div class="message" id="message"></div>
+</div>
+
+<!-- LIST -->
+<div class="section">
+<h2 class="section-title">Posted Assignments</h2>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Title</th>
+<th>Subject</th>
+<th>Deadline</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="assignmentTable">
+<tr><td colspan="5" style="text-align:center">Loading...</td></tr>
+</tbody>
+</table>
+</div>
+
 </main>
 
 <script>
-    /* ===============================
-   ACCESS CONTROL — ADMIN PANEL
-================================ */
-
+/* ACCESS CONTROL */
 const mentorId = localStorage.getItem("mentorId");
-const source   = sessionStorage.getItem("accessSource");
-
-// allowed sources
-const ALLOWED_SOURCES = ["ad", "admin"];
-
-if(!mentorId || !ALLOWED_SOURCES.includes(source)){
-  document.body.innerHTML = `
-    <h2 style="text-align:center;margin-top:20vh;color:red">
-      ❌ Access Denied <br>
-      Please open this page via Administration Panel
-    </h2>
-  `;
-  throw new Error("Unauthorized access");
-}
-function logout() {
-    localStorage.removeItem("mentorLoggedIn");
-    localStorage.removeItem("mentorBranch");
-    window.location.href = "mentor-login.html";
-}
-function goBack() { window.history.back(); }
-
-// ✅ Fetch all assignments
-async function fetchPostedAssignments() {
-    try {
-        const res = await fetch(`https://college-hwbb.onrender.com/api/assignments`);
-        const data = await res.json();
-        const tbody = document.getElementById("postedAssignmentsTable").querySelector("tbody");
-        tbody.innerHTML = '';
-        if(res.ok && data.success && data.assignments.length>0){
-            data.assignments.forEach(a=>{
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${a.class}</td>
-                    <td>${a.title}</td>
-                    <td>${a.subject}</td>
-                    <td>${a.deadline}</td>
-                    <td><button class="deleteBtn" onclick="deleteAssignment('${a.assignmentId}')">Delete</button></td>
-                `;
-                tbody.appendChild(tr);
-            });
-        } else {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:gray;">No assignments posted yet</td></tr>`;
-        }
-    } catch(err){
-        console.error(err);
-        const tbody = document.getElementById("postedAssignmentsTable").querySelector("tbody");
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Error fetching assignments</td></tr>`;
-    }
+const src = sessionStorage.getItem("accessSource");
+if(!mentorId || !["ad","admin"].includes(src)){
+  document.body.innerHTML="<h2 style='text-align:center;margin-top:20vh;color:red'>Unauthorized</h2>";
+  throw "";
 }
 
-// ✅ Delete assignment
+function logout(){
+  localStorage.clear();
+  sessionStorage.clear();
+  location.href="mentor-login.html";
+}
+
+/* FETCH */
+async function fetchAssignments(){
+  const tbody=document.getElementById("assignmentTable");
+  const res=await fetch("https://college-hwbb.onrender.com/api/assignments");
+  const data=await res.json();
+  tbody.innerHTML="";
+  if(data.assignments.length===0){
+    tbody.innerHTML="<tr><td colspan='5' style='text-align:center'>No assignments</td></tr>";
+    return;
+  }
+  data.assignments.forEach(a=>{
+    tbody.innerHTML+=`
+    <tr>
+      <td>${a.class}</td>
+      <td>${a.title}</td>
+      <td>${a.subject}</td>
+      <td>${a.deadline}</td>
+      <td><button class="deleteBtn" onclick="deleteAssignment('${a.assignmentId}')">Delete</button></td>
+    </tr>`;
+  });
+}
+
+/* DELETE */
 async function deleteAssignment(id){
-    if(!confirm("Are you sure?")) return;
-    try{
-        const res = await fetch(`https://college-hwbb.onrender.com/api/assignments/${id}`,{method:"DELETE"});
-        const data = await res.json();
-        if(res.ok && data.success){ alert("Deleted successfully"); fetchPostedAssignments(); }
-        else alert(data.message || "Error deleting assignment");
-    }catch(err){console.error(err); alert("Server error");}
+  if(!confirm("Delete this assignment?")) return;
+  const res=await fetch(`https://college-hwbb.onrender.com/api/assignments/${id}`,{method:"DELETE"});
+  const data=await res.json();
+  if(data.success){
+    alert("Deleted");
+    fetchAssignments();
+  }
 }
 
-// ✅ Post new assignment
-document.getElementById("assignmentForm").addEventListener("submit", async e=>{
-    e.preventDefault();
-    const className = document.getElementById("class").value.trim().toUpperCase();
-    const title = document.getElementById("title").value.trim();
-    const subject = document.getElementById("subject").value.trim();
-    const deadline = document.getElementById("deadline").value;
+/* POST */
+document.getElementById("assignmentForm").onsubmit=async e=>{
+  e.preventDefault();
+  const y=year.value,b=branch.value,s=section.value;
+  if(!y||!b||!s){alert("Select class properly");return;}
+  const className=`${y}${b}${s}`;
 
-    if(!className||!title||!subject||!deadline){
-        const msg = document.getElementById("message");
-        msg.textContent="All fields required!";
-        msg.style.color="red"; return;
-    }
+  const res=await fetch("https://college-hwbb.onrender.com/api/assignments",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      class:className,
+      title:title.value,
+      subject:subject.value,
+      deadline:deadline.value
+    })
+  });
 
-    const submitBtn = document.querySelector(".submitBtn");
-    submitBtn.disabled = true;
-    const msg = document.getElementById("message");
-    msg.textContent = "Processing your request...";
-    msg.style.color = "green";
+  const data=await res.json();
+  message.textContent=data.success?"Assignment Posted":"Error";
+  message.style.color=data.success?"green":"red";
+  if(data.success){assignmentForm.reset();fetchAssignments();}
+};
 
-    try{
-        const res = await fetch(`https://college-hwbb.onrender.com/api/assignments`,{
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({class:className,title,subject,deadline})
-        });
-        const data = await res.json();
-        if(res.ok && data.success){
-            msg.textContent = "Assignment posted successfully!";
-            msg.style.color = "green";
-            document.getElementById("assignmentForm").reset();
-            fetchPostedAssignments();
-        } else {
-            msg.textContent = data.message || "Error posting assignment";
-            msg.style.color = "red";
-        }
-    } catch(err){
-        console.error(err);
-        msg.textContent="Server connection error";
-        msg.style.color="red";
-    } finally{
-        submitBtn.disabled = false;
-    }
-});
-
-// Fetch assignments on load
-document.addEventListener("DOMContentLoaded", fetchPostedAssignments);
+fetchAssignments();
 </script>
+
 </body>
 </html>
