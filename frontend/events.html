@@ -151,6 +151,22 @@ header h1 {
 </header>
 
 <button class="back-btn" onclick="goBack()">← Back</button>
+<input 
+  type="text" 
+  id="searchInput" 
+  placeholder="🔍 Search events by title or description..."
+  style="
+    display:block;
+    margin:15px auto 25px;
+    width:100%;
+    max-width:420px;
+    padding:10px 14px;
+    font-size:15px;
+    border-radius:6px;
+    border:1px solid #ccc;
+    outline:none;
+  "
+>
 
 <main>
   <div id="loader" class="loader"></div>
@@ -162,6 +178,8 @@ header h1 {
 function goBack() {
   window.history.back();
 }
+
+let ALL_EVENTS = [];   // 🔑 store all events
 
 async function loadEvents() {
   const container = document.getElementById("eventsContainer");
@@ -175,45 +193,75 @@ async function loadEvents() {
   try {
     const res = await fetch("https://college-hwbb.onrender.com/api/events");
     const data = await res.json();
-    container.innerHTML = "";
     loader.style.display = "none";
 
-    if(data.success && Array.isArray(data.events) && data.events.length > 0) {
-      container.style.display = "grid";
-      data.events.forEach(ev => {
-        const card = document.createElement("div");
-        card.className = "event-card";
-        card.innerHTML = `
-          <img src="${ev.image || 'logo.jpg'}" alt="${ev.title}">
-          <h3>${ev.title}</h3>
-          <p>Click this to get the details of this event</p>
-        `;
-        card.onclick = () => window.location.href = `eventDetails.html?eventId=${ev.eventId}`;
-        container.appendChild(card);
-      });
+    if (data.success && Array.isArray(data.events) && data.events.length > 0) {
+      ALL_EVENTS = data.events;     // ⭐ save all events
+      renderEvents(ALL_EVENTS);     // ⭐ initial render
     } else {
       noEvents.style.display = "block";
     }
-  } catch(err) {
+  } catch (err) {
     console.error("Error fetching events:", err);
     loader.style.display = "none";
     noEvents.style.display = "block";
   }
 }
 
+/* 🔁 Render events (reuse for search also) */
+function renderEvents(events) {
+  const container = document.getElementById("eventsContainer");
+  const noEvents = document.getElementById("noEvents");
+
+  container.innerHTML = "";
+
+  if (events.length === 0) {
+    container.style.display = "none";
+    noEvents.style.display = "block";
+    return;
+  }
+
+  noEvents.style.display = "none";
+  container.style.display = "grid";
+
+  events.forEach(ev => {
+    const card = document.createElement("div");
+    card.className = "event-card";
+    card.innerHTML = `
+      <img src="${ev.image || 'logo.jpg'}" alt="${ev.title}">
+      <h3>${ev.title}</h3>
+      <p>${ev.description || "Click this to get the details of this event"}</p>
+    `;
+    card.onclick = () =>
+      window.location.href = `eventDetails.html?eventId=${ev.eventId}`;
+
+    container.appendChild(card);
+  });
+}
+
+/* 🔍 REAL-TIME SEARCH FILTER */
+document.addEventListener("DOMContentLoaded", () => {
+  const searchInput = document.getElementById("searchInput");
+
+  if (!searchInput) return;
+
+  searchInput.addEventListener("input", function () {
+    const query = this.value.toLowerCase().trim();
+
+    const filteredEvents = ALL_EVENTS.filter(ev =>
+      ev.title?.toLowerCase().includes(query) ||
+      ev.description?.toLowerCase().includes(query)
+    );
+
+    renderEvents(filteredEvents);   // 🔥 auto update
+  });
+});
 
 /* 🔔 NOTIFICATION PERMISSION (Every 5 Days) */
 function requestNotificationPermissionIfNeeded() {
-  if (!("Notification" in window)) {
-    console.log("Browser does not support notifications");
-    return;
-  }
+  if (!("Notification" in window)) return;
 
-  // Already allowed → kuch nahi
-  if (Notification.permission === "granted") {
-    console.log("Notification already granted");
-    return;
-  }
+  if (Notification.permission === "granted") return;
 
   const LAST_ASK_KEY = "event_notification_last_ask";
   const FIVE_DAYS = 5 * 24 * 60 * 60 * 1000;
@@ -226,24 +274,17 @@ function requestNotificationPermissionIfNeeded() {
       localStorage.setItem(LAST_ASK_KEY, now.toString());
 
       if (permission === "granted") {
-        console.log("Notification permission granted");
-
-        // Optional welcome notification
         new Notification("🎉 Notifications Enabled!", {
           body: "You will now receive updates about new events.",
           icon: "logo.jpg"
         });
-      } else {
-        console.log("Notification permission denied");
       }
     });
-  } else {
-    console.log("Notification prompt skipped (asked recently)");
   }
-} 
+}
+
 requestNotificationPermissionIfNeeded();
 loadEvents();
-
 </script>
 
 </body>
