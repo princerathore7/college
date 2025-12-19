@@ -109,15 +109,20 @@
    ACCESS CONTROL
 ================================ */
 
-const adminToken = localStorage.getItem("ADMIN_TOKEN");
-const fromAdmin  = sessionStorage.getItem("fromAdminPanel");
+const mentorId = localStorage.getItem("mentorId");
+const source   = sessionStorage.getItem("accessSource");
 
-if(!adminToken || fromAdmin !== "yes"){
+// allowed sources
+const ALLOWED_SOURCES = ["ad", "admin"];
+
+if(!mentorId || !ALLOWED_SOURCES.includes(source)){
   document.body.innerHTML = `
     <h2 style="text-align:center;margin-top:20vh;color:red">
-      ❌ Unauthorized Access
-    </h2>`;
-  throw new Error("Access denied");
+      ❌ Access Denied <br>
+      Please open this page via Administration Panel
+    </h2>
+  `;
+  throw new Error("Unauthorized access");
 }
 
 /* ===============================
