@@ -4,21 +4,104 @@
 <meta charset="UTF-8">
 <title>Upload Notes — Mentor Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
 <style>
 body { font-family: Inter, sans-serif; background:#eef2f7; padding:30px; }
-.card { max-width:900px; background:#fff; margin:auto; padding:25px; border-radius:10px; box-shadow:0 4px 16px rgba(0,0,0,0.1); }
+
+.card {
+  max-width:900px;
+  background:#fff;
+  margin:auto;
+  padding:25px;
+  border-radius:12px;
+  box-shadow:0 6px 20px rgba(0,0,0,.1);
+}
+
 label { font-weight:600; display:block; margin-top:12px; }
-input, select { width:100%; padding:10px; margin-top:5px; border:1px solid #ccc; border-radius:6px; }
-button { width:100%; padding:12px; margin-top:18px; background:#2563eb; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:15px; font-weight:600; }
-.note-item { border-bottom:1px solid #ddd; padding:12px; background:#f9f9f9; margin-top:12px; border-radius:6px; }
-.action-btn { padding:6px 12px; border:none; border-radius:6px; cursor:pointer; margin-top:6px; }
+input, select {
+  width:100%; padding:10px; margin-top:5px;
+  border:1px solid #ccc; border-radius:6px;
+}
+
+button {
+  width:100%; padding:12px; margin-top:18px;
+  background:#2563eb; color:#fff;
+  border:none; border-radius:6px;
+  cursor:pointer; font-size:15px; font-weight:600;
+}
+
+.note-item {
+  border-bottom:1px solid #ddd;
+  padding:12px; background:#f9f9f9;
+  margin-top:12px; border-radius:6px;
+}
+
+.action-btn {
+  padding:6px 12px;
+  border:none; border-radius:6px;
+  cursor:pointer; margin-top:6px;
+}
 .view { background:#16a34a; color:#fff; }
 .delete { background:#dc2626; color:#fff; margin-left:6px; }
-.top-actions{ display:flex; gap:10px; margin-bottom:15px; }
-.modal{ position:fixed; inset:0; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; }
-.modal-content{ background:#fff; padding:20px; width:90%; max-width:600px; border-radius:10px; }
-.close{ float:right; cursor:pointer; font-weight:bold; }
-#uploadingOverlay { position:fixed; inset:0; background:rgba(0,0,0,0.3); display:none; align-items:center; justify-content:center; font-size:20px; font-weight:bold; color:#fff; }
+
+.top-actions { display:flex; gap:10px; margin-bottom:15px; }
+
+.modal {
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.5);
+  display:none; align-items:center; justify-content:center;
+}
+
+.modal-content {
+  background:#fff; padding:20px;
+  width:90%; max-width:600px;
+  border-radius:12px;
+}
+
+.close { float:right; cursor:pointer; font-weight:bold; }
+
+/* ===== UPLOADING OVERLAY ===== */
+#uploadOverlay {
+  position:fixed; inset:0;
+  background:rgba(255,255,255,.9);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  z-index:1000;
+}
+
+.progress-circle {
+  width:120px; height:120px;
+  border-radius:50%;
+  border:8px solid #e5e7eb;
+  border-top-color:#2563eb;
+  animation:spin 1s linear infinite;
+}
+
+@keyframes spin { to{ transform:rotate(360deg);} }
+
+.progress-text {
+  margin-top:15px;
+  font-size:22px;
+  font-weight:600;
+  color:#2563eb;
+}
+
+.success {
+  display:none;
+  text-align:center;
+}
+
+.success svg {
+  width:90px;
+  fill:#22c55e;
+}
+
+.success h3 {
+  margin-top:12px;
+  color:#16a34a;
+}
 </style>
 </head>
 <body>
@@ -32,10 +115,10 @@ button { width:100%; padding:12px; margin-top:18px; background:#2563eb; color:#f
 </div>
 
 <label>Title</label>
-<input type="text" id="title">
+<input id="title">
 
 <label>Subject</label>
-<input type="text" id="subject">
+<input id="subject">
 
 <label>Deadline (Optional)</label>
 <input type="date" id="deadline">
@@ -51,12 +134,12 @@ button { width:100%; padding:12px; margin-top:18px; background:#2563eb; color:#f
 
 <label>Select Branch</label>
 <select id="branch">
- <option value="CSE">CSE - Computer Science Engineering</option>
-<option value="IT">IT - Information Technology</option>
-<option value="ECE">ECE - Electronics & Communication</option>
-<option value="ME">ME - Mechanical Engineering</option>
-<option value="CE">CE - Civil Engineering</option>
-<option value="CSE">CSE - Computer Science Engineering</option>
+  <option value="CSE">CSE</option>
+  <option value="IT">IT</option>
+  <option value="ECE">ECE</option>
+  <option value="ME">ME</option>
+  <option value="CE">CE</option>
+  <option value="CSE">CSE - Computer Science Engineering</option>
 <option value="IT">IT - Information Technology</option>
 <option value="AIML">AIML - Artificial Intelligence & Machine Learning</option>
 <option value="AIDS">AIDS - Artificial Intelligence & Data Science</option>
@@ -115,8 +198,6 @@ button { width:100%; padding:12px; margin-top:18px; background:#2563eb; color:#f
 <option value="DPLASTIC">Diploma - Plastic Engineering</option>
 <option value="DPOLY">Diploma - Polymer Engineering</option>
 
-
-
 </select>
 
 <label>Select Section</label>
@@ -125,8 +206,8 @@ button { width:100%; padding:12px; margin-top:18px; background:#2563eb; color:#f
   <option value="1">1</option>
   <option value="2">2</option>
   <option value="3">3</option>
-  <option value="4">4</option>
-  <option value="5">5</option>
+    <option value="4">4</option>
+      <option value="5">5</option>
 </select>
 
 <label>Upload PDF File</label>
@@ -149,156 +230,184 @@ button { width:100%; padding:12px; margin-top:18px; background:#2563eb; color:#f
   </div>
 </div>
 
-<div id="uploadingOverlay">Uploading...</div>
+<!-- UPLOADING OVERLAY -->
+<div id="uploadOverlay">
+  <div class="progress-circle"></div>
+  <div class="progress-text" id="progressText">0%</div>
+
+  <div class="success" id="successBox">
+    <svg viewBox="0 0 24 24">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <h3>Upload Successful</h3>
+  </div>
+</div>
 
 <script>
-const API = "https://college-hwbb.onrender.com/api/notes";
-const LS_NOTES = "my_posted_notes";
-const LS_CLASS = "last_selected_class";
+const API="https://college-hwbb.onrender.com/api/notes";
+const LS_NOTES="my_posted_notes";
+const LS_CLASS="last_selected_class";
 
-/* ACCESS CONTROL */
-const mentorId = localStorage.getItem("mentorId");
-const source = sessionStorage.getItem("accessSource");
-if(!mentorId || !["ad","admin"].includes(source)){
+/* ACCESS */
+const mentorId=localStorage.getItem("mentorId");
+const source=sessionStorage.getItem("accessSource");
+if(!mentorId||!["ad","admin"].includes(source)){
   document.body.innerHTML="<h2 style='color:red;text-align:center'>Access Denied</h2>";
   throw "";
 }
 
 function normalizeClass(y,b,s){ return (y+b+s).toUpperCase(); }
 
-/* AUTO FILL LAST CLASS */
-window.onload = ()=>{
-  const c = JSON.parse(localStorage.getItem(LS_CLASS) || "{}");
-  if(c.year) year.value=c.year, branch.value=c.branch, section.value=c.section;
+/* AUTO CLASS */
+window.onload=()=>{
+  const c=JSON.parse(localStorage.getItem(LS_CLASS)||"{}");
+  if(c.year){year.value=c.year;branch.value=c.branch;section.value=c.section;}
   loadNotes();
 };
 
-const uploadingOverlay = document.getElementById("uploadingOverlay");
+const overlay=document.getElementById("uploadOverlay");
+const progressText=document.getElementById("progressText");
+const successBox=document.getElementById("successBox");
 
 /* UPLOAD */
 async function uploadNote(){
-  const title=document.getElementById("title").value.trim();
-  const subject=document.getElementById("subject").value.trim();
-  const deadline=document.getElementById("deadline").value;
-  const yearVal=document.getElementById("year").value;
-  const branchVal=document.getElementById("branch").value;
-  const sectionVal=document.getElementById("section").value;
-  const file=document.getElementById("file").files[0];
+  const title=titleEl=title.value.trim();
+  const subjectVal=subject.value.trim();
+  const y=year.value,b=branch.value,s=section.value;
+  const file=fileEl=file.files[0];
 
-  if(!title || !subject || !yearVal || !branchVal || !sectionVal || !file){
-    alert("Fill all fields");
-    return;
+  if(!title||!subjectVal||!y||!b||!s||!file){
+    alert("Fill all fields"); return;
   }
 
-  const className = normalizeClass(yearVal,branchVal,sectionVal);
-  localStorage.setItem(LS_CLASS, JSON.stringify({year:yearVal, branch:branchVal, section:sectionVal}));
+  const cls=normalizeClass(y,b,s);
+  localStorage.setItem(LS_CLASS,JSON.stringify({year:y,branch:b,section:s}));
 
-  const form = new FormData();
-  form.append("title", title);
-  form.append("subject", subject);
-  form.append("deadline", deadline);
-  form.append("class", className);
-  form.append("file", file);
+  const form=new FormData();
+  form.append("title",title);
+  form.append("subject",subjectVal);
+  form.append("deadline",deadline.value);
+  form.append("class",cls);
+  form.append("file",file);
+
+  overlay.style.display="flex";
+  successBox.style.display="none";
+
+  let percent=0;
+  const fakeProgress=setInterval(()=>{
+    percent+=Math.floor(Math.random()*8);
+    if(percent>95) percent=95;
+    progressText.innerText=percent+"%";
+  },200);
 
   try{
-    uploadingOverlay.style.display="flex";
-    const res = await fetch(API, { method:"POST", body:form });
-    const data = await res.json();
-    uploadingOverlay.style.display="none";
+    const res=await fetch(API,{method:"POST",body:form});
+    const data=await res.json();
+    clearInterval(fakeProgress);
+
+    progressText.innerText="100%";
 
     if(data.success){
-      saveMyNote(data.noteId,title,subject,className);
-      loadNotes();
-    } else alert(data.message);
-  }catch(e){
-    uploadingOverlay.style.display="none";
-    alert("Upload failed!");
+      setTimeout(()=>{
+        document.querySelector(".progress-circle").style.display="none";
+        progressText.style.display="none";
+        successBox.style.display="block";
+      },400);
+
+      setTimeout(()=>{
+        overlay.style.display="none";
+        document.querySelector(".progress-circle").style.display="block";
+        progressText.style.display="block";
+        progressText.innerText="0%";
+        saveMyNote(data.noteId,title,subjectVal,cls);
+        loadNotes();
+      },1400);
+    } else {
+      overlay.style.display="none";
+      alert(data.message);
+    }
+  }catch{
+    overlay.style.display="none";
+    alert("Upload failed");
   }
 }
 
-/* LOCAL STORAGE MY NOTES */
+/* STORAGE */
 function saveMyNote(id,title,subject,cls){
-  const arr = JSON.parse(localStorage.getItem(LS_NOTES)||"[]");
+  const arr=JSON.parse(localStorage.getItem(LS_NOTES)||"[]");
   arr.push({id,title,subject,class:cls});
   localStorage.setItem(LS_NOTES,JSON.stringify(arr));
 }
 
-/* LOAD ALL NOTES */
-let ALL_NOTES = [];
+/* LOAD NOTES */
+let ALL_NOTES=[];
 async function loadNotes(){
-  const res = await fetch(API);
-  const data = await res.json();
-  ALL_NOTES = data.notes || [];
+  const res=await fetch(API);
+  const data=await res.json();
+  ALL_NOTES=data.notes||[];
   renderNotes(ALL_NOTES);
 }
 
 function renderNotes(list){
-  const container = document.getElementById("notesList");
-  container.innerHTML="";
-  if(list.length===0){ container.innerHTML="<p>No notes uploaded.</p>"; return; }
+  notesList.innerHTML="";
+  if(!list.length){notesList.innerHTML="<p>No notes uploaded.</p>";return;}
   list.forEach(n=>{
-    container.innerHTML += `
+    notesList.innerHTML+=`
       <div class="note-item">
         <strong>${n.title}</strong><br>
         <small>${n.subject} • Class: ${n.class}</small><br>
         <button class="action-btn view" onclick="openPDF('${n.file_url}')">View</button>
         <button class="action-btn delete" onclick="deleteNote('${n.noteId}')">Delete</button>
-      </div>
-    `;
+      </div>`;
   });
 }
 
 /* SEARCH */
-document.getElementById("searchInput").oninput = function(){
-  const q = this.value.toLowerCase();
+searchInput.oninput=function(){
+  const q=this.value.toLowerCase();
   renderNotes(ALL_NOTES.filter(n=>
-    n.title.toLowerCase().includes(q) ||
-    n.subject.toLowerCase().includes(q) ||
+    n.title.toLowerCase().includes(q)||
+    n.subject.toLowerCase().includes(q)||
     n.class.toLowerCase().includes(q)
   ));
 };
 
-/* MY NOTES MODAL */
+/* MODAL */
 function openMyNotes(){
-  const modal = document.getElementById("myNotesModal");
-  const listEl = document.getElementById("myNotesList");
-  modal.style.display="flex";
-  const arr = JSON.parse(localStorage.getItem(LS_NOTES)||"[]");
-  listEl.innerHTML="";
+  myNotesModal.style.display="flex";
+  const arr=JSON.parse(localStorage.getItem(LS_NOTES)||"[]");
+  myNotesList.innerHTML="";
   arr.forEach(n=>{
-    listEl.innerHTML+=`
+    myNotesList.innerHTML+=`
       <div class="note-item">
         <strong>${n.title}</strong><br>
         <small>${n.subject} • ${n.class}</small><br>
         <button class="action-btn delete" onclick="deleteNote('${n.id}',true)">Delete</button>
-      </div>
-    `;
+      </div>`;
   });
 }
-function closeMyNotes(){ document.getElementById("myNotesModal").style.display="none"; }
+function closeMyNotes(){ myNotesModal.style.display="none"; }
 
 /* DELETE */
 async function deleteNote(id,fromMine=false){
   if(!confirm("Delete?")) return;
-  try{
-    const res = await fetch(`${API}/${id}`,{method:"DELETE"});
-    const data = await res.json();
-    if(data.success){
-      if(fromMine){
-        let arr = JSON.parse(localStorage.getItem(LS_NOTES)||"[]");
-        arr = arr.filter(n=>n.id!==id);
-        localStorage.setItem(LS_NOTES,JSON.stringify(arr));
-        openMyNotes();
-      }
-      loadNotes();
+  const res=await fetch(`${API}/${id}`,{method:"DELETE"});
+  const data=await res.json();
+  if(data.success){
+    if(fromMine){
+      let arr=JSON.parse(localStorage.getItem(LS_NOTES)||"[]");
+      arr=arr.filter(n=>n.id!==id);
+      localStorage.setItem(LS_NOTES,JSON.stringify(arr));
+      openMyNotes();
     }
-  }catch(e){ alert("Delete failed!"); }
+    loadNotes();
+  }
 }
 
 function openPDF(url){
-  const previewUrl = url.includes("?") ? url+"&fl_attachment=false" : url+"?fl_attachment=false";
-  window.open(previewUrl,"_blank");
+  window.open(url+"?fl_attachment=false","_blank");
 }
 </script>
+
 </body>
 </html>
