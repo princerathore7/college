@@ -689,22 +689,21 @@ function renderAttendance(a) {
 /* ------------------------------------------
       ASSIGNMENTS — API + SAVE
 ------------------------------------------- */
-async function loadAssignmentsAPI(enrollment) {
+async function loadAssignmentsAPI() {
   const className = localStorage.getItem("studentClass") || "IT";
 
-  try {
-    const res = await fetch(`${API_ROOT}/api/assignments/class/${className}`);
-    const data = await res.json();
+  const res = await fetch(`${API_ROOT}/api/assignments/class/${className}`);
+  const data = await res.json();
 
-    if (data.success) {
-      saveLS("studentAssignments", data.assignments);
-      renderAssignments(data.assignments);
-    }
-  } catch (err) { console.error("Assignments API error:", err); }
+  console.log("Assignments fetched:", data);
+
+  if (data.success) {
+    renderAssignments(data.assignments);
+  }
 }
 
 function renderAssignments(list) {
-  const tbody = document.querySelector("#assignmentsTable tbody");
+  const tbody = document.getElementById("assignmentTable");
   tbody.innerHTML = "";
 
   if (!list || list.length === 0) {
@@ -714,14 +713,14 @@ function renderAssignments(list) {
   }
 
   list.forEach(a => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${a.title}</td>
-      <td>${a.subject}</td>
-      <td>${a.deadline}</td>
-      <td>${a.status || "Pending"}</td>
+    tbody.innerHTML += `
+      <tr>
+        <td>${a.title}</td>
+        <td>${a.subject}</td>
+        <td>${a.deadline}</td>
+        <td>Pending</td>
+      </tr>
     `;
-    tbody.appendChild(tr);
   });
 }
 
