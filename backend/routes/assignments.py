@@ -5,8 +5,6 @@ import os
 import re
 from datetime import datetime
 from utils import generate_id
-
-# 🔔 Notification helper (must exist in notifications.py)
 from routes.notifications import send_notification_to_class
 
 assignments_bp = Blueprint(
@@ -35,13 +33,40 @@ def normalize_class_name(class_name):
     return class_name
 
 # -----------------------------
+# Convert admin class → student format
+# -----------------------------
+def to_student_class_format(raw_class):
+    """
+    Converts: 2CSE2 → 2nd Year CSE2
+    """
+    if not raw_class:
+        return ""
+
+    raw_class = raw_class.strip().upper()
+
+    year = raw_class[0]
+    rest = raw_class[1:]
+
+    branch = "".join(filter(str.isalpha, rest))
+    section = "".join(filter(str.isdigit, rest))
+
+    year_map = {
+        "1": "1st Year",
+        "2": "2nd Year",
+        "3": "3rd Year",
+        "4": "4th Year"
+    }
+
+    return f"{year_map.get(year, year)} {branch}{section}"
+
+# -----------------------------
 # GET all ACTIVE assignments
 # -----------------------------
 @assignments_bp.route("", methods=["GET"])
 def get_all_assignments():
     assignments = list(
         assignments_collection.find(
-            {"active": True},     # ✅ IMPORTANT FILTER
+            {"active": True},
             {"_id": 0}
         )
     )
@@ -50,9 +75,6 @@ def get_all_assignments():
         "assignments": assignments
     }), 200
 
-# -----------------------------
-# GET assignments by class
-# -----------------------------
 # -----------------------------
 # GET ACTIVE assignments by class
 # -----------------------------
@@ -67,7 +89,6 @@ def get_assignments_by_class(class_name):
             {"_id": 0}
         )
     )
-
     return jsonify({
         "success": True,
         "assignments": assignments
@@ -91,10 +112,13 @@ def post_assignment():
     try:
         assignment_id = generate_id("A")
 
+        # ✅ CONVERT CLASS FORMAT HERE
+        student_class = to_student_class_format(data["class"])
+
         assignment = {
             "assignmentId": assignment_id,
-            "class": data["class"].strip(),
-            "class_normalized": normalize_class_name(data["class"]),
+            "class": student_class,
+            "class_normalized": normalize_class_name(student_class),
             "title": data["title"].strip(),
             "subject": data["subject"].strip(),
             "deadline": data["deadline"],
@@ -107,12 +131,11 @@ def post_assignment():
 
         # 🔔 SEND CLASS-WISE NOTIFICATION
         send_notification_to_class(
-    class_name=assignment["class_normalized"],
-    title="📚 New Assignment Posted",
-    body=f"{assignment['subject']}: {assignment['title']}",
-    url="/assignments.html"
-)
-
+            class_name=assignment["class_normalized"],
+            title="📚 New Assignment Posted",
+            body=f"{assignment['subject']}: {assignment['title']}",
+            url="/assignments.html"
+        )
 
         return jsonify({
             "success": True,
@@ -127,7 +150,7 @@ def post_assignment():
         }), 500
 
 # -----------------------------
-# DELETE assignment (stop reminders)
+# DELETE assignment (soft delete)
 # -----------------------------
 @assignments_bp.route("/<assignmentId>", methods=["DELETE"])
 def delete_assignment(assignmentId):
