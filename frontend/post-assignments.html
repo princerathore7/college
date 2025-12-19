@@ -160,18 +160,20 @@ button.deleteBtn:hover {background:#d32f2f;}
 ================================ */
 
 const mentorId = localStorage.getItem("mentorId");
-const fromAdmin = sessionStorage.getItem("fromAdminPanel");
+const source   = sessionStorage.getItem("accessSource");
 
-if(!mentorId || fromAdmin !== "yes"){
+// allowed sources
+const ALLOWED_SOURCES = ["ad", "admin"];
+
+if(!mentorId || !ALLOWED_SOURCES.includes(source)){
   document.body.innerHTML = `
     <h2 style="text-align:center;margin-top:20vh;color:red">
       ❌ Access Denied <br>
-      Please open this page from Administration Panel only
+      Please open this page via Administration Panel
     </h2>
   `;
   throw new Error("Unauthorized access");
 }
-
 function logout() {
     localStorage.removeItem("mentorLoggedIn");
     localStorage.removeItem("mentorBranch");
