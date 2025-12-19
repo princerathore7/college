@@ -58,13 +58,11 @@ def get_all_assignments():
 # -----------------------------
 @assignments_bp.route("/class/<class_name>", methods=["GET"])
 def get_assignments_by_class(class_name):
-    normalized_class = normalize_class_name(class_name)
-
     assignments = list(
         assignments_collection.find(
             {
-                "class_normalized": normalized_class,
-                "active": True     # ✅ IMPORTANT FILTER
+                "class": {"$regex": class_name, "$options": "i"},
+                "active": True
             },
             {"_id": 0}
         )
@@ -74,7 +72,6 @@ def get_assignments_by_class(class_name):
         "success": True,
         "assignments": assignments
     }), 200
-
 
 # -----------------------------
 # POST new assignment
