@@ -4,48 +4,23 @@
 <meta charset="UTF-8">
 <title>Upload Notes — Mentor Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-
 <style>
 body { font-family: Inter, sans-serif; background:#eef2f7; padding:30px; }
 .card { max-width:900px; background:#fff; margin:auto; padding:25px; border-radius:10px; box-shadow:0 4px 16px rgba(0,0,0,0.1); }
 label { font-weight:600; display:block; margin-top:12px; }
 input, select { width:100%; padding:10px; margin-top:5px; border:1px solid #ccc; border-radius:6px; }
 button { width:100%; padding:12px; margin-top:18px; background:#2563eb; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:15px; font-weight:600; }
-
 .note-item { border-bottom:1px solid #ddd; padding:12px; background:#f9f9f9; margin-top:12px; border-radius:6px; }
 .action-btn { padding:6px 12px; border:none; border-radius:6px; cursor:pointer; margin-top:6px; }
 .view { background:#16a34a; color:#fff; }
 .delete { background:#dc2626; color:#fff; margin-left:6px; }
-
-.top-actions{
-  display:flex;
-  gap:10px;
-  margin-bottom:15px;
-}
-
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.5);
-  display:none;
-  align-items:center;
-  justify-content:center;
-}
-.modal-content{
-  background:#fff;
-  padding:20px;
-  width:90%;
-  max-width:600px;
-  border-radius:10px;
-}
-.close{
-  float:right;
-  cursor:pointer;
-  font-weight:bold;
-}
+.top-actions{ display:flex; gap:10px; margin-bottom:15px; }
+.modal{ position:fixed; inset:0; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; }
+.modal-content{ background:#fff; padding:20px; width:90%; max-width:600px; border-radius:10px; }
+.close{ float:right; cursor:pointer; font-weight:bold; }
+#uploadingOverlay { position:fixed; inset:0; background:rgba(0,0,0,0.3); display:none; align-items:center; justify-content:center; font-size:20px; font-weight:bold; color:#fff; }
 </style>
 </head>
-
 <body>
 
 <div class="card">
@@ -75,17 +50,22 @@ button { width:100%; padding:12px; margin-top:18px; background:#2563eb; color:#f
 </select>
 
 <label>Select Branch</label>
-<select id="branch"> <!-- unchanged options -->
-<option value="CSE">CSE</option><option value="IT">IT</option>
-<option value="ECE">ECE</option><option value="ME">ME</option>
-<option value="CE">CE</option>
+<select id="branch">
+ <option value="CSE">CSE - Computer Science Engineering</option>
+<option value="IT">IT - Information Technology</option>
+<option value="ECE">ECE - Electronics & Communication</option>
+<option value="ME">ME - Mechanical Engineering</option>
+<option value="CE">CE - Civil Engineering</option>
 </select>
 
 <label>Select Section</label>
 <select id="section">
   <option value="">-- select section --</option>
-  <option value="1">1</option><option value="2">2</option>
-  <option value="3">3</option><option value="4">4</option>
+  <option value="1">1</option>
+  <option value="2">2</option>
+  <option value="3">3</option>
+  <option value="4">4</option>
+  <option value="5">5</option>
 </select>
 
 <label>Upload PDF File</label>
@@ -107,6 +87,8 @@ button { width:100%; padding:12px; margin-top:18px; background:#2563eb; color:#f
     <div id="myNotesList"></div>
   </div>
 </div>
+
+<div id="uploadingOverlay">Uploading...</div>
 
 <script>
 const API = "https://college-hwbb.onrender.com/api/notes";
@@ -130,63 +112,84 @@ window.onload = ()=>{
   loadNotes();
 };
 
+const uploadingOverlay = document.getElementById("uploadingOverlay");
+
 /* UPLOAD */
 async function uploadNote(){
-  const title=titleInput.value.trim();
-  const subject=subjectInput.value.trim();
-  const yearVal=year.value, branchVal=branch.value, sectionVal=section.value;
-  const file=fileInput.files[0];
-  if(!title||!subject||!yearVal||!branchVal||!sectionVal||!file) return alert("Fill all");
+  const title=document.getElementById("title").value.trim();
+  const subject=document.getElementById("subject").value.trim();
+  const deadline=document.getElementById("deadline").value;
+  const yearVal=document.getElementById("year").value;
+  const branchVal=document.getElementById("branch").value;
+  const sectionVal=document.getElementById("section").value;
+  const file=document.getElementById("file").files[0];
 
-  const cls = normalizeClass(yearVal,branchVal,sectionVal);
-  localStorage.setItem(LS_CLASS,JSON.stringify({year:yearVal,branch:branchVal,section:sectionVal}));
+  if(!title || !subject || !yearVal || !branchVal || !sectionVal || !file){
+    alert("Fill all fields");
+    return;
+  }
 
-  const fd=new FormData();
-  fd.append("title",title);
-  fd.append("subject",subject);
-  fd.append("class",cls);
-  fd.append("file",file);
+  const className = normalizeClass(yearVal,branchVal,sectionVal);
+  localStorage.setItem(LS_CLASS, JSON.stringify({year:yearVal, branch:branchVal, section:sectionVal}));
 
-  const res=await fetch(API,{method:"POST",body:fd});
-  const data=await res.json();
-  if(data.success){
-    saveMyNote(data.noteId,title,subject,cls);
-    loadNotes();
+  const form = new FormData();
+  form.append("title", title);
+  form.append("subject", subject);
+  form.append("deadline", deadline);
+  form.append("class", className);
+  form.append("file", file);
+
+  try{
+    uploadingOverlay.style.display="flex";
+    const res = await fetch(API, { method:"POST", body:form });
+    const data = await res.json();
+    uploadingOverlay.style.display="none";
+
+    if(data.success){
+      saveMyNote(data.noteId,title,subject,className);
+      loadNotes();
+    } else alert(data.message);
+  }catch(e){
+    uploadingOverlay.style.display="none";
+    alert("Upload failed!");
   }
 }
 
 /* LOCAL STORAGE MY NOTES */
-function saveMyNote(id,t,s,c){
-  const arr=JSON.parse(localStorage.getItem(LS_NOTES)||"[]");
-  arr.push({id,title:t,subject:s,class:c});
+function saveMyNote(id,title,subject,cls){
+  const arr = JSON.parse(localStorage.getItem(LS_NOTES)||"[]");
+  arr.push({id,title,subject,class:cls});
   localStorage.setItem(LS_NOTES,JSON.stringify(arr));
 }
 
 /* LOAD ALL NOTES */
-let ALL_NOTES=[];
+let ALL_NOTES = [];
 async function loadNotes(){
-  const res=await fetch(API);
-  const data=await res.json();
-  ALL_NOTES=data.notes||[];
+  const res = await fetch(API);
+  const data = await res.json();
+  ALL_NOTES = data.notes || [];
   renderNotes(ALL_NOTES);
 }
 
 function renderNotes(list){
-  notesList.innerHTML="";
+  const container = document.getElementById("notesList");
+  container.innerHTML="";
+  if(list.length===0){ container.innerHTML="<p>No notes uploaded.</p>"; return; }
   list.forEach(n=>{
-    notesList.innerHTML+=`
-    <div class="note-item">
-      <strong>${n.title}</strong><br>
-      <small>${n.subject} • ${n.class}</small><br>
-      <button class="action-btn view" onclick="openPDF('${n.file_url}')">View</button>
-      <button class="action-btn delete" onclick="deleteNote('${n.noteId}')">Delete</button>
-    </div>`;
+    container.innerHTML += `
+      <div class="note-item">
+        <strong>${n.title}</strong><br>
+        <small>${n.subject} • Class: ${n.class}</small><br>
+        <button class="action-btn view" onclick="openPDF('${n.file_url}')">View</button>
+        <button class="action-btn delete" onclick="deleteNote('${n.noteId}')">Delete</button>
+      </div>
+    `;
   });
 }
 
 /* SEARCH */
-searchInput.oninput=()=>{
-  const q=searchInput.value.toLowerCase();
+document.getElementById("searchInput").oninput = function(){
+  const q = this.value.toLowerCase();
   renderNotes(ALL_NOTES.filter(n=>
     n.title.toLowerCase().includes(q) ||
     n.subject.toLowerCase().includes(q) ||
@@ -196,37 +199,45 @@ searchInput.oninput=()=>{
 
 /* MY NOTES MODAL */
 function openMyNotes(){
-  myNotesModal.style.display="flex";
-  const arr=JSON.parse(localStorage.getItem(LS_NOTES)||"[]");
-  myNotesList.innerHTML="";
+  const modal = document.getElementById("myNotesModal");
+  const listEl = document.getElementById("myNotesList");
+  modal.style.display="flex";
+  const arr = JSON.parse(localStorage.getItem(LS_NOTES)||"[]");
+  listEl.innerHTML="";
   arr.forEach(n=>{
-    myNotesList.innerHTML+=`
-    <div class="note-item">
-      <strong>${n.title}</strong><br>
-      <small>${n.subject} • ${n.class}</small><br>
-      <button class="action-btn delete" onclick="deleteNote('${n.id}',true)">Delete</button>
-    </div>`;
+    listEl.innerHTML+=`
+      <div class="note-item">
+        <strong>${n.title}</strong><br>
+        <small>${n.subject} • ${n.class}</small><br>
+        <button class="action-btn delete" onclick="deleteNote('${n.id}',true)">Delete</button>
+      </div>
+    `;
   });
 }
-function closeMyNotes(){ myNotesModal.style.display="none"; }
+function closeMyNotes(){ document.getElementById("myNotesModal").style.display="none"; }
 
 /* DELETE */
 async function deleteNote(id,fromMine=false){
-  if(!confirm("Delete?"))return;
-  const res=await fetch(`${API}/${id}`,{method:"DELETE"});
-  const data=await res.json();
-  if(data.success){
-    if(fromMine){
-      let arr=JSON.parse(localStorage.getItem(LS_NOTES)||"[]");
-      arr=arr.filter(n=>n.id!==id);
-      localStorage.setItem(LS_NOTES,JSON.stringify(arr));
-      openMyNotes();
+  if(!confirm("Delete?")) return;
+  try{
+    const res = await fetch(`${API}/${id}`,{method:"DELETE"});
+    const data = await res.json();
+    if(data.success){
+      if(fromMine){
+        let arr = JSON.parse(localStorage.getItem(LS_NOTES)||"[]");
+        arr = arr.filter(n=>n.id!==id);
+        localStorage.setItem(LS_NOTES,JSON.stringify(arr));
+        openMyNotes();
+      }
+      loadNotes();
     }
-    loadNotes();
-  }
+  }catch(e){ alert("Delete failed!"); }
 }
 
-function openPDF(url){ window.open(url,"_blank"); }
+function openPDF(url){
+  const previewUrl = url.includes("?") ? url+"&fl_attachment=false" : url+"?fl_attachment=false";
+  window.open(previewUrl,"_blank");
+}
 </script>
 </body>
 </html>
