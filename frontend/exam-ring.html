@@ -7,392 +7,192 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
-  :root {
-    --primary: #0b3c5d;
-    --primary-dark: #06293f;
-    --success: #2ecc71;
-    --error: #e53935;
-  }
+body { font-family: 'Inter', sans-serif; background:#f3f4f6; margin:0; }
+header { background:#0b3c5d; color:#fff; padding:1rem 2rem; text-align:center; }
+main { max-width:900px; margin:2rem auto; padding:1.5rem; background:#fff; border-radius:12px; box-shadow:0 6px 16px rgba(0,0,0,0.1); }
+h2 { margin-top:0; color:#0b3c5d; }
 
-  body { font-family: 'Inter', sans-serif; background:#f3f4f6; margin:0; }
-  header { background: var(--primary); color:#fff; padding:1.5rem 2rem; text-align:center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-  main { max-width:900px; margin:2rem auto; padding:2rem; background:#fff; border-radius:16px; box-shadow:0 10px 25px rgba(0,0,0,0.05); }
-  h2 { margin-top:0; color: var(--primary); font-size: 1.5rem; border-left: 4px solid var(--primary); padding-left: 10px; }
+label { display:block; margin-top:0.8rem; font-weight:600; }
+input, select {
+  width:100%;
+  padding:0.6rem;
+  margin-top:0.2rem;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
 
-  .input-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 1rem; }
-  label { display:block; margin-top:0.8rem; font-weight:600; font-size: 0.9rem; color: #444; }
-  input, select {
-    width:100%; padding:0.7rem; margin-top:0.3rem; border-radius:8px; border:1px solid #ddd;
-    box-sizing: border-box; transition: all 0.3s;
-  }
-  input:focus, select:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(11, 60, 93, 0.1); }
+button {
+  margin-top:1rem;
+  background:#0b3c5d;
+  color:#fff;
+  padding:0.6rem 1.2rem;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:600;
+}
+button:hover { background:#06293f; }
 
-  /* --- Button & Loading Animation --- */
-  .btn-container { position: relative; margin-top: 1.5rem; }
-  button#postBtn {
-    width: 100%; background: var(--primary); color:#fff; padding:0.8rem; border:none; 
-    border-radius:8px; cursor:pointer; font-weight:600; font-size: 1rem;
-    transition: all 0.3s; display: flex; align-items: center; justify-content: center;
-  }
-  button#postBtn:disabled { background: #aab7c0; cursor: not-allowed; }
+table { width:100%; border-collapse:collapse; margin-top:1.5rem; }
+th, td { padding:10px; border-bottom:1px solid #ddd; }
+th { background:#e3eef7; }
 
-  .spinner {
-    width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3);
-    border-radius: 50%; border-top-color: #fff;
-    animation: spin 0.8s linear infinite; margin-right: 10px; display: none;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* --- Success Overlay Animation --- */
-  #successOverlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(255,255,255,0.9); display: none; align-items: center;
-    justify-content: center; flex-direction: column; z-index: 1000;
-    backdrop-filter: blur(5px);
-  }
-  .checkmark-circle {
-    width: 80px; height: 80px; border-radius: 50%; background: var(--success);
-    display: flex; align-items: center; justify-content: center;
-    animation: scaleUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-  .checkmark-circle svg { width: 50px; fill: white; }
-  
-  @keyframes scaleUp { from { transform: scale(0); } to { transform: scale(1); } }
-
-  /* Table styling */
-  table { width:100%; border-collapse:collapse; margin-top:2rem; }
-  th, td { padding:12px; border-bottom:1px solid #eee; text-align: left; }
-  th { background:#f8fafc; color: var(--primary); font-weight: 600; }
-  .delete-btn { background:var(--error); color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; transition: 0.2s; }
-  .delete-btn:hover { background:#c62828; transform: scale(1.05); }
-
+.delete-btn {
+  background:#e53935;
+  color:#fff;
+  border:none;
+  padding:6px 10px;
+  border-radius:5px;
+  cursor:pointer;
+}
+.delete-btn:hover { background:#c62828; }
 </style>
 </head>
-<body>
 
-<div id="successOverlay">
-  <div class="checkmark-circle">
-    <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-  </div>
-  <h2 style="margin-top:20px; border:none">Exam Posted Successfully!</h2>
-</div>
+<body>
 
 <header>
   <h1>Exam Ring — Mentor Dashboard</h1>
 </header>
 
 <main>
-  <h2>Post New Exam</h2>
-  
-  <div class="input-grid">
-    <div>
-      <label>Year</label>
-      <select id="year">
-        <option value="">Select</option>
-        <option value="1">1st Year</option>
-        <option value="2">2nd Year</option>
-        <option value="3">3rd Year</option>
-        <option value="4">4th Year</option>
-      </select>
-    </div>
-    <div>
-      <label>Branch</label>
-      <select id="branch">
-        <option value="">Select</option>
-        <option value="CSE">CSE</option>
-        <option value="IT">IT</option>
-        <option value="AIML">AIML</option>
-        <option value="DS">DS</option>
-          <option value="IT1">IT1</option>
-    <option value="IT2">IT2</option>
-    <option value="IT3">IT3</option>
-    <option value="IT4">IT4</option>
-    <option value="IT5">IT5</option>
-    
-    <option value="AIML1">AIML1</option>
-    <option value="AIML2">AIML2</option>
-    <option value="AIML3">AIML3</option>
-    <option value="AIML4">AIML4</option>
-    <option value="AIML5">AIML5</option>
-    
-    <option value="AIDS1">AIDS1</option>
-    <option value="AIDS2">AIDS2</option>
-    <option value="AIDS3">AIDS3</option>
-    <option value="AIDS4">AIDS4</option>
-    <option value="AIDS5">AIDS5</option>
-    
-    <option value="CSBS1">CSBS1</option>
-    <option value="CSBS2">CSBS2</option>
-    <option value="CSBS3">CSBS3</option>
-    <option value="CSBS4">CSBS4</option>
-    <option value="CSBS5">CSBS5</option>
 
-    <option value="IOT1">IOT1</option>
-    <option value="IOT2">IOT2</option>
-    <option value="IOT3">IOT3</option>
-    <option value="IOT4">IOT4</option>
-    <option value="IOT5">IOT5</option>
-    
-    <option value="ECE1">ECE1</option>
-    <option value="ECE2">ECE2</option>
-    <option value="ECE3">ECE3</option>
-    <option value="ECE4">ECE4</option>
-    <option value="ECE5">ECE5</option>
+<h2>Post New Exam</h2>
 
-    <option value="EEE1">EEE1</option>
-    <option value="EEE2">EEE2</option>
-    <option value="EEE3">EEE3</option>
-    <option value="EEE4">EEE4</option>
-    <option value="EEE5">EEE5</option>
+<label>Year</label>
+<select id="year">
+  <option value="">Select Year</option>
+  <option value="1">1st Year</option>
+  <option value="2">2nd Year</option>
+  <option value="3">3rd Year</option>
+  <option value="4">4th Year</option>
+</select>
 
-    <option value="EE1">EE1</option>
-    <option value="EE2">EE2</option>
-    <option value="EE3">EE3</option>
-    <option value="EE4">EE4</option>
-    <option value="EE5">EE5</option>
+<label>Branch</label>
+<select id="branch">
+  <option value="">Select Branch</option>
+  <option value="CSE">CSE</option>
+  <option value="IT">IT</option>
+  <option value="AIML">AIML</option>
+  <option value="DS">DS</option>
+</select>
 
-    <option value="ME1">ME1</option>
-    <option value="ME2">ME2</option>
-    <option value="ME3">ME3</option>
-    <option value="ME4">ME4</option>
-    <option value="ME5">ME5</option>
+<label>Section</label>
+<select id="section">
+  <option value="">Select Section</option>
+  <option value="1">1</option>
+  <option value="2">2</option>
+  <option value="3">3</option>
+</select>
 
-    <option value="AU1">AU1</option>
-    <option value="AU2">AU2</option>
-    <option value="AU3">AU3</option>
-    <option value="AU4">AU4</option>
-    <option value="AU5">AU5</option>
+<label>Exam Name</label>
+<input id="examName" placeholder="Mid Term Exam">
 
-    <option value="MT1">MT1</option>
-    <option value="MT2">MT2</option>
-    <option value="MT3">MT3</option>
-    <option value="MT4">MT4</option>
-    <option value="MT5">MT5</option>
+<label>Subject</label>
+<input id="subject" placeholder="Mathematics">
 
-    <option value="CE1">CE1</option>
-    <option value="CE2">CE2</option>
-    <option value="CE3">CE3</option>
-    <option value="CE4">CE4</option>
-    <option value="CE5">CE5</option>
+<label>Date</label>
+<input type="date" id="date">
 
-    <option value="CHE1">CHE1</option>
-    <option value="CHE2">CHE2</option>
-    <option value="CHE3">CHE3</option>
-    <option value="CHE4">CHE4</option>
-    <option value="CHE5">CHE5</option>
+<label>Room and some Discriptions</label>
+<input id="room" placeholder="101">
+ 
+<button onclick="postExam()">Post Exam</button>
 
-    <option value="MIN1">MIN1</option>
-    <option value="MIN2">MIN2</option>
-    <option value="MIN3">MIN3</option>
-    <option value="MIN4">MIN4</option>
-    <option value="MIN5">MIN5</option>
+<h2>Upcoming Exams</h2>
 
-    <option value="PET1">PET1</option>
-    <option value="PET2">PET2</option>
-    <option value="PET3">PET3</option>
-    <option value="PET4">PET4</option>
-    <option value="PET5">PET5</option>
+<table>
+<thead>
+<tr>
+  <th>Exam</th>
+  <th>Subject</th>
+  <th>Date</th>
+  <th>Room</th>
+  <th>Class</th>
+  <th>Action</th>
+</tr>
+</thead>
+<tbody id="examTable">
+<tr><td colspan="6" style="text-align:center">Loading...</td></tr>
+</tbody>
+</table>
 
-    <option value="BT1">BT1</option>
-    <option value="BT2">BT2</option>
-    <option value="BT3">BT3</option>
-    <option value="BT4">BT4</option>
-    <option value="BT5">BT5</option>
-
-    <option value="BME1">BME1</option>
-    <option value="BME2">BME2</option>
-    <option value="BME3">BME3</option>
-    <option value="BME4">BME4</option>
-    <option value="BME5">BME5</option>
-
-    <option value="FT1">FT1</option>
-    <option value="FT2">FT2</option>
-    <option value="FT3">FT3</option>
-    <option value="FT4">FT4</option>
-    <option value="FT5">FT5</option>
-
-    <option value="AG1">AG1</option>
-    <option value="AG2">AG2</option>
-    <option value="AG3">AG3</option>
-    <option value="AG4">AG4</option>
-    <option value="AG5">AG5</option>
-
-    <option value="ENV1">ENV1</option>
-    <option value="ENV2">ENV2</option>
-    <option value="ENV3">ENV3</option>
-    <option value="ENV4">ENV4</option>
-    <option value="ENV5">ENV5</option>
-
-    <option value="TX1">TX1</option>
-    <option value="TX2">TX2</option>
-    <option value="TX3">TX3</option>
-    <option value="TX4">TX4</option>
-    <option value="TX5">TX5</option>
-
-    <option value="PIE1">PIE1</option>
-    <option value="PIE2">PIE2</option>
-    <option value="PIE3">PIE3</option>
-    <option value="PIE4">PIE4</option>
-    <option value="PIE5">PIE5</option>
-
-    <option value="IM1">IM1</option>
-    <option value="IM2">IM2</option>
-    <option value="IM3">IM3</option>
-    <option value="IM4">IM4</option>
-    <option value="IM5">IM5</option>
-      </select>
-    </div>
-    <div>
-      <label>Section</label>
-      <select id="section">
-        <option value="">Select</option>
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-      </select>
-    </div>
-  </div>
-
-  <label>Exam Name</label>
-  <input id="examName" placeholder="e.g. Mid Term Exam">
-
-  <label>Subject</label>
-  <input id="subject" placeholder="e.g. Mathematics">
-
-  <div class="input-grid" style="grid-template-columns: 1fr 1fr;">
-    <div>
-      <label>Date</label>
-      <input type="date" id="date">
-    </div>
-    <div>
-      <label>Room / Description</label>
-      <input id="room" placeholder="e.g. Hall 101">
-    </div>
-  </div>
-  
-  <div class="btn-container">
-    <button id="postBtn" onclick="postExam()">
-      <div class="spinner" id="btnSpinner"></div>
-      <span id="btnText">Post Exam</span>
-    </button>
-  </div>
-
-  <h2 style="margin-top:3rem">Upcoming Exams</h2>
-  <div style="overflow-x:auto">
-    <table>
-      <thead>
-        <tr>
-          <th>Exam</th>
-          <th>Subject</th>
-          <th>Date</th>
-          <th>Room</th>
-          <th>Class</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="examTable">
-        <tr><td colspan="6" style="text-align:center">Loading...</td></tr>
-      </tbody>
-    </table>
-  </div>
 </main>
 
 <script>
+/* FETCH EXAMS */
 async function fetchExams(){
   const tbody = document.getElementById("examTable");
-  try {
-    const res = await fetch("https://college-hwbb.onrender.com/api/exams");
-    const data = await res.json();
-    tbody.innerHTML = "";
-    if(!data.success || data.exams.length === 0){
-      tbody.innerHTML = "<tr><td colspan='6' style='text-align:center'>No exams found</td></tr>";
-      return;
-    }
-    data.exams.forEach(e=>{
-      tbody.innerHTML += `
-        <tr>
-          <td><strong>${e.examName}</strong></td>
-          <td>${e.subject}</td>
-          <td>${e.date}</td>
-          <td>${e.room}</td>
-          <td><span style="background:#e3eef7; padding:4px 8px; border-radius:4px; font-size:0.85rem">${e.class}</span></td>
-          <td><button class="delete-btn" onclick="deleteExam('${e.examId}')">Delete</button></td>
-        </tr>`;
-    });
-  } catch(err) {
-    tbody.innerHTML = "<tr><td colspan='6' style='text-align:center; color:red'>Failed to load exams</td></tr>";
+  const res = await fetch("https://college-hwbb.onrender.com/api/exams");
+  const data = await res.json();
+
+  tbody.innerHTML = "";
+
+  if(!data.success || data.exams.length === 0){
+    tbody.innerHTML = "<tr><td colspan='6' style='text-align:center'>No exams</td></tr>";
+    return;
   }
+
+  data.exams.forEach(e=>{
+    tbody.innerHTML += `
+      <tr>
+        <td>${e.examName}</td>
+        <td>${e.subject}</td>
+        <td>${e.date}</td>
+        <td>${e.room}</td>
+        <td>${e.class}</td>
+        <td><button class="delete-btn" onclick="deleteExam('${e.examId}')">Delete</button></td>
+      </tr>
+    `;
+  });
 }
 
+/* POST EXAM */
 async function postExam(){
-  const btn = document.getElementById("postBtn");
-  const spinner = document.getElementById("btnSpinner");
-  const btnText = document.getElementById("btnText");
-  const overlay = document.getElementById("successOverlay");
-
   const y = year.value;
   const b = branch.value;
   const s = section.value;
 
-  if(!y || !b || !s || !examName.value || !subject.value || !date.value || !room.value){
-    alert("Please fill all fields properly");
+  if(!y || !b || !s){
+    alert("Please select Year, Branch & Section");
     return;
   }
 
-  // Start Animation State
-  btn.disabled = true;
-  spinner.style.display = "block";
-  btnText.innerText = "Uploading...";
+  const rawClass = `${y}${b}${s}`;
 
   const payload = {
     examName: examName.value.trim(),
     subject: subject.value.trim(),
     date: date.value,
     room: room.value.trim(),
-    class: `${y}${b}${s}`
+    class: rawClass
   };
 
-  try {
-    const res = await fetch("https://college-hwbb.onrender.com/api/exams",{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify(payload)
-    });
+  if(Object.values(payload).some(v => !v)){
+    alert("Fill all fields");
+    return;
+  }
 
-    const data = await res.json();
+  const res = await fetch("https://college-hwbb.onrender.com/api/exams",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify(payload)
+  });
 
-    if(data.success){
-      // Show Success Animation
-      overlay.style.display = "flex";
-      
-      setTimeout(() => {
-        overlay.style.opacity = "0";
-        overlay.style.transition = "opacity 0.5s";
-        setTimeout(() => {
-          overlay.style.display = "none";
-          overlay.style.opacity = "1";
-        }, 500);
-      }, 1500);
-
-      // Reset Form
-      document.querySelectorAll("input").forEach(i=>i.value="");
-      document.querySelectorAll("select").forEach(s=>s.value="");
-      fetchExams();
-    } else {
-      alert(data.message || "Error occurred");
-    }
-  } catch (error) {
-    alert("Server error, please try again");
-  } finally {
-    // End Animation State
-    btn.disabled = false;
-    spinner.style.display = "none";
-    btnText.innerText = "Post Exam";
+  const data = await res.json();
+  if(data.success){
+    alert("Exam posted");
+    document.querySelectorAll("input").forEach(i=>i.value="");
+    document.querySelectorAll("select").forEach(s=>s.value="");
+    fetchExams();
+  } else {
+    alert(data.message || "Error");
   }
 }
 
+/* DELETE */
 async function deleteExam(id){
-  if(!confirm("Are you sure you want to delete this exam?")) return;
+  if(!confirm("Delete this exam?")) return;
   const res = await fetch(`https://college-hwbb.onrender.com/api/exams/${id}`,{method:"DELETE"});
   const data = await res.json();
   if(data.success) fetchExams();
