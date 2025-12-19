@@ -11,3 +11,4 @@ gunicorn==21.2.0
 firebase-admin==7.1.0
 pywebpush==2.1.2
 razorpay==1.4.2
+setuptools>=68.0.0
