@@ -502,7 +502,7 @@ input:checked + .slider:before {
         <!-- Assignments Section -->
   <div class="section" id="assignmentsSection">
     <h2>Assignments</h2>
-    <table id="assignmentsTable">
+    <table id="assignmentTable">
       <thead>
         <tr>
           <th>Title</th>
@@ -698,6 +698,7 @@ async function loadAssignmentsAPI() {
   console.log("Assignments fetched:", data);
 
   if (data.success) {
+    saveLS("studentAssignments", data.assignments);
     renderAssignments(data.assignments);
   }
 }
@@ -1081,7 +1082,8 @@ function logout() {
   window.location.href = "login.html";
 }
 localStorage.removeItem("admin_students");
-render(true);   // force refresh
+
+refreshDashboard(); // agar force refresh chahiye
 
 </script>
 </body>
