@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pay Fine — Acropolis</title>
+
+<!-- Razorpay Checkout -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<style>
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: #f4f6f9;
+}
+
+.topbar {
+  background: #003366;
+  color: white;
+  padding: 15px;
+  text-align: center;
+}
+
+.container {
+  max-width: 450px;
+  margin: 25px auto;
+  padding: 20px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.info-box {
+  background: #eef3ff;
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+#upiBtn {
+  background: #009933;
+  color: white;
+}
+
+#qrBtn {
+  background: #003366;
+  color: white;
+}
+
+.note {
+  margin-top: 15px;
+  font-size: 13px;
+  color: #666;
+  text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+  <h2>Pay Your Fine</h2>
+</div>
+
+<div class="container">
+
+  <div class="info-box">
+    <p><b>Enrollment:</b> <span id="enrollment"></span></p>
+    <p><b>Fine Amount:</b> ₹ <span id="amount"></span></p>
+    <p><b>Reason:</b> <span id="reason"></span></p>
+    <p><b>Status:</b> Pending</p>
+  </div>
+
+  <button id="upiBtn" onclick="startPayment()">Pay via UPI (GPay / PhonePe / Paytm)</button>
+  <button id="qrBtn" onclick="startPayment()">Pay via QR Code</button>
+
+  <p class="note">
+    Please complete the payment. Partial payments are supported.
+  </p>
+</div>
+
+<script>
+const API_BASE = "https://college-hwbb.onrender.com";
+
+const params = new URLSearchParams(window.location.search);
+const enrollment = params.get("enrollment");
+const amount = params.get("amount");
+const reason = params.get("reason");
+
+document.getElementById("enrollment").innerText = enrollment;
+document.getElementById("amount").innerText = amount;
+document.getElementById("reason").innerText = reason;
+
+/************************************************
+  START PAYMENT (SECURE FLOW)
+************************************************/
+async function startPayment() {
+  try {
+    // 1️⃣ Create order from backend
+    const res = await fetch(`${API_BASE}/api/fines/create-order`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        enrollment: enrollment,
+        amount: amount
+      })
+    });
+
+    const data = await res.json();
+
+    if (!data.success) {
+      alert("Unable to start payment");
+      return;
+    }
+
+    // 2️⃣ Open Razorpay checkout
+    const options = {
+      key: "RAZORPAY_KEY_ID_HERE", // later env se aayega
+      amount: data.amount * 100,
+      currency: "INR",
+      name: "Acropolis Institute Indore",
+      description: "Fine Payment",
+      order_id: data.order_id,
+
+      handler: function () {
+        alert("Payment received. Verification in progress...");
+        // Real confirmation webhook se hogi
+        window.location.href = "fine.html";
+      },
+
+      notes: {
+        enrollment: enrollment
+      },
+
+      prefill: {
+        method: "upi"
+      },
+
+      theme: {
+        color: "#003366"
+      }
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.open();
+
+  } catch (err) {
+    console.error(err);
+    alert("Server error. Please try again.");
+  }
+}
+</script>
+
+</body>
+</html>

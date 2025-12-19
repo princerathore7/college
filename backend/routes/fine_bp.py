@@ -3,6 +3,11 @@ from flask_cors import cross_origin
 from db import db
 from datetime import datetime
 from bson.objectid import ObjectId
+import razorpay
+import os
+import hmac
+import hashlib
+import json
 
 # 🔔 Notification helper
 from routes.notifications import notify_fine
@@ -148,15 +153,95 @@ def all_fines():
 # ---------------------------------------------------------
 # 8️⃣ FUTURE — PAYMENT GATEWAY WEBHOOK
 # ---------------------------------------------------------
-@fine_bp.route("/payment-success", methods=["POST"])
+# @fine_bp.route("/payment-success", methods=["POST"])
+# @cross_origin()
+# def payment_success():
+#     data = request.json
+#     enrollment = data.get("enrollment")
+
+#     db.fine.update_many(
+#         {"enrollment": enrollment},
+#         {"$set": {"status": "Paid", "updatedAt": datetime.now()}}
+#     )
+
+#     return jsonify({"success": True, "message": "Payment verified"}), 200
+@fine_bp.route("/create-order", methods=["POST"])
 @cross_origin()
-def payment_success():
+def create_order():
     data = request.json
     enrollment = data.get("enrollment")
+    amount = int(data.get("amount"))  # rupees
 
-    db.fine.update_many(
-        {"enrollment": enrollment},
-        {"$set": {"status": "Paid", "updatedAt": datetime.now()}}
-    )
+    if amount <= 0:
+        return jsonify({"success": False, "message": "Invalid amount"}), 400
 
-    return jsonify({"success": True, "message": "Payment verified"}), 200
+    # Razorpay client (credentials later env me dalna)
+    client = razorpay.Client(auth=(
+        os.getenv("RAZORPAY_KEY_ID"),
+        os.getenv("RAZORPAY_KEY_SECRET")
+    ))
+
+    order = client.order.create({
+        "amount": amount * 100,
+        "currency": "INR",
+        "payment_capture": 1
+    })
+
+    return jsonify({
+        "success": True,
+        "order_id": order["id"],
+        "amount": amount,
+        "currency": "INR"
+    }), 200
+@fine_bp.route("/razorpay-webhook", methods=["POST"])
+def razorpay_webhook():
+    payload = request.data
+    signature = request.headers.get("X-Razorpay-Signature")
+
+    webhook_secret = os.getenv("RAZORPAY_WEBHOOK_SECRET")
+
+    expected_signature = hmac.new(
+        webhook_secret.encode(),
+        payload,
+        hashlib.sha256
+    ).hexdigest()
+
+    if not hmac.compare_digest(expected_signature, signature):
+        return "Invalid signature", 400
+
+    event = json.loads(payload)
+
+    if event["event"] == "payment.captured":
+        payment = event["payload"]["payment"]["entity"]
+
+        enrollment = payment["notes"].get("enrollment")
+        amount_paid = payment["amount"] // 100
+
+        # 🔹 Insert transaction
+        db.payment_transactions.insert_one({
+            "enrollment": enrollment,
+            "amount_paid": amount_paid,
+            "razorpay_payment_id": payment["id"],
+            "razorpay_order_id": payment["order_id"],
+            "status": "success",
+            "createdAt": datetime.now()
+        })
+
+        # 🔹 Recalculate fine
+        fine = db.fine.find_one({"enrollment": enrollment})
+
+        total = fine["fine"]
+        paid = sum(t["amount_paid"] for t in db.payment_transactions.find({"enrollment": enrollment}))
+        pending = total - paid
+
+        status = "Paid" if pending <= 0 else "Partial"
+
+        db.fine.update_many(
+            {"enrollment": enrollment},
+            {"$set": {
+                "status": status,
+                "updatedAt": datetime.now()
+            }}
+        )
+
+    return "OK", 200

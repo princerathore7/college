@@ -119,7 +119,7 @@
             <p><b>Status:</b> <span id="fineStatus"></span></p>
         </div>
 
-        <button id="payBtn">Pay Fine</button>
+    <button id="payBtn" onclick="goToPayment()">Pay Fine</button>
 
         <p class="warning">
             If you do not clear your pending fines, your RGPV exam form will not be forwarded by the institution.
@@ -132,7 +132,14 @@
 
 <script>
 const API_URL = "https://college-hwbb.onrender.com";
+function goToPayment() {
+    const enr = document.getElementById("showEnrollment").innerText;
+    const amt = document.getElementById("fineAmount").innerText;
+    const reason = document.getElementById("fineReason").innerText;
 
+    window.location.href =
+      `payment.html?enrollment=${encodeURIComponent(enr)}&amount=${amt}&reason=${encodeURIComponent(reason)}`;
+}
 /****************************************
     SEARCH FINE (Same logic as admin)
 ****************************************/
