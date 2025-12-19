@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Prince | Developer Diary</title>
+    <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Kalam:wght@300;400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --diary-bg: #fdfaf1;
+            --line-color: #e0d7c7;
+            --accent-color: #4a6670;
+            --text-color: #333;
+            --paper-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        body {
+            background-color: #f2f0e9;
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Notebook Container */
+        .notebook {
+            background: var(--diary-bg);
+            width: 100%;
+            max-width: 850px;
+            min-height: 100vh;
+            padding: 60px 50px;
+            box-shadow: var(--paper-shadow);
+            position: relative;
+            border-left: 12px solid #d4c8b5;
+            /* Lined paper effect */
+            background-image: linear-gradient(var(--line-color) 1px, transparent 1px);
+            background-size: 100% 32px; 
+            line-height: 32px;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Kalam', cursive;
+            color: var(--accent-color);
+            margin-top: 0;
+        }
+
+        .header-section {
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+        }
+
+        .profile-title {
+            font-size: 2.8rem;
+            margin-bottom: 5px;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            font-style: italic;
+            opacity: 0.7;
+            font-size: 1.1rem;
+        }
+
+        /* Content Sections */
+        .content-block {
+            margin-bottom: 45px;
+        }
+
+        .diary-entry {
+            font-family: 'Indie Flower', cursive;
+            font-size: 1.25rem;
+            color: #444;
+            padding-left: 5px;
+        }
+
+        /* Photo Diary Grid */
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 35px;
+            margin-top: 40px;
+        }
+
+        .polaroid {
+            background: #fff;
+            padding: 12px 12px 35px 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.07);
+            transform: rotate(-1.5deg);
+            transition: all 0.4s ease;
+            border: 1px solid #efefef;
+        }
+
+        .polaroid:nth-child(even) {
+            transform: rotate(1.5deg);
+        }
+
+        .polaroid:hover {
+            transform: rotate(0deg) translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.12);
+            z-index: 5;
+        }
+
+        .polaroid img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            filter: contrast(1.05) brightness(1.02);
+        }
+
+        .caption {
+            font-family: 'Indie Flower', cursive;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 1.1rem;
+            color: #666;
+            line-height: 1.2;
+        }
+
+        /* Skills/Tags */
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .tag {
+            background: #fff;
+            padding: 2px 18px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            border: 1px solid #d1d1d1;
+            font-family: 'Indie Flower', cursive;
+            font-weight: bold;
+        }
+
+        /* Contact Section */
+        .contact-box {
+            margin-top: 50px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px dashed var(--accent-color);
+            border-radius: 4px;
+        }
+
+        .footer-quote {
+            text-align: center;
+            font-family: 'Kalam', cursive;
+            font-size: 1.4rem;
+            margin-top: 50px;
+            color: var(--accent-color);
+        }
+
+        .private-note {
+            text-align: center;
+            font-size: 0.85rem;
+            margin-top: 25px;
+            color: #999;
+            font-style: italic;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .notebook { padding: 40px 25px; }
+            .profile-title { font-size: 2.2rem; }
+            .polaroid { transform: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="notebook">
+        <div class="header-section">
+            <h1 class="profile-title">Prince Rathore</h1>
+            <p class="subtitle">Full Stack Developer | Student | Visionary</p>
+            <p style="font-size: 0.9rem; color: #777; margin-top: 10px;">Based in Maksi • Studying at Acropolis (IT, 2nd Year)</p>
+        </div>
+
+        <div class="content-block">
+            <h3>📖 Sole Responsibility</h3>
+            <p class="diary-entry">
+                I built every single part of this platform alone. From the logic in the backend to the colors on the frontend, it’s all my work. To me, this isn't just a project for my grades—it's a living proof of my dedication and real-world learning.
+            </p>
+        </div>
+
+        <div class="content-block">
+            <h3>🎯 Heart & Hustle</h3>
+            <p class="diary-entry">
+                I believe in starting small but aiming for the stars. My focus is simple: if my heart isn't in it, I can't do it. But when I commit, I give it everything I have. Growth comes from staying humble while building something massive.
+            </p>
+        </div>
+
+        <div class="content-block">
+            <h3>🎨 My World Beyond Code</h3>
+            <div class="tags">
+                <span class="tag">Sketching & Painting 🎨</span>
+                <span class="tag">Web Architecture 💻</span>
+                <span class="tag">Problem Solving 👨‍💻</span>
+                <span class="tag">Singing (From the Heart) 🎤</span>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>📸 Developer Diary</h3>
+            <p class="diary-entry" style="font-size: 1rem; opacity: 0.8;">(Snapshots of the journey, not just the code...)</p>
+            
+            <div class="photo-grid">
+                <div class="polaroid">
+                    <img src="photo1.jpg" alt="Late night session">
+                    <p class="caption">Those quiet nights when dreams feel louder than the silence.</p>
+                </div>
+                <div class="polaroid">
+                    <img src="photo2.jpg" alt="Project Building">
+                    <p class="caption">Success is a journey of many "failed" experiments.</p>
+                </div>
+                <div class="polaroid">
+                    <img src="photo3.jpg" alt="Focus">
+                    <p class="caption">Stay curious. The best is yet to be built.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="contact-box">
+            <h3>📬 Let's Connect</h3>
+            <p class="diary-entry" style="font-size: 1.1rem;">
+                Email: <strong>princerathore2704@gmail.com</strong><br>
+                GitHub: princerathore7 <br>
+                LinkedIn: Prince Rathore
+            </p>
+        </div>
+
+        <div class="footer-quote">
+            "Still learning. Still building. Still becoming." 💙
+        </div>
+
+        <p class="private-note">
+            🔒 Some future goals are better kept as secrets for now... ✨
+        </p>
+    </div>
+
+    <script>
+        // Interactive tilt effect on click
+        document.querySelectorAll('.polaroid').forEach(photo => {
+            photo.addEventListener('click', () => {
+                const randomTilt = (Math.random() * 8 - 4).toFixed(2);
+                photo.style.transform = `rotate(${randomTilt}deg) scale(1.08)`;
+            });
+        });
+    </script>
+</body>
+</html>

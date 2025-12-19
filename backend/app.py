@@ -298,6 +298,12 @@ def send_notification():
     message = data["message"]
     send_web_notification(subscription, message, VAPID_PRIVATE_KEY)
     return {"success": True}
+@app.route("/api/verify-salary-password", methods=["POST"])
+def verify_salary_pwd():
+    data = request.json
+    if data.get("password") == os.getenv("SALARY_ADMIN_PASSWORD"):
+        return jsonify(success=True)
+    return jsonify(success=False)
 
 # ---------------------------------------------
 # MAIN ENTRY POINT
