@@ -4,52 +4,207 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Exam Ring — Mentor Dashboard</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
-body { font-family: 'Inter', sans-serif; background:#f3f4f6; margin:0; }
-header { background:#0b3c5d; color:#fff; padding:1rem 2rem; text-align:center; }
-main { max-width:900px; margin:2rem auto; padding:1.5rem; background:#fff; border-radius:12px; box-shadow:0 6px 16px rgba(0,0,0,0.1); }
-h2 { margin-top:0; color:#0b3c5d; }
+:root {
+  --primary:#0b3c5d;
+  --primary-dark:#06293f;
+  --success:#2ecc71;
+  --danger:#e53935;
+}
 
-label { display:block; margin-top:0.8rem; font-weight:600; }
+body {
+  font-family:'Inter',sans-serif;
+  background:#f3f4f6;
+  margin:0;
+}
+
+header {
+  background:var(--primary);
+  color:#fff;
+  padding:1.5rem;
+  text-align:center;
+  box-shadow:0 3px 12px rgba(0,0,0,.15);
+}
+
+main {
+  max-width:900px;
+  margin:2rem auto;
+  background:#fff;
+  padding:2rem;
+  border-radius:16px;
+  box-shadow:0 12px 30px rgba(0,0,0,.06);
+}
+
+h2 {
+  color:var(--primary);
+  border-left:4px solid var(--primary);
+  padding-left:10px;
+}
+
+label {
+  font-weight:600;
+  margin-top:1rem;
+  display:block;
+}
+
 input, select {
   width:100%;
-  padding:0.6rem;
-  margin-top:0.2rem;
-  border-radius:6px;
-  border:1px solid #ccc;
+  padding:.7rem;
+  margin-top:.3rem;
+  border-radius:8px;
+  border:1px solid #ddd;
+  transition:.3s;
 }
 
-button {
-  margin-top:1rem;
-  background:#0b3c5d;
+input:focus, select:focus {
+  outline:none;
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px rgba(11,60,93,.15);
+}
+
+.input-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:15px;
+}
+
+/* BUTTON + PROGRESS */
+#postBtn {
+  width:100%;
+  margin-top:1.5rem;
+  background:var(--primary);
   color:#fff;
-  padding:0.6rem 1.2rem;
+  padding:.9rem;
   border:none;
-  border-radius:6px;
-  cursor:pointer;
+  border-radius:10px;
+  font-size:1rem;
   font-weight:600;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
 }
-button:hover { background:#06293f; }
 
-table { width:100%; border-collapse:collapse; margin-top:1.5rem; }
-th, td { padding:10px; border-bottom:1px solid #ddd; }
-th { background:#e3eef7; }
+#postBtn:disabled {
+  background:#9fb3c4;
+  cursor:not-allowed;
+}
+
+.spinner {
+  width:18px;
+  height:18px;
+  border:3px solid rgba(255,255,255,.4);
+  border-top:3px solid #fff;
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+  display:none;
+}
+
+@keyframes spin { to{ transform:rotate(360deg);} }
+
+/* PROGRESS BAR */
+.progress-box {
+  margin-top:10px;
+  display:none;
+}
+
+.progress-bar {
+  height:8px;
+  background:#e0e0e0;
+  border-radius:20px;
+  overflow:hidden;
+}
+
+.progress-fill {
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,var(--primary),var(--success));
+  transition:width .3s;
+}
+
+.progress-text {
+  font-size:.8rem;
+  margin-top:4px;
+  text-align:right;
+}
+
+/* TABLE */
+table {
+  width:100%;
+  border-collapse:collapse;
+  margin-top:2rem;
+}
+
+th,td {
+  padding:12px;
+  border-bottom:1px solid #eee;
+}
+
+th {
+  background:#f6f9fc;
+  color:var(--primary);
+}
 
 .delete-btn {
-  background:#e53935;
+  background:var(--danger);
   color:#fff;
   border:none;
-  padding:6px 10px;
-  border-radius:5px;
+  padding:6px 12px;
+  border-radius:6px;
   cursor:pointer;
 }
+
 .delete-btn:hover { background:#c62828; }
+
+/* SUCCESS OVERLAY */
+#successOverlay {
+  position:fixed;
+  inset:0;
+  background:rgba(255,255,255,.9);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  z-index:999;
+}
+
+.check {
+  width:80px;
+  height:80px;
+  background:var(--success);
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  animation:pop .4s ease;
+}
+
+@keyframes pop {
+  from{transform:scale(0);}
+  to{transform:scale(1);}
+}
+
+.check svg {
+  width:45px;
+  fill:#fff;
+}
 </style>
 </head>
 
 <body>
+
+<div id="successOverlay">
+  <div class="check">
+    <svg viewBox="0 0 24 24">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+  </div>
+  <h2 style="border:none;margin-top:20px">Exam Posted Successfully</h2>
+</div>
 
 <header>
   <h1>Exam Ring — Mentor Dashboard</h1>
@@ -59,57 +214,75 @@ th { background:#e3eef7; }
 
 <h2>Post New Exam</h2>
 
-<label>Year</label>
-<select id="year">
-  <option value="">Select Year</option>
-  <option value="1">1st Year</option>
-  <option value="2">2nd Year</option>
-  <option value="3">3rd Year</option>
-  <option value="4">4th Year</option>
-</select>
+<div class="input-grid">
+  <div>
+    <label>Year</label>
+    <select id="year">
+      <option value="">Select</option>
+      <option value="1">1st Year</option>
+      <option value="2">2nd Year</option>
+      <option value="3">3rd Year</option>
+      <option value="4">4th Year</option>
+    </select>
+  </div>
 
-<label>Branch</label>
-<select id="branch">
-  <option value="">Select Branch</option>
-  <option value="CSE">CSE</option>
-  <option value="IT">IT</option>
-  <option value="AIML">AIML</option>
-  <option value="DS">DS</option>
-</select>
+  <div>
+    <label>Branch</label>
+    <select id="branch">
+      <option value="">Select</option>
+      <option value="CSE">CSE</option>
+      <option value="IT">IT</option>
+      <option value="AIML">AIML</option>
+      <option value="DS">DS</option>
+    </select>
+  </div>
 
-<label>Section</label>
-<select id="section">
-  <option value="">Select Section</option>
-  <option value="1">1</option>
-  <option value="2">2</option>
-  <option value="3">3</option>
-</select>
+  <div>
+    <label>Section</label>
+    <select id="section">
+      <option value="">Select</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+    </select>
+  </div>
+</div>
 
 <label>Exam Name</label>
-<input id="examName" placeholder="Mid Term Exam">
+<input id="examName">
 
 <label>Subject</label>
-<input id="subject" placeholder="Mathematics">
+<input id="subject">
 
-<label>Date</label>
-<input type="date" id="date">
+<div class="input-grid" style="grid-template-columns:1fr 1fr">
+  <div>
+    <label>Date</label>
+    <input type="date" id="date">
+  </div>
+  <div>
+    <label>Room / Description</label>
+    <input id="room">
+  </div>
+</div>
 
-<label>Room and some Discriptions</label>
-<input id="room" placeholder="101">
- 
-<button onclick="postExam()">Post Exam</button>
+<button id="postBtn" onclick="postExam()">
+  <div class="spinner" id="spinner"></div>
+  <span id="btnText">Post Exam</span>
+</button>
 
-<h2>Upcoming Exams</h2>
+<div class="progress-box" id="progressBox">
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+  <div class="progress-text" id="progressText">0%</div>
+</div>
+
+<h2 style="margin-top:3rem">Upcoming Exams</h2>
 
 <table>
 <thead>
 <tr>
-  <th>Exam</th>
-  <th>Subject</th>
-  <th>Date</th>
-  <th>Room</th>
-  <th>Class</th>
-  <th>Action</th>
+  <th>Exam</th><th>Subject</th><th>Date</th><th>Room</th><th>Class</th><th>Action</th>
 </tr>
 </thead>
 <tbody id="examTable">
@@ -120,21 +293,19 @@ th { background:#e3eef7; }
 </main>
 
 <script>
-/* FETCH EXAMS */
 async function fetchExams(){
-  const tbody = document.getElementById("examTable");
   const res = await fetch("https://college-hwbb.onrender.com/api/exams");
   const data = await res.json();
-
+  const tbody = examTable;
   tbody.innerHTML = "";
 
-  if(!data.success || data.exams.length === 0){
-    tbody.innerHTML = "<tr><td colspan='6' style='text-align:center'>No exams</td></tr>";
+  if(!data.success || data.exams.length===0){
+    tbody.innerHTML="<tr><td colspan='6' style='text-align:center'>No exams</td></tr>";
     return;
   }
 
   data.exams.forEach(e=>{
-    tbody.innerHTML += `
+    tbody.innerHTML+=`
       <tr>
         <td>${e.examName}</td>
         <td>${e.subject}</td>
@@ -142,59 +313,67 @@ async function fetchExams(){
         <td>${e.room}</td>
         <td>${e.class}</td>
         <td><button class="delete-btn" onclick="deleteExam('${e.examId}')">Delete</button></td>
-      </tr>
-    `;
+      </tr>`;
   });
 }
 
-/* POST EXAM */
 async function postExam(){
-  const y = year.value;
-  const b = branch.value;
-  const s = section.value;
+  const y=year.value,b=branch.value,s=section.value;
+  if(!y||!b||!s) return alert("Select Year, Branch & Section");
 
-  if(!y || !b || !s){
-    alert("Please select Year, Branch & Section");
-    return;
-  }
-
-  const rawClass = `${y}${b}${s}`;
-
-  const payload = {
-    examName: examName.value.trim(),
-    subject: subject.value.trim(),
-    date: date.value,
-    room: room.value.trim(),
-    class: rawClass
+  const payload={
+    examName:examName.value.trim(),
+    subject:subject.value.trim(),
+    date:date.value,
+    room:room.value.trim(),
+    class:`${y}${b}${s}`
   };
 
-  if(Object.values(payload).some(v => !v)){
-    alert("Fill all fields");
-    return;
-  }
+  if(Object.values(payload).some(v=>!v)) return alert("Fill all fields");
 
-  const res = await fetch("https://college-hwbb.onrender.com/api/exams",{
+  postBtn.disabled=true;
+  spinner.style.display="block";
+  progressBox.style.display="block";
+
+  let progress=0;
+  const interval=setInterval(()=>{
+    progress+=Math.floor(Math.random()*12);
+    if(progress>95) progress=95;
+    progressFill.style.width=progress+"%";
+    progressText.innerText=progress+"%";
+  },200);
+
+  const res=await fetch("https://college-hwbb.onrender.com/api/exams",{
     method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify(payload)
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload)
   });
 
-  const data = await res.json();
+  clearInterval(interval);
+  progressFill.style.width="100%";
+  progressText.innerText="100%";
+
+  const data=await res.json();
+  spinner.style.display="none";
+  postBtn.disabled=false;
+
   if(data.success){
-    alert("Exam posted");
-    document.querySelectorAll("input").forEach(i=>i.value="");
-    document.querySelectorAll("select").forEach(s=>s.value="");
-    fetchExams();
-  } else {
-    alert(data.message || "Error");
-  }
+    successOverlay.style.display="flex";
+    setTimeout(()=>{
+      successOverlay.style.display="none";
+      progressBox.style.display="none";
+      progressFill.style.width="0%";
+      progressText.innerText="0%";
+      document.querySelectorAll("input,select").forEach(e=>e.value="");
+      fetchExams();
+    },1500);
+  } else alert(data.message);
 }
 
-/* DELETE */
 async function deleteExam(id){
   if(!confirm("Delete this exam?")) return;
-  const res = await fetch(`https://college-hwbb.onrender.com/api/exams/${id}`,{method:"DELETE"});
-  const data = await res.json();
+  const res=await fetch(`https://college-hwbb.onrender.com/api/exams/${id}`,{method:"DELETE"});
+  const data=await res.json();
   if(data.success) fetchExams();
 }
 
