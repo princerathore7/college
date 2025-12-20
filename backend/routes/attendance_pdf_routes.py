@@ -2,9 +2,10 @@ from flask import Blueprint, request, jsonify
 from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
-from bson import ObjectId
-from config import db
-from auth.middleware import mentor_required, admin_required
+# from bson import ObjectId
+from backend.config import db
+from backend.auth.middleware import mentor_required, admin_required
+
 
 attendance_pdf_bp = Blueprint("attendance_pdf", __name__)
 
