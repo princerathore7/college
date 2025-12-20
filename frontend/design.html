@@ -116,6 +116,19 @@
     margin: 10px 0;
     border-radius: 8px;
   }
+  .editor-btn {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  background: #f8f8f8;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.editor-btn.active {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
 </style>
 </head>
 
@@ -139,30 +152,32 @@
 
   <label for="description">Event Description:</label>
 
-  <div class="toolbar">
-    <button type="button" onclick="formatText('bold')"><b>B</b></button>
-    <button type="button" onclick="formatText('italic')"><i>I</i></button>
-    <button type="button" onclick="formatText('underline')"><u>U</u></button>
+ <div class="toolbar">
+  <button type="button" id="btnBold" class="editor-btn"><b>B</b></button>
+  <button type="button" id="btnItalic" class="editor-btn"><i>I</i></button>
+  <button type="button" id="btnUnderline" class="editor-btn"><u>U</u></button>
 
-    <select onchange="changeFontSize(this.value)">
-      <option value="">Font Size</option>
-      <option value="1">Small</option>
-      <option value="3">Normal</option>
-      <option value="5">Large</option>
-      <option value="7">Extra Large</option>
-    </select>
+  <select id="fontSizeSelect">
+    <option value="">Font Size</option>
+    <option value="2">Small</option>
+    <option value="3">Normal</option>
+    <option value="4">Large</option>
+    <option value="5">Extra Large</option>
+  </select>
 
-    <select onchange="changeFont(this.value)">
-      <option value="">Font Family</option>
-      <option value="Inter">Inter</option>
-      <option value="Roboto">Roboto</option>
-      <option value="Montserrat">Montserrat</option>
-      <option value="Arial">Arial</option>
-      <option value="Times New Roman">Times New Roman</option>
-    </select>
+  <select id="fontFamilySelect">
+    <option value="">Font Family</option>
+    <option value="Inter">Inter</option>
+    <option value="Roboto">Roboto</option>
+    <option value="Montserrat">Montserrat</option>
+    <option value="Arial">Arial</option>
+    <option value="Times New Roman">Times New Roman</option>
+  </select>
 
-    <input type="color" onchange="changeColor(this.value)" title="Text color">
-  </div>
+  <input type="color" id="colorPicker">
+</div>
+
+   
 
   <div id="description" contenteditable="true"></div>
 
@@ -177,12 +192,10 @@
 /* ===============================
    ACCESS CONTROL — ADMIN PANEL
 ================================ */
+const mentorId  = localStorage.getItem("mentorId");
+const fromAdmin = sessionStorage.getItem("accessSource");
 
-const mentorId   = localStorage.getItem("mentorId");
-const fromAdmin  = sessionStorage.getItem("accessSource");
-
-// ✔ Only allow if opened from admin panel
-if(!mentorId || fromAdmin !== "ad"){
+if (!mentorId || fromAdmin !== "ad") {
   document.body.innerHTML = `
     <h2 style="text-align:center;margin-top:20vh;color:red">
       ❌ Access Denied <br>
@@ -192,143 +205,174 @@ if(!mentorId || fromAdmin !== "ad"){
   throw new Error("Unauthorized access");
 }
 
-  /* ------------------ RICH TEXT EDITOR ------------------ */
-  function formatText(cmd) { document.execCommand(cmd, false, null); }
-  function changeFontSize(size) { document.execCommand("fontSize", false, size); }
-  function changeFont(font) { document.execCommand("fontName", false, font); }
-  function changeColor(color) { document.execCommand("foreColor", false, color); }
+/* ===============================
+   RICH TEXT EDITOR (ENHANCED)
+================================ */
+const editor = document.getElementById("description");
 
-  /* ------------------ IMAGE UPLOAD (CLOUDINARY) ------------------ */
-  const imageFileInput = document.getElementById("imageFile");
-  const previewImage = document.getElementById("previewImage");
+const btnBold = document.getElementById("btnBold");
+const btnItalic = document.getElementById("btnItalic");
+const btnUnderline = document.getElementById("btnUnderline");
+const fontSizeSelect = document.getElementById("fontSizeSelect");
+const fontFamilySelect = document.getElementById("fontFamilySelect");
+const colorPicker = document.getElementById("colorPicker");
 
-  let uploadedImageUrl = "";
+function exec(cmd, value = null) {
+  editor.focus();
+  document.execCommand(cmd, false, value);
+  updateToolbarState();
+}
 
-  imageFileInput.addEventListener("change", async () => {
-    const file = imageFileInput.files[0];
-    if (!file) return;
+btnBold.onclick = () => exec("bold");
+btnItalic.onclick = () => exec("italic");
+btnUnderline.onclick = () => exec("underline");
 
-    previewImage.style.display = "none";
-    uploadedImageUrl = "";
+fontFamilySelect.onchange = e => exec("fontName", e.target.value);
+fontSizeSelect.onchange = e => exec("fontSize", e.target.value);
+colorPicker.onchange = e => exec("foreColor", e.target.value);
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", "events_photos");
+function updateToolbarState() {
+  btnBold.classList.toggle("active", document.queryCommandState("bold"));
+  btnItalic.classList.toggle("active", document.queryCommandState("italic"));
+  btnUnderline.classList.toggle("active", document.queryCommandState("underline"));
+}
 
-    try {
-      const res = await fetch("https://api.cloudinary.com/v1_1/deqqkiovg/image/upload", {
-        method: "POST",
-        body: formData
-      });
+document.addEventListener("selectionchange", () => {
+  if (document.activeElement === editor) updateToolbarState();
+});
 
-      const data = await res.json();
-      console.log("Cloudinary upload:", data);
+/* WhatsApp / ChatGPT style */
+editor.addEventListener("input", () => {
+  let html = editor.innerHTML;
 
-      if (!data.secure_url) {
-        alert("Image upload failed! No URL returned.");
-        return;
-      }
+  html = html
+    .replace(/\*(.*?)\*/g, "<b>$1</b>")
+    .replace(/_(.*?)_/g, "<i>$1</i>")
+    .replace(/~(.*?)~/g, "<u>$1</u>");
 
-      uploadedImageUrl = data.secure_url;
-      previewImage.src = uploadedImageUrl;
-      previewImage.style.display = "block";
+  editor.innerHTML = html;
+  placeCaretAtEnd(editor);
+  updatePreview();
+});
 
-      updatePreview();
+function placeCaretAtEnd(el) {
+  const range = document.createRange();
+  const sel = window.getSelection();
+  range.selectNodeContents(el);
+  range.collapse(false);
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
 
-    } catch (err) {
-      console.error("Cloudinary Upload Error:", err);
-      alert("Image upload failed!");
-    }
-  });
+/* ===============================
+   IMAGE UPLOAD (UNCHANGED LOGIC)
+================================ */
+const imageFileInput = document.getElementById("imageFile");
+const previewImage = document.getElementById("previewImage");
+let uploadedImageUrl = "";
 
-  /* ------------------ LIVE PREVIEW ------------------ */
-  const titleInput = document.getElementById("title");
-  const dateInput = document.getElementById("date");
-  const descInput = document.getElementById("description");
-  const livePreview = document.getElementById("livePreview");
+imageFileInput.addEventListener("change", async () => {
+  const file = imageFileInput.files[0];
+  if (!file) return;
 
-  function updatePreview() {
-    livePreview.innerHTML = `
-      ${uploadedImageUrl ? `<img src="${uploadedImageUrl}" style="max-width:100%; border-radius:6px; margin-bottom:10px;">` : ''}
-      <h2>${titleInput.value}</h2>
-      <p><strong>Date:</strong> ${dateInput.value}</p>
-      <div>${descInput.innerHTML}</div>
-    `;
+  previewImage.style.display = "none";
+  uploadedImageUrl = "";
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", "events_photos");
+
+  try {
+    const res = await fetch("https://api.cloudinary.com/v1_1/deqqkiovg/image/upload", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await res.json();
+    if (!data.secure_url) return alert("Image upload failed!");
+
+    uploadedImageUrl = data.secure_url;
+    previewImage.src = uploadedImageUrl;
+    previewImage.style.display = "block";
+
+    updatePreview();
+  } catch (err) {
+    alert("Image upload failed!");
   }
+});
 
-  titleInput.addEventListener("input", updatePreview);
-  dateInput.addEventListener("input", updatePreview);
-  descInput.addEventListener("input", updatePreview);
+/* ===============================
+   LIVE PREVIEW
+================================ */
+const titleInput = document.getElementById("title");
+const dateInput = document.getElementById("date");
+const livePreview = document.getElementById("livePreview");
 
-  /* ------------------ POST EVENT → BACKEND ------------------ */
-  document.getElementById("postEvent").addEventListener("click", async () => {
-    const title = titleInput.value.trim();
-    const date = dateInput.value.trim();
-    const description = descInput.innerHTML.trim();
+function updatePreview() {
+  livePreview.innerHTML = `
+    ${uploadedImageUrl ? `<img src="${uploadedImageUrl}" style="max-width:100%;border-radius:6px;margin-bottom:10px;">` : ""}
+    <h2>${titleInput.value}</h2>
+    <p><strong>Date:</strong> ${dateInput.value}</p>
+    <div>${editor.innerHTML}</div>
+  `;
+}
 
-    if (!title || !description) {
-      alert("Title and description are required!");
-      return;
-    }
+titleInput.addEventListener("input", updatePreview);
+dateInput.addEventListener("input", updatePreview);
 
-    if (!uploadedImageUrl) {
-      alert("Please select and upload an image!");
-      return;
-    }
+/* ===============================
+   POST EVENT (❌ NO CHANGE)
+================================ */
+document.getElementById("postEvent").addEventListener("click", async () => {
+  const title = titleInput.value.trim();
+  const date = dateInput.value.trim();
+  const description = editor.innerHTML.trim();
 
-    const payload = {
-      title,
-      date,
-      description,
-      image: uploadedImageUrl
-    };
+  if (!title || !description) return alert("Title and description are required!");
+  if (!uploadedImageUrl) return alert("Please select and upload an image!");
 
-    try {
-      /* 1️⃣ POST EVENT */
-      const res = await fetch("https://college-hwbb.onrender.com/api/events", {
+  const payload = { title, date, description, image: uploadedImageUrl };
+
+  try {
+    const res = await fetch("https://college-hwbb.onrender.com/api/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+
+      fetch("https://college-hwbb.onrender.com/api/notify/events", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          title: "🎉 New Event Posted!",
+          body: title + " — Tap to view details",
+          url: "/events.html"
+        })
       });
 
-      const data = await res.json();
-      console.log("Event post response:", data);
+      alert("Event posted successfully!");
 
-      if (res.ok && data.success) {
+      titleInput.value = "";
+      dateInput.value = "";
+      editor.innerHTML = "";
+      previewImage.style.display = "none";
+      uploadedImageUrl = "";
+      updatePreview();
 
-        /* 2️⃣ FIRE NOTIFICATION (EXTRA CALL) */
-        fetch("https://college-hwbb.onrender.com/api/notify/events", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            title: "🎉 New Event Posted!",
-            body: title + " — Tap to view details",
-            url: "/events.html"
-          })
-        }).catch(err => console.error("Notification error:", err));
-
-        alert("Event posted successfully!");
-
-        /* 3️⃣ RESET FORM */
-        titleInput.value = "";
-        dateInput.value = "";
-        descInput.innerHTML = "";
-        previewImage.src = "";
-        previewImage.style.display = "none";
-        uploadedImageUrl = "";
-
-        updatePreview();
-
-      } else {
-        alert(data.message || "Failed to post event");
-      }
-
-    } catch (err) {
-      console.error("Post Event Error:", err);
-      alert("Failed to post event due to network/server error.");
+    } else {
+      alert(data.message || "Failed to post event");
     }
-  });
+
+  } catch (err) {
+    alert("Failed to post event due to server error.");
+  }
+});
 </script>
+
 
 </body>
 </html>
