@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Upload Attendance PDF</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+body{
+  font-family:Inter,system-ui,sans-serif;
+  background:#f4f6fb;
+  margin:0;
+  padding:20px;
+}
+
+.container{
+  max-width:520px;
+  margin:40px auto;
+  background:#fff;
+  padding:25px;
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+
+h2{
+  margin-top:0;
+  text-align:center;
+}
+
+label{
+  font-weight:600;
+  display:block;
+  margin-top:15px;
+}
+
+input,select{
+  width:100%;
+  padding:10px 12px;
+  border-radius:8px;
+  border:1px solid #cbd5e1;
+  font-size:14px;
+  margin-top:6px;
+}
+
+button{
+  width:100%;
+  margin-top:20px;
+  padding:12px;
+  background:#2563eb;
+  color:#fff;
+  border:none;
+  border-radius:10px;
+  font-size:15px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+button:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
+.note{
+  margin-top:12px;
+  font-size:13px;
+  color:#555;
+}
+
+.status{
+  margin-top:15px;
+  text-align:center;
+  font-weight:600;
+}
+
+.success{color:#16a34a}
+.error{color:#dc2626}
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+}
+
+.back-btn{
+  background:#e5e7eb;
+  color:#111;
+  padding:8px 14px;
+  border-radius:8px;
+  font-size:13px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="topbar">
+    <h2>📄 Upload Attendance PDF</h2>
+    <button class="back-btn" onclick="history.back()">⬅ Back</button>
+  </div>
+
+  <label>Subject Name</label>
+  <input type="text" id="subject" placeholder="Eg: DSA" required>
+
+  <label>Year</label>
+  <select id="year">
+    <option value="">Select Year</option>
+    <option value="1">1st Year</option>
+    <option value="2">2nd Year</option>
+    <option value="3">3rd Year</option>
+    <option value="4">4th Year</option>
+  </select>
+
+  <label>Branch</label>
+  <select id="branch">
+    <option value="">Select Branch</option>
+    <option value="CSE1">CSE1</option>
+    <option value="CSE2">CSE2</option>
+    <option value="IT1">IT1</option>
+    <option value="IT2">IT2</option>
+    <option value="IT3">IT3</option>
+  </select>
+
+  <label>Attendance PDF</label>
+  <input type="file" id="pdfFile" accept="application/pdf">
+
+  <button id="uploadBtn" onclick="uploadPDF()">Upload / Replace PDF</button>
+
+  <div class="note">
+    ⚠ One attendance PDF per subject + class per week is allowed.  
+    Uploading again will <b>replace</b> the previous file.
+  </div>
+
+  <div id="status" class="status"></div>
+
+</div>
+
+<script>
+/* ================= AUTH ================= */
+const teacherToken = localStorage.getItem("mentorToken"); // or teacherToken
+
+if(!teacherToken){
+  alert("Session expired. Please login again.");
+  window.location.href="/login.html";
+}
+
+/* ================= UPLOAD ================= */
+async function uploadPDF(){
+  const subject = document.getElementById("subject").value.trim();
+  const year    = document.getElementById("year").value;
+  const branch  = document.getElementById("branch").value;
+  const file    = document.getElementById("pdfFile").files[0];
+  const status  = document.getElementById("status");
+  const btn     = document.getElementById("uploadBtn");
+
+  if(!subject || !year || !branch || !file){
+    status.textContent = "❌ Please fill all fields";
+    status.className="status error";
+    return;
+  }
+
+  if(file.type !== "application/pdf"){
+    status.textContent = "❌ Only PDF files allowed";
+    status.className="status error";
+    return;
+  }
+
+  btn.disabled = true;
+  status.textContent = "Uploading...";
+  status.className="status";
+
+  const formData = new FormData();
+  formData.append("subject", subject);
+  formData.append("year", year);
+  formData.append("branch", branch);
+  formData.append("pdf", file);
+
+  try{
+    const res = await fetch("/api/attendance-pdf/upload",{
+      method:"POST",
+      headers:{
+        Authorization: `Bearer ${teacherToken}`
+      },
+      body: formData
+    });
+
+    const data = await res.json();
+
+    if(!data.success){
+      throw new Error(data.message || "Upload failed");
+    }
+
+    status.textContent = "✅ Attendance PDF uploaded successfully";
+    status.className="status success";
+
+  }catch(err){
+    console.error(err);
+    status.textContent = "❌ Upload failed. Try again.";
+    status.className="status error";
+  }finally{
+    btn.disabled = false;
+  }
+}
+</script>
+
+</body>
+</html>

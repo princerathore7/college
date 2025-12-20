@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Attendance PDF Viewer</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+body{
+  font-family:Inter,system-ui,sans-serif;
+  background:#f4f6fb;
+  margin:0;
+  padding:20px;
+}
+
+.container{
+  max-width:1200px;
+  margin:auto;
+}
+
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+select,button{
+  padding:9px 14px;
+  border-radius:8px;
+  border:1px solid #cbd5e1;
+  font-size:14px;
+}
+
+button{
+  background:#1e40af;
+  color:#fff;
+  cursor:pointer;
+}
+
+.filters{
+  display:flex;
+  gap:10px;
+  margin-bottom:15px;
+  flex-wrap:wrap;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+  border-radius:12px;
+  overflow:hidden;
+}
+
+th{
+  background:#eef3ff;
+  padding:12px;
+  font-size:14px;
+}
+
+td{
+  padding:10px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:center;
+}
+
+.badge{
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+}
+
+.updated{background:#dcfce7;color:#166534}
+.pending{background:#fee2e2;color:#991b1b}
+
+.action-btn{
+  padding:6px 12px;
+  border-radius:6px;
+  border:none;
+  font-size:13px;
+  cursor:pointer;
+}
+
+.view-btn{background:#2563eb;color:#fff}
+.mark-btn{background:#16a34a;color:#fff}
+
+.no-data{
+  color:#666;
+  padding:20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+  <h2>📄 Attendance PDF Viewer (Admin)</h2>
+  <button onclick="history.back()">⬅ Back</button>
+</header>
+
+<div class="filters">
+  <select id="year">
+    <option value="">Select Year</option>
+    <option value="1">1st Year</option>
+    <option value="2">2nd Year</option>
+    <option value="3">3rd Year</option>
+    <option value="4">4th Year</option>
+  </select>
+
+  <select id="branch">
+    <option value="">Select Branch</option>
+    <option value="CSE1">CSE1</option>
+    <option value="CSE2">CSE2</option>
+    <option value="IT1">IT1</option>
+    <option value="IT2">IT2</option>
+    <option value="IT3">IT3</option>
+  </select>
+
+  <button onclick="loadPDFs()">Search</button>
+</div>
+
+<table>
+<thead>
+<tr>
+  <th>Subject</th>
+  <th>Teacher</th>
+  <th>Week</th>
+  <th>Status</th>
+  <th>Actions</th>
+</tr>
+</thead>
+<tbody id="pdfBody">
+<tr><td colspan="5" class="no-data">Select Year & Branch</td></tr>
+</tbody>
+</table>
+
+</div>
+
+<script>
+/* ================= AUTH ================= */
+const adminToken = localStorage.getItem("adminToken") || localStorage.getItem("mentorToken");
+if(!adminToken){
+  alert("Unauthorized access");
+  location.href="/login.html";
+}
+
+/* ================= CONFIG ================= */
+const API_ROOT = "https://college-hwbb.onrender.com";
+const UPDATED_KEY = "attendance_pdf_updated"; // local storage
+
+function loadUpdated(){
+  return JSON.parse(localStorage.getItem(UPDATED_KEY)||"{}");
+}
+function saveUpdated(d){
+  localStorage.setItem(UPDATED_KEY,JSON.stringify(d));
+}
+let updatedMap = loadUpdated();
+
+/* ================= LOAD PDFs ================= */
+async function loadPDFs(){
+  const year = document.getElementById("year").value;
+  const branch = document.getElementById("branch").value;
+  const body = document.getElementById("pdfBody");
+
+  if(!year || !branch){
+    alert("Select Year and Branch");
+    return;
+  }
+
+  body.innerHTML = `<tr><td colspan="5">Loading...</td></tr>`;
+
+  try{
+    const res = await fetch(
+      `${API_ROOT}/api/admin/attendance-pdfs?year=${year}&branch=${branch}`,
+      {
+        headers:{ Authorization:`Bearer ${adminToken}` }
+      }
+    );
+
+    const data = await res.json();
+    if(!data.success) throw new Error("Failed");
+
+    renderPDFs(data.pdfs);
+
+  }catch(err){
+    console.error(err);
+    body.innerHTML = `<tr><td colspan="5" class="no-data">Failed to load PDFs</td></tr>`;
+  }
+}
+
+/* ================= RENDER ================= */
+function renderPDFs(list){
+  const body = document.getElementById("pdfBody");
+  body.innerHTML = "";
+
+  if(!list || !list.length){
+    body.innerHTML = `<tr><td colspan="5" class="no-data">No PDFs uploaded</td></tr>`;
+    return;
+  }
+
+  list.forEach(p=>{
+    const key = `${p.year}_${p.branch}_${p.subject}_${p.week}`;
+    const isUpdated = updatedMap[key];
+
+    body.innerHTML += `
+      <tr>
+        <td>${p.subject}</td>
+        <td>${p.teacherName}</td>
+        <td>${p.week}</td>
+        <td>
+          <span class="badge ${isUpdated?"updated":"pending"}">
+            ${isUpdated?"Updated":"Pending"}
+          </span>
+        </td>
+        <td>
+          <button class="action-btn view-btn"
+            onclick="window.open('${p.pdfUrl}','_blank')">
+            View PDF
+          </button>
+          ${!isUpdated ? `
+            <button class="action-btn mark-btn"
+              onclick="markUpdated('${key}')">
+              Mark Updated
+            </button>` : ""}
+        </td>
+      </tr>
+    `;
+  });
+}
+
+/* ================= MARK UPDATED ================= */
+function markUpdated(key){
+  if(!confirm("Mark this attendance as updated?")) return;
+
+  updatedMap[key] = true;
+  saveUpdated(updatedMap);
+  loadPDFs();
+
+  /*
+  // 🔜 FUTURE (GLOBAL BACKEND MARK)
+  fetch("/api/admin/attendance-pdf/mark-updated",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      Authorization:`Bearer ${adminToken}`
+    },
+    body:JSON.stringify({ key })
+  });
+  */
+}
+</script>
+
+</body>
+</html>
