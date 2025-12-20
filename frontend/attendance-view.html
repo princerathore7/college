@@ -2,76 +2,119 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Attendance View — Admin</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<title>Attendance View</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 
 <style>
 body{
-  font-family:Inter,sans-serif;
-  background:#f4f6fb;
+  font-family:Inter,system-ui,sans-serif;
+  background:#f5f6fc;
   margin:0;
+  padding:20px
 }
-main{padding:20px}
-
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px
+}
+select,button{
+  padding:8px 12px;
+  border-radius:6px;
+  border:1px solid #ccc
+}
+button{
+  background:#003366;
+  color:#fff;
+  cursor:pointer
+}
 table{
   width:100%;
   border-collapse:collapse;
   background:#fff;
-  border-radius:12px;
-  overflow:hidden;
+  border-radius:10px;
+  overflow:hidden
 }
 th,td{
-  padding:12px 14px;
+  padding:10px;
   border-bottom:1px solid #e5e7eb;
-  text-align:left;
+  text-align:center
 }
-th{background:#eef2ff}
-
-.badge{
-  padding:6px 10px;
-  border-radius:999px;
-  font-weight:600;
-  font-size:13px;
+th{
+  background:#eef3ff
 }
-.green{background:#dcfce7;color:#166534}
-.yellow{background:#fef9c3;color:#854d0e}
-.red{background:#fee2e2;color:#991b1b}
-
 .no-data{
-  text-align:center;
-  color:#6b7280;
+  color:#666
 }
+.controls{
+  display:flex;
+  gap:10px;
+  margin-bottom:15px;
+  flex-wrap:wrap
+}
+.badge{
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:13px;
+  font-weight:600
+}
+.p{background:#dcfce7;color:#166534}
+.a{background:#fee2e2;color:#991b1b}
+.perc{background:#e0e7ff;color:#1e3a8a}
 </style>
 </head>
 
 <body>
 
-<main>
-<h2>📊 Attendance Overview</h2>
+<header>
+  <h2>Attendance Overview</h2>
+  <button onclick="logout()">Logout</button>
+</header>
 
-<input
-  type="text"
-  id="searchEnrollment"
-  placeholder="Search by Enrollment Number"
-  style="padding:8px 12px;border-radius:8px;border:1px solid #d1d5db;min-width:220px"
->
+<div class="controls">
+  <select id="year">
+    <option value="">Year</option>
+    <option value="1">1st</option>
+    <option value="2">2nd</option>
+    <option value="3">3rd</option>
+    <option value="4">4th</option>
+  </select>
+
+  <select id="branch">
+    <option value="">Branch</option>
+    <option value="CSE">CSE</option>
+    <option value="IT">IT</option>
+    <option value="ECE">ECE</option>
+  </select>
+
+  <select id="section">
+    <option value="">Section</option>
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+  </select>
+
+  <button onclick="renderTable()">Load Students</button>
+</div>
 
 <table>
 <thead>
 <tr>
   <th>Enrollment</th>
   <th>Name</th>
-  <th>Year</th>
-  <th>Branch</th>
+  <th>Present</th>
+  <th>Absent</th>
+  <th>Total</th>
   <th>Attendance %</th>
 </tr>
 </thead>
 <tbody id="studentsBody">
-<tr><td colspan="5" class="no-data">Loading...</td></tr>
+<tr>
+  <td colspan="6" class="no-data">Select filters & load students</td>
+</tr>
 </tbody>
 </table>
-</main>
 
 <script>
 /* ===============================
@@ -79,86 +122,95 @@ th{background:#eef2ff}
 ================================ */
 const mentorId = localStorage.getItem("mentorId");
 const source   = sessionStorage.getItem("accessSource");
+
 if(!mentorId || !["ad","admin"].includes(source)){
-  document.body.innerHTML="<h2 style='text-align:center;margin-top:20vh;color:red'>❌ Access Denied</h2>";
+  document.body.innerHTML =
+    "<h2 style='text-align:center;margin-top:20vh;color:red'>Access Denied</h2>";
   throw new Error("Unauthorized");
 }
 
 /* ===============================
-   APIs
+   CONFIG
 ================================ */
-const API_STUDENTS = "https://college-hwbb.onrender.com/api/admin/students";
-const API_SUMMARY  = "https://college-hwbb.onrender.com/api/attendance/summary/";
+const API_ALL_STUDENTS = "https://college-hwbb.onrender.com/api/students";
 
 /* ===============================
-   FETCH STUDENTS (CACHE)
+   DATA
+================================ */
+let allStudents = [];
+let attendanceData = JSON.parse(localStorage.getItem("attendance_data") || "{}");
+
+/* ===============================
+   FETCH STUDENTS
 ================================ */
 async function fetchStudents(){
-  const cached = localStorage.getItem("admin_students");
-  if(cached) return JSON.parse(cached);
-
-  const res = await fetch(API_STUDENTS);
-  const d = await res.json();
-  if(d.success){
-    localStorage.setItem("admin_students", JSON.stringify(d.students));
-    return d.students;
+  try{
+    const res = await fetch(API_ALL_STUDENTS);
+    const data = await res.json();
+    if(data.success){
+      allStudents = data.students;
+    }
+  }catch(err){
+    console.error(err);
   }
-  return [];
 }
 
 /* ===============================
-   FETCH ATTENDANCE SUMMARY
+   RENDER TABLE
 ================================ */
-async function fetchSummary(enr){
-  const res = await fetch(API_SUMMARY + enr);
-  const d = await res.json();
-  return d.success ? d.summary : null;
-}
-
-/* ===============================
-   RENDER
-================================ */
-async function render(){
+function renderTable(){
   const body = document.getElementById("studentsBody");
-  const search = document.getElementById("searchEnrollment").value.toLowerCase();
+  const year = document.getElementById("year").value;
+  const branch = document.getElementById("branch").value.toLowerCase();
+  const section = document.getElementById("section").value;
 
-  const students = await fetchStudents();
-  const filtered = students.filter(s =>
-    !search || s.enrollment.toLowerCase().includes(search)
-  );
+  const filtered = allStudents.filter(s=>{
+    if(year && String(s.year) !== year) return false;
+    if(branch && s.branch.toLowerCase() !== branch) return false;
+    if(section && String(s.section) !== section) return false;
+    return true;
+  });
 
   body.innerHTML = "";
 
   if(!filtered.length){
-    body.innerHTML = `<tr><td colspan="5" class="no-data">No students found</td></tr>`;
+    body.innerHTML = `<tr><td colspan="6" class="no-data">No students found</td></tr>`;
     return;
   }
 
-  for(const s of filtered){
-    const sum = await fetchSummary(s.enrollment);
-
-    let badge = "—";
-    if(sum && sum.total){
-      const cls = sum.percentage>=75?"green":sum.percentage>=60?"yellow":"red";
-      badge = `<span class="badge ${cls}">
-        ${sum.percentage}% (${sum.present}/${sum.total})
-      </span>`;
-    }
+  filtered.forEach(s=>{
+    const att = attendanceData[s.enrollment] || {P:0,A:0};
+    const total = att.P + att.A;
+    const perc = total ? ((att.P / total) * 100).toFixed(1) : "0.0";
 
     body.innerHTML += `
       <tr>
         <td>${s.enrollment}</td>
         <td>${s.name}</td>
-        <td>${s.year}</td>
-        <td>${s.branch}</td>
-        <td>${badge}</td>
+        <td><span class="badge p">${att.P}</span></td>
+        <td><span class="badge a">${att.A}</span></td>
+        <td>${total}</td>
+        <td><span class="badge perc">${perc}%</span></td>
       </tr>
     `;
-  }
+  });
 }
 
-document.getElementById("searchEnrollment").addEventListener("input", render);
-document.addEventListener("DOMContentLoaded", render);
+/* ===============================
+   INIT
+================================ */
+document.addEventListener("DOMContentLoaded", async ()=>{
+  await fetchStudents();
+});
+
+/* ===============================
+   LOGOUT
+================================ */
+function logout(){
+  localStorage.clear();
+  sessionStorage.clear();
+  location.href="login.html";
+}
 </script>
 
 </body>
