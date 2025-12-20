@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="3;url=/whiuhfuiewhfhehfehuifhewfebfeibfewfui/login.html">
+    <title>Acropolis | Redirecting...</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f4f7f6; /* Light professional background */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container {
+            text-align: center;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        .logo {
+            max-width: 400px; /* Logo size control */
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2c3e50; /* Matches the logo blue */
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+
+        .message {
+            color: #333;
+            font-size: 1.1rem;
+            margin-top: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <img src="logo.jpg" alt="Acropolis Logo" class="logo">
+        
+        <div class="message">
+            <div class="loader"></div>
+            Please wait, redirecting to login...
+        </div>
+    </div>
+
+    <script>
+        // Backup JavaScript redirection
+        setTimeout(function() {
+            window.location.href = "/whiuhfuiewhfhehfehuifhewfebfeibfewfui";
+        }, 3000); // 3 seconds delay
+    </script>
+</body>
+</html>
