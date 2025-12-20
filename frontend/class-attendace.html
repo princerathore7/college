@@ -3,13 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Admin — Students Management</title>
+<title>Attendance View</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 body{font-family:Inter,system-ui,sans-serif;background:#f5f6fc;margin:0;padding:20px}
 header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
-select,button{padding:9px 14px;border-radius:8px;border:1px solid #cbd5e1;font-size:14px}
+select,button,input{padding:9px 14px;border-radius:8px;border:1px solid #cbd5e1;font-size:14px}
 button{background:#003366;color:#fff;cursor:pointer}
 .controls{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
 table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden}
@@ -18,7 +22,6 @@ td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:center}
 .mark-btn{padding:6px 14px;border:none;border-radius:20px;cursor:pointer;font-weight:600;margin:2px}
 .present{background:#16a34a;color:#fff}
 .absent{background:#dc2626;color:#fff}
-.selected{outline:3px solid #000}
 .badge{padding:4px 8px;border-radius:6px;font-size:12px;font-weight:700}
 .perc{background:#e0e7ff;color:#1e3a8a}
 .no-data{color:#666}
@@ -28,11 +31,12 @@ td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:center}
 <body>
 
 <header>
-  <h2>Admin — Students</h2>
+  <h2>Attendance Overview</h2>
   <button onclick="logout()">Logout</button>
 </header>
 
 <div class="controls">
+  <input id="lectureName" placeholder="Lecture Name (for PDF)">
   <select id="year">
     <option value="">All Years</option>
     <option value="1">1st</option>
@@ -40,7 +44,6 @@ td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:center}
     <option value="3">3rd</option>
     <option value="4">4th</option>
   </select>
-
   <select id="branch">
     <option value="">All Branches</option>
     <option value="CSE1">CSE1</option>
@@ -50,12 +53,11 @@ td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:center}
   </select>
 
   <button onclick="render()">Refresh</button>
-
-  <button onclick="clearClassAttendance()" style="background:#7c2d12">
-    Clear Selected Class Attendance
-  </button>
+  <button onclick="undoLast()" style="background:#7c2d12">Undo Last</button>
+  <button onclick="downloadPDF()" style="background:#065f46">Download PDF</button>
 </div>
 
+<div id="pdfArea">
 <table>
 <thead>
 <tr>
@@ -63,33 +65,34 @@ td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:center}
   <th>Name</th>
   <th>Year</th>
   <th>Branch</th>
-  <th>Attendance</th>
+  <th>Present</th>
+  <th>Absent</th>
+  <th>%</th>
 </tr>
 </thead>
 <tbody id="studentsBody">
-<tr><td colspan="5" class="no-data">Loading...</td></tr>
+<tr><td colspan="7" class="no-data">Loading...</td></tr>
 </tbody>
 </table>
+</div>
 
 <script>
-/* ================= ACCESS ================= */
-const mentorId = localStorage.getItem("mentorId");
-const source = sessionStorage.getItem("accessSource");
-if(!mentorId || !["ad","admin"].includes(source)){
+/* ============ ACCESS ============ */
+const mentorId=localStorage.getItem("mentorId");
+const source=sessionStorage.getItem("accessSource");
+if(!mentorId||!["ad","admin"].includes(source)){
   document.body.innerHTML="<h2 style='text-align:center;margin-top:20vh;color:red'>Access Denied</h2>";
   throw new Error("Unauthorized");
 }
 
-/* ================= STORAGE ================= */
+/* ============ STORAGE ============ */
 const DEVICE_KEY="attendance_device_count";
-function loadDevice(){return JSON.parse(localStorage.getItem(DEVICE_KEY)||"{}")}
-function saveDevice(d){localStorage.setItem(DEVICE_KEY,JSON.stringify(d))}
-let deviceData = loadDevice();
+let deviceData=JSON.parse(localStorage.getItem(DEVICE_KEY)||"{}");
+let history=[]; // undo stack
 
-/* ================= API ================= */
 const API_STUDENTS="https://college-hwbb.onrender.com/api/admin/students";
 
-/* ================= LOGIC ================= */
+/* ============ LOGIC ============ */
 function logout(){localStorage.clear();location.href="login.html";}
 
 async function fetchStudents(){
@@ -107,7 +110,17 @@ async function fetchStudents(){
 function mark(enr,status){
   if(!deviceData[enr]) deviceData[enr]={P:0,A:0};
   deviceData[enr][status]++;
-  saveDevice(deviceData);
+  history.push({enr,status});
+  localStorage.setItem(DEVICE_KEY,JSON.stringify(deviceData));
+  render();
+}
+
+function undoLast(){
+  if(!history.length){ alert("Nothing to undo"); return; }
+  const last=history.pop();
+  deviceData[last.enr][last.status]--;
+  if(deviceData[last.enr][last.status]<0) deviceData[last.enr][last.status]=0;
+  localStorage.setItem(DEVICE_KEY,JSON.stringify(deviceData));
   render();
 }
 
@@ -117,7 +130,6 @@ async function render(){
   const branch=document.getElementById("branch").value;
 
   const students=await fetchStudents();
-
   const filtered=students.filter(s=>{
     if(year && String(s.year)!==year) return false;
     if(branch && s.branch!==branch) return false;
@@ -126,7 +138,7 @@ async function render(){
 
   body.innerHTML="";
   if(!filtered.length){
-    body.innerHTML=`<tr><td colspan="5" class="no-data">No students</td></tr>`;
+    body.innerHTML=`<tr><td colspan="7" class="no-data">No students</td></tr>`;
     return;
   }
 
@@ -134,56 +146,44 @@ async function render(){
     const d=deviceData[s.enrollment]||{P:0,A:0};
     const total=d.P+d.A;
     const perc=total?((d.P/total)*100).toFixed(1):"0.0";
-
     body.innerHTML+=`
-    <tr>
-      <td>${s.enrollment}</td>
-      <td>${s.name}</td>
-      <td>${s.year}</td>
-      <td>${s.branch}</td>
-      <td>
-        <button class="mark-btn present" onclick="mark('${s.enrollment}','P')">
-          P (${d.P})
-        </button>
-        <button class="mark-btn absent" onclick="mark('${s.enrollment}','A')">
-          A (${d.A})
-        </button>
-        <span class="badge perc">${perc}%</span>
-      </td>
-    </tr>`;
+      <tr>
+        <td>${s.enrollment}</td>
+        <td>${s.name}</td>
+        <td>${s.year}</td>
+        <td>${s.branch}</td>
+        <td>
+          <button class="mark-btn present" onclick="mark('${s.enrollment}','P')">P (${d.P})</button>
+        </td>
+        <td>
+          <button class="mark-btn absent" onclick="mark('${s.enrollment}','A')">A (${d.A})</button>
+        </td>
+        <td><span class="badge perc">${perc}%</span></td>
+      </tr>
+    `;
   });
 }
 
-/* ========== CLEAR CLASS-WISE DATA ========== */
-function clearClassAttendance(){
-  const year=document.getElementById("year").value;
-  const branch=document.getElementById("branch").value;
+/* ============ PDF DOWNLOAD ============ */
+async function downloadPDF(){
+  const lecture=document.getElementById("lectureName").value||"Attendance";
+  const area=document.getElementById("pdfArea");
 
-  if(!year && !branch){
-    alert("Select Year or Branch first");
-    return;
-  }
+  const canvas=await html2canvas(area,{scale:2});
+  const img=canvas.toDataURL("image/png");
 
-  if(!confirm("Clear attendance for selected class only?")) return;
+  const { jsPDF } = window.jspdf;
+  const pdf=new jsPDF("p","mm","a4");
 
-  fetchStudents().then(students=>{
-    students.forEach(s=>{
-      if((!year || String(s.year)===year) &&
-         (!branch || s.branch===branch)){
-        delete deviceData[s.enrollment];
-      }
-    });
-    saveDevice(deviceData);
-    render();
-    alert("Selected class attendance cleared ✅");
-  });
+  pdf.setFontSize(14);
+  pdf.text(`Lecture: ${lecture}`,10,10);
+  pdf.text(`Date: ${new Date().toLocaleDateString()}`,10,18);
+
+  pdf.addImage(img,"PNG",10,25,190,0);
+  pdf.save(`${lecture}_attendance.pdf`);
 }
 
-/* ================= INIT ================= */
 document.addEventListener("DOMContentLoaded",render);
-
-/* ================= TEMPORARY ================= */
-// submitAttendance();  // ❌ BACKEND DISABLED FOR NOW
 </script>
 
 </body>
