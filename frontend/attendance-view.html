@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Attendance View</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+<style>
+body{
+  font-family:Inter,system-ui,sans-serif;
+  background:#f4f6fb;
+  margin:0;
+}
+header{
+  background:#111827;
+  color:#fff;
+  padding:14px 20px;
+  font-weight:700;
+}
+main{padding:20px}
+
+.filters{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:15px;
+}
+select,input{
+  padding:8px 12px;
+  border-radius:8px;
+  border:1px solid #d1d5db;
+  font-size:14px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+  border-radius:12px;
+  overflow:hidden;
+}
+th,td{
+  padding:12px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:left;
+}
+th{background:#f1f5f9}
+.percent-good{color:green;font-weight:600}
+.percent-bad{color:#b91c1c;font-weight:600}
+
+.no-data{text-align:center;padding:30px;color:#6b7280}
+</style>
+</head>
+
+<body>
+
+<header>📊 Attendance Summary</header>
+
+<main>
+
+<div class="filters">
+  <select id="year">
+    <option value="">All Years</option>
+    <option value="1">1st</option>
+    <option value="2">2nd</option>
+    <option value="3">3rd</option>
+    <option value="4">4th</option>
+  </select>
+
+  <select id="branch">
+    <option value="">All Branches</option>
+    <option value="CS">CS</option>
+    <option value="IT">IT</option>
+    <option value="EC">EC</option>
+  </select>
+
+  <input type="text" id="searchEnrollment" placeholder="Search Enrollment">
+</div>
+
+<table>
+<thead>
+<tr>
+  <th>Enrollment</th>
+  <th>Name</th>
+  <th>Year</th>
+  <th>Branch</th>
+  <th>Present</th>
+  <th>Absent</th>
+  <th>Attendance %</th>
+</tr>
+</thead>
+<tbody id="body">
+<tr><td colspan="7" class="no-data">Loading...</td></tr>
+</tbody>
+</table>
+
+</main>
+
+<script>
+/* 🔐 ACCESS CONTROL */
+// const mentorId = localStorage.getItem("mentorId");
+// const source = sessionStorage.getItem("accessSource");
+// if(!mentorId || !["ad","admin"].includes(source)){
+//   document.body.innerHTML="<h2 style='text-align:center;margin-top:20vh;color:red'>❌ Access Denied</h2>";
+//   throw new Error("Unauthorized");
+// }
+
+/* APIs */
+const API_STUDENTS  = "https://college-hwbb.onrender.com/api/admin/students";
+const API_ATT_SUM   = "https://college-hwbb.onrender.com/api/attendance/summary";
+
+/* CACHE */
+async function fetchStudents(){
+  const c=localStorage.getItem("admin_students");
+  if(c) return JSON.parse(c);
+  const r=await fetch(API_STUDENTS);
+  const d=await r.json();
+  if(d.success){
+    localStorage.setItem("admin_students",JSON.stringify(d.students));
+    return d.students;
+  }
+  return [];
+}
+
+async function fetchSummary(){
+  const r=await fetch(API_ATT_SUM);
+  const d=await r.json();
+  return d.success ? d.data : {};
+}
+
+/* RENDER */
+async function render(){
+  const body=document.getElementById("body");
+  const year=document.getElementById("year").value;
+  const branch=document.getElementById("branch").value;
+  const search=document.getElementById("searchEnrollment").value.toLowerCase();
+
+  const students=await fetchStudents();
+  const summary=await fetchSummary();
+
+  let list=students.filter(s=>{
+    let ok=true;
+    if(year) ok=ok && String(s.year)===year;
+    if(branch) ok=ok && s.branch===branch;
+    if(search) ok=ok && s.enrollment.toLowerCase().includes(search);
+    return ok;
+  });
+
+  body.innerHTML="";
+  if(!list.length){
+    body.innerHTML=`<tr><td colspan="7" class="no-data">No students found</td></tr>`;
+    return;
+  }
+
+  for(const s of list){
+    const att = summary[s.enrollment] || {P:0,A:0};
+    const total = att.P + att.A;
+    const percent = total ? Math.round((att.P/total)*100) : 0;
+
+    body.innerHTML+=`
+      <tr>
+        <td>${s.enrollment}</td>
+        <td>${s.name}</td>
+        <td>${s.year}</td>
+        <td>${s.branch}</td>
+        <td>${att.P}</td>
+        <td>${att.A}</td>
+        <td class="${percent>=75?'percent-good':'percent-bad'}">${percent}%</td>
+      </tr>
+    `;
+  }
+}
+
+/* EVENTS */
+["year","branch"].forEach(id=>{
+  document.getElementById(id).addEventListener("change",render);
+});
+document.getElementById("searchEnrollment").addEventListener("input",render);
+document.addEventListener("DOMContentLoaded",render);
+</script>
+
+</body>
+</html>
