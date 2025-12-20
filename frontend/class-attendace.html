@@ -36,7 +36,10 @@ td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:center}
 </header>
 
 <div class="controls">
-  <input id="lectureName" placeholder="Lecture Name (for PDF)">
+  <input id="lectureName" placeholder="Lecture Name (eg. DSA – Unit 3)">
+  <input id="teacherName" placeholder="Teacher Name">
+  <input id="lectureDate" type="date">
+  
   <select id="year">
     <option value="">All Years</option>
     <option value="1">1st</option>
@@ -44,6 +47,7 @@ td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:center}
     <option value="3">3rd</option>
     <option value="4">4th</option>
   </select>
+
   <select id="branch">
     <option value="">All Branches</option>
     <option value="CSE1">CSE1</option>
@@ -88,7 +92,7 @@ if(!mentorId||!["ad","admin"].includes(source)){
 /* ============ STORAGE ============ */
 const DEVICE_KEY="attendance_device_count";
 let deviceData=JSON.parse(localStorage.getItem(DEVICE_KEY)||"{}");
-let history=[]; // undo stack
+let history=[];
 
 const API_STUDENTS="https://college-hwbb.onrender.com/api/admin/students";
 
@@ -152,12 +156,8 @@ async function render(){
         <td>${s.name}</td>
         <td>${s.year}</td>
         <td>${s.branch}</td>
-        <td>
-          <button class="mark-btn present" onclick="mark('${s.enrollment}','P')">P (${d.P})</button>
-        </td>
-        <td>
-          <button class="mark-btn absent" onclick="mark('${s.enrollment}','A')">A (${d.A})</button>
-        </td>
+        <td><button class="mark-btn present" onclick="mark('${s.enrollment}','P')">P (${d.P})</button></td>
+        <td><button class="mark-btn absent" onclick="mark('${s.enrollment}','A')">A (${d.A})</button></td>
         <td><span class="badge perc">${perc}%</span></td>
       </tr>
     `;
@@ -166,20 +166,31 @@ async function render(){
 
 /* ============ PDF DOWNLOAD ============ */
 async function downloadPDF(){
-  const lecture=document.getElementById("lectureName").value||"Attendance";
-  const area=document.getElementById("pdfArea");
+  const lecture=document.getElementById("lectureName").value.trim();
+  const teacher=document.getElementById("teacherName").value.trim();
+  const date=document.getElementById("lectureDate").value;
 
+  if(!lecture || !teacher){
+    alert("Please enter Lecture Name and Teacher Name");
+    return;
+  }
+
+  const area=document.getElementById("pdfArea");
   const canvas=await html2canvas(area,{scale:2});
   const img=canvas.toDataURL("image/png");
 
   const { jsPDF } = window.jspdf;
   const pdf=new jsPDF("p","mm","a4");
 
-  pdf.setFontSize(14);
-  pdf.text(`Lecture: ${lecture}`,10,10);
-  pdf.text(`Date: ${new Date().toLocaleDateString()}`,10,18);
+  pdf.setFontSize(16);
+  pdf.text("Attendance Sheet",105,10,{align:"center"});
 
-  pdf.addImage(img,"PNG",10,25,190,0);
+  pdf.setFontSize(12);
+  pdf.text(`Lecture : ${lecture}`,10,20);
+  pdf.text(`Teacher : ${teacher}`,10,28);
+  pdf.text(`Date    : ${date || new Date().toLocaleDateString()}`,10,36);
+
+  pdf.addImage(img,"PNG",10,45,190,0);
   pdf.save(`${lecture}_attendance.pdf`);
 }
 
