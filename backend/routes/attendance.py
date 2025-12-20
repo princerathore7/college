@@ -230,3 +230,34 @@ def get_all_students_for_attendance():
         {"_id": 0, "enrollment": 1, "name": 1, "year": 1, "branch": 1, "section": 1}
     ))
     return jsonify({"success": True, "count": len(students), "students": students}), 200
+# ----------------------------------------
+# 3️⃣ Attendance Summary — VIEW PAGE
+# ----------------------------------------
+@attendance_bp.route("/summary/<enrollment>", methods=["GET"])
+def attendance_summary(enrollment):
+    enrollment = enrollment.strip().upper()
+
+    records = list(attendance_collection.find(
+        {"enrollment": enrollment},
+        {"status": 1}
+    ))
+
+    if not records:
+        return jsonify({"success": True, "summary": {
+            "total": 0, "present": 0, "absent": 0, "percentage": 0
+        }})
+
+    total = len(records)
+    present = sum(1 for r in records if r["status"] == "P")
+    absent = total - present
+    percentage = round((present / total) * 100, 2)
+
+    return jsonify({
+        "success": True,
+        "summary": {
+            "total": total,
+            "present": present,
+            "absent": absent,
+            "percentage": percentage
+        }
+    })
