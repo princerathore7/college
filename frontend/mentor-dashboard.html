@@ -222,11 +222,11 @@
     <button class="action-btn" onclick="window.location.href='fines.html'">check fines on students</button>
   
   </div>
-
+<!-- 
 <button id="noticeBtn">
   <i class="fa-solid fa-bell"></i> Notices
   <span class="notice-badge" id="unreadCount">0</span>
-</button>
+</button> -->
 
 </main>
 
@@ -281,17 +281,17 @@ document.getElementById("adminPanelBtn").addEventListener("click", () => {
   // window.location.href = `/fghlwegfuhbcdkbfrufckjbfufgewufdbcadministration-pannelxyzabc?mentorId=${mentorId}`;
 });
 
-document.getElementById("noticeBtn").addEventListener("click", () => {
-  const mentorId = localStorage.getItem("mentorId");
+// document.getElementById("noticeBtn").addEventListener("click", () => {
+//   const mentorId = localStorage.getItem("mentorId");
 
-  if(!mentorId){
-    alert("Mentor not logged in");
-    return;
-  }
+//   if(!mentorId){
+//     alert("Mentor not logged in");
+//     return;
+//   }
 
-  // mentorId already localStorage me hai – best practice
-  window.location.href = "/notice-read.html";
-});
+//   // mentorId already localStorage me hai – best practice
+//   window.location.href = "/notice-read.html";
+// });
 /* ===== LOGOUT ===== */
 function logout(){
   localStorage.clear();
