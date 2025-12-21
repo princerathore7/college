@@ -188,6 +188,48 @@
     <button class="action-btn" style="background:#eaf3ff;color:#2f80ed" onclick="logout()">Logout</button>
   </div>
 </header>
+<!-- WEEKEND REMINDER MODAL -->
+<div id="weekendReminder" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.45);
+  z-index:9999;
+  justify-content:center;
+  align-items:center;
+">
+  <div style="
+    background:#fff;
+    max-width:420px;
+    width:90%;
+    padding:24px;
+    border-radius:14px;
+    box-shadow:0 20px 30px rgba(0,0,0,0.2);
+    text-align:center;
+    font-family:Inter,system-ui,sans-serif;
+  ">
+    <h3 style="margin-top:0;color:#1e40af">📢 Attendance Reminder</h3>
+
+    <p style="font-size:14px;color:#334155;line-height:1.6">
+      Please update the <b>attendance PDF</b> of students.<br><br>
+      <b>Reminder:</b> Do <u>not clear attendance of all students</u> until the semester ends.
+    </p>
+
+    <button onclick="closeWeekendReminder()" style="
+      margin-top:16px;
+      padding:10px 18px;
+      background:#1e40af;
+      color:#fff;
+      border:none;
+      border-radius:8px;
+      font-size:14px;
+      cursor:pointer;
+    ">
+      Got it 👍
+    </button>
+  </div>
+</div>
+
 
 <div class="sidebar" id="sidebar">
   <h2>Mentor Menu</h2>
@@ -297,6 +339,32 @@ function logout(){
   localStorage.clear();
   window.location.href="/login.html";
 }
+(function weekendReminder(){
+  const today = new Date();
+  const day = today.getDay(); // 0–6
+  const year = today.getFullYear();
+
+  // get week number
+  const week = Math.ceil(
+    (((today - new Date(year,0,1)) / 86400000) + new Date(year,0,1).getDay()+1)/7
+  );
+
+  // Unique key per weekend
+  const reminderKey = `attendanceReminder_${year}_week_${week}`;
+
+  // Only Friday(5) & Saturday(6)
+  if(day === 5 || day === 6){
+    if(!localStorage.getItem(reminderKey)){
+      document.getElementById("weekendReminder").style.display = "flex";
+    }
+  }
+
+  window.closeWeekendReminder = function(){
+    localStorage.setItem(reminderKey, "shown");
+    document.getElementById("weekendReminder").style.display = "none";
+  }
+})();
+
 </script>
 
 </body>
