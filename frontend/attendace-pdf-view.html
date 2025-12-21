@@ -166,7 +166,9 @@ async function loadPDFs(){
   body.innerHTML = `<tr><td colspan="4">Loading...</td></tr>`;
 
   try{
-    const res = await fetch(`/api/attendance-pdfs?year=${year}&branch=${branch}`)
+  const res = await fetch(
+  `${API}/api/attendance-pdfs?year=${year}&branch=${branch}`
+);
 
     const data = await res.json();
 
