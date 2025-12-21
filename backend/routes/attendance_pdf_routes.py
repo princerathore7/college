@@ -73,11 +73,11 @@ def upload_attendance_pdf():
 # =========================
 # ADMIN → VIEW PDFs
 # =========================
-@attendance_pdf_bp.route("/api/admin/attendance-pdfs", methods=["GET"])
-@admin_required
+@attendance_pdf_bp.route("/api/attendance-pdfs", methods=["GET"])
 def view_attendance_pdfs():
     year = request.args.get("year")
     branch = request.args.get("branch")
+
     if not year or not branch:
         return jsonify(success=False, message="Missing filters"), 400
 
