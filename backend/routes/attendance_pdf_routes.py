@@ -62,9 +62,18 @@ def upload_attendance_pdf():
             "updated": False
         }
 
+        # Upsert PDF record
         db.attendance_pdfs.update_one(query, {"$set": data}, upsert=True)
 
-        return jsonify({"success": True, "message": "Attendance PDF uploaded", "pdfUrl": pdf_url})
+        # 🔹 Fetch the saved record to get _id
+        saved_pdf = db.attendance_pdfs.find_one(query)
+
+        return jsonify({
+            "success": True,
+            "message": "Attendance PDF uploaded",
+            "pdfUrl": pdf_url,
+            "pdfId": str(saved_pdf["_id"])  # ✅ send _id to frontend
+        })
 
     except Exception as e:
         print("Error uploading PDF:", e)
