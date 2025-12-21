@@ -126,18 +126,18 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
 
 <script>
 /* ===================== TOKEN FROM ADMIN PANEL ===================== */
-const mentorToken = localStorage.getItem("mentorToken"); // ✅ existing admin token
-const source = sessionStorage.getItem("accessSource");
-const ALLOWED_SOURCES = ["ad","admin"];
+// const mentorToken = localStorage.getItem("mentorToken"); // ✅ existing admin token
+// const source = sessionStorage.getItem("accessSource");
+// const ALLOWED_SOURCES = ["ad","admin"];
 
-if(!mentorToken || !ALLOWED_SOURCES.includes(source)){
-    document.body.innerHTML = `
-    <div style="text-align:center;padding:50px;">
-        <h2 style="color:#dc2626">❌ Access Denied</h2>
-        <p>Please open this page via the Administration Panel.</p>
-    </div>`;
-    throw new Error("Unauthorized access");
-}
+// if(!mentorToken || !ALLOWED_SOURCES.includes(source)){
+//     document.body.innerHTML = `
+//     <div style="text-align:center;padding:50px;">
+//         <h2 style="color:#dc2626">❌ Access Denied</h2>
+//         <p>Please open this page via the Administration Panel.</p>
+//     </div>`;
+//     throw new Error("Unauthorized access");
+// }
 
 /* ================= UPLOAD FUNCTION ================= */
 async function uploadPDF(){
