@@ -269,65 +269,74 @@ const overlay=document.getElementById("uploadOverlay");
 const progressText=document.getElementById("progressText");
 const successBox=document.getElementById("successBox");
 
-/* UPLOAD */
+/* ================= UPLOAD NOTE ================= */
 async function uploadNote(){
-  const title=titleEl=title.value.trim();
-  const subjectVal=subject.value.trim();
-  const y=year.value,b=branch.value,s=section.value;
-  const file=fileEl=file.files[0];
 
-  if(!title||!subjectVal||!y||!b||!s||!file){
-    alert("Fill all fields"); return;
+  const titleVal   = document.getElementById("title").value.trim();
+  const subjectVal = document.getElementById("subject").value.trim();
+  const y = year.value;
+  const b = branch.value;
+  const s = section.value;
+  const fileObj = document.getElementById("file").files[0];
+
+  if(!titleVal || !subjectVal || !y || !b || !s || !fileObj){
+    alert("Fill all fields");
+    return;
   }
 
-  const cls=normalizeClass(y,b,s);
-  localStorage.setItem(LS_CLASS,JSON.stringify({year:y,branch:b,section:s}));
+  const cls = normalizeClass(y, b, s);
+  localStorage.setItem(LS_CLASS, JSON.stringify({year:y, branch:b, section:s}));
 
-  const form=new FormData();
-  form.append("title",title);
-  form.append("subject",subjectVal);
-  form.append("deadline",deadline.value);
-  form.append("class",cls);
-  form.append("file",file);
+  const form = new FormData();
+  form.append("title", titleVal);
+  form.append("subject", subjectVal);
+  form.append("deadline", deadline.value);
+  form.append("class", cls);
+  form.append("file", fileObj);
 
-  overlay.style.display="flex";
-  successBox.style.display="none";
+  overlay.style.display = "flex";
+  successBox.style.display = "none";
 
-  let percent=0;
-  const fakeProgress=setInterval(()=>{
-    percent+=Math.floor(Math.random()*8);
-    if(percent>95) percent=95;
-    progressText.innerText=percent+"%";
-  },200);
+  let percent = 0;
+  const fakeProgress = setInterval(()=>{
+    percent += Math.floor(Math.random()*8);
+    if(percent > 95) percent = 95;
+    progressText.innerText = percent + "%";
+  }, 200);
 
   try{
-    const res=await fetch(API,{method:"POST",body:form});
-    const data=await res.json();
+    const res  = await fetch(API, { method:"POST", body: form });
+    const data = await res.json();
     clearInterval(fakeProgress);
 
-    progressText.innerText="100%";
+    progressText.innerText = "100%";
 
     if(data.success){
-      setTimeout(()=>{
-        document.querySelector(".progress-circle").style.display="none";
-        progressText.style.display="none";
-        successBox.style.display="block";
-      },400);
 
       setTimeout(()=>{
-        overlay.style.display="none";
-        document.querySelector(".progress-circle").style.display="block";
-        progressText.style.display="block";
-        progressText.innerText="0%";
-        saveMyNote(data.noteId,title,subjectVal,cls);
+        document.querySelector(".progress-circle").style.display = "none";
+        progressText.style.display = "none";
+        successBox.style.display = "block";
+      }, 400);
+
+      setTimeout(()=>{
+        overlay.style.display = "none";
+        document.querySelector(".progress-circle").style.display = "block";
+        progressText.style.display = "block";
+        progressText.innerText = "0%";
+
+        saveMyNote(data.noteId, titleVal, subjectVal, cls);
         loadNotes();
-      },1400);
-    } else {
-      overlay.style.display="none";
+      }, 1400);
+
+    }else{
+      overlay.style.display = "none";
       alert(data.message);
     }
-  }catch{
-    overlay.style.display="none";
+
+  }catch(err){
+    clearInterval(fakeProgress);
+    overlay.style.display = "none";
     alert("Upload failed");
   }
 }
@@ -389,20 +398,35 @@ function openMyNotes(){
 function closeMyNotes(){ myNotesModal.style.display="none"; }
 
 /* DELETE */
-async function deleteNote(id,fromMine=false){
-  if(!confirm("Delete?")) return;
-  const res=await fetch(`${API}/${id}`,{method:"DELETE"});
-  const data=await res.json();
-  if(data.success){
-    if(fromMine){
-      let arr=JSON.parse(localStorage.getItem(LS_NOTES)||"[]");
-      arr=arr.filter(n=>n.id!==id);
-      localStorage.setItem(LS_NOTES,JSON.stringify(arr));
-      openMyNotes();
+/* ================= DELETE NOTE ================= */
+async function deleteNote(id, fromMine = false){
+
+  if(!confirm("Delete this note?")) return;
+
+  try{
+    const res  = await fetch(`${API}/${id}`, { method:"DELETE" });
+    const data = await res.json();
+
+    if(data.success){
+
+      if(fromMine){
+        let arr = JSON.parse(localStorage.getItem(LS_NOTES) || "[]");
+        arr = arr.filter(n => n.id !== id);
+        localStorage.setItem(LS_NOTES, JSON.stringify(arr));
+        openMyNotes();
+      }
+
+      loadNotes();
+
+    }else{
+      alert(data.message || "Delete failed");
     }
-    loadNotes();
+
+  }catch(err){
+    alert("Server error while deleting note");
   }
 }
+
 
 function openPDF(url){
   window.open(url+"?fl_attachment=false","_blank");
