@@ -22,42 +22,35 @@ collection = db.attendance_pdfs
 @attendance_pdf_bp.route("/api/attendance-pdf/upload", methods=["POST"])
 @mentor_required
 def upload_attendance_pdf(current_user):
+    try:
+        year    = request.form.get("year")
+        branch  = request.form.get("branch")
+        subject = request.form.get("subject")
+        week    = request.form.get("week")
+        file    = request.files.get("pdf")
 
-    year    = request.form.get("year")
-    branch  = request.form.get("branch")
-    subject = request.form.get("subject")
-    week    = request.form.get("week")
-    file    = request.files.get("pdf")
+        if not all([year, branch, subject, week, file]):
+            return jsonify(success=False, message="Missing fields"), 400
 
-    if not all([year, branch, subject, week, file]):
-        return jsonify(success=False, message="Missing fields"), 400
+        filename = secure_filename(f"{year}_{branch}_{subject}_week{week}.pdf")
+        filepath = os.path.join(UPLOAD_DIR, filename)
+        file.save(filepath)
 
-    filename = secure_filename(
-        f"{year}_{branch}_{subject}_week{week}.pdf"
-    )
+        query = {"year": year, "branch": branch, "subject": subject, "week": int(week)}
+        data = {
+            **query,
+            "teacherId": current_user["mentorId"],
+            "teacherName": current_user["name"],
+            "pdfUrl": f"/uploads/attendance_pdfs/{filename}",
+            "uploadedAt": datetime.utcnow(),
+            "updated": False
+        }
 
-    filepath = os.path.join(UPLOAD_DIR, filename)
-    file.save(filepath)
-
-    query = {
-        "year": year,
-        "branch": branch,
-        "subject": subject,
-        "week": int(week)
-    }
-
-    data = {
-        **query,
-        "teacherId": current_user["mentorId"],
-        "teacherName": current_user["name"],
-        "pdfUrl": f"/uploads/attendance_pdfs/{filename}",
-        "uploadedAt": datetime.utcnow(),
-        "updated": False
-    }
-
-    collection.update_one(query, {"$set": data}, upsert=True)
-
-    return jsonify(success=True, message="Attendance PDF uploaded")
+        collection.update_one(query, {"$set": data}, upsert=True)
+        return jsonify(success=True, message="Attendance PDF uploaded")
+    
+    except Exception as e:
+        return jsonify(success=False, message=str(e)), 500
 
 
 # =========================

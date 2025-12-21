@@ -291,12 +291,11 @@ async function uploadPDF(){
     try {
         const res = await fetch("/api/attendance-pdf/upload", {
             method: "POST",
-            headers: {
-                "Authorization": `Bearer ${mentorId}` // Fixed: Using the correct 'source' variable
-            },
-            body: formData
-        });
-
+               headers: {
+        "Authorization": `Bearer ${mentorToken}`
+    },
+    body: formData
+});
         const data = await res.json();
 
         if(!data.success){
