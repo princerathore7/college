@@ -174,22 +174,34 @@ function renderPDFs(list){
 }
 
 /* ================= MARK UPDATED ================= */
-async function markUpdated(key){
-  if(!confirm("Mark this PDF as updated for all admins?")) return;
-
+async function markUpdated(pdfId){
   try{
-    const res = await fetch(`${API}/api/admin/attendance-pdf/mark-updated`,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ key })
-    });
+    const res = await fetch(
+      `${API}/api/admin/attendance-pdf/mark-updated`,
+      {
+        method: "POST",
+        headers:{
+          "Content-Type":"application/json",
+          "Authorization": "Bearer " + localStorage.getItem("token")
+        },
+        body: JSON.stringify({ pdfId })
+      }
+    );
+
     const data = await res.json();
-    if(!data.success) throw new Error(data.message);
-    loadPDFs();
-  }catch(err){
+
+    if(data.success){
+      alert("✅ Marked as updated");
+      loadPDFs();
+    }else{
+      alert("❌ " + data.message);
+    }
+
+  }catch(e){
     alert("❌ Failed to mark updated");
   }
 }
+
 
 /* ================= ADMIN REDIRECT ================= */
 function openAdmin(){
