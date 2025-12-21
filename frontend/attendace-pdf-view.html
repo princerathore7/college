@@ -3,248 +3,159 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Attendance PDF Viewer</title>
-
+<title>Upload Attendance PDF</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-
 <style>
-body{
-  font-family:Inter,system-ui,sans-serif;
-  background:#f4f6fb;
-  margin:0;
-  padding:20px;
-}
-
-.container{
-  max-width:1200px;
-  margin:auto;
-}
-
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:20px;
-}
-
-select,button{
-  padding:9px 14px;
-  border-radius:8px;
-  border:1px solid #cbd5e1;
-  font-size:14px;
-}
-
-button{
-  background:#1e40af;
-  color:#fff;
-  cursor:pointer;
-}
-
-.filters{
-  display:flex;
-  gap:10px;
-  margin-bottom:15px;
-  flex-wrap:wrap;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  background:#fff;
-  border-radius:12px;
-  overflow:hidden;
-}
-
-th{
-  background:#eef3ff;
-  padding:12px;
-  font-size:14px;
-}
-
-td{
-  padding:10px;
-  border-bottom:1px solid #e5e7eb;
-  text-align:center;
-}
-
-.badge{
-  padding:4px 10px;
-  border-radius:999px;
-  font-size:12px;
-  font-weight:700;
-}
-
-.updated{background:#dcfce7;color:#166534}
-.pending{background:#fee2e2;color:#991b1b}
-
-.action-btn{
-  padding:6px 12px;
-  border-radius:6px;
-  border:none;
-  font-size:13px;
-  cursor:pointer;
-  margin:2px;
-}
-
-.view-btn{background:#2563eb;color:#fff}
-.mark-btn{background:#16a34a;color:#fff}
-.delete-btn{background:#dc2626;color:#fff}
-
-.no-data{
-  color:#666;
-  padding:20px;
-}
+/* === SAME CSS (UNCHANGED) === */
+body { font-family: 'Inter', system-ui, sans-serif; margin:0; padding:20px; background:#f8fafc; color:#1e293b; display:flex; justify-content:center; align-items:flex-start; min-height:100vh; }
+.container { max-width:480px; width:100%; background:#fff; padding:30px; border-radius:16px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1),0 10px 10px -5px rgba(0,0,0,0.04); position:relative; overflow:hidden; margin-top:30px; }
+.loader-overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); display:none; flex-direction:column; justify-content:center; align-items:center; z-index:10; backdrop-filter: blur(2px); }
+.spinner { width:40px; height:40px; border:4px solid #f3f3f3; border-top:4px solid #2563eb; border-radius:50%; animation:spin 1s linear infinite; }
+@keyframes spin { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
+.topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; }
+h2 { margin:0; font-size:1.25rem; font-weight:700; }
+.back-btn, .my-pdfs-btn { background:#f1f5f9; color:#1e293b; padding:8px 14px; border-radius:8px; border:none; cursor:pointer; font-size:13px; margin-left:10px; }
+.back-btn:hover, .my-pdfs-btn:hover{background:#e2e8f0;}
+.form-group{margin-bottom:18px;}
+label{font-weight:600;margin-bottom:6px;display:block;font-size:14px;}
+input, select{width:100%; padding:12px; border-radius:8px; border:1px solid #cbd5e1; font-size:14px; outline:none;}
+button.main-btn{width:100%; padding:14px; background:#2563eb; color:#fff; border:none; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer;}
+.note{margin-top:20px;font-size:12px;color:#64748b;padding:10px;background:#f8fafc;border-radius:8px;border-left:4px solid #fbbf24;}
+.status{margin-top:20px;text-align:center;font-size:14px;font-weight:600;}
+.success{color:#16a34a;background:#f0fdf4;padding:10px;border-radius:8px;}
+.error{color:#dc2626;background:#fef2f2;padding:10px;border-radius:8px;}
+.modal { display:none; position:fixed; z-index:50; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.4); justify-content:center; align-items:center; }
+.modal-content { background:#fff; padding:20px; border-radius:12px; max-width:500px; width:90%; }
+.pdf-item{display:flex;gap:6px;align-items:center;border-bottom:1px solid #e5e7eb;padding:8px 0;}
+.pdf-item button{font-size:12px;padding:4px 8px;border:none;border-radius:6px;}
+.delete-btn{background:#dc2626;color:#fff;}
 </style>
 </head>
 
 <body>
 
 <div class="container">
-
-<header>
-  <h2>📄 Attendance PDFs (Admin)</h2>
-  <button onclick="history.back()">⬅ Back</button>
-</header>
-
-<div class="filters">
-  <select id="year">
-    <option value="">Select Year</option>
-    <option value="1">1st Year</option>
-    <option value="2">2nd Year</option>
-    <option value="3">3rd Year</option>
-    <option value="4">4th Year</option>
-  </select>
-
-  <select id="branch">
-    <option value="">Select Branch</option>
-    <option value="CSE1">CSE1</option>
-    <option value="CSE2">CSE2</option>
-    <option value="IT1">IT1</option>
-    <option value="IT2">IT2</option>
-    <option value="IT3">IT3</option>
-  </select>
-
-  <button onclick="loadPDFs()">Search</button>
+<div id="loader" class="loader-overlay">
+  <div class="spinner"></div>
+  <p>Uploading PDF...</p>
 </div>
 
-<table>
-<thead>
-<tr>
-  <th>Subject</th>
-  <th>Week</th>
-  <th>Status</th>
-  <th>Actions</th>
-</tr>
-</thead>
-<tbody id="pdfBody">
-<tr><td colspan="4" class="no-data">Select Year & Branch</td></tr>
-</tbody>
-</table>
+<div class="topbar">
+  <h2>📄 Upload Attendance</h2>
+  <div>
+    <button class="back-btn" onclick="history.back()">⬅ Back</button>
+    <button class="my-pdfs-btn" onclick="showMyPDFs()">My Uploaded PDFs</button>
+  </div>
+</div>
 
+<div class="form-group">
+  <label>Subject</label>
+  <input id="subject">
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<select id="year"><option value="">Year</option><option>1</option><option>2</option><option>3</option><option>4</option></select>
+<select id="branch"><option value="">Branch</option><option>CSE1</option><option>CSE2</option><option>IT1</option><option>IT2</option></select>
+</div>
+
+<select id="week"><option value="">Week</option><option>1</option><option>2</option><option>3</option><option>4</option></select>
+<input type="file" id="pdfFile" accept="application/pdf">
+<button class="main-btn" onclick="uploadPDF()">Upload</button>
+<div id="status" class="status"></div>
+</div>
+
+<div id="pdfModal" class="modal">
+<div class="modal-content">
+<h3>My Uploaded PDFs</h3>
+<div id="pdfList"></div>
+<button onclick="closeModal()">Close</button>
+</div>
 </div>
 
 <script>
-const API_ROOT = "https://college-hwbb.onrender.com";
+const mentorId = localStorage.getItem("mentorId");
 
-/* ================= LOAD PDFs ================= */
-async function loadPDFs(){
+/* ========= LOCAL STORAGE HELPERS ========= */
+function getLocalPDFs(){
+  return JSON.parse(localStorage.getItem("myUploadedAttendancePDFs") || "[]");
+}
+function saveLocalPDF(key){
+  const list = getLocalPDFs();
+  if(!list.includes(key)){
+    list.push(key);
+    localStorage.setItem("myUploadedAttendancePDFs", JSON.stringify(list));
+  }
+}
+function isMyPDF(key){
+  return getLocalPDFs().includes(key);
+}
+
+/* ========= UPLOAD ========= */
+async function uploadPDF(){
+  const subject = subject.value.trim();
   const year = document.getElementById("year").value;
   const branch = document.getElementById("branch").value;
-  const body = document.getElementById("pdfBody");
+  const week = document.getElementById("week").value;
+  const file = pdfFile.files[0];
 
-  if(!year || !branch){
-    alert("Select Year and Branch");
-    return;
-  }
+  if(!subject||!year||!branch||!week||!file) return;
 
-  body.innerHTML = `<tr><td colspan="4">Loading...</td></tr>`;
+  const fd = new FormData();
+  fd.append("subject",subject);
+  fd.append("year",year);
+  fd.append("branch",branch);
+  fd.append("week",week);
+  fd.append("pdf",file);
 
-  try{
-    const res = await fetch(`${API_ROOT}/api/admin/attendance-pdfs?year=${year}&branch=${branch}`);
-    const data = await res.json();
+  const res = await fetch("https://college-hwbb.onrender.com/api/attendance-pdf/upload",{method:"POST",body:fd});
+  const data = await res.json();
 
-    if(!data.success) throw new Error(data.message || "Failed");
-
-    renderPDFs(data.pdfs);
-
-  }catch(err){
-    console.error(err);
-    body.innerHTML = `<tr><td colspan="4" class="no-data">Failed to load PDFs</td></tr>`;
+  if(data.success){
+    const key = `${year}_${branch}_${subject}_${week}`;
+    saveLocalPDF(key); // 🔥 STORE DEVICE PDF
+    status.textContent="✅ Uploaded";
+    status.className="status success";
   }
 }
 
-/* ================= RENDER PDFs ================= */
-function renderPDFs(list){
-  const body = document.getElementById("pdfBody");
-  body.innerHTML = "";
+/* ========= SHOW PDFs ========= */
+async function showMyPDFs(){
+  pdfModal.style.display="flex";
+  pdfList.innerHTML="Loading...";
 
-  if(!list || !list.length){
-    body.innerHTML = `<tr><td colspan="4" class="no-data">No PDFs uploaded</td></tr>`;
-    return;
-  }
+  const res = await fetch(`https://college-hwbb.onrender.com/api/attendance-pdfs/teacher/${mentorId}`);
+  const data = await res.json();
 
-  list.forEach(pdf=>{
-    const statusClass = pdf.updated ? "updated" : "pending";
-    const statusText = pdf.updated ? "Updated" : "Pending";
+  pdfList.innerHTML="";
+  data.pdfs.forEach(pdf=>{
+    const key = `${pdf.year}_${pdf.branch}_${pdf.subject}_${pdf.week}`;
+    const canDelete = isMyPDF(key);
 
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${pdf.subject}</td>
-      <td>${pdf.week}</td>
-      <td><span class="badge ${statusClass}">${statusText}</span></td>
-      <td>
-        <button class="action-btn view-btn" onclick="window.open('${pdf.pdfUrl}','_blank')">View</button>
-        ${!pdf.updated ? `<button class="action-btn mark-btn" onclick="markUpdated('${pdf.year}_${pdf.branch}_${pdf.subject}_${pdf.week}')">Mark Updated</button>` : ""}
-        <button class="action-btn delete-btn" onclick="deletePDF('${pdf._id}')">Delete</button>
-      </td>
+    pdfList.innerHTML+=`
+      <div class="pdf-item">
+        <span>${key}</span>
+        <a href="${pdf.pdfUrl}" target="_blank"><button>View</button></a>
+        ${canDelete ? `<button class="delete-btn" onclick="deletePDF('${pdf._id}','${key}')">Delete</button>` : ``}
+      </div>
     `;
-    body.appendChild(tr);
   });
 }
 
-/* ================= MARK UPDATED ================= */
-async function markUpdated(key){
-  if(!confirm("Mark this attendance as updated?")) return;
-
-  try{
-    const res = await fetch(`${API_ROOT}/api/admin/attendance-pdf/mark-updated`,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({ key })
-    });
-    const data = await res.json();
-    if(data.success){
-      loadPDFs();
-    }else{
-      alert("Failed to mark updated");
-    }
-  }catch(err){
-    console.error(err);
-    alert("Error marking updated");
+/* ========= DELETE ========= */
+async function deletePDF(id,key){
+  if(!confirm("Delete PDF?")) return;
+  const res = await fetch(`https://college-hwbb.onrender.com/api/attendance-pdf/delete/${id}`,{method:"DELETE"});
+  const data = await res.json();
+  if(data.success){
+    localStorage.setItem("myUploadedAttendancePDFs",
+      JSON.stringify(getLocalPDFs().filter(k=>k!==key))
+    );
+    showMyPDFs();
   }
 }
 
-/* ================= DELETE PDF ================= */
-async function deletePDF(id){
-  if(!confirm("Are you sure you want to delete this PDF?")) return;
-
-  try{
-    const res = await fetch(`${API_ROOT}/api/attendance-pdf/delete/${id}`,{
-      method:"DELETE"
-    });
-    const data = await res.json();
-    if(data.success){
-      alert("PDF deleted successfully");
-      loadPDFs();
-    }else{
-      alert("Failed to delete PDF: " + data.message);
-    }
-  }catch(err){
-    console.error(err);
-    alert("Error deleting PDF");
-  }
-}
+function closeModal(){pdfModal.style.display="none";}
 </script>
-
 </body>
 </html>
+

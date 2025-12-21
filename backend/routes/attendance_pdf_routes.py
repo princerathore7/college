@@ -8,6 +8,7 @@ from db import db
 from auth.middleware import mentor_required, admin_required
 from bson import ObjectId
 
+
 attendance_pdf_bp = Blueprint("attendance_pdf_bp", __name__)
 
 ALLOWED = {"pdf"}
@@ -75,27 +76,25 @@ def upload_attendance_pdf():
 @attendance_pdf_bp.route("/api/admin/attendance-pdfs", methods=["GET"])
 @admin_required
 def view_attendance_pdfs():
-    try:
-        year   = request.args.get("year")
-        branch = request.args.get("branch")
+    year = request.args.get("year")
+    branch = request.args.get("branch")
+    if not year or not branch:
+        return jsonify(success=False, message="Missing filters"), 400
 
-        if not year or not branch:
-            return jsonify(success=False, message="Missing filters"), 400
+    pdfs = list(collection.find({"year": year, "branch": branch}))
+    serialized = []
+    for pdf in pdfs:
+        serialized.append({
+            "_id": str(pdf["_id"]),
+            "year": pdf["year"],
+            "branch": pdf["branch"],
+            "subject": pdf["subject"],
+            "week": pdf["week"],
+            "pdfUrl": pdf["pdfUrl"],
+            "updated": pdf.get("updated", False),
+        })
 
-        pdfs = list(
-            db.attendance_pdfs.find(
-                {"year": year, "branch": branch},
-                {"_id": 1, "year":1, "branch":1, "subject":1, "week":1, "pdfUrl":1, "updated":1}
-            ).sort("week", 1)
-        )
-
-        for p in pdfs:
-            p["_id"] = str(p["_id"])
-
-        return jsonify(success=True, pdfs=pdfs)
-    except Exception as e:
-        print("Error fetching PDFs:", e)
-        return jsonify(success=False, message=str(e)), 500
+    return jsonify(success=True, pdfs=serialized)
 
 # =========================
 # ADMIN → MARK UPDATED
