@@ -7,6 +7,7 @@ import cloudinary
 import cloudinary.uploader
 import firebase_init
 from threading import Thread
+from flask import send_from_directory
 firebase_init.init_firebase()
 # Import blueprints
 from notes import notes_bp
@@ -27,7 +28,7 @@ from routes.management import management_bp
 from routes.fine_bp import fine_bp
 from routes.admin_students import admin_students_bp
 from routes.notifications import notifications_bp
-# from routes.attendance_pdf_routes import attendance_pdf_bp
+from routes.attendance_pdf_routes import attendance_pdf_bp
 # ---------------------------------------------
 # FLASK APP SETUP
 # ---------------------------------------------
@@ -88,7 +89,7 @@ for bp in [
     assignments_bp, classes_bp, class_mgmt_bp,
     events_bp, exams_bp, timetables_bp, marks_bp,
     bus_bp, management_bp, notes_bp, fine_bp,
-    admin_students_bp, notifications_bp, #attendance_pdf_bp
+    admin_students_bp, notifications_bp, attendance_pdf_bp
 ]:
     app.register_blueprint(bp)
 
@@ -305,6 +306,12 @@ def verify_salary_pwd():
     if data.get("password") == os.getenv("SALARY_ADMIN_PASSWORD"):
         return jsonify(success=True)
     return jsonify(success=False)
+
+
+@app.route("/uploads/<path:filename>")
+def serve_uploads(filename):
+    upload_root = os.path.join(os.getcwd(), "uploads")
+    return send_from_directory(upload_root, filename)
 
 # ---------------------------------------------
 # MAIN ENTRY POINT
