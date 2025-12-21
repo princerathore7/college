@@ -107,6 +107,7 @@ if (!mentorId || source !== "ad") {
     throw new Error("Unauthorized access");
 }
 
+/* =============================== UPLOAD FUNCTION =============================== */
 async function uploadPDF(){
     const subject = document.getElementById("subject").value.trim();
     const year = document.getElementById("year").value;
@@ -143,12 +144,13 @@ async function uploadPDF(){
     formData.append("pdf", file);
 
     try{
-        const res = await fetch("/api/attendance-pdf/upload", {
+        // Use full URL to avoid fetch issues
+        const res = await fetch("https://college-hwbb.onrender.com//api/attendance-pdf/upload", {
             method: "POST",
-            headers: { "Authorization": `Bearer ${mentorId}` }, // using mentorId as token
             body: formData
         });
 
+        // Always attempt to parse JSON
         let data;
         try{ data = await res.json(); } catch(e){ throw new Error("Invalid server response"); }
 
