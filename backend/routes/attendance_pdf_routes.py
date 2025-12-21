@@ -145,3 +145,54 @@ def delete_attendance_pdf(pdf_id):
     except Exception as e:
         print("Error deleting PDF:", e)
         return jsonify({"success": False, "message": str(e)}), 500
+# =========================
+# Update PDF
+# =========================
+@attendance_pdf_bp.route("/api/attendance-pdf/update/<pdf_id>", methods=["POST"])
+def update_attendance_pdf(pdf_id):
+    try:
+        if not ObjectId.is_valid(pdf_id):
+            return jsonify({"success": False, "message": "Invalid PDF ID"}), 400
+
+        file = request.files.get("pdf")
+        if not file:
+            return jsonify({"success": False, "message": "No PDF file provided"}), 400
+
+        # Fetch old record
+        pdf = db.attendance_pdfs.find_one({"_id": ObjectId(pdf_id)})
+        if not pdf:
+            return jsonify({"success": False, "message": "PDF not found"}), 404
+
+        # Delete old file from Cloudinary
+        cloud_id = pdf.get("cloudinary_id")
+        if cloud_id:
+            cloudinary.uploader.destroy(cloud_id, resource_type="raw")
+
+        # Upload new file
+        filename = f"{pdf['year']}_{pdf['branch']}_{pdf['subject']}_week{pdf['week']}_{generate_id()}.pdf"
+        upload_result = cloudinary.uploader.upload(
+            file,
+            resource_type="raw",
+            public_id=f"attendance_pdfs/{filename}",
+            overwrite=True
+        )
+        pdf_url = upload_result.get("secure_url")
+        public_id = upload_result.get("public_id")
+
+        # Update MongoDB record & reset updated status
+        db.attendance_pdfs.update_one(
+            {"_id": ObjectId(pdf_id)},
+            {"$set": {
+                "pdfUrl": pdf_url,
+                "filename": filename,
+                "cloudinary_id": public_id,
+                "updated": False,
+                "uploadedAt": datetime.utcnow()
+            }}
+        )
+
+        return jsonify({"success": True, "message": "PDF updated", "pdfUrl": pdf_url})
+
+    except Exception as e:
+        print("Error updating PDF:", e)
+        return jsonify({"success": False, "message": str(e)}), 500
