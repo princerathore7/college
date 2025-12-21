@@ -14,39 +14,21 @@ body{
   margin:0;
   padding:20px;
 }
-
-.container{
-  max-width:1100px;
-  margin:auto;
-}
-
+.container{max-width:1100px;margin:auto;}
 header{
   display:flex;
   justify-content:space-between;
   align-items:center;
   margin-bottom:20px;
 }
-
 select,button{
   padding:9px 14px;
   border-radius:8px;
   border:1px solid #cbd5e1;
   font-size:14px;
 }
-
-button{
-  background:#1e40af;
-  color:#fff;
-  cursor:pointer;
-}
-
-.filters{
-  display:flex;
-  gap:10px;
-  margin-bottom:15px;
-  flex-wrap:wrap;
-}
-
+button{background:#1e40af;color:#fff;cursor:pointer}
+.filters{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
 table{
   width:100%;
   border-collapse:collapse;
@@ -54,18 +36,8 @@ table{
   border-radius:12px;
   overflow:hidden;
 }
-
-th{
-  background:#eef3ff;
-  padding:12px;
-  font-size:14px;
-}
-
-td{
-  padding:10px;
-  border-bottom:1px solid #e5e7eb;
-  text-align:center;
-}
+th{background:#eef3ff;padding:12px;font-size:14px}
+td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:center}
 
 .badge{
   padding:4px 10px;
@@ -73,7 +45,6 @@ td{
   font-size:12px;
   font-weight:700;
 }
-
 .updated{background:#dcfce7;color:#166534}
 .pending{background:#fee2e2;color:#991b1b}
 
@@ -85,14 +56,10 @@ td{
   cursor:pointer;
   margin:2px;
 }
-
-.view-btn{background:#2563eb;color:#fff}
-.delete-btn{background:#dc2626;color:#fff}
-
-.no-data{
-  color:#666;
-  padding:20px;
-}
+.view-btn{background:#2563eb}
+.update-btn{background:#16a34a}
+.update-btn[disabled]{background:#9ca3af;cursor:not-allowed}
+.no-data{color:#666;padding:20px}
 </style>
 </head>
 
@@ -102,7 +69,10 @@ td{
 
 <header>
   <h2>📄 Attendance PDFs</h2>
-  <button onclick="history.back()">⬅ Back</button>
+  <div>
+    <button onclick="openAdmin()">🏠 Admin Panel</button>
+    <button onclick="history.back()">⬅ Back</button>
+  </div>
 </header>
 
 <div class="filters">
@@ -144,15 +114,7 @@ td{
 <script>
 const API = "https://college-hwbb.onrender.com";
 
-/* ========= LOCAL STORAGE HELPERS ========= */
-function getLocalPDFs(){
-  return JSON.parse(localStorage.getItem("myUploadedAttendancePDFs") || "[]");
-}
-function isMyPDF(key){
-  return getLocalPDFs().includes(key);
-}
-
-/* ========= LOAD PDFs ========= */
+/* ================= LOAD PDFs ================= */
 async function loadPDFs(){
   const year = document.getElementById("year").value;
   const branch = document.getElementById("branch").value;
@@ -166,21 +128,16 @@ async function loadPDFs(){
   body.innerHTML = `<tr><td colspan="4">Loading...</td></tr>`;
 
   try{
-  const res = await fetch(
-  `${API}/api/attendance-pdfs?year=${year}&branch=${branch}`
-);
-
+    const res = await fetch(`${API}/api/attendance-pdfs?year=${year}&branch=${branch}`);
     const data = await res.json();
-
     if(!data.success) throw new Error();
-
     renderPDFs(data.pdfs);
   }catch{
     body.innerHTML = `<tr><td colspan="4" class="no-data">Failed to load PDFs</td></tr>`;
   }
 }
 
-/* ========= RENDER ========= */
+/* ================= RENDER ================= */
 function renderPDFs(list){
   const body = document.getElementById("pdfBody");
   body.innerHTML = "";
@@ -195,7 +152,6 @@ function renderPDFs(list){
     const statusText  = pdf.updated ? "Updated" : "Pending";
 
     const key = `${pdf.year}_${pdf.branch}_${pdf.subject}_${pdf.week}`;
-    const canDelete = isMyPDF(key);
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -206,34 +162,39 @@ function renderPDFs(list){
         <button class="action-btn view-btn"
           onclick="window.open('${pdf.pdfUrl}','_blank')">View</button>
 
-        ${canDelete ? `
-          <button class="action-btn delete-btn"
-            onclick="deletePDF('${pdf._id}','${key}')">Delete</button>
-        ` : ``}
+        <button class="action-btn update-btn"
+          ${pdf.updated ? "disabled" : ""}
+          onclick="markUpdated('${key}')">
+          Mark Updated
+        </button>
       </td>
     `;
     body.appendChild(tr);
   });
 }
 
-/* ========= DELETE ========= */
-async function deletePDF(id,key){
-  if(!confirm("Delete this PDF?")) return;
+/* ================= MARK UPDATED ================= */
+async function markUpdated(key){
+  if(!confirm("Mark this PDF as updated for all admins?")) return;
 
-  const res = await fetch(`${API}/api/attendance-pdf/delete/${id}`,{
-    method:"DELETE"
-  });
-  const data = await res.json();
-
-  if(data.success){
-    localStorage.setItem(
-      "myUploadedAttendancePDFs",
-      JSON.stringify(getLocalPDFs().filter(k=>k!==key))
-    );
+  try{
+    const res = await fetch(`${API}/api/admin/attendance-pdf/mark-updated`,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ key })
+    });
+    const data = await res.json();
+    if(!data.success) throw new Error(data.message);
     loadPDFs();
-  }else{
-    alert("Delete failed");
+  }catch(err){
+    alert("❌ Failed to mark updated");
   }
+}
+
+/* ================= ADMIN REDIRECT ================= */
+function openAdmin(){
+  // same token/session will be reused
+  window.location.href = "admin.html";
 }
 </script>
 
