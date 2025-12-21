@@ -6,29 +6,38 @@
 <title>Upload Attendance PDF</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
-body { font-family: 'Inter', system-ui, sans-serif; margin:0; padding:20px; background:#f8fafc; color:#1e293b; display:flex; justify-content:center; align-items:center; min-height:100vh; }
-.container { max-width:480px; width:100%; background:#fff; padding:30px; border-radius:16px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1),0 10px 10px -5px rgba(0,0,0,0.04); position:relative; overflow:hidden; }
+body { font-family: 'Inter', system-ui, sans-serif; margin:0; padding:20px; background:#f8fafc; color:#1e293b; display:flex; justify-content:center; align-items:flex-start; min-height:100vh; }
+.container { max-width:480px; width:100%; background:#fff; padding:30px; border-radius:16px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1),0 10px 10px -5px rgba(0,0,0,0.04); position:relative; overflow:hidden; margin-top:30px; }
 .loader-overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); display:none; flex-direction:column; justify-content:center; align-items:center; z-index:10; backdrop-filter: blur(2px); }
 .spinner { width:40px; height:40px; border:4px solid #f3f3f3; border-top:4px solid #2563eb; border-radius:50%; animation:spin 1s linear infinite; }
 @keyframes spin { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
 .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; }
 h2 { margin:0; font-size:1.25rem; font-weight:700; }
-.back-btn { background:#f1f5f9; color:#1e293b; padding:8px 14px; border-radius:8px; border:none; cursor:pointer; font-size:13px; }
-.back-btn:hover{background:#e2e8f0;}
+.back-btn, .my-pdfs-btn { background:#f1f5f9; color:#1e293b; padding:8px 14px; border-radius:8px; border:none; cursor:pointer; font-size:13px; margin-left:10px; }
+.back-btn:hover, .my-pdfs-btn:hover{background:#e2e8f0;}
 .form-group{margin-bottom:18px;}
 label{font-weight:600;margin-bottom:6px;display:block;font-size:14px;}
 input, select{width:100%; padding:12px; border-radius:8px; border:1px solid #cbd5e1; font-size:14px; outline:none; box-sizing:border-box; transition:border-color 0.2s, box-shadow 0.2s;}
 input:focus, select:focus{border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,0.1);}
 button.main-btn{width:100%; padding:14px; background:#2563eb; color:#fff; border:none; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer;}
 button.main-btn:hover{background:#1d4ed8;}
-button.update-btn{width:100%; padding:10px; background:#f59e0b; color:#fff; border:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; margin-top:10px;}
-button.update-btn:hover{background:#d97706;}
 button:disabled{opacity:0.6;cursor:not-allowed;}
 .note{margin-top:20px;font-size:12px;color:#64748b;padding:10px;background:#f8fafc;border-radius:8px;border-left:4px solid #fbbf24;}
 .status{margin-top:20px;text-align:center;font-size:14px;font-weight:600;min-height:20px;}
 .success{color:#16a34a;background:#f0fdf4;padding:10px;border-radius:8px;}
 .error{color:#dc2626;background:#fef2f2;padding:10px;border-radius:8px;}
-.current-pdf{margin-bottom:15px;font-size:13px; color:#1e40af; font-weight:500;}
+
+/* Modal Styles */
+.modal { display:none; position:fixed; z-index:50; left:0; top:0; width:100%; height:100%; overflow:auto; background:rgba(0,0,0,0.4); justify-content:center; align-items:center; }
+.modal-content { background:#fff; padding:20px; border-radius:12px; max-width:500px; width:90%; position:relative; }
+.modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; }
+.modal-header h3 { margin:0; font-size:1.1rem; }
+.modal-close { cursor:pointer; font-size:18px; font-weight:bold; }
+.pdf-list { max-height:300px; overflow-y:auto; margin-top:10px; }
+.pdf-item { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #e5e7eb; }
+.pdf-item span { font-size:14px; }
+.pdf-item button { padding:4px 8px; font-size:12px; border:none; border-radius:6px; background:#2563eb; color:#fff; cursor:pointer; }
+.pdf-item button:hover { background:#1d4ed8; }
 </style>
 </head>
 <body>
@@ -41,12 +50,10 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
 
     <div class="topbar">
         <h2>📄 Upload Attendance</h2>
-        <button class="back-btn" onclick="window.history.back()">⬅ Back</button>
-    </div>
-
-    <div class="current-pdf" id="currentPdf" style="display:none;">
-        <span>Previously uploaded PDF: <b id="pdfName"></b></span>
-        <button class="update-btn" onclick="updatePDF()">Update</button>
+        <div>
+            <button class="back-btn" onclick="window.history.back()">⬅ Back</button>
+            <button class="my-pdfs-btn" onclick="showMyPDFs()">My Uploaded PDFs</button>
+        </div>
     </div>
 
     <div class="form-group">
@@ -96,14 +103,25 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
     <button id="uploadBtn" class="main-btn" onclick="uploadPDF()">Upload / Replace PDF</button>
 
     <div class="note"><b>Note:</b> Only one PDF per subject per week is allowed. Uploading a new file will replace the previous one.</div>
-
     <div id="status" class="status"></div>
 </div>
 
+<!-- Modal for uploaded PDFs -->
+<div id="pdfModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>My Uploaded PDFs</h3>
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+        </div>
+        <div class="pdf-list" id="pdfList">
+            <!-- PDF items will be inserted here dynamically -->
+        </div>
+    </div>
+</div>
+
 <script>
-/* =============================== ACCESS CONTROL =============================== */
 const mentorId = localStorage.getItem("mentorId");
-const source = sessionStorage.getItem("accessSource"); // admin panel sets this as "ad"
+const source = sessionStorage.getItem("accessSource");
 
 if (!mentorId || source !== "ad") {
     document.body.innerHTML = `
@@ -115,16 +133,7 @@ if (!mentorId || source !== "ad") {
     throw new Error("Unauthorized access");
 }
 
-/* =============================== PREVIOUSLY UPLOADED PDF =============================== */
-window.addEventListener("load", () => {
-    const savedPdf = localStorage.getItem("uploadedPdf");
-    if(savedPdf){
-        document.getElementById("currentPdf").style.display = "block";
-        document.getElementById("pdfName").textContent = savedPdf;
-    }
-});
-
-/* =============================== UPLOAD FUNCTION =============================== */
+/* ================== Upload PDF ================== */
 async function uploadPDF(){
     const subject = document.getElementById("subject").value.trim();
     const year = document.getElementById("year").value;
@@ -171,15 +180,9 @@ async function uploadPDF(){
 
         if(!data.success){ throw new Error(data.message || "Upload failed"); }
 
-        // Save filename to localStorage
-        localStorage.setItem("uploadedPdf", file.name);
-        document.getElementById("currentPdf").style.display = "block";
-        document.getElementById("pdfName").textContent = file.name;
-
         status.textContent = "✅ Attendance PDF uploaded successfully";
         status.className = "status success";
         document.getElementById("pdfFile").value = "";
-
     } catch(err){
         console.error(err);
         status.textContent = "❌ Error: " + err.message;
@@ -190,9 +193,41 @@ async function uploadPDF(){
     }
 }
 
-/* =============================== UPDATE BUTTON =============================== */
-function updatePDF(){
-    document.getElementById("pdfFile").click();
+/* =============== Show Uploaded PDFs Modal ================= */
+async function showMyPDFs(){
+    const modal = document.getElementById("pdfModal");
+    const pdfList = document.getElementById("pdfList");
+    pdfList.innerHTML = `<p style="text-align:center;">Loading...</p>`;
+    modal.style.display = "flex";
+
+    try{
+        const res = await fetch(`https://college-hwbb.onrender.com/api/attendance-pdfs/teacher/${mentorId}`);
+        const data = await res.json();
+        if(!data.success){ throw new Error(data.message || "Failed to fetch PDFs"); }
+
+        if(data.pdfs.length === 0){
+            pdfList.innerHTML = `<p style="text-align:center;">No PDFs uploaded yet.</p>`;
+            return;
+        }
+
+        pdfList.innerHTML = "";
+        data.pdfs.forEach(pdf => {
+            const div = document.createElement("div");
+            div.className = "pdf-item";
+            div.innerHTML = `
+                <span>${pdf.year} ${pdf.branch} - ${pdf.subject} (Week ${pdf.week})</span>
+                <a href="${pdf.pdfUrl}" target="_blank"><button>View</button></a>
+            `;
+            pdfList.appendChild(div);
+        });
+
+    } catch(err){
+        pdfList.innerHTML = `<p style="color:red;text-align:center;">❌ Error: ${err.message}</p>`;
+    }
+}
+
+function closeModal(){
+    document.getElementById("pdfModal").style.display = "none";
 }
 </script>
 </body>
