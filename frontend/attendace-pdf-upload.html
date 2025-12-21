@@ -124,6 +124,14 @@ button:disabled{
     <option value="IT2">IT2</option>
     <option value="IT3">IT3</option>
   </select>
+<label>Week</label>
+<select id="week">
+  <option value="">Select Week</option>
+  <option value="1">Week 1</option>
+  <option value="2">Week 2</option>
+  <option value="3">Week 3</option>
+  <option value="4">Week 4</option>
+</select>
 
   <label>Attendance PDF</label>
   <input type="file" id="pdfFile" accept="application/pdf">
@@ -168,7 +176,13 @@ async function uploadPDF(){
   const file    = document.getElementById("pdfFile").files[0];
   const status  = document.getElementById("status");
   const btn     = document.getElementById("uploadBtn");
+const week = document.getElementById("week").value;
+if(!subject || !year || !branch || !week || !file){
+  status.textContent = "❌ Please fill all fields";
+  return;
+}
 
+formData.append("week", week);
   if(!subject || !year || !branch || !file){
     status.textContent = "❌ Please fill all fields";
     status.className="status error";
@@ -195,7 +209,7 @@ async function uploadPDF(){
     const res = await fetch("/api/attendance-pdf/upload",{
       method:"POST",
       headers:{
-        Authorization: `Bearer ${teacherToken}`
+        Authorization: `Bearer ${accessSource}`
       },
       body: formData
     });
@@ -221,3 +235,4 @@ async function uploadPDF(){
 
 </body>
 </html>
+ 
