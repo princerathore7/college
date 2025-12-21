@@ -192,7 +192,7 @@ async function loadPDFs(){
     const res = await fetch(
       `${API_ROOT}/api/admin/attendance-pdfs?year=${year}&branch=${branch}`,
       {
-        headers:{ Authorization:`Bearer ${adminToken}` }
+        headers:{ Authorization:`Bearer ${accessSource}` }
       }
     );
 
