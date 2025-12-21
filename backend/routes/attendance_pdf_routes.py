@@ -81,7 +81,8 @@ def view_attendance_pdfs():
     if not year or not branch:
         return jsonify(success=False, message="Missing filters"), 400
 
-    pdfs = list(collection.find({"year": year, "branch": branch}))
+    pdfs = list(db.attendance_pdfs.find({"year": year, "branch": branch}))
+
     serialized = []
     for pdf in pdfs:
         serialized.append({
