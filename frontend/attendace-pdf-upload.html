@@ -34,10 +34,12 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
 .modal-header h3 { margin:0; font-size:1.1rem; }
 .modal-close { cursor:pointer; font-size:18px; font-weight:bold; }
 .pdf-list { max-height:300px; overflow-y:auto; margin-top:10px; }
-.pdf-item { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #e5e7eb; }
-.pdf-item span { font-size:14px; }
+.pdf-item { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #e5e7eb; gap:5px; }
+.pdf-item span { font-size:14px; flex:1; }
 .pdf-item button { padding:4px 8px; font-size:12px; border:none; border-radius:6px; background:#2563eb; color:#fff; cursor:pointer; }
 .pdf-item button:hover { background:#1d4ed8; }
+.pdf-item .delete-btn { background:#dc2626; }
+.pdf-item .delete-btn:hover { background:#b91c1c; }
 </style>
 </head>
 <body>
@@ -217,12 +219,29 @@ async function showMyPDFs(){
             div.innerHTML = `
                 <span>${pdf.year} ${pdf.branch} - ${pdf.subject} (Week ${pdf.week})</span>
                 <a href="${pdf.pdfUrl}" target="_blank"><button>View</button></a>
+                <button class="delete-btn" onclick="deletePDF('${pdf._id}')">Delete</button>
             `;
             pdfList.appendChild(div);
         });
 
     } catch(err){
         pdfList.innerHTML = `<p style="color:red;text-align:center;">❌ Error: ${err.message}</p>`;
+    }
+}
+
+/* ================== Delete PDF ================== */
+async function deletePDF(pdfId){
+    if(!confirm("Are you sure you want to delete this PDF?")) return;
+    try{
+        const res = await fetch(`https://college-hwbb.onrender.com/api/attendance-pdf/delete/${pdfId}`, {
+            method: "DELETE"
+        });
+        const data = await res.json();
+        if(!data.success){ throw new Error(data.message || "Delete failed"); }
+        alert("PDF deleted successfully!");
+        showMyPDFs(); // Refresh the list
+    } catch(err){
+        alert("❌ Error: " + err.message);
     }
 }
 

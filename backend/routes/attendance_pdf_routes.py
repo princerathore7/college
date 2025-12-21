@@ -1,20 +1,19 @@
 from flask import Blueprint, request, jsonify
 from werkzeug.utils import secure_filename
-import os
 from datetime import datetime
-
+from utils import generate_id
+import cloudinary
+import cloudinary.uploader
 from db import db
 from auth.middleware import mentor_required, admin_required
+from bson import ObjectId
 
-attendance_pdf_bp = Blueprint("attendance_pdf", __name__)
+attendance_pdf_bp = Blueprint("attendance_pdf_bp", __name__)
 
-# uploads folder backend/ ke andar rahega
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-UPLOAD_DIR = os.path.join(BASE_DIR, "uploads", "attendance_pdfs")
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+ALLOWED = {"pdf"}
 
-collection = db.attendance_pdfs
-
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED
 
 # =========================
 # MENTOR → UPLOAD PDF
@@ -29,28 +28,46 @@ def upload_attendance_pdf():
         file    = request.files.get("pdf")
 
         if not all([year, branch, subject, week, file]):
-            return jsonify(success=False, message="Missing fields"), 400
+            return jsonify({"success": False, "message": "Missing fields"}), 400
 
-        # Safe filename
-        filename = secure_filename(f"{year}_{branch}_{subject}_week{week}.pdf")
-        filepath = os.path.join(UPLOAD_DIR, filename)
-        file.save(filepath)
+        if not allowed_file(file.filename):
+            return jsonify({"success": False, "message": "Only PDF files allowed"}), 400
 
-        # DB save (without mentor info)
+        # Generate unique filename
+        filename = f"{year}_{branch}_{subject}_week{week}_{generate_id()}.pdf"
+
+        # Upload to Cloudinary
+        upload_result = cloudinary.uploader.upload(
+            file,
+            resource_type="raw",  # for PDFs
+            public_id=f"attendance_pdfs/{filename}",
+            overwrite=True
+        )
+
+        pdf_url = upload_result.get("secure_url")
+        public_id = upload_result.get("public_id")
+
+        if not pdf_url:
+            return jsonify({"success": False, "message": "Upload failed"}), 500
+
+        # Save info in MongoDB
         query = {"year": year, "branch": branch, "subject": subject, "week": int(week)}
         data = {
             **query,
-            "pdfUrl": f"/uploads/attendance_pdfs/{filename}",
+            "pdfUrl": pdf_url,
+            "filename": filename,
+            "cloudinary_id": public_id,
             "uploadedAt": datetime.utcnow(),
             "updated": False
         }
 
-        collection.update_one(query, {"$set": data}, upsert=True)
-        return jsonify(success=True, message="Attendance PDF uploaded")
-    
-    except Exception as e:
-        return jsonify(success=False, message=str(e)), 500
+        db.attendance_pdfs.update_one(query, {"$set": data}, upsert=True)
 
+        return jsonify({"success": True, "message": "Attendance PDF uploaded", "pdfUrl": pdf_url})
+
+    except Exception as e:
+        print("Error uploading PDF:", e)
+        return jsonify({"success": False, "message": str(e)}), 500
 
 # =========================
 # ADMIN → VIEW PDFs
@@ -58,22 +75,27 @@ def upload_attendance_pdf():
 @attendance_pdf_bp.route("/api/admin/attendance-pdfs", methods=["GET"])
 @admin_required
 def view_attendance_pdfs():
+    try:
+        year   = request.args.get("year")
+        branch = request.args.get("branch")
 
-    year   = request.args.get("year")
-    branch = request.args.get("branch")
+        if not year or not branch:
+            return jsonify(success=False, message="Missing filters"), 400
 
-    if not year or not branch:
-        return jsonify(success=False, message="Missing filters"), 400
+        pdfs = list(
+            db.attendance_pdfs.find(
+                {"year": year, "branch": branch},
+                {"_id": 1, "year":1, "branch":1, "subject":1, "week":1, "pdfUrl":1, "updated":1}
+            ).sort("week", 1)
+        )
 
-    pdfs = list(
-        collection.find(
-            {"year": year, "branch": branch},
-            {"_id": 0}
-        ).sort("week", 1)
-    )
+        for p in pdfs:
+            p["_id"] = str(p["_id"])
 
-    return jsonify(success=True, pdfs=pdfs)
-
+        return jsonify(success=True, pdfs=pdfs)
+    except Exception as e:
+        print("Error fetching PDFs:", e)
+        return jsonify(success=False, message=str(e)), 500
 
 # =========================
 # ADMIN → MARK UPDATED
@@ -81,21 +103,46 @@ def view_attendance_pdfs():
 @attendance_pdf_bp.route("/api/admin/attendance-pdf/mark-updated", methods=["POST"])
 @admin_required
 def mark_attendance_updated():
+    try:
+        key = request.json.get("key")
+        if not key:
+            return jsonify(success=False, message="Key required"), 400
 
-    key = request.json.get("key")
-    if not key:
-        return jsonify(success=False, message="Key required"), 400
+        year, branch, subject, week = key.split("_")
 
-    year, branch, subject, week = key.split("_")
+        db.attendance_pdfs.update_one(
+            {"year": year, "branch": branch, "subject": subject, "week": int(week)},
+            {"$set": {"updated": True}}
+        )
 
-    collection.update_one(
-        {
-            "year": year,
-            "branch": branch,
-            "subject": subject,
-            "week": int(week)
-        },
-        {"$set": {"updated": True}}
-    )
+        return jsonify(success=True, message="Marked as updated")
+    except Exception as e:
+        print("Error marking updated:", e)
+        return jsonify(success=False, message=str(e)), 500
 
-    return jsonify(success=True, message="Marked as updated")
+# =========================
+# DELETE PDF
+# =========================
+@attendance_pdf_bp.route("/api/attendance-pdf/delete/<pdf_id>", methods=["DELETE"])
+def delete_attendance_pdf(pdf_id):
+    try:
+        if not ObjectId.is_valid(pdf_id):
+            return jsonify({"success": False, "message": "Invalid PDF ID"}), 400
+
+        pdf = db.attendance_pdfs.find_one({"_id": ObjectId(pdf_id)})
+        if not pdf:
+            return jsonify({"success": False, "message": "PDF not found"}), 404
+
+        # Delete PDF from Cloudinary
+        cloud_id = pdf.get("cloudinary_id")
+        if cloud_id:
+            cloudinary.uploader.destroy(cloud_id, resource_type="raw")
+
+        # Delete record from MongoDB
+        db.attendance_pdfs.delete_one({"_id": ObjectId(pdf_id)})
+
+        return jsonify({"success": True, "message": "PDF deleted successfully"})
+
+    except Exception as e:
+        print("Error deleting PDF:", e)
+        return jsonify({"success": False, "message": str(e)}), 500

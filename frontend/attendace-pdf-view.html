@@ -83,10 +83,12 @@ td{
   border:none;
   font-size:13px;
   cursor:pointer;
+  margin:2px;
 }
 
 .view-btn{background:#2563eb;color:#fff}
 .mark-btn{background:#16a34a;color:#fff}
+.delete-btn{background:#dc2626;color:#fff}
 
 .no-data{
   color:#666;
@@ -100,7 +102,7 @@ td{
 <div class="container">
 
 <header>
-  <h2>📄 Attendance PDF Viewer (Admin)</h2>
+  <h2>📄 Attendance PDFs (Admin)</h2>
   <button onclick="history.back()">⬅ Back</button>
 </header>
 
@@ -129,51 +131,20 @@ td{
 <thead>
 <tr>
   <th>Subject</th>
-  <th>Teacher</th>
   <th>Week</th>
   <th>Status</th>
   <th>Actions</th>
 </tr>
 </thead>
 <tbody id="pdfBody">
-<tr><td colspan="5" class="no-data">Select Year & Branch</td></tr>
+<tr><td colspan="4" class="no-data">Select Year & Branch</td></tr>
 </tbody>
 </table>
 
 </div>
 
 <script>
-/* ================= AUTH ================= */
-/* ===============================
-   ACCESS CONTROL — ADMIN PAGES
-================================ */
-
-const mentorId = localStorage.getItem("mentorId");
-const source   = sessionStorage.getItem("accessSource");
-
-// allowed sources
-const ALLOWED_SOURCES = ["ad", "admin"];
-
-if(!mentorId || !ALLOWED_SOURCES.includes(source)){
-  document.body.innerHTML = `
-    <h2 style="text-align:center;margin-top:20vh;color:red">
-      ❌ Access Denied <br>
-      Please open this page via Administration Panel
-    </h2>
-  `;
-  throw new Error("Unauthorized access");
-}
-/* ================= CONFIG ================= */
 const API_ROOT = "https://college-hwbb.onrender.com";
-const UPDATED_KEY = "attendance_pdf_updated"; // local storage
-
-function loadUpdated(){
-  return JSON.parse(localStorage.getItem(UPDATED_KEY)||"{}");
-}
-function saveUpdated(d){
-  localStorage.setItem(UPDATED_KEY,JSON.stringify(d));
-}
-let updatedMap = loadUpdated();
 
 /* ================= LOAD PDFs ================= */
 async function loadPDFs(){
@@ -186,86 +157,92 @@ async function loadPDFs(){
     return;
   }
 
-  body.innerHTML = `<tr><td colspan="5">Loading...</td></tr>`;
+  body.innerHTML = `<tr><td colspan="4">Loading...</td></tr>`;
 
   try{
-    const res = await fetch(
-      `${API_ROOT}/api/admin/attendance-pdfs?year=${year}&branch=${branch}`,
-      {
-        headers:{ Authorization:`Bearer ${accessSource}` }
-      }
-    );
-
+    const res = await fetch(`${API_ROOT}/api/admin/attendance-pdfs?year=${year}&branch=${branch}`);
     const data = await res.json();
-    if(!data.success) throw new Error("Failed");
+
+    if(!data.success) throw new Error(data.message || "Failed");
 
     renderPDFs(data.pdfs);
 
   }catch(err){
     console.error(err);
-    body.innerHTML = `<tr><td colspan="5" class="no-data">Failed to load PDFs</td></tr>`;
+    body.innerHTML = `<tr><td colspan="4" class="no-data">Failed to load PDFs</td></tr>`;
   }
 }
 
-/* ================= RENDER ================= */
+/* ================= RENDER PDFs ================= */
 function renderPDFs(list){
   const body = document.getElementById("pdfBody");
   body.innerHTML = "";
 
   if(!list || !list.length){
-    body.innerHTML = `<tr><td colspan="5" class="no-data">No PDFs uploaded</td></tr>`;
+    body.innerHTML = `<tr><td colspan="4" class="no-data">No PDFs uploaded</td></tr>`;
     return;
   }
 
-  list.forEach(p=>{
-    const key = `${p.year}_${p.branch}_${p.subject}_${p.week}`;
-    const isUpdated = updatedMap[key];
+  list.forEach(pdf=>{
+    const statusClass = pdf.updated ? "updated" : "pending";
+    const statusText = pdf.updated ? "Updated" : "Pending";
 
-    body.innerHTML += `
-      <tr>
-        <td>${p.subject}</td>
-        <td>${p.teacherName}</td>
-        <td>${p.week}</td>
-        <td>
-          <span class="badge ${isUpdated?"updated":"pending"}">
-            ${isUpdated?"Updated":"Pending"}
-          </span>
-        </td>
-        <td>
-          <button class="action-btn view-btn"
-            onclick="window.open('${p.pdfUrl}','_blank')">
-            View PDF
-          </button>
-          ${!isUpdated ? `
-            <button class="action-btn mark-btn"
-              onclick="markUpdated('${key}')">
-              Mark Updated
-            </button>` : ""}
-        </td>
-      </tr>
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${pdf.subject}</td>
+      <td>${pdf.week}</td>
+      <td><span class="badge ${statusClass}">${statusText}</span></td>
+      <td>
+        <button class="action-btn view-btn" onclick="window.open('${pdf.pdfUrl}','_blank')">View</button>
+        ${!pdf.updated ? `<button class="action-btn mark-btn" onclick="markUpdated('${pdf.year}_${pdf.branch}_${pdf.subject}_${pdf.week}')">Mark Updated</button>` : ""}
+        <button class="action-btn delete-btn" onclick="deletePDF('${pdf._id}')">Delete</button>
+      </td>
     `;
+    body.appendChild(tr);
   });
 }
 
 /* ================= MARK UPDATED ================= */
-function markUpdated(key){
+async function markUpdated(key){
   if(!confirm("Mark this attendance as updated?")) return;
 
-  updatedMap[key] = true;
-  saveUpdated(updatedMap);
-  loadPDFs();
+  try{
+    const res = await fetch(`${API_ROOT}/api/admin/attendance-pdf/mark-updated`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ key })
+    });
+    const data = await res.json();
+    if(data.success){
+      loadPDFs();
+    }else{
+      alert("Failed to mark updated");
+    }
+  }catch(err){
+    console.error(err);
+    alert("Error marking updated");
+  }
+}
 
-  /*
-  // 🔜 FUTURE (GLOBAL BACKEND MARK)
-  fetch("/api/admin/attendance-pdf/mark-updated",{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      Authorization:`Bearer ${adminToken}`
-    },
-    body:JSON.stringify({ key })
-  });
-  */
+/* ================= DELETE PDF ================= */
+async function deletePDF(id){
+  if(!confirm("Are you sure you want to delete this PDF?")) return;
+
+  try{
+    const res = await fetch(`${API_ROOT}/api/attendance-pdf/delete/${id}`,{
+      method:"DELETE"
+    });
+    const data = await res.json();
+    if(data.success){
+      alert("PDF deleted successfully");
+      loadPDFs();
+    }else{
+      alert("Failed to delete PDF: " + data.message);
+    }
+  }catch(err){
+    console.error(err);
+    alert("Error deleting PDF");
+  }
 }
 </script>
 
