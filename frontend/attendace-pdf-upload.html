@@ -21,11 +21,14 @@ input, select{width:100%; padding:12px; border-radius:8px; border:1px solid #cbd
 input:focus, select:focus{border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,0.1);}
 button.main-btn{width:100%; padding:14px; background:#2563eb; color:#fff; border:none; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer;}
 button.main-btn:hover{background:#1d4ed8;}
+button.update-btn{width:100%; padding:10px; background:#f59e0b; color:#fff; border:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; margin-top:10px;}
+button.update-btn:hover{background:#d97706;}
 button:disabled{opacity:0.6;cursor:not-allowed;}
 .note{margin-top:20px;font-size:12px;color:#64748b;padding:10px;background:#f8fafc;border-radius:8px;border-left:4px solid #fbbf24;}
 .status{margin-top:20px;text-align:center;font-size:14px;font-weight:600;min-height:20px;}
 .success{color:#16a34a;background:#f0fdf4;padding:10px;border-radius:8px;}
 .error{color:#dc2626;background:#fef2f2;padding:10px;border-radius:8px;}
+.current-pdf{margin-bottom:15px;font-size:13px; color:#1e40af; font-weight:500;}
 </style>
 </head>
 <body>
@@ -39,6 +42,11 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
     <div class="topbar">
         <h2>📄 Upload Attendance</h2>
         <button class="back-btn" onclick="window.history.back()">⬅ Back</button>
+    </div>
+
+    <div class="current-pdf" id="currentPdf" style="display:none;">
+        <span>Previously uploaded PDF: <b id="pdfName"></b></span>
+        <button class="update-btn" onclick="updatePDF()">Update</button>
     </div>
 
     <div class="form-group">
@@ -107,6 +115,15 @@ if (!mentorId || source !== "ad") {
     throw new Error("Unauthorized access");
 }
 
+/* =============================== PREVIOUSLY UPLOADED PDF =============================== */
+window.addEventListener("load", () => {
+    const savedPdf = localStorage.getItem("uploadedPdf");
+    if(savedPdf){
+        document.getElementById("currentPdf").style.display = "block";
+        document.getElementById("pdfName").textContent = savedPdf;
+    }
+});
+
 /* =============================== UPLOAD FUNCTION =============================== */
 async function uploadPDF(){
     const subject = document.getElementById("subject").value.trim();
@@ -144,17 +161,20 @@ async function uploadPDF(){
     formData.append("pdf", file);
 
     try{
-        // Use full URL to avoid fetch issues
-        const res = await fetch("https://college-hwbb.onrender.com//api/attendance-pdf/upload", {
+        const res = await fetch("https://college-hwbb.onrender.com/api/attendance-pdf/upload", {
             method: "POST",
             body: formData
         });
 
-        // Always attempt to parse JSON
         let data;
         try{ data = await res.json(); } catch(e){ throw new Error("Invalid server response"); }
 
         if(!data.success){ throw new Error(data.message || "Upload failed"); }
+
+        // Save filename to localStorage
+        localStorage.setItem("uploadedPdf", file.name);
+        document.getElementById("currentPdf").style.display = "block";
+        document.getElementById("pdfName").textContent = file.name;
 
         status.textContent = "✅ Attendance PDF uploaded successfully";
         status.className = "status success";
@@ -168,6 +188,11 @@ async function uploadPDF(){
         btn.disabled = false;
         loader.style.display = "none";
     }
+}
+
+/* =============================== UPDATE BUTTON =============================== */
+function updatePDF(){
+    document.getElementById("pdfFile").click();
 }
 </script>
 </body>
