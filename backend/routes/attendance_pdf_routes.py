@@ -101,7 +101,6 @@ def view_attendance_pdfs():
 # ADMIN → MARK UPDATED
 # =========================
 @attendance_pdf_bp.route("/api/admin/attendance-pdf/mark-updated", methods=["POST"])
-@admin_required
 def mark_attendance_updated():
     try:
         key = request.json.get("key")
