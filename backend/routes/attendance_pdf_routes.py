@@ -3,7 +3,7 @@ from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
 
-from config import db
+from backend.db import db
 from auth.middleware import mentor_required, admin_required
 
 attendance_pdf_bp = Blueprint("attendance_pdf", __name__)
