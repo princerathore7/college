@@ -20,8 +20,7 @@ collection = db.attendance_pdfs
 # MENTOR → UPLOAD PDF
 # =========================
 @attendance_pdf_bp.route("/api/attendance-pdf/upload", methods=["POST"])
-@mentor_required
-def upload_attendance_pdf(current_user):
+def upload_attendance_pdf():
     try:
         year    = request.form.get("year")
         branch  = request.form.get("branch")
@@ -32,15 +31,15 @@ def upload_attendance_pdf(current_user):
         if not all([year, branch, subject, week, file]):
             return jsonify(success=False, message="Missing fields"), 400
 
+        # Safe filename
         filename = secure_filename(f"{year}_{branch}_{subject}_week{week}.pdf")
         filepath = os.path.join(UPLOAD_DIR, filename)
         file.save(filepath)
 
+        # DB save (without mentor info)
         query = {"year": year, "branch": branch, "subject": subject, "week": int(week)}
         data = {
             **query,
-            "teacherId": current_user["mentorId"],
-            "teacherName": current_user["name"],
             "pdfUrl": f"/uploads/attendance_pdfs/{filename}",
             "uploadedAt": datetime.utcnow(),
             "updated": False
