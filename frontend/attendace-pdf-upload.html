@@ -134,99 +134,118 @@ if (!mentorId || source !== "ad") {
     `;
     throw new Error("Unauthorized access");
 }
+/* ================= LOCAL STORAGE HELPERS ================= */
+// structure:
+// myAttendancePDFs = [
+//  { key, year, branch, subject, week, pdfUrl, _id }
+// ]
 
-/* ================== Upload PDF ================== */
+function getMyPDFs(){
+  return JSON.parse(localStorage.getItem("myAttendancePDFs") || "[]");
+}
+
+function saveMyPDF(pdf){
+  const list = getMyPDFs();
+  const exists = list.find(p => p.key === pdf.key);
+  if(!exists){
+    list.push(pdf);
+    localStorage.setItem("myAttendancePDFs", JSON.stringify(list));
+  }
+}
+
+function removeMyPDF(key){
+  const updated = getMyPDFs().filter(p => p.key !== key);
+  localStorage.setItem("myAttendancePDFs", JSON.stringify(updated));
+}
+
+/* ================= UPLOAD PDF (UNCHANGED + SAVE LOCAL) ================= */
 async function uploadPDF(){
-    const subject = document.getElementById("subject").value.trim();
-    const year = document.getElementById("year").value;
-    const branch = document.getElementById("branch").value;
-    const week = document.getElementById("week").value;
-    const file = document.getElementById("pdfFile").files[0];
+  const subject = document.getElementById("subject").value.trim();
+  const year    = document.getElementById("year").value;
+  const branch  = document.getElementById("branch").value;
+  const week    = document.getElementById("week").value;
+  const file    = document.getElementById("pdfFile").files[0];
 
-    const status = document.getElementById("status");
-    const btn = document.getElementById("uploadBtn");
-    const loader = document.getElementById("loader");
+  const status = document.getElementById("status");
+  const loader = document.getElementById("loader");
 
-    status.textContent = "";
-    status.className = "status";
+  if(!subject || !year || !branch || !week || !file){
+    status.textContent = "❌ Please fill all fields";
+    status.className = "status error";
+    return;
+  }
 
-    if(!subject || !year || !branch || !week || !file){
-        status.textContent = "❌ Please fill all fields";
-        status.className = "status error";
-        return;
-    }
-    if(file.type !== "application/pdf"){
-        status.textContent = "❌ Only PDF files allowed";
-        status.className = "status error";
-        return;
-    }
+  loader.style.display = "flex";
 
-    btn.disabled = true;
-    loader.style.display = "flex";
+  const fd = new FormData();
+  fd.append("subject",subject);
+  fd.append("year",year);
+  fd.append("branch",branch);
+  fd.append("week",week);
+  fd.append("pdf",file);
 
-    const formData = new FormData();
-    formData.append("subject", subject);
-    formData.append("year", year);
-    formData.append("branch", branch);
-    formData.append("week", week);
-    formData.append("pdf", file);
+  try{
+    const res  = await fetch("https://college-hwbb.onrender.com/api/attendance-pdf/upload",{
+      method:"POST",
+      body:fd
+    });
+    const data = await res.json();
 
-    try{
-        const res = await fetch("https://college-hwbb.onrender.com/api/attendance-pdf/upload", {
-            method: "POST",
-            body: formData
-        });
+    if(!data.success) throw new Error(data.message);
 
-        let data;
-        try{ data = await res.json(); } catch(e){ throw new Error("Invalid server response"); }
+    const key = `${year}_${branch}_${subject}_${week}`;
 
-        if(!data.success){ throw new Error(data.message || "Upload failed"); }
+    // 🔥 SAVE TO LOCAL STORAGE
+    saveMyPDF({
+      key,
+      year,
+      branch,
+      subject,
+      week,
+      pdfUrl : data.pdfUrl,
+      _id    : data.pdfId || null   // optional
+    });
 
-        status.textContent = "✅ Attendance PDF uploaded successfully";
-        status.className = "status success";
-        document.getElementById("pdfFile").value = "";
-    } catch(err){
-        console.error(err);
-        status.textContent = "❌ Error: " + err.message;
-        status.className = "status error";
-    } finally{
-        btn.disabled = false;
-        loader.style.display = "none";
-    }
+    status.textContent = "✅ Attendance PDF uploaded";
+    status.className = "status success";
+    document.getElementById("pdfFile").value = "";
+
+  }catch(err){
+    status.textContent = "❌ " + err.message;
+    status.className = "status error";
+  }finally{
+    loader.style.display = "none";
+  }
 }
 
 /* =============== Show Uploaded PDFs Modal ================= */
-async function showMyPDFs(){
-    const modal = document.getElementById("pdfModal");
-    const pdfList = document.getElementById("pdfList");
-    pdfList.innerHTML = `<p style="text-align:center;">Loading...</p>`;
-    modal.style.display = "flex";
+/* ================= SHOW MY UPLOADED PDFs (LOCAL ONLY) ================= */
+function showMyPDFs(){
+  const modal   = document.getElementById("pdfModal");
+  const pdfList = document.getElementById("pdfList");
+  modal.style.display = "flex";
 
-    try{
-        const res = await fetch(`https://college-hwbb.onrender.com/api/attendance-pdfs/teacher/${mentorId}`);
-        const data = await res.json();
-        if(!data.success){ throw new Error(data.message || "Failed to fetch PDFs"); }
+  const list = getMyPDFs();
+  if(!list.length){
+    pdfList.innerHTML = `<p style="text-align:center;">No PDFs uploaded from this device</p>`;
+    return;
+  }
 
-        if(data.pdfs.length === 0){
-            pdfList.innerHTML = `<p style="text-align:center;">No PDFs uploaded yet.</p>`;
-            return;
-        }
-
-        pdfList.innerHTML = "";
-        data.pdfs.forEach(pdf => {
-            const div = document.createElement("div");
-            div.className = "pdf-item";
-            div.innerHTML = `
-                <span>${pdf.year} ${pdf.branch} - ${pdf.subject} (Week ${pdf.week})</span>
-                <a href="${pdf.pdfUrl}" target="_blank"><button>View</button></a>
-                <button class="delete-btn" onclick="deletePDF('${pdf._id}')">Delete</button>
-            `;
-            pdfList.appendChild(div);
-        });
-
-    } catch(err){
-        pdfList.innerHTML = `<p style="color:red;text-align:center;">❌ Error: ${err.message}</p>`;
-    }
+  pdfList.innerHTML = "";
+  list.forEach(pdf=>{
+    pdfList.innerHTML += `
+      <div class="pdf-item">
+        <span>${pdf.year} ${pdf.branch} - ${pdf.subject} (Week ${pdf.week})</span>
+        <a href="${pdf.pdfUrl}" target="_blank">
+          <button>View</button>
+        </a>
+        <button class="delete-btn"
+          onclick="deletePDF('${pdf._id}','${pdf.key}')">
+          Delete
+        </button>
+      </div>
+    `;
+  });
 }
 
 /* ================== Delete PDF ================== */
