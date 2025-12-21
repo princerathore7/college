@@ -113,6 +113,18 @@ td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:center}
 
 <script>
 const API = "https://college-hwbb.onrender.com";
+const mentorId = localStorage.getItem("mentorId");
+const source = sessionStorage.getItem("accessSource");
+
+if (!mentorId || source !== "ad") {
+    document.body.innerHTML = `
+        <h2 style="text-align:center;margin-top:20vh;color:red">
+          ❌ Access Denied <br>
+          Please open this page from Administration Panel only
+        </h2>
+    `;
+    throw new Error("Unauthorized access");
+}
 
 /* ================= LOAD PDFs ================= */
 async function loadPDFs(){
