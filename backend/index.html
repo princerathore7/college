@@ -12,52 +12,44 @@
   --dark-blue:#2E3192;
   --light-blue:#00AEEF;
   --red:#ED1C24;
+  --bg:#FFFFFF;
 }
 
 body{
   margin:0;
+  min-height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
-  height:100vh;
-  background:#fff;
+  background:var(--bg);
   font-family:'Open Sans',sans-serif;
   overflow:hidden;
 }
 
 .container{
-  position:relative;
-  width:300px;
   text-align:center;
+  position:relative;
 }
 
 #acropolis-logo{
   width:300px;
-  display:block;
 }
 
 .path-hidden{
   stroke-dasharray:1000;
   stroke-dashoffset:1000;
   opacity:0;
-  transition:opacity 0.8s ease;
 }
 
-/* fade out ellipses */
-.fade-out{
-  opacity:0 !important;
-}
-
-/* LOGO IMAGE */
+/* Final logo */
 #final-logo{
+  width:150px;
   position:absolute;
-  top:50%;
   left:50%;
+  top:50%;
   transform:translate(-50%,-50%) scale(0.9);
-  width:140px;
   opacity:0;
   transition:opacity 1s ease, transform 1s ease;
-  pointer-events:none;
 }
 
 #final-logo.show{
@@ -67,38 +59,42 @@ body{
 
 /* Text */
 .text-container{
-  margin-top:20px;
   opacity:0;
   transform:translateY(20px);
-  transition:all 1s ease;
+  transition:1s ease;
 }
 
-.text-container.visible{
+.visible{
   opacity:1;
   transform:translateY(0);
 }
 
 .title{
-  font-size:48px;
+  font-size:64px;
   font-weight:800;
   color:var(--dark-blue);
   margin:0;
+  letter-spacing:2px;
 }
 
 .subtitle{
-  font-size:22px;
+  font-size:32px;
   font-weight:300;
   color:#777;
   margin-top:-5px;
 }
+
+/* Pillar / gear colors */
+#pillar-base,#pillar-capital{fill:var(--dark-blue);}
+.pillar-flute{fill:white;}
+#gear-outer,.gear-tooth{fill:var(--red);}
+#gear-center{fill:white;}
 </style>
 </head>
 
 <body>
 
 <div class="container">
-
-<img src="logop.png" id="final-logo" alt="Acropolis Logo">
 
 <svg id="acropolis-logo" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
 
@@ -114,7 +110,25 @@ body{
     fill="none" stroke="var(--light-blue)" stroke-width="8"
     transform="rotate(70 250 200)" class="path-hidden"/>
 
+  <!-- <g id="pillar" class="path-hidden" style="opacity:0">
+    <rect id="pillar-base" x="220" y="220" width="60" height="80"/>
+    <rect class="pillar-flute" x="225" y="230" width="5" height="60"/>
+    <rect class="pillar-flute" x="238" y="230" width="5" height="60"/>
+    <rect class="pillar-flute" x="251" y="230" width="5" height="60"/>
+    <rect class="pillar-flute" x="264" y="230" width="5" height="60"/>
+    <path id="pillar-capital"
+      d="M180 160 C180 120 220 120 220 120 L280 120
+         C320 120 320 160 320 160 L320 220 L180 220 Z"/>
+  </g>
+
+  <g id="gear" class="path-hidden" style="opacity:0">
+    <circle id="gear-outer" cx="310" cy="160" r="28"/>
+    <circle id="gear-center" cx="310" cy="160" r="10"/>
+  </g> -->
+
 </svg>
+
+<img src="logop.png" id="final-logo" alt="Acropolis Logo">
 
 <div class="text-container" id="brand-text">
   <h1 class="title">ACROPOLIS</h1>
@@ -124,37 +138,53 @@ body{
 </div>
 
 <script>
-const animationData=[
- {id:'orbit-1',delay:200,duration:1200},
- {id:'orbit-2',delay:500,duration:1200},
- {id:'orbit-3',delay:800,duration:1200}
+const animationData = [
+  {id:'orbit-1',delay:200,duration:1200},
+  {id:'orbit-2',delay:500,duration:1200},
+  {id:'orbit-3',delay:800,duration:1200},
+  {id:'pillar',delay:1500,duration:800,type:'fade'},
+  {id:'gear',delay:2000,duration:600,type:'fade'},
+  {id:'brand-text',delay:2500,duration:1000,type:'class'}
 ];
 
 function startAnimation(){
- animationData.forEach(item=>{
+  animationData.forEach(item=>{
+    setTimeout(()=>{
+      const el=document.getElementById(item.id);
+      if(!el)return;
+
+      if(item.type==='fade'){
+        el.style.transition=`opacity ${item.duration}ms ease`;
+        el.style.opacity='1';
+      }
+      else if(item.type==='class'){
+        el.classList.add('visible');
+      }
+      else{
+        el.style.opacity='1';
+        el.style.transition=`stroke-dashoffset ${item.duration}ms ease`;
+        el.style.strokeDashoffset='0';
+
+        // AFTER 3RD ELLIPSE
+        if(item.id==='orbit-3'){
+          setTimeout(()=>{
+            document.querySelectorAll('#orbit-1,#orbit-2,#orbit-3')
+              .forEach(o=>{
+                o.style.transition='opacity 600ms ease';
+                o.style.opacity='0';
+              });
+
+            document.getElementById('final-logo').classList.add('show');
+          },item.duration);
+        }
+      }
+    },item.delay);
+  });
+
+  // REDIRECT AFTER COMPLETE
   setTimeout(()=>{
-   const el=document.getElementById(item.id);
-   el.style.opacity='1';
-   el.style.transition=`stroke-dashoffset ${item.duration}ms ease`;
-   el.style.strokeDashoffset='0';
-
-   if(item.id==='orbit-3'){
-     setTimeout(()=>{
-       // fade out ellipses
-       document.querySelectorAll('ellipse').forEach(e=>{
-         e.classList.add('fade-out');
-       });
-
-       // fade in logo
-       document.getElementById('final-logo').classList.add('show');
-
-       // show text
-       document.getElementById('brand-text').classList.add('visible');
-
-     },item.duration);
-   }
-  },item.delay);
- });
+    window.location.href='login.html';
+  },5000);
 }
 
 window.onload=startAnimation;
