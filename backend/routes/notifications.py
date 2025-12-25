@@ -309,3 +309,30 @@ def subscribe():
         return jsonify({"success": True, "message": "Subscription saved"})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+    # 📥 Fetch notifications for a student
+@notifications_bp.route('/api/notifications', methods=['GET'])
+def get_notifications():
+    enrollment = request.args.get('enrollment')
+    student_class = request.args.get('class')
+
+    if not enrollment:
+        return jsonify({"success": False, "message": "Enrollment required"}), 400
+
+    query = {
+        "$or": [
+            {"target_type": "global"},
+            {"target_type": "class", "target": student_class},
+            {"target_type": "enrollment", "target": {"$in": [enrollment]}}
+        ]
+    }
+
+    notifications = list(
+        notifications_col.find(query)
+        .sort("timestamp", -1)
+        .limit(100)
+    )
+
+    for n in notifications:
+        n["_id"] = str(n["_id"])
+
+    return jsonify({"success": True, "notifications": notifications})

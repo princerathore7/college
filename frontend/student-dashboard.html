@@ -403,7 +403,18 @@ input:checked + .slider {
 input:checked + .slider:before {
   transform: translateX(24px);
 }
-
+.notif-btn{
+  background:#2563eb;
+  color:white;
+  border:none;
+  padding:10px 16px;
+  border-radius:6px;
+  cursor:pointer;
+  font-size:14px;
+}
+.notif-btn:hover{
+  background:#1e40af;
+}
 </style>
 </head>
 <body>
@@ -415,7 +426,10 @@ input:checked + .slider:before {
     <img src="logo.jpg" alt="logo">
     <h1>Acropolis — Student</h1>
   </div>
-
+<!-- 🔔 Notifications Button -->
+<button id="openNotifications" class="notif-btn">
+  🔔 Notifications
+</button>
   <div class="top-actions">
     <div id="mentorIdDisplay" style="color:#fff;margin-right:8px">Student</div>
     <!-- <button class="action-btn" id="logoutBtn">Logout</button> -->
@@ -1084,7 +1098,26 @@ function logout() {
 localStorage.removeItem("admin_students");
 
 refreshDashboard(); // agar force refresh chahiye
+document.getElementById("openNotifications").addEventListener("click", () => {
 
+  // 👇 ye values dashboard me already hoti hain
+  const enrollment   = localStorage.getItem("enrollment");
+  const studentClass = localStorage.getItem("studentClass");
+  const roll         = localStorage.getItem("roll");
+
+  if(!enrollment || !studentClass){
+    alert("Student info missing. Please login again.");
+    return;
+  }
+
+  // extra safety ke liye dobara store kar rahe hain
+  localStorage.setItem("enrollment", enrollment);
+  localStorage.setItem("studentClass", studentClass);
+  localStorage.setItem("roll", roll);
+
+  // 🚀 redirect
+  window.location.href = "notification.html";
+});
 </script>
 </body>
 </html>
