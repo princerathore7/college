@@ -3,297 +3,272 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Student Signup - Acropolis College</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<title>Student ID Creator - Acropolis</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 <style>
-  :root{
-    --blue:#2f80ed;
-    --blue-soft:#eaf3ff;
-    --blue-dark:#1c5fd4;
-    --text-dark:#1f2937;
-    --text-muted:#6b7280;
-    --border:#e5e7eb;
-    --card:#ffffff;
-    --bg:#f4f8ff;
-  }
-
-  *{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-  }
-
-  body{
-    font-family:'Inter','Poppins',system-ui,sans-serif;
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:linear-gradient(180deg,#f8fbff,#eef4ff);
-    color:var(--text-dark);
-  }
-
-  .signup-container{
-    width:420px;
-    background:var(--card);
-    padding:34px 30px;
-    border-radius:20px;
-    text-align:center;
-    border:1px solid var(--border);
-    box-shadow:0 30px 60px rgba(47,128,237,.18);
-  }
-
-  h1{
-    font-size:1.7rem;
-    font-weight:700;
-    color:var(--blue);
-    margin-bottom:6px;
-  }
-
-  p.subtitle{
-    font-size:14px;
-    color:var(--text-muted);
-    margin-bottom:22px;
-  }
-
-  form{
-    display:flex;
-    flex-direction:column;
-    gap:16px;
-  }
-
-  input,
-  select{
-    padding:14px 16px;
-    border-radius:14px;
-    border:1.5px solid var(--border);
-    font-size:15px;
-    background:#fff;
-    transition:.25s ease;
-  }
-
-  input::placeholder{
-    color:#9ca3af;
-  }
-
-  input:focus,
-  select:focus{
-    outline:none;
-    border-color:var(--blue);
-    box-shadow:0 0 0 4px rgba(47,128,237,.15);
-  }
-
-  button{
-    margin-top:8px;
-    padding:14px;
-    border-radius:14px;
-    border:none;
-    background:linear-gradient(135deg,var(--blue),var(--blue-dark));
-    color:#fff;
-    font-size:16px;
-    font-weight:700;
-    cursor:pointer;
-    letter-spacing:.3px;
-    transition:.3s ease;
-  }
-
-  button:hover{
-    transform:translateY(-2px);
-    box-shadow:0 16px 32px rgba(47,128,237,.35);
-  }
-
-  .login-link{
-    margin-top:18px;
-    font-size:14px;
-    color:var(--text-muted);
-  }
-
-  .login-link a{
-    color:var(--blue);
-    font-weight:600;
-    text-decoration:none;
-  }
-
-  .login-link a:hover{
-    text-decoration:underline;
-  }
-  .college-logo{
-  width:110px;
-  height:auto;
-  margin-bottom:14px;
-  display:block;
-  margin-left:auto;
-  margin-right:auto;
+:root {
+  --primary-color: #31c2cf;
+  --text-gray: #777;
+  --input-bg: #e8f0fe;
 }
 
-</style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
+body {
+  font-family: 'Poppins', sans-serif;
+  height: 100vh;
+  display: flex;
+  overflow: hidden;
+  background-color: #f4f7f6;
+}
+
+.main-wrapper { display: flex; width: 100%; height: 100%; }
+
+/* --- Left Side: Image Slider --- */
+.image-section {
+  flex: 1.2;
+  position: relative;
+  background-color: #000;
+}
+
+.image-section img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  position: absolute;
+  transition: opacity 1s ease-in-out;
+  opacity: 0;
+}
+
+.image-section img.active { opacity: 1; }
+
+.logo-overlay {
+  position: absolute; top: 30px; left: 30px; z-index: 10;
+  color: white; font-weight: bold; font-size: 24px; letter-spacing: 2px;
+}
+
+/* --- Right Side: Form --- */
+.login-section {
+  flex: 1;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 8%;
+  overflow-y: auto;
+}
+
+.login-header h1 { font-size: 1.8rem; font-weight: 300; color: #555; text-transform: uppercase; }
+.login-header p { color: var(--text-gray); font-size: 0.9rem; margin-bottom: 30px; }
+
+.form-group { margin-bottom: 15px; }
+
+input, select {
+  width: 100%; padding: 12px;
+  border: none; background-color: var(--input-bg);
+  border-bottom: 2px solid transparent;
+  font-size: 0.95rem; outline: none; transition: 0.3s;
+}
+
+input:focus, select:focus { border-bottom-color: var(--primary-color); }
+
+.btn-create {
+  background-color: var(--primary-color);
+  color: white; border: none;
+  padding: 12px 35px; font-size: 1rem;
+  cursor: pointer; width: 100%; margin-top: 20px;
+  transition: 0.3s; font-weight: 600;
+}
+
+/* --- Modal Styles --- */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: none; align-items: center; justify-content: center; z-index: 1000;
+}
+
+.id-card-modal {
+  background: white; padding: 30px; border-radius: 15px;
+  width: 350px; text-align: center; position: relative;
+}
+
+.id-details {
+  background: #f9f9f9; padding: 20px; border: 1px dashed var(--primary-color);
+  border-radius: 10px; margin: 20px 0; text-align: left;
+}
+
+.id-details p { font-size: 0.9rem; margin-bottom: 8px; color: #333; }
+.id-details strong { color: var(--primary-color); }
+
+.modal-btns { display: flex; flex-direction: column; gap: 10px; }
+
+.btn-ss { background: #2ecc71; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; }
+.btn-close { background: #e74c3c; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; }
+
+@media (max-width: 900px) { .image-section { display: none; } }
+</style>
 </head>
 <body>
 
-<div class="signup-container">
-    <img 
-  src="logo.jpg" 
-  alt="Acropolis College Logo" 
-  class="college-logo"
-/>
+<div class="main-wrapper">
+  <div class="image-section" id="slider">
+    <div class="logo-overlay">ACROPOLIS</div>
+    <img src="model1.png" class="active">
+    <img src="model2.png">
+    <img src="model3.png">
+  </div>
 
-  <h1>Student Signup</h1>
+  <div class="login-section">
+    <div class="login-header">
+      <h1>Student ID Creator</h1>
+      <p>Enter details to generate new student account</p>
+    </div>
 
-  <p class="subtitle">Create your account</p>
+    <form id="signupForm">
+      <div class="form-group"><input type="text" id="studentName" placeholder="Full Name" required></div>
+      <div class="form-group"><input type="text" id="enrollment" placeholder="Enrollment Number" required></div>
+      <div class="form-group"><input type="password" id="password" placeholder="Set Password" required></div>
+      
+      <div class="form-group">
+        <select id="branchSelect" required>
+          <option value="">-- Select Branch --</option>
+          <option value="CSE1">CSE1</option><option value="CSE2">CSE2</option>
+          <option value="IT1">IT1</option><option value="IT2">IT2</option>
+          <option value="AIDS1">AIDS1</option><option value="CSD1">CSD1</option>
+          </select>
+      </div>
 
-  <form id="signupForm">
-    <input type="text" id="studentName" placeholder="Full Name" required />
-    <input type="text" id="enrollment" placeholder="Enrollment Number" required />
-    <input type="password" id="password" placeholder="Password" required />
+      <div class="form-group">
+        <select id="semesterSelect" required>
+          <option value="">-- Select Semester --</option>
+        </select>
+      </div>
 
-    <!-- Branch Dropdown -->
-<select id="branchSelect" required>
-  <option value="">-- Select Branch --</option>
+      <div class="form-group">
+        <select id="yearSelect" required>
+          <option value="">-- Select Year --</option>
+          <option value="1st">1st Year</option>
+          <option value="2nd">2nd Year</option>
+          <option value="3rd">3rd Year</option>
+          <option value="4th">4th Year</option>
+        </select>
+      </div>
 
-  <!-- CSE Sections -->
-  <option value="CSE1">CSE1</option>
-  <option value="CSE2">CSE2</option>
-  <option value="CSE3">CSE3</option>
-  <option value="CSE4">CSE4</option>
-  <option value="CSE5">CSE5</option>
+      <button type="submit" id="submitBtn" class="btn-create">Create Student ID</button>
+    </form>
+  </div>
+</div>
 
-  <!-- IT Sections -->
-  <option value="IT1">IT1</option>
-  <option value="IT2">IT2</option>
-  <option value="IT3">IT3</option>
-  <option value="IT4">IT4</option>
-  <option value="IT5">IT5</option>
-
-  <!-- ECE Sections -->
-  <option value="ECE1">ECE1</option>
-  <option value="ECE2">ECE2</option>
-  <option value="ECE3">ECE3</option>
-  <option value="ECE4">ECE4</option>
-  <option value="ECE5">ECE5</option>
-
-  <!-- Mechanical Sections -->
-  <option value="ME1">ME1</option>
-  <option value="ME2">ME2</option>
-  <option value="ME3">ME3</option>
-  <option value="ME4">ME4</option>
-  <option value="ME5">ME5</option>
-
-  <!-- Civil Sections -->
-  <option value="CE1">CE1</option>
-  <option value="CE2">CE2</option>
-  <option value="CE3">CE3</option>
-  <option value="CE4">CE4</option>
-  <option value="CE5">CE5</option>
-
-  <!-- AI & DS Sections -->
-  <option value="AIDS1">AIDS1</option>
-  <option value="AIDS2">AIDS2</option>
-  <option value="AIDS3">AIDS3</option>
-  <option value="AIDS4">AIDS4</option>
-  <option value="AIDS5">AIDS5</option>
-
-  <!-- CSD Sections -->
-  <option value="CSD1">CSD1</option>
-  <option value="CSD2">CSD2</option>
-  <option value="CSD3">CSD3</option>
-  <option value="CSD4">CSD4</option>
-  <option value="CSD5">CSD5</option>
-
-  <!-- EEE Sections -->
-  <option value="EEE1">EEE1</option>
-  <option value="EEE2">EEE2</option>
-  <option value="EEE3">EEE3</option>
-  <option value="EEE4">EEE4</option>
-  <option value="EEE5">EEE5</option>
-</select>
-
-    <!-- Semester Dropdown -->
-    <select id="semesterSelect" required>
-      <option value="">-- Select Semester --</option>
-    </select>
-
-    <!-- Year Dropdown -->
-    <select id="yearSelect" required>
-      <option value="">-- Select Year --</option>
-      <option value="1st">1st Year</option>
-      <option value="2nd">2nd Year</option>
-      <option value="3rd">3rd Year</option>
-      <option value="4th">4th Year</option>
-    </select>
-
-    <button type="submit">Sign Up</button>
-  </form>
-
-  <div class="login-link">
-    Already have an account? <a href="login.html">Login</a>
+<div class="modal-overlay" id="modalOverlay">
+  <div class="id-card-modal" id="idCard">
+    <h2 style="color: #2ecc71;">✅ ID Created!</h2>
+    <div class="id-details" id="captureArea">
+      <p><strong>Name:</strong> <span id="resName"></span></p>
+      <p><strong>Enrollment:</strong> <span id="resEnroll"></span></p>
+      <p><strong>Branch:</strong> <span id="resBranch"></span></p>
+      <p><strong>Year:</strong> <span id="resYear"></span></p>
+      <p><strong>Semester:</strong> <span id="resSem"></span></p>
+      <hr style="margin:10px 0; border:0; border-top:1px solid #ddd;">
+      <p style="font-size: 10px; color: #999; text-align: center;">Acropolis Institute Official Record</p>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-ss" onclick="takeScreenshot()">Download Screenshot</button>
+      <button class="btn-close" onclick="closeModal()">Close & New ID</button>
+    </div>
   </div>
 </div>
 
 <script>
-/* ===============================
-   ACCESS CONTROL — ADMIN PAGES
-================================ */
+/* --- Slider Logic --- */
+const imgs = document.querySelectorAll('#slider img');
+let idx = 0;
+setInterval(() => {
+  imgs[idx].classList.remove('active');
+  idx = (idx + 1) % imgs.length;
+  imgs[idx].classList.add('active');
+}, 5000);
 
+/* --- Access Control --- */
 const mentorId = localStorage.getItem("mentorId");
-const source   = sessionStorage.getItem("accessSource");
-
-// allowed sources
-const ALLOWED_SOURCES = ["ad", "admin"];
-
-if(!mentorId || !ALLOWED_SOURCES.includes(source)){
-  document.body.innerHTML = `
-    <h2 style="text-align:center;margin-top:20vh;color:red">
-      ❌ Access Denied <br>
-      Please open this page via Administration Panel
-    </h2>
-  `;
-  throw new Error("Unauthorized access");
+const source = sessionStorage.getItem("accessSource");
+if(!mentorId || !["ad", "admin"].includes(source)){
+  document.body.innerHTML = "<h2 style='text-align:center;padding:50px;color:red;'>❌ Access Denied</h2>";
+  throw new Error("Unauthorized");
 }
-// Populate semester options (1 to 8)
-const semesterSelect = document.getElementById("semesterSelect");
+
+/* --- Populate Semesters --- */
+const semSelect = document.getElementById("semesterSelect");
 for (let i = 1; i <= 8; i++) {
-  const opt = document.createElement("option");
-  opt.value = i;
-  opt.textContent = `Semester ${i}`;
-  semesterSelect.appendChild(opt);
+  let opt = document.createElement("option");
+  opt.value = i; opt.textContent = `Semester ${i}`;
+  semSelect.appendChild(opt);
 }
 
-// Signup submit
+/* --- Form Submission & Modal Logic --- */
 const form = document.getElementById("signupForm");
+const modal = document.getElementById("modalOverlay");
+
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
+  const btn = document.getElementById("submitBtn");
+  btn.innerText = "Creating...";
+  btn.disabled = true;
 
-  const name = document.getElementById("studentName").value.trim();
-  const enrollment = document.getElementById("enrollment").value.trim();
-  const password = document.getElementById("password").value.trim();
-  const branch = document.getElementById("branchSelect").value;
-  const semester = document.getElementById("semesterSelect").value;
-  const year = document.getElementById("yearSelect").value;
-
-  if (!branch || !semester || !year)
-    return alert("Please select Branch, Semester and Year.");
+  const payload = {
+    name: document.getElementById("studentName").value,
+    enrollment: document.getElementById("enrollment").value,
+    password: document.getElementById("password").value,
+    branch: document.getElementById("branchSelect").value,
+    semester: document.getElementById("semesterSelect").value,
+    year: document.getElementById("yearSelect").value
+  };
 
   try {
     const res = await fetch("https://college-hwbb.onrender.com/api/students/signup", {
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({name, enrollment, password, branch, semester, year})
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
     });
 
     const data = await res.json();
-    if(res.ok && data.success){
-      alert("Signup successful! Redirecting...");
-      window.location.href = "login.html";
+
+    if(res.ok && data.success) {
+      // Show Pop-up with data
+      document.getElementById("resName").innerText = payload.name;
+      document.getElementById("resEnroll").innerText = payload.enrollment;
+      document.getElementById("resBranch").innerText = payload.branch;
+      document.getElementById("resYear").innerText = payload.year;
+      document.getElementById("resSem").innerText = payload.semester;
+      
+      modal.style.display = "flex";
     } else {
-      alert(data.message || "Signup failed");
+      alert(data.message || "Failed to create ID");
     }
-  } catch(err){
-    console.error(err);
-    alert("Error connecting to server");
+  } catch(err) {
+    alert("Server error");
+  } finally {
+    btn.innerText = "Create Student ID";
+    btn.disabled = false;
   }
 });
 
+function closeModal() {
+  modal.style.display = "none";
+  form.reset(); // Clear form for next entry
+}
+
+/* --- Screenshot Logic --- */
+function takeScreenshot() {
+  const element = document.getElementById("captureArea");
+  html2canvas(element).then(canvas => {
+    const link = document.createElement("a");
+    link.download = `Student_ID_${document.getElementById("resEnroll").innerText}.png`;
+    link.href = canvas.toDataURL();
+    link.click();
+  });
+}
 </script>
 
 </body>
