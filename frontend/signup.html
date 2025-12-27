@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Student ID Creator - Acropolis</title>
+<title>ID Creator - Acropolis Campus</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -22,12 +22,11 @@ body {
   height: 100vh;
   display: flex;
   overflow: hidden;
-  background-color: #f4f7f6;
 }
 
 .main-wrapper { display: flex; width: 100%; height: 100%; }
 
-/* --- Left Side: Image Slider --- */
+/* --- Left Side: Slider --- */
 .image-section {
   flex: 1.2;
   position: relative;
@@ -50,7 +49,7 @@ body {
 }
 
 /* --- Right Side: Form --- */
-.login-section {
+.form-section {
   flex: 1;
   background: white;
   display: flex;
@@ -60,52 +59,44 @@ body {
   overflow-y: auto;
 }
 
-.login-header h1 { font-size: 1.8rem; font-weight: 300; color: #555; text-transform: uppercase; }
-.login-header p { color: var(--text-gray); font-size: 0.9rem; margin-bottom: 30px; }
-
-.form-group { margin-bottom: 15px; }
+.form-header h1 { font-size: 1.8rem; font-weight: 300; color: #555; text-transform: uppercase; }
+.form-header p { color: var(--text-gray); font-size: 0.9rem; margin-bottom: 30px; }
 
 input, select {
-  width: 100%; padding: 12px;
+  width: 100%; padding: 12px; margin-bottom: 15px;
   border: none; background-color: var(--input-bg);
-  border-bottom: 2px solid transparent;
-  font-size: 0.95rem; outline: none; transition: 0.3s;
+  border-bottom: 2px solid transparent; outline: none; transition: 0.3s;
 }
 
 input:focus, select:focus { border-bottom-color: var(--primary-color); }
 
 .btn-create {
   background-color: var(--primary-color);
-  color: white; border: none;
-  padding: 12px 35px; font-size: 1rem;
-  cursor: pointer; width: 100%; margin-top: 20px;
-  transition: 0.3s; font-weight: 600;
+  color: white; border: none; padding: 12px 40px;
+  font-size: 1rem; cursor: pointer; float: right; margin-top: 10px;
 }
 
-/* --- Modal Styles --- */
+/* --- Modal/Popup Styles --- */
 .modal-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.7);
-  display: none; align-items: center; justify-content: center; z-index: 1000;
+  background: rgba(0,0,0,0.7); display: none;
+  justify-content: center; align-items: center; z-index: 100;
 }
 
-.id-card-modal {
+.id-card-popup {
   background: white; padding: 30px; border-radius: 15px;
   width: 350px; text-align: center; position: relative;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
-.id-details {
-  background: #f9f9f9; padding: 20px; border: 1px dashed var(--primary-color);
-  border-radius: 10px; margin: 20px 0; text-align: left;
-}
+.id-card-content { padding: 10px; border: 2px dashed var(--primary-color); border-radius: 10px; margin-bottom: 20px; background: #f9ffff; }
+.id-card-content h2 { color: var(--primary-color); margin-bottom: 15px; font-size: 1.2rem; }
+.id-card-content p { font-size: 0.9rem; margin: 5px 0; text-align: left; border-bottom: 1px solid #eee; padding-bottom: 2px; }
+.id-card-content b { color: #333; }
 
-.id-details p { font-size: 0.9rem; margin-bottom: 8px; color: #333; }
-.id-details strong { color: var(--primary-color); }
-
-.modal-btns { display: flex; flex-direction: column; gap: 10px; }
-
-.btn-ss { background: #2ecc71; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; }
-.btn-close { background: #e74c3c; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; }
+.modal-btns { display: flex; gap: 10px; justify-content: center; }
+.btn-ss { background: #4caf50; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+.btn-close { background: #f44336; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
 
 @media (max-width: 900px) { .image-section { display: none; } }
 </style>
@@ -120,85 +111,79 @@ input:focus, select:focus { border-bottom-color: var(--primary-color); }
     <img src="model3.png">
   </div>
 
-  <div class="login-section">
-    <div class="login-header">
+  <div class="form-section">
+    <div class="form-header">
       <h1>Student ID Creator</h1>
-      <p>Enter details to generate new student account</p>
+      <p>Enter details to generate new student credentials</p>
     </div>
 
     <form id="signupForm">
-      <div class="form-group"><input type="text" id="studentName" placeholder="Full Name" required></div>
-      <div class="form-group"><input type="text" id="enrollment" placeholder="Enrollment Number" required></div>
-      <div class="form-group"><input type="password" id="password" placeholder="Set Password" required></div>
-      
-      <div class="form-group">
-        <select id="branchSelect" required>
-          <option value="">-- Select Branch --</option>
-          <option value="CSE1">CSE1</option><option value="CSE2">CSE2</option>
-          <option value="IT1">IT1</option><option value="IT2">IT2</option>
-          <option value="AIDS1">AIDS1</option><option value="CSD1">CSD1</option>
-          </select>
-      </div>
+      <input type="text" id="studentName" placeholder="Full Name" required />
+      <input type="text" id="enrollment" placeholder="Enrollment Number" required />
+      <input type="password" id="password" placeholder="Set Password" required />
 
-      <div class="form-group">
-        <select id="semesterSelect" required>
-          <option value="">-- Select Semester --</option>
+      <select id="branchSelect" required>
+        <option value="">-- Select Branch --</option>
+        <option value="CSE1">CSE1</option><option value="CSE2">CSE2</option>
+        <option value="IT1">IT1</option><option value="IT2">IT2</option>
+        <option value="AIDS1">AIDS1</option><option value="CSD1">CSD1</option>
         </select>
-      </div>
 
-      <div class="form-group">
-        <select id="yearSelect" required>
-          <option value="">-- Select Year --</option>
-          <option value="1st">1st Year</option>
-          <option value="2nd">2nd Year</option>
-          <option value="3rd">3rd Year</option>
-          <option value="4th">4th Year</option>
-        </select>
-      </div>
+      <select id="semesterSelect" required>
+        <option value="">-- Select Semester --</option>
+      </select>
 
-      <button type="submit" id="submitBtn" class="btn-create">Create Student ID</button>
+      <select id="yearSelect" required>
+        <option value="">-- Select Year --</option>
+        <option value="1st">1st Year</option>
+        <option value="2nd">2nd Year</option>
+        <option value="3rd">3rd Year</option>
+        <option value="4th">4th Year</option>
+      </select>
+
+      <button type="submit" id="submitBtn" class="btn-create">Create ID</button>
     </form>
   </div>
 </div>
 
 <div class="modal-overlay" id="modalOverlay">
-  <div class="id-card-modal" id="idCard">
-    <h2 style="color: #2ecc71;">✅ ID Created!</h2>
-    <div class="id-details" id="captureArea">
-      <p><strong>Name:</strong> <span id="resName"></span></p>
-      <p><strong>Enrollment:</strong> <span id="resEnroll"></span></p>
-      <p><strong>Branch:</strong> <span id="resBranch"></span></p>
-      <p><strong>Year:</strong> <span id="resYear"></span></p>
-      <p><strong>Semester:</strong> <span id="resSem"></span></p>
-      <hr style="margin:10px 0; border:0; border-top:1px solid #ddd;">
-      <p style="font-size: 10px; color: #999; text-align: center;">Acropolis Institute Official Record</p>
+  <div class="id-card-popup">
+    <div id="captureArea" class="id-card-content">
+      <img src="logo.jpg" style="width: 60px; margin-bottom: 5px;">
+      <h2>New ID Created</h2>
+      <p><b>Name:</b> <span id="resName"></span></p>
+      <p><b>Enrollment:</b> <span id="resEnroll"></span></p>
+      <p><b>Password:</b> <span id="resPass"></span></p>
+      <p><b>Branch:</b> <span id="resBranch"></span></p>
+      <p><b>Sem:</b> <span id="resSem"></span> | <b>Year:</b> <span id="resYear"></span></p>
     </div>
     <div class="modal-btns">
-      <button class="btn-ss" onclick="takeScreenshot()">Download Screenshot</button>
-      <button class="btn-close" onclick="closeModal()">Close & New ID</button>
+      <button class="btn-ss" onclick="takeScreenshot()">Download SS</button>
+      <button class="btn-close" onclick="closeModal()">Close</button>
     </div>
   </div>
 </div>
 
 <script>
-/* --- Slider Logic --- */
-const imgs = document.querySelectorAll('#slider img');
-let idx = 0;
-setInterval(() => {
-  imgs[idx].classList.remove('active');
-  idx = (idx + 1) % imgs.length;
-  imgs[idx].classList.add('active');
-}, 5000);
-
-/* --- Access Control --- */
+/* Access Control Logic */
 const mentorId = localStorage.getItem("mentorId");
 const source = sessionStorage.getItem("accessSource");
-if(!mentorId || !["ad", "admin"].includes(source)){
-  document.body.innerHTML = "<h2 style='text-align:center;padding:50px;color:red;'>❌ Access Denied</h2>";
-  throw new Error("Unauthorized");
+const ALLOWED_SOURCES = ["ad", "admin"];
+
+if(!mentorId || !ALLOWED_SOURCES.includes(source)){
+  document.body.innerHTML = `<h2 style="text-align:center;margin-top:20vh;color:red">❌ Access Denied</h2>`;
 }
 
-/* --- Populate Semesters --- */
+/* Slider Logic */
+const images = document.querySelectorAll('#slider img');
+let idx = 0;
+setInterval(() => {
+  images[idx].classList.remove('active');
+  idx = (idx + 1) % images.length;
+  images[idx].classList.add('active');
+}, 5000);
+
+/* Semester Population */
 const semSelect = document.getElementById("semesterSelect");
 for (let i = 1; i <= 8; i++) {
   let opt = document.createElement("option");
@@ -206,7 +191,7 @@ for (let i = 1; i <= 8; i++) {
   semSelect.appendChild(opt);
 }
 
-/* --- Form Submission & Modal Logic --- */
+/* Signup Logic */
 const form = document.getElementById("signupForm");
 const modal = document.getElementById("modalOverlay");
 
@@ -216,7 +201,7 @@ form.addEventListener("submit", async (e) => {
   btn.innerText = "Creating...";
   btn.disabled = true;
 
-  const payload = {
+  const formData = {
     name: document.getElementById("studentName").value,
     enrollment: document.getElementById("enrollment").value,
     password: document.getElementById("password").value,
@@ -228,43 +213,41 @@ form.addEventListener("submit", async (e) => {
   try {
     const res = await fetch("https://college-hwbb.onrender.com/api/students/signup", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(formData)
     });
 
     const data = await res.json();
-
-    if(res.ok && data.success) {
-      // Show Pop-up with data
-      document.getElementById("resName").innerText = payload.name;
-      document.getElementById("resEnroll").innerText = payload.enrollment;
-      document.getElementById("resBranch").innerText = payload.branch;
-      document.getElementById("resYear").innerText = payload.year;
-      document.getElementById("resSem").innerText = payload.semester;
-      
-      modal.style.display = "flex";
+    if(res.ok && data.success){
+        // Show Data in Popup
+        document.getElementById("resName").innerText = formData.name;
+        document.getElementById("resEnroll").innerText = formData.enrollment;
+        document.getElementById("resPass").innerText = formData.password;
+        document.getElementById("resBranch").innerText = formData.branch;
+        document.getElementById("resSem").innerText = formData.semester;
+        document.getElementById("resYear").innerText = formData.year;
+        
+        modal.style.display = "flex";
+        form.reset(); // Form clear for next ID
     } else {
       alert(data.message || "Failed to create ID");
     }
   } catch(err) {
-    alert("Server error");
+    alert("Server Error");
   } finally {
-    btn.innerText = "Create Student ID";
+    btn.innerText = "Create ID";
     btn.disabled = false;
   }
 });
 
-function closeModal() {
-  modal.style.display = "none";
-  form.reset(); // Clear form for next entry
-}
+/* Popup Functions */
+function closeModal() { modal.style.display = "none"; }
 
-/* --- Screenshot Logic --- */
 function takeScreenshot() {
   const element = document.getElementById("captureArea");
   html2canvas(element).then(canvas => {
-    const link = document.createElement("a");
-    link.download = `Student_ID_${document.getElementById("resEnroll").innerText}.png`;
+    const link = document.createElement('a');
+    link.download = `ID_${document.getElementById("resEnroll").innerText}.png`;
     link.href = canvas.toDataURL();
     link.click();
   });
