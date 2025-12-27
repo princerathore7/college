@@ -1,257 +1,300 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Acropolis - Mentor Registration</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary-navy: #001f3f;
-      --accent-gold: #daa520;
-      --glass-white: rgba(255, 255, 255, 0.9);
-      --input-bg: rgba(240, 244, 248, 0.8);
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mentor ID Creator - Acropolis Campus</title>
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-    body {
-      font-family: 'Poppins', sans-serif;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      /* Dynamic Navy Gradient Background */
-      background: linear-gradient(135deg, #001f3f 0%, #003366 50%, #001f3f 100%);
-      background-size: 400% 400%;
-      animation: gradientBG 15s ease infinite;
-      overflow-x: hidden;
-    }
+<style>
+:root {
+  --primary-color: #001f3f; /* Mentor theme: Navy Blue */
+  --accent-color: #31c2cf;
+  --text-gray: #777;
+  --input-bg: #e8f0fe;
+}
 
-    @keyframes gradientBG {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .signup-card {
-      background: var(--glass-white);
-      width: 450px;
-      padding: 40px;
-      border-radius: 24px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
-      transform: translateY(30px);
-      opacity: 0;
-      animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-      text-align: center;
-      position: relative;
-    }
+body {
+  font-family: 'Poppins', sans-serif;
+  height: 100vh;
+  display: flex;
+  overflow: hidden;
+}
 
-    @keyframes slideUp {
-      to { transform: translateY(0); opacity: 1; }
-    }
+.main-wrapper { display: flex; width: 100%; height: 100%; }
 
-    /* Logo Styling - No Border */
-    .logo-container img {
-      width: 180px; /* Adjusted for clarity */
-      height: auto;
-      margin-bottom: 15px;
-      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
-    }
+/* --- Left Side: Slider --- */
+.image-section {
+  flex: 1.2;
+  position: relative;
+  background-color: #000;
+}
 
-    h1 {
-      color: var(--primary-navy);
-      font-weight: 600;
-      font-size: 24px;
-      margin-bottom: 8px;
-      letter-spacing: 0.5px;
-    }
+.image-section img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  position: absolute;
+  transition: opacity 1s ease-in-out;
+  opacity: 0;
+}
 
-    .subtitle {
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 30px;
-    }
+.image-section img.active { opacity: 1; }
 
-    form {
-      display: grid;
-      grid-template-columns: 1fr 1fr; /* Two column layout for better look */
-      gap: 15px;
-    }
+.logo-overlay {
+  position: absolute; top: 30px; left: 30px; z-index: 10;
+  color: white; font-weight: bold; font-size: 24px; letter-spacing: 2px;
+}
 
-    /* Full width inputs for specific fields */
-    .full-width { grid-column: span 2; }
+/* --- Right Side: Form --- */
+.form-section {
+  flex: 1;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 6%;
+  overflow-y: auto;
+}
 
-    input, select {
-      width: 100%;
-      padding: 12px 16px;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      font-size: 14px;
-      background: var(--input-bg);
-      transition: all 0.3s ease;
-      outline: none;
-    }
+.form-header h1 { font-size: 1.8rem; font-weight: 300; color: var(--primary-color); text-transform: uppercase; }
+.form-header p { color: var(--text-gray); font-size: 0.85rem; margin-bottom: 20px; }
 
-    input:focus, select:focus {
-      border-color: var(--primary-navy);
-      background: #fff;
-      box-shadow: 0 0 0 3px rgba(0, 31, 63, 0.1);
-      transform: scale(1.02);
-    }
+/* Grid for Mentor Fields */
+.mentor-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
 
-    button.signup-btn {
-      grid-column: span 2;
-      padding: 14px;
-      margin-top: 10px;
-      border: none;
-      border-radius: 10px;
-      background: var(--primary-navy);
-      color: white;
-      font-weight: 600;
-      font-size: 16px;
-      cursor: pointer;
-      transition: all 0.4s ease;
-      box-shadow: 0 4px 15px rgba(0, 31, 63, 0.3);
-    }
+.full-col { grid-column: span 2; }
 
-    button.signup-btn:hover {
-      background: #003366;
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(0, 31, 63, 0.4);
-    }
+input, select {
+  width: 100%; padding: 11px; margin-bottom: 5px;
+  border: none; background-color: var(--input-bg);
+  border-bottom: 2px solid transparent; outline: none; transition: 0.3s;
+  font-size: 0.9rem;
+}
 
-    .footer-link {
-      grid-column: span 2;
-      margin-top: 20px;
-      font-size: 13px;
-    }
+input:focus, select:focus { border-bottom-color: var(--accent-color); }
 
-    .footer-link button {
-      background: none;
-      border: none;
-      color: var(--accent-gold);
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: underline;
-    }
+.btn-create {
+  background-color: var(--primary-color);
+  color: white; border: none; padding: 12px 40px;
+  font-size: 1rem; cursor: pointer; float: right; margin-top: 15px;
+  transition: 0.3s;
+}
 
-    /* Responsive */
-    @media (max-width: 500px) {
-      .signup-card { width: 90%; padding: 25px; }
-      form { grid-template-columns: 1fr; }
-      .full-width { grid-column: span 1; }
-      button.signup-btn { grid-column: span 1; }
-    }
-  </style>
+.btn-create:hover { background-color: #003366; }
+
+/* --- Popup Modal --- */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8); display: none;
+  justify-content: center; align-items: center; z-index: 1000;
+}
+
+.id-card-popup {
+  background: white; padding: 25px; border-radius: 15px;
+  width: 380px; text-align: center;
+}
+
+.id-card-content { 
+    padding: 20px; 
+    border: 2px solid var(--primary-color); 
+    border-radius: 10px; 
+    margin-bottom: 15px; 
+    background: #fff;
+    text-align: left;
+}
+
+.id-card-content h2 { 
+    color: var(--primary-color); 
+    font-size: 1.1rem; 
+    text-align: center; 
+    margin-bottom: 15px;
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 5px;
+}
+
+.id-card-content p { font-size: 0.85rem; margin: 6px 0; border-bottom: 1px solid #f0f0f0; }
+.id-card-content b { color: #555; width: 100px; display: inline-block; }
+
+.modal-btns { display: flex; gap: 10px; justify-content: center; }
+.btn-ss { background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+.btn-close { background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+
+@media (max-width: 900px) { .image-section { display: none; } }
+</style>
 </head>
 <body>
 
-  <div class="signup-card">
-    <div class="logo-container">
-      <img src="logo.jpg" alt="Acropolis Logo">
-    </div>
-    <h1>Mentor Signup</h1>
-    <p class="subtitle">Join the academic excellence portal</p>
-
-    <form id="mentorSignupForm">
-      <input type="text" id="mentorId" placeholder="Mentor ID" required class="full-width">
-      <input type="text" id="name" placeholder="Full Name" required class="full-width">
-      <input type="email" id="email" placeholder="Email Address" required>
-      <input type="tel" id="phone" placeholder="Phone Number" required>
-      
-      <select id="subject" required>
-        <option value="" disabled selected>Subject</option>
-        <option value="DBMS">DBMS</option>
-        <option value="Mathematics">Mathematics</option>
-        <option value="Programming">Programming</option>
-      </select>
-      
-      <select id="branch" required>
-        <option value="" disabled selected>Branch</option>
-        <option value="CSE">CSE</option>
-        <option value="ECE">ECE</option>
-        <option value="ME">ME</option>
-      </select>
-
-      <select id="classAssigned" required class="full-width">
-        <option value="" disabled selected>Select Class Assigned</option>
-        <option value="1st Year - A">1st Year - A</option>
-        <option value="2nd Year - A">2nd Year - A</option>
-        <option value="3rd Year - A">3rd Year - A</option>
-      </select>
-
-      <input type="password" id="password" placeholder="Password" required>
-      <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
-
-      <button type="submit" class="signup-btn">Create Mentor Account</button>
-      
-      <div class="footer-link">
-        Already have an account? 
-        <button type="button" onclick="window.location.href='/mentor-login'">Login here</button>
-      </div>
-    </form>
+<div class="main-wrapper">
+  <div class="image-section" id="slider">
+    <div class="logo-overlay">ACROPOLIS</div>
+    <img src="model1.png" class="active">
+    <img src="model2.png">
+    <img src="model3.png">
   </div>
 
-  <script>
-    // --- Access Control Logic ---
-    const mentorIdStorage = localStorage.getItem("mentorId");
-    const source = sessionStorage.getItem("accessSource");
-    const ALLOWED_SOURCES = ["ad", "admin"];
+  <div class="form-section">
+    <div class="form-header">
+      <h1>Mentor ID Creator</h1>
+      <p>Register a new faculty member to the portal</p>
+    </div>
 
-    if(!mentorIdStorage || !ALLOWED_SOURCES.includes(source)){
-      document.body.innerHTML = `
-        <div style="color:white; text-align:center; padding:50px;">
-          <h2 style="font-size:40px;">🚫</h2>
-          <h2>Access Denied</h2>
-          <p>Please register via the Admin Dashboard.</p>
-        </div>
-      `;
-      throw new Error("Unauthorized");
-    }
+    <form id="mentorSignupForm">
+      <div class="mentor-grid">
+        <input type="text" id="mentorId" placeholder="Mentor ID" required class="full-col">
+        <input type="text" id="name" placeholder="Full Name" required class="full-col">
+        <input type="email" id="email" placeholder="Email Address" required>
+        <input type="tel" id="phone" placeholder="Phone Number" required>
+        
+        <select id="subject" required>
+          <option value="" disabled selected>Subject</option>
+          <option value="DBMS">DBMS</option>
+          <option value="Mathematics">Mathematics</option>
+          <option value="Programming">Programming</option>
+          <option value="Cloud Computing">Cloud Computing</option>
+        </select>
+        
+        <select id="branch" required>
+          <option value="" disabled selected>Branch</option>
+          <option value="CSE">CSE</option>
+          <option value="ECE">ECE</option>
+          <option value="ME">ME</option>
+          <option value="IT">IT</option>
+        </select>
 
-    // --- Form Submission ---
-    const form = document.getElementById('mentorSignupForm');
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
+        <select id="classAssigned" required class="full-col">
+          <option value="" disabled selected>Class Assigned</option>
+          <option value="1st Year - A">1st Year - A</option>
+          <option value="2nd Year - A">2nd Year - A</option>
+          <option value="3rd Year - A">3rd Year - A</option>
+          <option value="4th Year - A">4th Year - A</option>
+        </select>
 
-      const password = document.getElementById('password').value;
-      const confirmPassword = document.getElementById('confirmPassword').value;
+        <input type="password" id="password" placeholder="Password" required>
+        <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+      </div>
 
-      if(password !== confirmPassword){
-        alert("❌ Passwords do not match!");
-        return;
-      }
+      <button type="submit" id="submitBtn" class="btn-create">Generate Mentor ID</button>
+    </form>
+  </div>
+</div>
 
-      const formData = {
-        mentorId: document.getElementById('mentorId').value,
-        name: document.getElementById('name').value,
-        email: document.getElementById('email').value,
-        phone: document.getElementById('phone').value,
-        subject: document.getElementById('subject').value,
-        branch: document.getElementById('branch').value,
-        classAssigned: document.getElementById('classAssigned').value,
-        password: password
-      };
+<div class="modal-overlay" id="modalOverlay">
+  <div class="id-card-popup">
+    <div id="captureArea" class="id-card-content">
+      <div style="text-align: center;"><img src="logo.jpg" style="width: 50px;"></div>
+      <h2>MENTOR CREDENTIALS</h2>
+      <p><b>ID:</b> <span id="resId"></span></p>
+      <p><b>Name:</b> <span id="resName"></span></p>
+      <p><b>Password:</b> <span id="resPass"></span></p>
+      <p><b>Subject:</b> <span id="resSub"></span></p>
+      <p><b>Branch:</b> <span id="resBranch"></span></p>
+      <p><b>Class:</b> <span id="resClass"></span></p>
+      <p style="font-size: 10px; color: gray; margin-top: 10px; border: none; text-align: center;">Official Mentor Access Card - Acropolis</p>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-ss" onclick="takeScreenshot()">Save Screenshot</button>
+      <button class="btn-close" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
 
-      try {
-        const res = await fetch("https://college-hwbb.onrender.com/api/signup/mentor", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData)
-        });
+<script>
+/* --- Slider Logic --- */
+const images = document.querySelectorAll('#slider img');
+let idx = 0;
+setInterval(() => {
+  images[idx].classList.remove('active');
+  idx = (idx + 1) % images.length;
+  images[idx].classList.add('active');
+}, 5000);
 
-        const data = await res.json();
-        if(res.ok){
-          alert("✅ Mentor Registered Successfully!");
-          window.location.href = '/mentor-login';
-        } else {
-          alert("⚠️ " + (data.message || "Signup failed"));
-        }
-      } catch(err){
-        alert("❌ Server connection error");
-      }
+/* --- Access Control --- */
+const mentorIdStorage = localStorage.getItem("mentorId");
+const source = sessionStorage.getItem("accessSource");
+if(!mentorIdStorage || !["ad", "admin"].includes(source)){
+  document.body.innerHTML = `<div style="color:black;text-align:center;padding:100px;"><h2>🚫 Access Denied</h2></div>`;
+}
+
+/* --- Form Submission & Popup Logic --- */
+const form = document.getElementById('mentorSignupForm');
+const modal = document.getElementById('modalOverlay');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const password = document.getElementById('password').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+
+  if(password !== confirmPassword){
+    alert("❌ Passwords do not match!");
+    return;
+  }
+
+  const btn = document.getElementById("submitBtn");
+  btn.innerText = "Processing...";
+  btn.disabled = true;
+
+  const formData = {
+    mentorId: document.getElementById('mentorId').value,
+    name: document.getElementById('name').value,
+    email: document.getElementById('email').value,
+    phone: document.getElementById('phone').value,
+    subject: document.getElementById('subject').value,
+    branch: document.getElementById('branch').value,
+    classAssigned: document.getElementById('classAssigned').value,
+    password: password
+  };
+
+  try {
+    const res = await fetch("https://college-hwbb.onrender.com/api/signup/mentor", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData)
     });
-  </script>
+
+    const data = await res.json();
+    if(res.ok){
+        // Populate Popup
+        document.getElementById("resId").innerText = formData.mentorId;
+        document.getElementById("resName").innerText = formData.name;
+        document.getElementById("resPass").innerText = formData.password;
+        document.getElementById("resSub").innerText = formData.subject;
+        document.getElementById("resBranch").innerText = formData.branch;
+        document.getElementById("resClass").innerText = formData.classAssigned;
+
+        modal.style.display = "flex";
+        form.reset();
+    } else {
+      alert("⚠️ " + (data.message || "Signup failed"));
+    }
+  } catch(err){
+    alert("❌ Server connection error");
+  } finally {
+    btn.innerText = "Generate Mentor ID";
+    btn.disabled = false;
+  }
+});
+
+function closeModal() { modal.style.display = "none"; }
+
+function takeScreenshot() {
+  const element = document.getElementById("captureArea");
+  html2canvas(element).then(canvas => {
+    const link = document.createElement('a');
+    link.download = `Mentor_${document.getElementById("resId").innerText}.png`;
+    link.href = canvas.toDataURL();
+    link.click();
+  });
+}
+</script>
+
 </body>
 </html>
