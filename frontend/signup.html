@@ -231,7 +231,25 @@
 </div>
 
 <script>
+/* ===============================
+   ACCESS CONTROL — ADMIN PAGES
+================================ */
 
+const mentorId = localStorage.getItem("mentorId");
+const source   = sessionStorage.getItem("accessSource");
+
+// allowed sources
+const ALLOWED_SOURCES = ["ad", "admin"];
+
+if(!mentorId || !ALLOWED_SOURCES.includes(source)){
+  document.body.innerHTML = `
+    <h2 style="text-align:center;margin-top:20vh;color:red">
+      ❌ Access Denied <br>
+      Please open this page via Administration Panel
+    </h2>
+  `;
+  throw new Error("Unauthorized access");
+}
 // Populate semester options (1 to 8)
 const semesterSelect = document.getElementById("semesterSelect");
 for (let i = 1; i <= 8; i++) {
