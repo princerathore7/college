@@ -77,7 +77,8 @@ if(!enrollment){
   document.getElementById("container").innerHTML =
     "<div class='empty'>❌ Please login first</div>";
 }else{
-  fetch(`/api/notifications?enrollment=${enrollment}&class=${studentClass}`)
+  fetch(`https://college-hwbb.onrender.com/api/notifications?enrollment=${enrollment}&class=${studentClass}`)
+
     .then(res => res.json())
     .then(data => {
       const box = document.getElementById("container");

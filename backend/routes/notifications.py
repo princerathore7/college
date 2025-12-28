@@ -56,7 +56,7 @@ def log_notification(title, body, target_type, target, extra_data, result):
         "data": extra_data,
         "success_count": result["success_count"],
         "failure_count": result["failure_count"],
-        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        "timestamp": datetime.utcnow() 
     })
 
 
@@ -88,7 +88,7 @@ def send_to_enrollment(enrollment, title, body, url="/"):
         return {"success_count":0, "failure_count":1, "message":"No token for enrollment"}
     token = token_doc['token']
     result = send_fcm_notification(title, body, [token], data={"url": url})
-    log_notification(title, body, "enrollment", [enrollment], {"url": url}, result)
+    log_notification(title, body, "enrollment", enrollment, {"url": url}, result)
     return result
 
 
@@ -322,7 +322,7 @@ def get_notifications():
         "$or": [
             {"target_type": "global"},
             {"target_type": "class", "target": student_class},
-            {"target_type": "enrollment", "target": {"$in": [enrollment]}}
+            {"target_type": "enrollment", "target": enrollment}
         ]
     }
 
@@ -334,5 +334,6 @@ def get_notifications():
 
     for n in notifications:
         n["_id"] = str(n["_id"])
+        n["timestamp"] = n["timestamp"].strftime("%Y-%m-%d %H:%M")
 
     return jsonify({"success": True, "notifications": notifications})
