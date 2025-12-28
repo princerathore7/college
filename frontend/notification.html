@@ -88,141 +88,123 @@ header{
 </head>
 
 <body>
-
 <header>🔔 Notifications</header>
 
 <div id="container">
   <div class="empty">Loading notifications...</div>
 </div>
+
 <script type="module">
-let res = await fetch('/api/notifications?enrollment=123&class=A');
-let data = await res.json();
-console.log(data);
-</script>
-
-<script>
-const enrollment   = localStorage.getItem("enrollment");
-const studentClass = localStorage.getItem("studentClass");
 const API_BASE = "https://college-hwbb.onrender.com";
-const messaging = firebase.messaging();
 
-const token = await messaging.getToken({
-  vapidKey: "BNubnwV8CTYrdDmpyhdl4f8kHXQ8Q9XpTDYNsuN59eEgDXDgsm3ecXvO-rRWbQH6MR25RJWUm3-_813aDEHpzZ8"
-});
+async function init() {
+    const enrollment   = localStorage.getItem("enrollment");
+    const studentClass = localStorage.getItem("studentClass");
 
-await fetch("/api/save-token", {
-  method: "POST",
-  headers: {"Content-Type":"application/json"},
-  body: JSON.stringify({
-    enrollment,
-    studentClass,
-    token
-  })
-});
-
-if(!enrollment){
-  document.getElementById("container").innerHTML =
-    "<div class='empty'>❌ Please login first</div>";
-}else{
-  loadNotifications();
-}
-
-function loadNotifications(){
-  fetch(`${API_BASE}/api/notifications?enrollment=${enrollment}&class=${studentClass}`)
-    .then(res => res.json())
-    .then(data => {
-      const box = document.getElementById("container");
-      box.innerHTML = "";
-
-      if(!data.success || data.notifications.length === 0){
-        box.innerHTML = "<div class='empty'>No notifications yet</div>";
+    if(!enrollment){
+        document.getElementById("container").innerHTML =
+            "<div class='empty'>❌ Please login first</div>";
         return;
-      }
+    }
 
-      // Clear All button
-      box.innerHTML += `
-        <div class="top-actions">
-          <button onclick="clearAll()">🧹 Clear All</button>
-        </div>
-      `;
+    // Firebase messaging token
+    try {
+        const messaging = firebase.messaging();
+        const token = await messaging.getToken({
+            vapidKey: "BNubnwV8CTYrdDmpyhdl4f8kHXQ8Q9XpTDYNsuN59eEgDXDgsm3ecXvO-rRWbQH6MR25RJWUm3-_813aDEHpzZ8"
+        });
 
-      data.notifications.forEach(n => {
+        await fetch(`${API_BASE}/api/save-token`, {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({ enrollment, studentClass, token })
+        });
+    } catch(e){
+        console.warn("Firebase token error:", e);
+    }
 
-        let badgeClass = "global";
-        let badgeText  = "GLOBAL";
+    loadNotifications(enrollment, studentClass);
+}
 
-        if(n.target_type === "class"){
-          badgeClass = "class";
-          badgeText  = "CLASS";
+async function loadNotifications(enrollment, studentClass){
+    const container = document.getElementById("container");
+    container.innerHTML = "<div class='empty'>Loading notifications...</div>";
+
+    try {
+        const res = await fetch(`${API_BASE}/api/notifications?enrollment=${enrollment}&class=${studentClass}`);
+        const data = await res.json();
+
+        container.innerHTML = ""; // Clear loader
+
+        if(!data.success || data.notifications.length === 0){
+            container.innerHTML = "<div class='empty'>No notifications yet</div>";
+            return;
         }
-        if(n.target_type === "enrollment"){
-          badgeClass = "personal";
-          badgeText  = "PERSONAL";
-        }
 
-        box.innerHTML += `
-          <div class="notification" id="note-${n._id}">
-            <button class="clear-btn" onclick="clearOne('${n._id}')">✖</button>
-            <span class="badge ${badgeClass}">${badgeText}</span>
-            <h3>${n.title}</h3>
-            <p>${n.body}</p>
-            <div class="time">🕒 ${n.timestamp}</div>
-          </div>
+        // Clear All button
+        container.innerHTML += `
+            <div class="top-actions">
+                <button onclick="clearAll('${enrollment}')">🧹 Clear All</button>
+            </div>
         `;
-      });
-    })
-    .catch(err => {
-      document.getElementById("container").innerHTML =
-        "<div class='empty'>⚠️ Failed to load notifications</div>";
-      console.error(err);
-    });
-}
 
-/* ---------- CLEAR ONE (BACKEND) ---------- */
-function clearOne(id){
-  if(!confirm("Delete this notification?")) return;
+        data.notifications.forEach(n => {
+            let badgeClass = "global";
+            let badgeText  = "GLOBAL";
+            if(n.target_type === "class"){ badgeClass="class"; badgeText="CLASS"; }
+            if(n.target_type === "enrollment"){ badgeClass="personal"; badgeText="PERSONAL"; }
 
-  fetch(`${API_BASE}/api/notifications/${id}`, {
-    method: "DELETE"
-  })
-  .then(res => res.json())
-  .then(r => {
-    if(r.success){
-      const el = document.getElementById("note-" + id);
-      if(el) el.remove();
-    }else{
-      alert("Failed to delete notification");
+            container.innerHTML += `
+                <div class="notification" id="note-${n._id}">
+                    <button class="clear-btn" onclick="clearOne('${n._id}')">✖</button>
+                    <span class="badge ${badgeClass}">${badgeText}</span>
+                    <h3>${n.title}</h3>
+                    <p>${n.body}</p>
+                    <div class="time">🕒 ${n.timestamp}</div>
+                </div>
+            `;
+        });
+    } catch(err){
+        console.error(err);
+        container.innerHTML = "<div class='empty'>⚠️ Failed to load notifications</div>";
     }
-  })
-  .catch(err => {
-    console.error(err);
-    alert("Server error");
-  });
 }
 
-/* ---------- CLEAR ALL (BACKEND) ---------- */
-function clearAll(){
-  if(!confirm("Clear ALL notifications?")) return;
-
-  fetch(`${API_BASE}/api/notifications/clear-all`, {
-    method: "POST",
-    headers: { "Content-Type":"application/json" },
-    body: JSON.stringify({ enrollment })
-  })
-  .then(res => res.json())
-  .then(r => {
-    if(r.success){
-      document.getElementById("container").innerHTML =
-        "<div class='empty'>All notifications cleared</div>";
-    }else{
-      alert("Failed to clear notifications");
+/* Clear one notification */
+async function clearOne(id){
+    if(!confirm("Delete this notification?")) return;
+    try {
+        const res = await fetch(`${API_BASE}/api/notifications/${id}`, { method: "DELETE" });
+        const r = await res.json();
+        if(r.success) document.getElementById("note-" + id)?.remove();
+        else alert("Failed to delete notification");
+    } catch(e){
+        console.error(e);
+        alert("Server error");
     }
-  })
-  .catch(err => {
-    console.error(err);
-    alert("Server error");
-  });
 }
+
+/* Clear all notifications */
+async function clearAll(enrollment){
+    if(!confirm("Clear ALL notifications?")) return;
+    try {
+        const res = await fetch(`${API_BASE}/api/notifications/clear-all`, {
+            method: "POST",
+            headers: { "Content-Type":"application/json" },
+            body: JSON.stringify({ enrollment })
+        });
+        const r = await res.json();
+        if(r.success){
+            document.getElementById("container").innerHTML =
+                "<div class='empty'>All notifications cleared</div>";
+        } else alert("Failed to clear notifications");
+    } catch(e){
+        console.error(e);
+        alert("Server error");
+    }
+}
+
+init();
 </script>
 
 </body>
