@@ -445,6 +445,18 @@ if(!mentorId || !ALLOWED_SOURCES.includes(source)){
         const data = await res.json();
         if (res.ok && data.success) { 
           msg.textContent = `Class updated successfully! (${combinedClass})`; 
+          // After successful update
+await fetch("/api/notify/class", {
+  method: "POST",
+  headers: {"Content-Type":"application/json"},
+  body: JSON.stringify({
+    class: combinedClass,
+    title: "Class Updated",
+    body: `Your class has been updated to ${combinedClass}`,
+    url: "/student-dashboard.html"
+  })
+});
+
           msg.style.color = "green"; 
           document.getElementById("sClass").textContent = combinedClass;
           localStorage.setItem("selectedClass", combinedClass);
@@ -510,10 +522,22 @@ if(!mentorId || !ALLOWED_SOURCES.includes(source)){
           } else {
             alert(data.message);
           }
-        } else {
+        } 
+        else {
           console.error(await res.text());
           alert("Server returned invalid response (not JSON)");
         }
+// After successful attendance update
+await fetch("/api/notify/attendance", {
+  method: "POST",
+  headers: {"Content-Type":"application/json"},
+  body: JSON.stringify({
+    enrollments: [enrollment],
+    title: "Attendance Updated",
+    body: `Your attendance has been updated. Please check.`,
+    url: "/attendance.html"
+  })
+});
 
       } catch (err) {
         console.error(err);
