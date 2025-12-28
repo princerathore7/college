@@ -30,15 +30,19 @@ button{
 .tabs{
   display:flex;
   gap:10px;
+  margin-bottom:12px;
+}
+.tab{background:#e5e7eb}
+.tab.active{background:#4f46e5;color:#fff}
+
+.search{
+  width:100%;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ddd;
   margin-bottom:15px;
 }
-.tab{
-  background:#e5e7eb;
-}
-.tab.active{
-  background:#4f46e5;
-  color:#fff;
-}
+
 .grid{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
@@ -96,69 +100,70 @@ button{
   <button class="tab" id="allTab" onclick="switchTab('all')">All Notices</button>
 </div>
 
+<input class="search" id="searchBox" placeholder="🔍 Search notices..." oninput="loadNotices()">
+
 <div id="content" class="grid"></div>
 
 <script>
 const API = "https://college-hwbb.onrender.com/api/notices/";
+const DEVICE_KEY = "device_id";
 const MY_KEY = "my_posted_notices";
+let currentTab = "my";
 
-/* 🔐 AUTH CHECK */
-// if(!localStorage.getItem("access_token")){
-//   alert("Unauthorized access");
-//   location.href = "notice.html";
-// }
-
-// let currentTab="my";
-  
-    /* ===============================
-   ACCESS CONTROL — ADMIN PAGES
-================================ */
-
-const mentorId = localStorage.getItem("mentorId");
-const source   = sessionStorage.getItem("accessSource");
-
-// allowed sources
-const ALLOWED_SOURCES = ["ad", "admin"];
-
-if(!mentorId || !ALLOWED_SOURCES.includes(source)){
-  document.body.innerHTML = `
-    <h2 style="text-align:center;margin-top:20vh;color:red">
-      ❌ Access Denied <br>
-      Please open this page via Administration Panel
-    </h2>
-  `;
-  throw new Error("Unauthorized access");
+/* 🔐 DEVICE ID (ONE TIME) */
+function getDeviceId(){
+  let id = localStorage.getItem(DEVICE_KEY);
+  if(!id){
+    id = "dev-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+    localStorage.setItem(DEVICE_KEY, id);
+  }
+  return id;
 }
+const DEVICE_ID = getDeviceId();
+
 /* TAB SWITCH */
 function switchTab(tab){
-  currentTab=tab;
-  document.getElementById("myTab").classList.toggle("active",tab==="my");
-  document.getElementById("allTab").classList.toggle("active",tab==="all");
+  currentTab = tab;
+  myTab.classList.toggle("active", tab==="my");
+  allTab.classList.toggle("active", tab==="all");
   loadNotices();
 }
 
 /* LOAD NOTICES */
 async function loadNotices(){
-  const box=document.getElementById("content");
-  box.innerHTML="Loading...";
+  const box = document.getElementById("content");
+  const q = document.getElementById("searchBox").value.toLowerCase();
+  box.innerHTML = "Loading...";
 
   try{
-    const res=await fetch(API);
-    const data=await res.json();
+    const res = await fetch(API);
+    const data = await res.json();
     if(!data.success){
-      box.innerHTML="Failed";
+      box.innerHTML = "Failed";
       return;
     }
 
-    let notices=data.notices;
+    let notices = data.notices;
 
+    /* ✅ MY POSTED (DEVICE BASED) */
     if(currentTab==="my"){
-      const mine=JSON.parse(localStorage.getItem(MY_KEY)||"[]");
-      notices=notices.filter(n=>mine.includes(n.title));
+      const mine = JSON.parse(localStorage.getItem(MY_KEY)||"[]");
+      notices = notices.filter(n =>
+        mine.some(m => m.title === n.title && m.device === DEVICE_ID)
+      );
+    }
+
+    /* 🔍 SEARCH */
+    if(q){
+      notices = notices.filter(n =>
+        n.title.toLowerCase().includes(q) ||
+        (n.sender||"").toLowerCase().includes(q) ||
+        (n.target||"").toLowerCase().includes(q)
+      );
     }
 
     if(notices.length===0){
-      box.innerHTML="<div class='empty'>No notices found</div>";
+      box.innerHTML = "<div class='empty'>No notices found</div>";
       return;
     }
 
@@ -188,15 +193,15 @@ async function loadNotices(){
   }
 }
 
-/* DELETE NOTICE */
+/* DELETE */
 async function deleteNotice(title){
-  if(!confirm("Delete this notice?"))return;
+  if(!confirm("Delete this notice?")) return;
 
-  await fetch(API+title,{method:"DELETE"});
+  await fetch(API + title, {method:"DELETE"});
 
-  let mine=JSON.parse(localStorage.getItem(MY_KEY)||"[]");
-  mine=mine.filter(t=>t!==decodeURIComponent(title));
-  localStorage.setItem(MY_KEY,JSON.stringify(mine));
+  let mine = JSON.parse(localStorage.getItem(MY_KEY)||"[]");
+  mine = mine.filter(m => m.title !== decodeURIComponent(title));
+  localStorage.setItem(MY_KEY, JSON.stringify(mine));
 
   loadNotices();
 }

@@ -333,6 +333,7 @@ el("addNotice").onclick = async ()=>{
     alert(data.message);
 
     if(data.success){
+      saveMyNotice(title);  
       ["title","message","year","branch","section","image"]
         .forEach(i => el(i).value = "");
       loadNotices();
@@ -351,6 +352,11 @@ function goToManageNotices(){
     return;
   }
   location.href = "manage-notice.html";
+}
+function saveMyNotice(title){
+  const list = JSON.parse(localStorage.getItem("my_posted_notices")||"[]");
+  list.push({ title, device: localStorage.getItem("device_id") });
+  localStorage.setItem("my_posted_notices", JSON.stringify(list));
 }
 
 /* =============================
