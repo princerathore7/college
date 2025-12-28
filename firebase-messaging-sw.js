@@ -11,15 +11,21 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// 🔔 BACKGROUND NOTIFICATIONS
+/* BACKGROUND PUSH */
 messaging.onBackgroundMessage(payload => {
-  console.log("[SW] Background message:", payload);
+  self.registration.showNotification(
+    payload.notification.title,
+    {
+      body: payload.notification.body,
+      icon: "/logo.jpg",
+      data: payload.data
+    }
+  );
+});
 
-  const title = payload.notification.title;
-  const options = {
-    body: payload.notification.body,
-    icon: "/static/img/logo.png"
-  };
-
-  self.registration.showNotification(title, options);
+/* CLICK REDIRECT */
+self.addEventListener("notificationclick", event => {
+  event.notification.close();
+  const url = event.notification.data?.url || "/dashboard.html";
+  event.waitUntil(clients.openWindow(url));
 });
