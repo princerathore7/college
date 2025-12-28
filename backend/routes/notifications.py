@@ -31,6 +31,15 @@ else:
     print("⚠️ Firebase disabled: FIREBASE_SERVICE_ACCOUNT_JSON not set")
 
 # -------------------- HELPER FUNCTION --------------------
+# 🔔 Helper for assignments / notices / exams
+def send_notification_to_class(class_name, title, body, url="/"):
+    return send_to_class(
+        student_class=class_name,
+        title=title,
+        body=body,
+        url=url
+    )
+
 def send_fcm_notification(title, body, tokens, url="/"):
     """Send FCM notification to multiple tokens"""
     tokens = [t for t in tokens if t]
@@ -303,3 +312,12 @@ def clear_all_notifications():
         ]
     })
     return jsonify(success=True)
+
+# Optional: expose for imports
+__all__ = [
+    "notifications_bp",
+    "send_notification_to_class",
+    "send_to_class",
+    "send_to_enrollment",
+    "send_global",
+]
