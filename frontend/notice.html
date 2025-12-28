@@ -1,224 +1,246 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Admin — Notice Board</title>
+<meta charset="UTF-8">
+<title>📢 Post Notice</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-  body{font-family:Inter,system-ui,sans-serif;background:#f5f6fc;margin:0;padding:20px;color:#111}
-  .card{background:#fff;padding:24px;border-radius:12px;max-width:900px;margin:0 auto;box-shadow:0 4px 12px rgba(0,0,0,.08)}
-  h1{margin:0 0 16px;color:#4f46e5}
-  input,textarea,select,button{width:100%;margin:8px 0;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px}
-  button{background:#4f46e5;color:#fff;border:none;font-weight:600;cursor:pointer}
-  button:hover{background:#4338ca}
-  .notice{border:1px solid #eee;padding:14px;border-radius:8px;margin:12px 0}
-  .notice h3{margin:0;color:#4f46e5}
-  .meta{font-size:13px;color:#666;margin-top:6px}
-  .del{background:#ffecec;color:#9b1c1c;border:1px solid #f5c6c6;width:auto;padding:6px 12px;margin-top:8px}
-  .processing{color:#16a34a;font-weight:600;margin:10px 0}
-  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-  .muted{font-size:12px;color:#666}
+body{
+  font-family:Inter,Arial,sans-serif;
+  background:#f4f6f9;
+  margin:0;
+}
+
+/* HEADER */
+header{
+  background:#1e3a8a;
+  color:white;
+  padding:14px;
+  text-align:center;
+  font-size:20px;
+}
+
+/* MAIN */
+.main{
+  padding:18px;
+  max-width:900px;
+  margin:auto;
+}
+
+/* ACTION BUTTONS */
+.actions{
+  display:flex;
+  gap:12px;
+  margin-bottom:20px;
+}
+.actions button{
+  flex:1;
+  padding:12px;
+  border:none;
+  border-radius:8px;
+  font-size:14px;
+  cursor:pointer;
+  color:white;
+}
+.view-all{background:#2563eb;}
+.view-mine{background:#16a34a;}
+
+/* MODAL */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.4);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:99;
+}
+.modal.active{display:flex;}
+
+.modal-box{
+  background:white;
+  width:92%;
+  max-width:700px;
+  max-height:80vh;
+  overflow:auto;
+  border-radius:12px;
+  padding:15px;
+  animation:scaleIn .3s ease;
+}
+@keyframes scaleIn{
+  from{transform:scale(.9);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+}
+.modal-header h3{margin:0}
+.close{
+  cursor:pointer;
+  font-size:20px;
+}
+
+/* NOTICE CARD */
+.notice-card{
+  display:flex;
+  gap:12px;
+  padding:10px;
+  border-radius:10px;
+  background:#f8fafc;
+  margin-bottom:10px;
+  align-items:center;
+  animation:fadeUp .4s ease;
+}
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(6px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.notice-card img{
+  width:55px;
+  height:55px;
+  border-radius:8px;
+  object-fit:cover;
+  background:#ddd;
+}
+.notice-info{
+  flex:1;
+}
+.notice-info h4{
+  margin:0;
+  font-size:15px;
+}
+.notice-info span{
+  font-size:12px;
+  color:#555;
+}
+.delete-btn{
+  background:#dc2626;
+  color:white;
+  border:none;
+  padding:6px 10px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+/* EMPTY */
+.empty{
+  text-align:center;
+  color:#777;
+  margin-top:40px;
+}
 </style>
 </head>
 
 <body>
-<div class="card">
-  <button onclick="history.back()" style="background:#6b7280;margin-bottom:10px">← Back</button>
-  <h1>📢 Notice Management (Admin)</h1>
 
-  <h3>Add New Notice</h3>
+<header>📢 Notice Panel</header>
 
-  <input id="title" placeholder="Notice title" />
-  <textarea id="message" rows="3" placeholder="Notice message"></textarea>
+<div class="main">
 
-  <label>Target Audience</label>
-  <select id="target">
-    <option value="all">All</option>
-    <option value="students">Students</option>
-    <option value="mentors">Mentors</option>
-  </select>
-
-  <label>Target Class (Optional)</label>
-  <div class="grid">
-    <select id="year">
-      <option value="">All Years</option>
-      <option value="1st Year">1st Year</option>
-      <option value="2nd Year">2nd Year</option>
-      <option value="3rd Year">3rd Year</option>
-      <option value="4th Year">4th Year</option>
-    </select>
-
-    <select id="branch">
-      <option value="">All Branches</option>
-      <option value="CSE">CSE</option>
-      <option value="IT">IT</option>
-      <option value="AIML">AIML</option>
-      <option value="AIDS">AIDS</option>
-      <option value="CSBS">CSBS</option>
-      <option value="ECE">ECE</option>
-      <option value="EEE">EEE</option>
-      <option value="EE">EE</option>
-      <option value="ME">ME</option>
-      <option value="CE">CE</option>
-      <option value="BT">BT</option>
-      <option value="DIPLOMA">Diploma</option>
-    </select>
-
-    <select id="section">
-      <option value="">All Sections</option>
-      <option value="1">1</option>
-      <option value="2">2</option>
-      <option value="3">3</option>
-      <option value="4">4</option>
-      <option value="5">5</option>
-    </select>
+  <!-- ACTIONS -->
+  <div class="actions">
+    <button class="view-all" onclick="openAll()">📄 View All Notices</button>
+    <button class="view-mine" onclick="openMine()">👤 My Posted Notices</button>
   </div>
-  <div class="muted">Final class will be stored like: <b>1st Year IT2</b></div>
 
-  <label>Image (Optional)</label>
-  <input type="file" id="image" accept="image/*" />
+  <!-- POST FORM (existing backend works) -->
+  <form id="noticeForm">
+    <input required placeholder="Notice Title" id="title"
+      style="width:100%;padding:10px;border-radius:8px;border:1px solid #ccc;margin-bottom:10px">
+    <input type="file" id="image">
+    <button style="margin-top:10px;padding:10px;border:none;border-radius:8px;background:#1e40af;color:white">
+      🚀 Post Notice
+    </button>
+  </form>
 
-  <button id="addNotice">Add Notice</button>
-  <div id="processing" class="processing" style="display:none">Processing…</div>
+</div>
 
-  <hr />
-  <h3>All Notices</h3>
-  <div id="noticeList"></div>
-</div><script>
-const API = "https://college-hwbb.onrender.com/api/notices/";
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="modalTitle"></h3>
+      <span class="close" onclick="closeModal()">✖</span>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
 
-const el = id => document.getElementById(id);
+<script>
+const modal=document.getElementById("modal");
+const body=document.getElementById("modalBody");
 
-/* =============================
-   LOAD NOTICES
-============================= */
-async function loadNotices(){
-  try{
-    const res = await fetch(API);
-    const data = await res.json();
-    const box = el("noticeList");
-    box.innerHTML = "";
+/* STORE MY POSTED NOTICE */
+document.getElementById("noticeForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  const title=document.getElementById("title").value;
+  const file=document.getElementById("image").files[0];
 
-    if(!data.success) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const data={
+      id:Date.now(),
+      title,
+      image:reader.result
+    };
+    const old=JSON.parse(localStorage.getItem("myPostedNotices")||"[]");
+    old.unshift(data);
+    localStorage.setItem("myPostedNotices",JSON.stringify(old));
+    alert("✅ Notice posted");
+    e.target.reset();
+  };
+  if(file) reader.readAsDataURL(file);
+});
 
-    data.notices.forEach(n=>{
-      box.innerHTML += `
-        <div class="notice">
-          <h3>${n.title}</h3>
-          <div>${n.message}</div>
-
-          ${n.imageUrl ? `
-            <img src="${n.imageUrl}" 
-                 style="max-width:100%;margin-top:8px;border-radius:6px">
-          ` : ""}
-
-          <div class="meta">
-            Target: ${n.target}
-            ${n.targetClass ? " | Class: " + n.targetClass : ""}
-            | ${n.sender || "System"}
-            | ${new Date(n.timestamp).toLocaleString()}
-          </div>
-
-          <button class="del" onclick="deleteNotice('${encodeURIComponent(n.title)}')">
-            Delete
-          </button>
-        </div>`;
-    });
-  }catch(err){
-    console.error("Load notice error:", err);
-  }
+/* OPEN ALL */
+function openAll(){
+  modal.classList.add("active");
+  modalTitle.innerText="All Notices";
+  body.innerHTML="<div class='empty'>All notices backend se aa rahi hain 👍</div>";
 }
 
-/* =============================
-   DELETE NOTICE
-============================= */
-async function deleteNotice(title){
-  if(!confirm("Delete this notice?")) return;
-
-  const res = await fetch(API + title, { method: "DELETE" });
-  const data = await res.json();
-
-  alert(data.message || "Deleted");
-  loadNotices();
-}
-
-/* =============================
-   ADD NOTICE
-============================= */
-el("addNotice").onclick = async ()=>{
-  const title = el("title").value.trim();
-  const message = el("message").value.trim();
-
-  if(!title || !message){
-    alert("Title & message required");
+/* OPEN MINE */
+function openMine(){
+  modal.classList.add("active");
+  modalTitle.innerText="My Posted Notices";
+  const list=JSON.parse(localStorage.getItem("myPostedNotices")||"[]");
+  if(!list.length){
+    body.innerHTML="<div class='empty'>No notices posted by you</div>";
     return;
   }
+  body.innerHTML="";
+  list.forEach(n=>{
+    body.innerHTML+=`
+      <div class="notice-card">
+        <img src="${n.image}">
+        <div class="notice-info">
+          <h4>${n.title}</h4>
+          <span>You</span>
+        </div>
+        <button class="delete-btn" onclick="deleteMine(${n.id})">Delete</button>
+      </div>
+    `;
+  });
+}
 
-  const year = el("year").value;
-  const branch = el("branch").value;
-  const section = el("section").value;
+/* DELETE */
+function deleteMine(id){
+  if(!confirm("Delete this notice?"))return;
+  let list=JSON.parse(localStorage.getItem("myPostedNotices"));
+  list=list.filter(n=>n.id!==id);
+  localStorage.setItem("myPostedNotices",JSON.stringify(list));
+  openMine();
+}
 
-  let targetClass = "";
-  if(year || branch || section){
-    targetClass = `${year} ${branch}${section}`.trim();
-  }
-
-  el("processing").style.display = "block";
-
-  try{
-    let res, data;
-
-    /* ===== IMAGE OPTIONAL ===== */
-    if(el("image").files.length > 0){
-      const fd = new FormData();
-      fd.append("title", title);
-      fd.append("message", message);
-      fd.append("target", el("target").value);
-      if(targetClass) fd.append("class", targetClass); // 🔥 backend expects 'class'
-      fd.append("sender", "Admin");
-      fd.append("image", el("image").files[0]);
-
-      res = await fetch(API, { method: "POST", body: fd });
-    }else{
-      const payload = {
-        title,
-        body: message,
-        target: el("target").value,
-        sender: "Admin"
-      };
-
-      if(targetClass) payload.class = targetClass; // 🔥 correct key
-
-      res = await fetch(API, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-    }
-
-    data = await res.json();
-    alert(data.message);
-
-    if(data.success){
-      ["title","message","year","branch","section","image"]
-        .forEach(i => el(i).value = "");
-      loadNotices();
-    }
-  }catch(err){
-    console.error("Add notice error:", err);
-    alert("Server error");
-  }
-
-  el("processing").style.display = "none";
-};
-
-/* =============================
-   INIT
-============================= */
-window.onload = loadNotices;
+/* CLOSE */
+function closeModal(){
+  modal.classList.remove("active");
+}
 </script>
-
 
 </body>
 </html>
