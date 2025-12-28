@@ -2,10 +2,10 @@ from flask import Blueprint, request, jsonify
 from pymongo import MongoClient
 import firebase_admin
 from firebase_admin import credentials, messaging
-
 from datetime import datetime
 import os, json
 from pywebpush import webpush
+
 notifications_bp = Blueprint('notifications', __name__)
 
 # -------------------- DATABASE SETUP --------------------
@@ -38,7 +38,6 @@ def send_fcm_notification(title, body, tokens, url="/"):
     - Filters invalid tokens
     - Sends proper string data
     """
-
     # ❌ remove empty / null tokens
     tokens = [t for t in tokens if t]
 
@@ -65,9 +64,7 @@ def send_fcm_notification(title, body, tokens, url="/"):
                 data=payload_data,
                 token=tokens[0]
             )
-
             response = messaging.send(message)
-
             return {
                 "success_count": 1,
                 "failure_count": 0,
@@ -84,9 +81,7 @@ def send_fcm_notification(title, body, tokens, url="/"):
                 data=payload_data,
                 tokens=tokens
             )
-
             response = messaging.send_multicast(message)
-
             return {
                 "success_count": response.success_count,
                 "failure_count": response.failure_count
@@ -116,7 +111,6 @@ def log_notification(title, body, target_type, target, extra_data, result):
 
 
 # -------------------- ROUTES --------------------
-
 # 1️⃣ Save or update FCM token for a student
 @notifications_bp.route('/api/save-token', methods=['POST'])
 def save_token():
@@ -142,7 +136,7 @@ def send_to_enrollment(enrollment, title, body, url="/"):
     if not token_doc or not token_doc.get("token"):
         return {"success_count":0, "failure_count":1, "message":"No token for enrollment"}
     token = token_doc['token']
-    result = send_fcm_notification(title, body, [token], data={"url": url})
+    result = send_fcm_notification(title, body, [token], url)
     log_notification(title, body, "enrollment", enrollment, {"url": url}, result)
     return result
 
@@ -150,7 +144,7 @@ def send_to_enrollment(enrollment, title, body, url="/"):
 # 3️⃣ Class-wise notification
 def send_to_class(student_class, title, body, url="/"):
     tokens = [t['token'] for t in tokens_col.find({"studentClass": student_class})]
-    result = send_fcm_notification(title, body, tokens, data={"url": url})
+    result = send_fcm_notification(title, body, tokens, url)
     log_notification(title, body, "class", student_class, {"url": url}, result)
     return result
 
@@ -158,13 +152,12 @@ def send_to_class(student_class, title, body, url="/"):
 # 4️⃣ Global notification
 def send_global(title, body, url="/"):
     tokens = [t['token'] for t in tokens_col.find({})]
-    result = send_fcm_notification(title, body, tokens, data={"url": url})
+    result = send_fcm_notification(title, body, tokens, url)
     log_notification(title, body, "global", "all", {"url": url}, result)
     return result
 
 
 # -------------------- EXPOSED ROUTES --------------------
-
 # Enrollment-wise (POST)
 @notifications_bp.route('/api/notify/enrollment', methods=['POST'])
 def notify_enrollment():
@@ -203,7 +196,6 @@ def notify_global_route():
 
 
 # -------------------- SPECIFIC HELPERS FOR COMMON USE CASES --------------------
-
 # Attendance update
 @notifications_bp.route('/api/notify/attendance', methods=['POST'])
 def notify_attendance():
@@ -244,7 +236,6 @@ def notify_marks():
 # Fine update
 @notifications_bp.route('/api/notify/fine', methods=['POST'])
 def notify_fine(enrollment, title, body, url):
-    # 🔎 enrollment se student ka device token nikaalo
     sub = db.notifications.find_one({"enrollment": enrollment})
     if not sub:
         return
@@ -270,6 +261,7 @@ def notify_notices():
     else:
         result = send_global(title, body, url)
     return jsonify({"success": True, "result": result})
+
 
 @notifications_bp.route('/api/notify/assignments', methods=['POST'])
 def notify_assignments():
@@ -324,6 +316,8 @@ def notify_events():
     url = data.get('url', "/events.html")
     result = send_global(title, body, url)
     return jsonify({"success": True, "result": result})
+
+
 # --------------------------------------------------
 # 🔔 COMMON HELPER (Assignments / Notices / Exams)
 # --------------------------------------------------
@@ -338,6 +332,8 @@ def send_notification_to_class(class_name, title, body, url="/"):
         body=body,
         url=url
     )
+
+
 def send_web_notification(subscription, message, private_key):
     webpush(
         subscription_info=subscription,
@@ -345,6 +341,8 @@ def send_web_notification(subscription, message, private_key):
         vapid_private_key=private_key,
         vapid_claims={"sub": "mailto:your-email@example.com"}
     )
+
+
 @notifications_bp.route('/api/subscribe', methods=['POST'])
 def subscribe():
     data = request.json
@@ -364,7 +362,9 @@ def subscribe():
         return jsonify({"success": True, "message": "Subscription saved"})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
-    # 📥 Fetch notifications for a student
+
+
+# 📥 Fetch notifications for a student
 @notifications_bp.route('/api/notifications', methods=['GET'])
 def get_notifications():
     enrollment = request.args.get('enrollment')
@@ -389,18 +389,18 @@ def get_notifications():
 
     for n in notifications:
         n["_id"] = str(n["_id"])
-
         ts = n.get("timestamp")
         if isinstance(ts, datetime):
             n["timestamp"] = ts.strftime("%Y-%m-%d %H:%M")
         else:
-            # old string or missing
             n["timestamp"] = str(ts) if ts else ""
 
     return jsonify({
         "success": True,
         "notifications": notifications
     })
+
+
 @notifications_bp.route("/api/notifications/<id>", methods=["DELETE"])
 def delete_notification(id):
     from bson import ObjectId
@@ -413,6 +413,8 @@ def delete_notification(id):
         return jsonify(success=True)
 
     return jsonify(success=False), 404
+
+
 @notifications_bp.route("/api/notifications/clear-all", methods=["POST"])
 def clear_all_notifications():
     data = request.json
