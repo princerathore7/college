@@ -334,6 +334,15 @@ def get_notifications():
 
     for n in notifications:
         n["_id"] = str(n["_id"])
-        n["timestamp"] = n["timestamp"].strftime("%Y-%m-%d %H:%M")
 
-    return jsonify({"success": True, "notifications": notifications})
+        ts = n.get("timestamp")
+        if isinstance(ts, datetime):
+            n["timestamp"] = ts.strftime("%Y-%m-%d %H:%M")
+        else:
+            # old string or missing
+            n["timestamp"] = str(ts) if ts else ""
+
+    return jsonify({
+        "success": True,
+        "notifications": notifications
+    })
