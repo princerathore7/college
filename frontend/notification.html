@@ -22,18 +22,32 @@ header{
   padding:15px;
 }
 .top-actions{
-  text-align:right;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
   margin-bottom:10px;
+  gap:10px;
+}
+.top-actions button, .top-actions select, .top-actions input{
+  padding:6px 10px;
+  border-radius:5px;
+  border:none;
+  font-size:13px;
+  cursor:pointer;
 }
 .top-actions button{
   background:#dc2626;
   color:white;
-  border:none;
-  padding:6px 12px;
-  border-radius:5px;
-  cursor:pointer;
-  font-size:13px;
 }
+.top-actions select{
+  background:#2563eb;
+  color:white;
+}
+.top-actions input{
+  flex:1;
+  border:1px solid #ccc;
+}
+
 .notification{
   background:white;
   border-left:5px solid #2563eb;
@@ -42,6 +56,12 @@ header{
   border-radius:6px;
   box-shadow:0 2px 5px rgba(0,0,0,0.08);
   position:relative;
+  cursor:pointer;
+  transition: background 0.3s;
+}
+.notification.read{
+  opacity:0.7;
+  background:#f0f0f0;
 }
 .notification h3{
   margin:0;
@@ -95,12 +115,10 @@ header{
   <div class="empty">Loading notifications...</div>
 </div>
 
-<!-- 🔥 Firebase SDKs (COMPAT ONLY) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
 
 <script>
-/* ---------------- FIREBASE INIT ---------------- */
 firebase.initializeApp({
   apiKey: "AIzaSyCTjF_PJW03icRfxtnmwIhI8hDqv6XJscc",
   authDomain: "college-notifications-18747.firebaseapp.com",
@@ -111,7 +129,8 @@ firebase.initializeApp({
 
 const API_BASE = "https://college-hwbb.onrender.com";
 
-/* ---------------- INIT ---------------- */
+let allNotifications = []; // store for filtering/search
+
 async function init() {
   const enrollment   = localStorage.getItem("enrollment");
   const studentClass = localStorage.getItem("studentClass");
@@ -122,22 +141,16 @@ async function init() {
     return;
   }
 
-  /* 🔔 PUSH NOTIFICATION SETUP */
+  // 🔔 PUSH NOTIFICATION SETUP
   try {
     if ("serviceWorker" in navigator) {
-      const registration = await navigator.serviceWorker.register(
-        "/firebase-messaging-sw.js"
-      );
-
+      const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
       await navigator.serviceWorker.ready;
-
       const messaging = firebase.messaging();
-
       const token = await messaging.getToken({
         vapidKey: "BNubnwV8CTYrdDmpyhdl4f8kHXQ8Q9XpTDYNsuN59eEgDXDgsm3ecXvO-rRWbQH6MR25RJWUm3-_813aDEHpzZ8",
         serviceWorkerRegistration: registration
       });
-
       if (token) {
         await fetch(`${API_BASE}/api/save-token`, {
           method: "POST",
@@ -151,94 +164,123 @@ async function init() {
     console.warn("Firebase token error:", err);
   }
 
-  /* 🔔 LOAD PANEL NOTIFICATIONS */
   loadNotifications(enrollment, studentClass);
 }
 
-/* ---------------- LOAD NOTIFICATIONS ---------------- */
-async function loadNotifications(enrollment, studentClass) {
-  const container = document.getElementById("container");
-  container.innerHTML = "<div class='empty'>Loading notifications...</div>";
-
+// ---------------- LOAD NOTIFICATIONS ----------------
+async function loadNotifications(enrollment, studentClass){
   try {
-    const res = await fetch(
-      `${API_BASE}/api/notifications?enrollment=${enrollment}&class=${studentClass}`
-    );
+    const res = await fetch(`${API_BASE}/api/notifications?enrollment=${enrollment}&class=${studentClass}`);
     const data = await res.json();
 
-    container.innerHTML = "";
-
-    if (!data.success || data.notifications.length === 0) {
-      container.innerHTML = "<div class='empty'>No notifications yet</div>";
+    if(!data.success || data.notifications.length===0){
+      document.getElementById("container").innerHTML = "<div class='empty'>No notifications yet</div>";
       return;
     }
 
+    allNotifications = data.notifications; // save for filters/search
+
+    renderNotifications(allNotifications);
+  } catch(err){
+    console.error(err);
+    document.getElementById("container").innerHTML = "<div class='empty'>⚠️ Failed to load notifications</div>";
+  }
+}
+
+// ---------------- RENDER NOTIFICATIONS ----------------
+function renderNotifications(notifications){
+  const container = document.getElementById("container");
+  container.innerHTML = `
+    <div class="top-actions">
+      <input type="text" id="searchBox" placeholder="Search notifications..." oninput="applyFilters()"/>
+      <select id="filterSelect" onchange="applyFilters()">
+        <option value="all">All</option>
+        <option value="notices">Notices</option>
+        <option value="events">Events</option>
+        <option value="attendance">Attendance</option>
+        <option value="class">Class</option>
+        <option value="personal">Personal</option>
+      </select>
+      <button onclick="clearAll('${localStorage.getItem('enrollment')}')">🧹 Clear All</button>
+    </div>
+  `;
+
+  notifications.forEach(n=>{
+    let badge = "GLOBAL"; 
+    let colorClass="global";
+    if(n.target_type==="class"){ badge="CLASS"; colorClass="class"; }
+    if(n.target_type==="enrollment"){ badge="PERSONAL"; colorClass="personal"; }
+
     container.innerHTML += `
-      <div class="top-actions">
-        <button onclick="clearAll('${enrollment}')">🧹 Clear All</button>
+      <div class="notification ${n.read?'read':''}" id="note-${n._id}" onclick="gotoNotification('${n._id}','${n.target_type}','${encodeURIComponent(n.title)}')">
+        <button class="clear-btn" onclick="event.stopPropagation(); clearOne('${n._id}')">✖</button>
+        <span class="badge ${colorClass}">${badge}</span>
+        <h3>${n.title}</h3>
+        <p>${n.body}</p>
+        <div class="time">🕒 ${n.timestamp}</div>
       </div>
     `;
-
-    data.notifications.forEach(n => {
-      let badge = "GLOBAL";
-      if (n.target_type === "class") badge = "CLASS";
-      if (n.target_type === "enrollment") badge = "PERSONAL";
-
-      container.innerHTML += `
-        <div class="notification" id="note-${n._id}">
-          <button class="clear-btn" onclick="clearOne('${n._id}')">✖</button>
-          <span class="badge">${badge}</span>
-          <h3>${n.title}</h3>
-          <p>${n.body}</p>
-          <div class="time">🕒 ${n.timestamp}</div>
-        </div>
-      `;
-    });
-
-  } catch (err) {
-    console.error(err);
-    container.innerHTML =
-      "<div class='empty'>⚠️ Failed to load notifications</div>";
-  }
+  });
 }
 
-/* ---------------- CLEAR ONE ---------------- */
-async function clearOne(id) {
-  if (!confirm("Delete this notification?")) return;
-  const res = await fetch(`${API_BASE}/api/notifications/${id}`, {
-    method: "DELETE"
+// ---------------- REDIRECT / MARK READ ----------------
+function gotoNotification(id,type,title){
+  fetch(`${API_BASE}/api/notifications/${id}`, {method:"DELETE"}); // mark read
+  let url = "/";
+  if(title.toLowerCase().includes("notice")) url="notice-read.html?userType=students";
+  else if(title.toLowerCase().includes("event")) url="events.html";
+  else if(title.toLowerCase().includes("attendance")) url="attendance.html";
+  else if(title.toLowerCase().includes("class")) url="student-dashboard.html";
+  window.location.href = url;
+}
+
+// ---------------- FILTER & SEARCH ----------------
+function applyFilters(){
+  const filter = document.getElementById("filterSelect").value;
+  const search = document.getElementById("searchBox").value.toLowerCase();
+  let filtered = allNotifications;
+
+  if(filter!=="all"){
+    if(filter==="notices") filtered = filtered.filter(n=>n.title.toLowerCase().includes("notice"));
+    else if(filter==="events") filtered = filtered.filter(n=>n.title.toLowerCase().includes("event"));
+    else if(filter==="attendance") filtered = filtered.filter(n=>n.title.toLowerCase().includes("attendance"));
+    else if(filter==="class") filtered = filtered.filter(n=>n.title.toLowerCase().includes("class"));
+    else if(filter==="personal") filtered = filtered.filter(n=>n.target_type==="enrollment");
+  }
+
+  if(search) filtered = filtered.filter(n=>
+    n.title.toLowerCase().includes(search) || n.body.toLowerCase().includes(search)
+  );
+
+  renderNotifications(filtered);
+}
+
+// ---------------- CLEAR ONE ----------------
+async function clearOne(id){
+  if(!confirm("Delete this notification?")) return;
+  const res = await fetch(`${API_BASE}/api/notifications/${id}`,{method:"DELETE"});
+  const r = await res.json();
+  if(r.success) document.getElementById("note-"+id)?.remove();
+}
+
+// ---------------- CLEAR ALL ----------------
+async function clearAll(enrollment){
+  if(!confirm("Clear ALL notifications?")) return;
+  const res = await fetch(`${API_BASE}/api/notifications/clear-all`,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({enrollment, studentClass:localStorage.getItem("studentClass")})
   });
   const r = await res.json();
-  if (r.success) document.getElementById("note-" + id)?.remove();
+  if(r.success) document.getElementById("container").innerHTML = "<div class='empty'>All notifications cleared</div>";
 }
 
-/* ---------------- CLEAR ALL ---------------- */
-async function clearAll(enrollment) {
-  if (!confirm("Clear ALL notifications?")) return;
-  const res = await fetch(`${API_BASE}/api/notifications/clear-all`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      enrollment,
-      studentClass: localStorage.getItem("studentClass")
-    })
-  });
-  const r = await res.json();
-  if (r.success) {
-    document.getElementById("container").innerHTML =
-      "<div class='empty'>All notifications cleared</div>";
-  }
-}
+window.clearOne=clearOne;
+window.clearAll=clearAll;
+window.applyFilters=applyFilters;
 
-/* 🔑 expose for onclick */
-window.clearOne = clearOne;
-window.clearAll = clearAll;
-
-/* 🚀 START */
 init();
 </script>
 
 </body>
-
 </html>
-.
