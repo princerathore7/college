@@ -93,6 +93,18 @@ header{
 <div id="container">
   <div class="empty">Loading notifications...</div>
 </div>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
+
+<script>
+  firebase.initializeApp({
+      apiKey: "AIzaSyCTjF_PJW03icRfxtnmwIhI8hDqv6XJscc",
+  authDomain: "college-notifications-18747.firebaseapp.com",
+  projectId: "college-notifications-18747",
+  messagingSenderId: "721889955640",
+  appId: "1:721889955640:web:d29f3d3f0829e8af89fbcd"
+  });
+</script>
 
 <script type="module">
 const API_BASE = "https://college-hwbb.onrender.com";
@@ -191,7 +203,10 @@ async function clearAll(enrollment){
         const res = await fetch(`${API_BASE}/api/notifications/clear-all`, {
             method: "POST",
             headers: { "Content-Type":"application/json" },
-            body: JSON.stringify({ enrollment })
+            body: JSON.stringify({
+              enrollment,
+              studentClass: localStorage.getItem("studentClass")
+            })
         });
         const r = await res.json();
         if(r.success){
@@ -203,6 +218,9 @@ async function clearAll(enrollment){
         alert("Server error");
     }
 }
+// expose functions to global scope (IMPORTANT)
+window.clearOne = clearOne;
+window.clearAll = clearAll;
 
 init();
 </script>

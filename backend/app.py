@@ -313,6 +313,9 @@ def verify_salary_pwd():
 def serve_uploads(filename):
     upload_root = os.path.join(os.getcwd(), "uploads")
     return send_from_directory(upload_root, filename)
+@app.route("/firebase-messaging-sw.js")
+def firebase_sw():
+    return send_from_directory("static/js", "firebase-messaging-sw.js")
 
 # ---------------------------------------------
 # MAIN ENTRY POINT
