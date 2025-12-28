@@ -346,3 +346,32 @@ def get_notifications():
         "success": True,
         "notifications": notifications
     })
+@notifications_bp.route("/api/notifications/<id>", methods=["DELETE"])
+def delete_notification(id):
+    from bson import ObjectId
+
+    result = db.notifications.delete_one({
+        "_id": ObjectId(id)
+    })
+
+    if result.deleted_count == 1:
+        return jsonify(success=True)
+
+    return jsonify(success=False), 404
+@notifications_bp.route("/api/notifications/clear-all", methods=["POST"])
+def clear_all_notifications():
+    data = request.json
+    enrollment = data.get("enrollment")
+
+    if not enrollment:
+        return jsonify(success=False), 400
+
+    db.notifications.delete_many({
+        "$or": [
+            {"target_type": "global"},
+            {"target_type": "class"},
+            {"target_type": "enrollment", "target_value": enrollment}
+        ]
+    })
+
+    return jsonify(success=True)
