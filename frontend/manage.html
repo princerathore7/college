@@ -3,75 +3,73 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Manage Events - Mentor Dashboard</title>
+<title>Manage Events</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 
 <style>
 body{
-  font-family:'Inter',sans-serif;
-  margin:0;
+  font-family:Inter,sans-serif;
   background:#f3f4f6;
+  margin:0;
 }
 header{
   background:#4a90e2;
-  color:white;
-  padding:1rem 2rem;
+  color:#fff;
+  padding:1rem;
   text-align:center;
 }
 main{
   max-width:1000px;
-  margin:2rem auto;
+  margin:1.5rem auto;
+  background:#fff;
   padding:1rem;
-  background:white;
   border-radius:10px;
-  box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+h2{
+  margin-top:2rem;
+  border-bottom:2px solid #eee;
+  padding-bottom:6px;
 }
 .search-box{
-  margin-bottom:1rem;
-}
-.search-box input{
   width:100%;
   padding:10px;
   border-radius:6px;
   border:1px solid #ccc;
+  margin-bottom:1rem;
   font-size:15px;
 }
-.event-card{
+.event{
   border:1px solid #ddd;
   border-radius:8px;
   padding:1rem;
   margin-bottom:1rem;
   display:flex;
   justify-content:space-between;
-  align-items:flex-start;
+  gap:1rem;
   background:#fafafa;
 }
-.event-info{
-  max-width:80%;
-}
-.event-info img{
-  max-width:160px;
-  display:block;
-  margin-bottom:8px;
+.event img{
+  max-width:140px;
   border-radius:6px;
+}
+.meta{
+  font-size:13px;
+  color:#666;
 }
 button{
   background:#e74c3c;
-  color:white;
+  color:#fff;
   border:none;
   padding:8px 14px;
   border-radius:6px;
   cursor:pointer;
-  font-weight:600;
 }
-button:hover{
-  background:#c0392b;
-}
+button:hover{background:#c0392b}
 .empty{
   text-align:center;
-  color:gray;
-  margin-top:2rem;
+  color:#777;
+  margin:1rem 0;
 }
 </style>
 </head>
@@ -83,11 +81,15 @@ button:hover{
 </header>
 
 <main>
-  <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Search events (title, description, date...)">
-  </div>
 
-  <div id="eventsContainer"></div>
+<input class="search-box" id="search" placeholder="Search events (title, description, date...)">
+
+<h2>📌 My Posted Events</h2>
+<div id="myEvents"></div>
+
+<h2>📢 All Events</h2>
+<div id="allEvents"></div>
+
 </main>
 
 <script>
@@ -95,122 +97,114 @@ button:hover{
    ACCESS CONTROL
 ================================ */
 const mentorId = localStorage.getItem("mentorId");
-const source   = sessionStorage.getItem("accessSource");
+const source = sessionStorage.getItem("accessSource");
 
-if(!mentorId || !["ad","admin"].includes(source)){
-  document.body.innerHTML = `
-    <h2 style="text-align:center;margin-top:20vh;color:red">
-      ❌ Access Denied<br>Please open via Admin Panel
-    </h2>`;
+if(!mentorId || !["admin","ad"].includes(source)){
+  document.body.innerHTML = "<h2 style='text-align:center;color:red;margin-top:20vh'>Access Denied</h2>";
   throw new Error("Unauthorized");
 }
 
 /* ===============================
-   DEVICE ID (for ownership)
+   DEVICE ID
 ================================ */
 if(!localStorage.getItem("device_id")){
-  localStorage.setItem(
-    "device_id",
-    "dev-" + Date.now() + "-" + Math.random().toString(36).slice(2)
-  );
+  localStorage.setItem("device_id","dev-"+Date.now()+"-"+Math.random().toString(36).slice(2));
 }
-
-const DEVICE = localStorage.getItem("device_id");
-let ALL_EVENTS = [];
+const deviceId = localStorage.getItem("device_id");
 
 /* ===============================
-   LOAD EVENTS
+   GLOBAL DATA
+================================ */
+let allEventsData = [];
+
+/* ===============================
+   FETCH EVENTS
 ================================ */
 async function loadEvents(){
   try{
     const res = await fetch("https://college-hwbb.onrender.com/api/events");
     const data = await res.json();
+    if(!data.success) return;
 
-    if(!data.success || !Array.isArray(data.events)){
-      render([]);
-      return;
-    }
-
-    // 🔥 only my posted events
-    const myEvents = JSON.parse(localStorage.getItem("my_posted_events")||"[]");
-
-    ALL_EVENTS = data.events.filter(ev =>
-      myEvents.some(m => m.eventId === ev.eventId && m.device === DEVICE)
-    );
-
-    render(ALL_EVENTS);
-
-  }catch(err){
-    console.error(err);
-    render([]);
+    allEventsData = data.events || [];
+    renderEvents();
+  }catch(e){
+    console.error(e);
   }
 }
 
 /* ===============================
-   RENDER
+   RENDER EVENTS
 ================================ */
-function render(list){
-  const box = document.getElementById("eventsContainer");
-  box.innerHTML = "";
+function renderEvents(){
+  const q = document.getElementById("search").value.toLowerCase();
 
-  if(list.length === 0){
-    box.innerHTML = `<div class="empty">No events found</div>`;
-    return;
-  }
+  const myBox = document.getElementById("myEvents");
+  const allBox = document.getElementById("allEvents");
 
-  list.forEach(ev=>{
-    const div = document.createElement("div");
-    div.className = "event-card";
+  myBox.innerHTML = "";
+  allBox.innerHTML = "";
 
-    div.innerHTML = `
-      <div class="event-info">
-        ${ev.image ? `<img src="${ev.image}">` : ""}
-        <strong>${ev.title}</strong><br>
-        Date: ${ev.date || "N/A"}<br>
-        <div>${ev.description || ""}</div>
+  const myList = JSON.parse(localStorage.getItem("my_posted_events") || "[]");
+
+  let myCount = 0, allCount = 0;
+
+  allEventsData.forEach(ev=>{
+    const text = `${ev.title} ${ev.description} ${ev.date}`.toLowerCase();
+    if(!text.includes(q)) return;
+
+    const isMine = myList.some(e => e.eventId === ev.eventId && e.device === deviceId);
+
+    const html = `
+      <div class="event">
+        <div>
+          ${ev.image ? `<img src="${ev.image}">` : ""}
+          <strong>${ev.title}</strong>
+          <div>${ev.description || ""}</div>
+          <div class="meta">📅 ${ev.date || "N/A"}</div>
+        </div>
+        ${isMine ? `<button onclick="deleteEvent('${ev.eventId}')">Delete</button>` : ""}
       </div>
-      <button onclick="deleteEvent('${ev.eventId}')">Delete</button>
     `;
-    box.appendChild(div);
+
+    if(isMine){
+      myBox.innerHTML += html;
+      myCount++;
+    }else{
+      allBox.innerHTML += html;
+      allCount++;
+    }
   });
+
+  if(myCount === 0) myBox.innerHTML = "<div class='empty'>No events posted by you</div>";
+  if(allCount === 0) allBox.innerHTML = "<div class='empty'>No events found</div>";
 }
 
 /* ===============================
    DELETE EVENT
 ================================ */
-async function deleteEvent(eventId){
+async function deleteEvent(id){
   if(!confirm("Delete this event?")) return;
 
-  try{
-    const res = await fetch(
-      `https://college-hwbb.onrender.com/api/events/${eventId}`,
-      { method:"DELETE" }
-    );
-    const data = await res.json();
+  const res = await fetch(`https://college-hwbb.onrender.com/api/events/${id}`,{
+    method:"DELETE"
+  });
+  const data = await res.json();
 
-    if(data.success){
-      let my = JSON.parse(localStorage.getItem("my_posted_events")||"[]");
-      my = my.filter(e => e.eventId !== eventId);
-      localStorage.setItem("my_posted_events", JSON.stringify(my));
-      loadEvents();
-    }else{
-      alert(data.message || "Delete failed");
-    }
-  }catch(err){
-    alert("Server error");
+  if(data.success){
+    let list = JSON.parse(localStorage.getItem("my_posted_events")||"[]");
+    list = list.filter(e => e.eventId !== id);
+    localStorage.setItem("my_posted_events",JSON.stringify(list));
+    loadEvents();
+  }else{
+    alert(data.message || "Delete failed");
   }
 }
 
 /* ===============================
-   SEARCH (title + desc + date)
+   SEARCH
 ================================ */
-document.getElementById("searchInput").addEventListener("input", e=>{
-  const q = e.target.value.toLowerCase();
-  const filtered = ALL_EVENTS.filter(ev =>
-    JSON.stringify(ev).toLowerCase().includes(q)
-  );
-  render(filtered);
-});
+document.getElementById("search").addEventListener("input",renderEvents);
 
 /* ===============================
    INIT
