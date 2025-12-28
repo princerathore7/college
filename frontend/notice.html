@@ -2,243 +2,234 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>📢 Post Notice</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Notice Board</title>
 
 <style>
 body{
-  font-family:Inter,Arial,sans-serif;
-  background:#f4f6f9;
-  margin:0;
+  font-family:Inter,system-ui,sans-serif;
+  background:#f5f6fc;
+  margin:0;padding:20px;color:#111
 }
-
-/* HEADER */
-header{
-  background:#1e3a8a;
-  color:white;
-  padding:14px;
-  text-align:center;
-  font-size:20px;
-}
-
-/* MAIN */
-.main{
-  padding:18px;
+.card{
+  background:#fff;
+  padding:24px;
+  border-radius:14px;
   max-width:900px;
   margin:auto;
+  box-shadow:0 10px 30px rgba(0,0,0,.08)
 }
+h1{color:#4f46e5;margin:0 0 12px}
 
-/* ACTION BUTTONS */
+input,textarea,select,button{
+  width:100%;padding:12px;margin:8px 0;
+  border-radius:8px;border:1px solid #ddd;font-size:14px
+}
+button{
+  background:#4f46e5;color:#fff;
+  border:none;font-weight:600;cursor:pointer
+}
+button:hover{background:#4338ca}
+
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.muted{font-size:12px;color:#666}
+
 .actions{
-  display:flex;
-  gap:12px;
-  margin-bottom:20px;
+  display:flex;gap:10px;margin-top:10px
 }
-.actions button{
-  flex:1;
-  padding:12px;
-  border:none;
-  border-radius:8px;
-  font-size:14px;
-  cursor:pointer;
-  color:white;
-}
-.view-all{background:#2563eb;}
-.view-mine{background:#16a34a;}
+.actions button{flex:1}
 
 /* MODAL */
 .modal{
-  position:fixed;
-  inset:0;
+  position:fixed;inset:0;
   background:rgba(0,0,0,.4);
-  display:none;
-  justify-content:center;
-  align-items:center;
-  z-index:99;
+  display:none;align-items:center;justify-content:center;
+  z-index:50
 }
-.modal.active{display:flex;}
-
+.modal.show{display:flex}
 .modal-box{
-  background:white;
-  width:92%;
-  max-width:700px;
-  max-height:80vh;
-  overflow:auto;
-  border-radius:12px;
-  padding:15px;
-  animation:scaleIn .3s ease;
+  background:#fff;
+  width:90%;max-width:850px;
+  border-radius:14px;
+  padding:20px;
+  animation:zoom .3s ease
 }
-@keyframes scaleIn{
+@keyframes zoom{
   from{transform:scale(.9);opacity:0}
   to{transform:scale(1);opacity:1}
 }
-.modal-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:10px;
-}
-.modal-header h3{margin:0}
-.close{
-  cursor:pointer;
-  font-size:20px;
-}
 
-/* NOTICE CARD */
+/* NOTICE CARD SMALL */
 .notice-card{
-  display:flex;
-  gap:12px;
-  padding:10px;
-  border-radius:10px;
-  background:#f8fafc;
-  margin-bottom:10px;
+  display:flex;gap:14px;
+  border:1px solid #eee;
+  padding:12px;border-radius:10px;
+  margin-bottom:12px;
   align-items:center;
-  animation:fadeUp .4s ease;
+  transition:.3s
 }
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(6px)}
-  to{opacity:1;transform:translateY(0)}
+.notice-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 18px rgba(0,0,0,.08)
 }
 .notice-card img{
-  width:55px;
-  height:55px;
-  border-radius:8px;
+  width:60px;height:60px;
+  border-radius:10px;
   object-fit:cover;
-  background:#ddd;
+  background:#e5e7eb
 }
-.notice-info{
-  flex:1;
-}
-.notice-info h4{
-  margin:0;
-  font-size:15px;
-}
-.notice-info span{
-  font-size:12px;
-  color:#555;
-}
-.delete-btn{
-  background:#dc2626;
-  color:white;
-  border:none;
-  padding:6px 10px;
-  border-radius:6px;
-  cursor:pointer;
-}
+.notice-info{flex:1}
+.notice-info h4{margin:0;color:#4f46e5}
+.notice-meta{font-size:12px;color:#555;margin-top:4px}
 
-/* EMPTY */
-.empty{
-  text-align:center;
-  color:#777;
-  margin-top:40px;
+.del{
+  background:#fee2e2;color:#991b1b;
+  border:1px solid #fca5a5;
+  padding:6px 10px;border-radius:6px;
+  cursor:pointer
 }
 </style>
 </head>
 
 <body>
 
-<header>📢 Notice Panel</header>
+<div class="card">
+  <button onclick="history.back()" style="background:#6b7280">← Back</button>
+  <h1>📢 Notice Management</h1>
 
-<div class="main">
+  <!-- POST NOTICE -->
+  <input id="title" placeholder="Notice title">
+  <textarea id="message" rows="3" placeholder="Notice message"></textarea>
+
+  <select id="target">
+    <option value="all">All</option>
+    <option value="students">Students</option>
+    <option value="mentors">Mentors</option>
+  </select>
+
+  <div class="grid">
+    <select id="year">
+      <option value="">All Years</option>
+      <option>1st Year</option><option>2nd Year</option>
+      <option>3rd Year</option><option>4th Year</option>
+    </select>
+    <select id="branch">
+      <option value="">All Branches</option>
+      <option>CSE</option><option>IT</option><option>ECE</option>
+      <option>ME</option><option>CE</option>
+    </select>
+    <select id="section">
+      <option value="">All</option>
+      <option>1</option><option>2</option><option>3</option>
+    </select>
+  </div>
+
+  <input type="file" id="image" accept="image/*">
+  <button id="addNotice">Add Notice</button>
 
   <!-- ACTIONS -->
   <div class="actions">
-    <button class="view-all" onclick="openAll()">📄 View All Notices</button>
-    <button class="view-mine" onclick="openMine()">👤 My Posted Notices</button>
+    <button onclick="openAll()">📢 View All Notices</button>
+    <button onclick="openMine()" style="background:#16a34a">👤 My Posted Notices</button>
   </div>
-
-  <!-- POST FORM (existing backend works) -->
-  <form id="noticeForm">
-    <input required placeholder="Notice Title" id="title"
-      style="width:100%;padding:10px;border-radius:8px;border:1px solid #ccc;margin-bottom:10px">
-    <input type="file" id="image">
-    <button style="margin-top:10px;padding:10px;border:none;border-radius:8px;background:#1e40af;color:white">
-      🚀 Post Notice
-    </button>
-  </form>
-
 </div>
 
 <!-- MODAL -->
 <div class="modal" id="modal">
   <div class="modal-box">
-    <div class="modal-header">
-      <h3 id="modalTitle"></h3>
-      <span class="close" onclick="closeModal()">✖</span>
-    </div>
-    <div id="modalBody"></div>
+    <h3 id="modalTitle"></h3>
+    <div id="modalContent"></div>
+    <button onclick="closeModal()" style="margin-top:10px;background:#6b7280">Close</button>
   </div>
 </div>
 
 <script>
-const modal=document.getElementById("modal");
-const body=document.getElementById("modalBody");
+const API="https://college-hwbb.onrender.com/api/notices/";
+const modal=id=>document.getElementById(id);
+const myKey="my_posted_notices";
 
-/* STORE MY POSTED NOTICE */
-document.getElementById("noticeForm").addEventListener("submit",e=>{
-  e.preventDefault();
-  const title=document.getElementById("title").value;
-  const file=document.getElementById("image").files[0];
+/* ADD NOTICE (backend untouched) */
+addNotice.onclick=async()=>{
+  const title=titleEl.value=title.value.trim();
+  if(!title||!message.value.trim()) return alert("Required");
 
-  const reader=new FileReader();
-  reader.onload=()=>{
-    const data={
-      id:Date.now(),
-      title,
-      image:reader.result
-    };
-    const old=JSON.parse(localStorage.getItem("myPostedNotices")||"[]");
-    old.unshift(data);
-    localStorage.setItem("myPostedNotices",JSON.stringify(old));
-    alert("✅ Notice posted");
-    e.target.reset();
-  };
-  if(file) reader.readAsDataURL(file);
-});
+  const year=yearEl.value=year.value;
+  const branch=branch.value;
+  const section=section.value;
+  let cls=[year,branch+section].join(" ").trim();
 
-/* OPEN ALL */
+  const fd=new FormData();
+  fd.append("title",title);
+  fd.append("message",message.value);
+  fd.append("target",target.value);
+  fd.append("sender","Teacher");
+  if(cls) fd.append("class",cls);
+  if(image.files[0]) fd.append("image",image.files[0]);
+
+  const res=await fetch(API,{method:"POST",body:fd});
+  const data=await res.json();
+  alert(data.message);
+
+  if(data.success){
+    const mine=JSON.parse(localStorage.getItem(myKey)||"[]");
+    mine.push({...data.notice});
+    localStorage.setItem(myKey,JSON.stringify(mine));
+    document.querySelectorAll("input,textarea").forEach(i=>i.value="");
+  }
+};
+
+/* MODALS */
 function openAll(){
-  modal.classList.add("active");
-  modalTitle.innerText="All Notices";
-  body.innerHTML="<div class='empty'>All notices backend se aa rahi hain 👍</div>";
+  modal("modalTitle").innerText="📢 All Notices";
+  loadNotices(false);
+}
+function openMine(){
+  modal("modalTitle").innerText="👤 My Posted Notices";
+  loadNotices(true);
+}
+function closeModal(){
+  modal("modal").classList.remove("show");
 }
 
-/* OPEN MINE */
-function openMine(){
-  modal.classList.add("active");
-  modalTitle.innerText="My Posted Notices";
-  const list=JSON.parse(localStorage.getItem("myPostedNotices")||"[]");
-  if(!list.length){
-    body.innerHTML="<div class='empty'>No notices posted by you</div>";
-    return;
+/* LOAD */
+async function loadNotices(onlyMine){
+  modal("modal").classList.add("show");
+  const box=modal("modalContent");
+  box.innerHTML="Loading…";
+
+  let notices=[];
+  if(onlyMine){
+    notices=JSON.parse(localStorage.getItem(myKey)||"[]");
+  }else{
+    const r=await fetch(API);const d=await r.json();
+    notices=d.notices||[];
   }
-  body.innerHTML="";
-  list.forEach(n=>{
-    body.innerHTML+=`
+
+  box.innerHTML="";
+  notices.forEach(n=>{
+    box.innerHTML+=`
       <div class="notice-card">
-        <img src="${n.image}">
+        <img src="${n.imageUrl||''}">
         <div class="notice-info">
           <h4>${n.title}</h4>
-          <span>You</span>
+          <div class="notice-meta">
+            Target: ${n.target} | ${n.sender||"System"} |
+            ${new Date(n.timestamp).toLocaleString()}
+          </div>
         </div>
-        <button class="delete-btn" onclick="deleteMine(${n.id})">Delete</button>
-      </div>
-    `;
+        ${onlyMine?`<button class="del" onclick="deleteNotice('${encodeURIComponent(n.title)}')">Delete</button>`:""}
+      </div>`;
   });
 }
 
 /* DELETE */
-function deleteMine(id){
-  if(!confirm("Delete this notice?"))return;
-  let list=JSON.parse(localStorage.getItem("myPostedNotices"));
-  list=list.filter(n=>n.id!==id);
-  localStorage.setItem("myPostedNotices",JSON.stringify(list));
+async function deleteNotice(title){
+  if(!confirm("Delete?"))return;
+  await fetch(API+title,{method:"DELETE"});
+  let mine=JSON.parse(localStorage.getItem(myKey)||"[]");
+  mine=mine.filter(n=>encodeURIComponent(n.title)!==title);
+  localStorage.setItem(myKey,JSON.stringify(mine));
   openMine();
-}
-
-/* CLOSE */
-function closeModal(){
-  modal.classList.remove("active");
 }
 </script>
 
