@@ -355,6 +355,8 @@ document.getElementById("postEvent").addEventListener("click", async () => {
       });
 
       alert("Event posted successfully!");
+// Example, after successful POST
+saveMyEvent(newEvent.eventId);
 
       titleInput.value = "";
       dateInput.value = "";
@@ -371,6 +373,22 @@ document.getElementById("postEvent").addEventListener("click", async () => {
     alert("Failed to post event due to server error.");
   }
 });
+function getDeviceId() {
+  let id = localStorage.getItem("device_id");
+  if (!id) {
+    id = "dev-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+    localStorage.setItem("device_id", id);
+  }
+  return id;
+}
+
+const DEVICE_ID = getDeviceId();
+function saveMyEvent(eventId){
+  const list = JSON.parse(localStorage.getItem("my_posted_events") || "[]");
+  list.push({ eventId, device: DEVICE_ID });
+  localStorage.setItem("my_posted_events", JSON.stringify(list));
+}
+
 </script>
 
 
