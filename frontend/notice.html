@@ -1,262 +1,364 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Notice Board — Admin</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Admin — Notice Board</title>
 
 <style>
-body{
-  font-family:Inter,system-ui,sans-serif;
-  background:#f4f6fb;
-  margin:0;
-  padding:20px;
-}
-.card{
-  background:#fff;
-  max-width:900px;
-  margin:auto;
-  padding:24px;
-  border-radius:14px;
-  box-shadow:0 8px 24px rgba(0,0,0,.08);
-}
-h1{color:#4f46e5;margin:0 0 10px}
-input,textarea,select,button{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border-radius:8px;
-  border:1px solid #ddd;
-}
-button{
-  background:#4f46e5;
-  color:#fff;
-  border:none;
-  font-weight:600;
-  cursor:pointer;
-}
-button:hover{background:#4338ca}
-
-/* ACTION BAR */
-.actions{
-  display:flex;
-  gap:10px;
-  margin:15px 0;
-}
-.actions button{
-  flex:1;
-  background:#0f172a;
-}
-
-/* MODAL */
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.45);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:20;
-}
-.modal.show{display:flex}
-.modal-box{
-  background:#fff;
-  width:90%;
-  max-width:950px;
-  max-height:85vh;
-  overflow:auto;
-  border-radius:14px;
-  padding:20px;
-  animation:pop .3s ease;
-}
-@keyframes pop{
-  from{transform:scale(.9);opacity:0}
-  to{transform:scale(1);opacity:1}
-}
-
-/* NOTICE CARD GRID */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-  gap:14px;
-}
-
-/* MINI CARD (INSTAGRAM STYLE) */
-.notice-mini{
-  display:flex;
-  gap:12px;
-  background:#f8fafc;
-  padding:12px;
-  border-radius:12px;
-  align-items:center;
-}
-.notice-mini img{
-  width:60px;
-  height:60px;
-  object-fit:cover;
-  border-radius:10px;
-  background:#e5e7eb;
-}
-.notice-mini h4{margin:0;font-size:14px}
-.meta{
-  font-size:12px;
-  color:#555;
-  margin-top:4px;
-}
-.del{
-  margin-left:auto;
-  background:#fee2e2;
-  color:#991b1b;
-  padding:6px 10px;
-  border-radius:6px;
-  font-size:12px;
-}
-
-/* NORMAL CARD */
-.notice-card{
-  background:#fff;
-  padding:14px;
-  border-radius:12px;
-  box-shadow:0 4px 14px rgba(0,0,0,.08);
-}
-.notice-card img{
-  width:100%;
-  border-radius:10px;
-  margin-top:8px;
-}
-
-.close{
-  background:#6b7280;
-  margin-bottom:10px;
-}
+  body{font-family:Inter,system-ui,sans-serif;background:#f5f6fc;margin:0;padding:20px;color:#111}
+  .card{background:#fff;padding:24px;border-radius:12px;max-width:900px;margin:0 auto;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+  h1{margin:0 0 16px;color:#4f46e5}
+  input,textarea,select,button{width:100%;margin:8px 0;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px}
+  button{background:#4f46e5;color:#fff;border:none;font-weight:600;cursor:pointer}
+  button:hover{background:#4338ca}
+  .notice{border:1px solid #eee;padding:14px;border-radius:8px;margin:12px 0}
+  .notice h3{margin:0;color:#4f46e5}
+  .meta{font-size:13px;color:#666;margin-top:6px}
+  .del{background:#ffecec;color:#9b1c1c;border:1px solid #f5c6c6;width:auto;padding:6px 12px;margin-top:8px}
+  .processing{color:#16a34a;font-weight:600;margin:10px 0}
+  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .muted{font-size:12px;color:#666}
 </style>
 </head>
 
 <body>
-
 <div class="card">
-  <button class="close" onclick="history.back()">← Back</button>
-  <h1>📢 Notice Management</h1>
+  <button onclick="history.back()" style="background:#6b7280;margin-bottom:10px">← Back</button>
+  <h1>📢 Notice Management (Admin)</h1>
+<button onclick="goToManageNotices()">📂 Manage Posted Notices</button>
+  <h3>Add New Notice</h3>
 
-  <!-- POST FORM (UNCHANGED LOGIC) -->
-  <input id="title" placeholder="Notice title">
+  <input id="title" placeholder="Notice title" />
   <textarea id="message" rows="3" placeholder="Notice message"></textarea>
 
+  <label>Target Audience</label>
   <select id="target">
     <option value="all">All</option>
     <option value="students">Students</option>
     <option value="mentors">Mentors</option>
   </select>
 
-  <input id="year" placeholder="Year (optional)">
-  <input id="branch" placeholder="Branch (optional)">
-  <input id="section" placeholder="Section (optional)">
-  <input type="file" id="image" accept="image/*">
+  <label>Target Class (Optional)</label>
+  <div class="grid">
+    <select id="year">
+      <option value="">All Years</option>
+      <option value="1st Year">1st Year</option>
+      <option value="2nd Year">2nd Year</option>
+      <option value="3rd Year">3rd Year</option>
+      <option value="4th Year">4th Year</option>
+    </select>
 
-  <button id="addNotice">Post Notice</button>
+    <select id="branch">
+      <option value="">All Branches</option>
+      <option value="CSE">CSE</option>
+      <option value="IT">IT</option>
+      <option value="AIML">AIML</option>
+      <option value="AIDS">AIDS</option>
+      <option value="CSBS">CSBS</option>
+      <option value="ECE">ECE</option>
+      <option value="EEE">EEE</option>
+      <option value="EE">EE</option>
+      <option value="ME">ME</option>
+      <option value="CE">CE</option>
+      <option value="BT">BT</option>
+      <option value="DIPLOMA">Diploma</option>
+        <option value="AIML1">AIML1</option>
+    <option value="AIML2">AIML2</option>
+    <option value="AIML3">AIML3</option>
+    <option value="AIML4">AIML4</option>
+    <option value="AIML5">AIML5</option>
+    
+    <option value="AIDS1">AIDS1</option>
+    <option value="AIDS2">AIDS2</option>
+    <option value="AIDS3">AIDS3</option>
+    <option value="AIDS4">AIDS4</option>
+    <option value="AIDS5">AIDS5</option>
+    
+    <option value="CSBS1">CSBS1</option>
+    <option value="CSBS2">CSBS2</option>
+    <option value="CSBS3">CSBS3</option>
+    <option value="CSBS4">CSBS4</option>
+    <option value="CSBS5">CSBS5</option>
 
-  <!-- ACTIONS -->
-  <div class="actions">
-    <button onclick="openModal('all')">View All Notices</button>
-    <button onclick="openModal('my')">My Posted Notices</button>
+    <option value="IOT1">IOT1</option>
+    <option value="IOT2">IOT2</option>
+    <option value="IOT3">IOT3</option>
+    <option value="IOT4">IOT4</option>
+    <option value="IOT5">IOT5</option>
+    
+    <option value="ECE1">ECE1</option>
+    <option value="ECE2">ECE2</option>
+    <option value="ECE3">ECE3</option>
+    <option value="ECE4">ECE4</option>
+    <option value="ECE5">ECE5</option>
+
+    <option value="EEE1">EEE1</option>
+    <option value="EEE2">EEE2</option>
+    <option value="EEE3">EEE3</option>
+    <option value="EEE4">EEE4</option>
+    <option value="EEE5">EEE5</option>
+
+    <option value="EE1">EE1</option>
+    <option value="EE2">EE2</option>
+    <option value="EE3">EE3</option>
+    <option value="EE4">EE4</option>
+    <option value="EE5">EE5</option>
+
+    <option value="ME1">ME1</option>
+    <option value="ME2">ME2</option>
+    <option value="ME3">ME3</option>
+    <option value="ME4">ME4</option>
+    <option value="ME5">ME5</option>
+
+    <option value="AU1">AU1</option>
+    <option value="AU2">AU2</option>
+    <option value="AU3">AU3</option>
+    <option value="AU4">AU4</option>
+    <option value="AU5">AU5</option>
+
+    <option value="MT1">MT1</option>
+    <option value="MT2">MT2</option>
+    <option value="MT3">MT3</option>
+    <option value="MT4">MT4</option>
+    <option value="MT5">MT5</option>
+
+    <option value="CE1">CE1</option>
+    <option value="CE2">CE2</option>
+    <option value="CE3">CE3</option>
+    <option value="CE4">CE4</option>
+    <option value="CE5">CE5</option>
+
+    <option value="CHE1">CHE1</option>
+    <option value="CHE2">CHE2</option>
+    <option value="CHE3">CHE3</option>
+    <option value="CHE4">CHE4</option>
+    <option value="CHE5">CHE5</option>
+
+    <option value="MIN1">MIN1</option>
+    <option value="MIN2">MIN2</option>
+    <option value="MIN3">MIN3</option>
+    <option value="MIN4">MIN4</option>
+    <option value="MIN5">MIN5</option>
+
+    <option value="PET1">PET1</option>
+    <option value="PET2">PET2</option>
+    <option value="PET3">PET3</option>
+    <option value="PET4">PET4</option>
+    <option value="PET5">PET5</option>
+
+    <option value="BT1">BT1</option>
+    <option value="BT2">BT2</option>
+    <option value="BT3">BT3</option>
+    <option value="BT4">BT4</option>
+    <option value="BT5">BT5</option>
+
+    <option value="BME1">BME1</option>
+    <option value="BME2">BME2</option>
+    <option value="BME3">BME3</option>
+    <option value="BME4">BME4</option>
+    <option value="BME5">BME5</option>
+
+    <option value="FT1">FT1</option>
+    <option value="FT2">FT2</option>
+    <option value="FT3">FT3</option>
+    <option value="FT4">FT4</option>
+    <option value="FT5">FT5</option>
+
+    <option value="AG1">AG1</option>
+    <option value="AG2">AG2</option>
+    <option value="AG3">AG3</option>
+    <option value="AG4">AG4</option>
+    <option value="AG5">AG5</option>
+
+    <option value="ENV1">ENV1</option>
+    <option value="ENV2">ENV2</option>
+    <option value="ENV3">ENV3</option>
+    <option value="ENV4">ENV4</option>
+    <option value="ENV5">ENV5</option>
+
+    <option value="TX1">TX1</option>
+    <option value="TX2">TX2</option>
+    <option value="TX3">TX3</option>
+    <option value="TX4">TX4</option>
+    <option value="TX5">TX5</option>
+
+    <option value="PIE1">PIE1</option>
+    <option value="PIE2">PIE2</option>
+    <option value="PIE3">PIE3</option>
+    <option value="PIE4">PIE4</option>
+    <option value="PIE5">PIE5</option>
+
+    <option value="IM1">IM1</option>
+    <option value="IM2">IM2</option>
+    <option value="IM3">IM3</option>
+    <option value="IM4">IM4</option>
+    <option value="IM5">IM5</option>
+  
+    </select>
+
+    <select id="section">
+      <option value="">All Sections</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+    </select>
   </div>
-</div>
+  <div class="muted">Final class will be stored like: <b>1st Year IT2</b></div>
 
-<!-- MODAL -->
-<div class="modal" id="modal">
-  <div class="modal-box">
-    <button class="close" onclick="closeModal()">Close</button>
-    <div id="modalContent"></div>
-  </div>
-</div>
+  <label>Image (Optional)</label>
+  <input type="file" id="image" accept="image/*" />
 
-<script>
-const API="https://college-hwbb.onrender.com/api/notices/";
-const LS_KEY="my_posted_notices";
+  <button id="addNotice">Add Notice</button>
+  <div id="processing" class="processing" style="display:none">Processing…</div>
 
-/* SAVE MY NOTICE */
-function saveMyNotice(title){
-  let list=JSON.parse(localStorage.getItem(LS_KEY)||"[]");
-  if(!list.includes(title)){
-    list.push(title);
-    localStorage.setItem(LS_KEY,JSON.stringify(list));
-  }
-}
+  <hr />
+  <h3>All Notices</h3>
+  <div id="noticeList"></div>
+</div><script>
+const API = "https://college-hwbb.onrender.com/api/notices/";
 
-/* LOAD MODAL */
-async function openModal(type){
-  const modal=document.getElementById("modal");
-  const box=document.getElementById("modalContent");
-  modal.classList.add("show");
-  box.innerHTML="Loading...";
+const el = id => document.getElementById(id);
 
-  const res=await fetch(API);
-  const data=await res.json();
-  if(!data.success) return;
+/* =============================
+   LOAD NOTICES
+============================= */
+async function loadNotices(){
+  try{
+    const res = await fetch(API);
+    const data = await res.json();
+    const box = el("noticeList");
+    box.innerHTML = "";
 
-  let notices=data.notices;
-  if(type==="my"){
-    const mine=JSON.parse(localStorage.getItem(LS_KEY)||"[]");
-    notices=notices.filter(n=>mine.includes(n.title));
-  }
+    if(!data.success) return;
 
-  box.innerHTML=`<div class="grid"></div>`;
-  const grid=box.querySelector(".grid");
+    data.notices.forEach(n=>{
+      box.innerHTML += `
+        <div class="notice">
+          <h3>${n.title}</h3>
+          <div>${n.message}</div>
 
-  notices.forEach(n=>{
-    if(type==="my"){
-      grid.innerHTML+=`
-        <div class="notice-mini">
-          <img src="${n.imageUrl||''}">
-          <div>
-            <h4>${n.title}</h4>
-            <div class="meta">
-              Target: ${n.target} | ${n.sender||"Admin"} | 
-              ${new Date(n.timestamp).toLocaleString()}
-            </div>
+          ${n.imageUrl ? `
+            <img src="${n.imageUrl}" 
+                 style="max-width:100%;margin-top:8px;border-radius:6px">
+          ` : ""}
+
+          <div class="meta">
+            Target: ${n.target}
+            ${n.targetClass ? " | Class: " + n.targetClass : ""}
+            | ${n.sender || "System"}
+            | ${new Date(n.timestamp).toLocaleString()}
           </div>
+
           <button class="del" onclick="deleteNotice('${encodeURIComponent(n.title)}')">
             Delete
           </button>
         </div>`;
-    }else{
-      grid.innerHTML+=`
-        <div class="notice-card">
-          <h4>${n.title}</h4>
-          <div class="meta">
-            Target: ${n.target} | ${n.sender||"Admin"} | 
-            ${new Date(n.timestamp).toLocaleString()}
-          </div>
-          <p>${n.message}</p>
-          ${n.imageUrl?`<img src="${n.imageUrl}">`:""}
-        </div>`;
-    }
-  });
+    });
+  }catch(err){
+    console.error("Load notice error:", err);
+  }
 }
 
-function closeModal(){
-  document.getElementById("modal").classList.remove("show");
-}
-
-/* DELETE (BACKEND SAME) */
+/* =============================
+   DELETE NOTICE
+============================= */
 async function deleteNotice(title){
-  if(!confirm("Delete notice?"))return;
-  await fetch(API+title,{method:"DELETE"});
-  let mine=JSON.parse(localStorage.getItem(LS_KEY)||"[]");
-  localStorage.setItem(LS_KEY,JSON.stringify(mine.filter(t=>t!==decodeURIComponent(title))));
-  openModal("my");
+  if(!confirm("Delete this notice?")) return;
+
+  const res = await fetch(API + title, { method: "DELETE" });
+  const data = await res.json();
+
+  alert(data.message || "Deleted");
+  loadNotices();
 }
 
-/* ADD NOTICE (LOGIC SAME) */
-document.getElementById("addNotice").onclick=async()=>{
-  const title=titleEl.value.trim();
-  const message=messageEl.value.trim();
-  if(!title||!message) return alert("Required");
+/* =============================
+   ADD NOTICE
+============================= */
+el("addNotice").onclick = async ()=>{
+  const title = el("title").value.trim();
+  const message = el("message").value.trim();
 
-  saveMyNotice(title);
-  location.reload();
+  if(!title || !message){
+    alert("Title & message required");
+    return;
+  }
+
+  const year = el("year").value;
+  const branch = el("branch").value;
+  const section = el("section").value;
+
+  let targetClass = "";
+  if(year || branch || section){
+    targetClass = `${year} ${branch}${section}`.trim();
+  }
+
+  el("processing").style.display = "block";
+
+  try{
+    let res, data;
+
+    /* ===== IMAGE OPTIONAL ===== */
+    if(el("image").files.length > 0){
+      const fd = new FormData();
+      fd.append("title", title);
+      fd.append("message", message);
+      fd.append("target", el("target").value);
+      if(targetClass) fd.append("class", targetClass); // 🔥 backend expects 'class'
+      fd.append("sender", "Admin");
+      fd.append("image", el("image").files[0]);
+
+      res = await fetch(API, { method: "POST", body: fd });
+    }else{
+      const payload = {
+        title,
+        body: message,
+        target: el("target").value,
+        sender: "Admin"
+      };
+
+      if(targetClass) payload.class = targetClass; // 🔥 correct key
+
+      res = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    }
+
+    data = await res.json();
+    alert(data.message);
+
+    if(data.success){
+      ["title","message","year","branch","section","image"]
+        .forEach(i => el(i).value = "");
+      loadNotices();
+    }
+  }catch(err){
+    console.error("Add notice error:", err);
+    alert("Server error");
+  }
+
+  el("processing").style.display = "none";
 };
+function goToManageNotices(){
+  const token = localStorage.getItem("access_token");
+  if(!token){
+    alert("Unauthorized");
+    return;
+  }
+  location.href = "manage-notice.html";
+}
+
+/* =============================
+   INIT
+============================= */
+window.onload = loadNotices;
 </script>
+
 
 </body>
 </html>
