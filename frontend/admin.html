@@ -408,6 +408,10 @@ if(!mentorId || !ALLOWED_SOURCES.includes(source)){
           document.getElementById("sName").textContent = data.student.name;
           document.getElementById("sClass").textContent = data.student.class || "Not Assigned";
           document.getElementById("yearSelect").value = data.student.year || "";
+           // ✅ Store enrollment & class for notifications
+      localStorage.setItem("enrollment", enrollment);
+      localStorage.setItem("studentClass", data.student.class || `${data.student.year} ${document.getElementById("newClass").value}`);
+
           msg.textContent = "";
           fetchAttendance(enrollment);
         } else {
@@ -569,6 +573,32 @@ await fetch("/api/notify/attendance", {
     });
     localStorage.removeItem("admin_students");
 render(true);   // force refresh
+async function init() {
+  const enrollment = localStorage.getItem("enrollment");
+  const studentClass = localStorage.getItem("studentClass");
+
+  if (!enrollment || !studentClass) return; // student select hona chahiye
+
+  if ("serviceWorker" in navigator) {
+    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+    await navigator.serviceWorker.ready;
+    const messaging = firebase.messaging();
+
+    const token = await messaging.getToken({
+      vapidKey: "...",
+      serviceWorkerRegistration: registration
+    });
+
+    if (token) {
+      await fetch(`${API_BASE}/api/save-token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enrollment, studentClass, token })
+      });
+      console.log("✅ Push token saved");
+    }
+  }
+}
 
 </script>
 <script src="/static/js/notifications.js"></script>
