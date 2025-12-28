@@ -5,7 +5,7 @@ from firebase_admin import credentials, messaging
 
 from datetime import datetime
 import os, json
-
+from pywebpush import webpush
 notifications_bp = Blueprint('notifications', __name__)
 
 # -------------------- DATABASE SETUP --------------------
@@ -16,6 +16,7 @@ tokens_col = db['fcm_tokens']             # Store student FCM tokens
 notifications_col = db['notifications']   # Store sent notifications history/log
 
 # -------------------- FIREBASE ADMIN SETUP --------------------
+# Initialize Firebase only once
 firebase_json = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
 
 if firebase_json:
@@ -31,45 +32,77 @@ else:
     print("⚠️ Firebase disabled: FIREBASE_SERVICE_ACCOUNT_JSON not set")
 
 # -------------------- HELPER FUNCTION --------------------
-# 🔔 Helper for assignments / notices / exams
-def send_notification_to_class(class_name, title, body, url="/"):
-    return send_to_class(
-        student_class=class_name,
-        title=title,
-        body=body,
-        url=url
-    )
-
 def send_fcm_notification(title, body, tokens, url="/"):
-    """Send FCM notification to multiple tokens"""
-    tokens = [t for t in tokens if t]
-    if not tokens:
-        return {"success_count": 0, "failure_count": 0, "message": "No valid tokens"}
+    """
+    Production-safe FCM sender
+    - Filters invalid tokens
+    - Sends proper string data
+    """
 
-    payload_data = {"url": str(url)}
+    # ❌ remove empty / null tokens
+    tokens = [t for t in tokens if t]
+
+    if not tokens:
+        return {
+            "success_count": 0,
+            "failure_count": 0,
+            "message": "No valid tokens"
+        }
+
+    # 🔔 payload (DATA MUST BE STRING)
+    payload_data = {
+        "url": str(url)
+    }
 
     try:
+        # 🔹 SINGLE TOKEN
         if len(tokens) == 1:
             message = messaging.Message(
-                notification=messaging.Notification(title=title, body=body),
+                notification=messaging.Notification(
+                    title=title,
+                    body=body
+                ),
                 data=payload_data,
                 token=tokens[0]
             )
+
             response = messaging.send(message)
-            return {"success_count": 1, "failure_count": 0, "message_id": response}
+
+            return {
+                "success_count": 1,
+                "failure_count": 0,
+                "message_id": response
+            }
+
+        # 🔹 MULTIPLE TOKENS
         else:
             message = messaging.MulticastMessage(
-                notification=messaging.Notification(title=title, body=body),
+                notification=messaging.Notification(
+                    title=title,
+                    body=body
+                ),
                 data=payload_data,
                 tokens=tokens
             )
+
             response = messaging.send_multicast(message)
-            return {"success_count": response.success_count, "failure_count": response.failure_count}
+
+            return {
+                "success_count": response.success_count,
+                "failure_count": response.failure_count
+            }
+
     except Exception as e:
         print("❌ FCM SEND ERROR:", e)
-        return {"success_count": 0, "failure_count": len(tokens), "error": str(e)}
+        return {
+            "success_count": 0,
+            "failure_count": len(tokens),
+            "error": str(e)
+        }
+
 
 def log_notification(title, body, target_type, target, extra_data, result):
+    """Store sent notification in DB"""
     notifications_col.insert_one({
         "title": title,
         "body": body,
@@ -81,7 +114,10 @@ def log_notification(title, body, target_type, target, extra_data, result):
         "timestamp": datetime.utcnow() 
     })
 
+
 # -------------------- ROUTES --------------------
+
+# 1️⃣ Save or update FCM token for a student
 @notifications_bp.route('/api/save-token', methods=['POST'])
 def save_token():
     data = request.json
@@ -99,29 +135,37 @@ def save_token():
     )
     return jsonify({"success": True, "message": "Token saved"})
 
-# -------------------- Notification Helpers --------------------
+
+# 2️⃣ Enrollment-wise notification
 def send_to_enrollment(enrollment, title, body, url="/"):
     token_doc = tokens_col.find_one({"enrollment": enrollment})
     if not token_doc or not token_doc.get("token"):
         return {"success_count":0, "failure_count":1, "message":"No token for enrollment"}
     token = token_doc['token']
-    result = send_fcm_notification(title, body, [token], url)
+    result = send_fcm_notification(title, body, [token], data={"url": url})
     log_notification(title, body, "enrollment", enrollment, {"url": url}, result)
     return result
 
+
+# 3️⃣ Class-wise notification
 def send_to_class(student_class, title, body, url="/"):
     tokens = [t['token'] for t in tokens_col.find({"studentClass": student_class})]
-    result = send_fcm_notification(title, body, tokens, url)
+    result = send_fcm_notification(title, body, tokens, data={"url": url})
     log_notification(title, body, "class", student_class, {"url": url}, result)
     return result
 
+
+# 4️⃣ Global notification
 def send_global(title, body, url="/"):
     tokens = [t['token'] for t in tokens_col.find({})]
-    result = send_fcm_notification(title, body, tokens, url)
+    result = send_fcm_notification(title, body, tokens, data={"url": url})
     log_notification(title, body, "global", "all", {"url": url}, result)
     return result
 
-# -------------------- Exposed Routes --------------------
+
+# -------------------- EXPOSED ROUTES --------------------
+
+# Enrollment-wise (POST)
 @notifications_bp.route('/api/notify/enrollment', methods=['POST'])
 def notify_enrollment():
     data = request.json
@@ -129,9 +173,13 @@ def notify_enrollment():
     title = data.get('title')
     body = data.get('body')
     url = data.get('url', "/")
-    results = [send_to_enrollment(e, title, body, url) for e in enrollments]
+    results = []
+    for e in enrollments:
+        results.append(send_to_enrollment(e, title, body, url))
     return jsonify({"success": True, "results": results})
 
+
+# Class-wise (POST)
 @notifications_bp.route('/api/notify/class', methods=['POST'])
 def notify_class():
     data = request.json
@@ -142,6 +190,8 @@ def notify_class():
     result = send_to_class(student_class, title, body, url)
     return jsonify({"success": True, "result": result})
 
+
+# Global (POST)
 @notifications_bp.route('/api/notify/global', methods=['POST'])
 def notify_global_route():
     data = request.json
@@ -151,23 +201,30 @@ def notify_global_route():
     result = send_global(title, body, url)
     return jsonify({"success": True, "result": result})
 
-# -------------------- Specific Use Cases --------------------
+
+# -------------------- SPECIFIC HELPERS FOR COMMON USE CASES --------------------
+
+# Attendance update
 @notifications_bp.route('/api/notify/attendance', methods=['POST'])
 def notify_attendance():
     data = request.json
     enrollments = data.get('enrollments', [])
-    title = data.get('title', "Attendance Update")
     body = data.get('body', "Your attendance has been updated")
+    title = data.get('title', "Attendance Update")
     url = data.get('url', "/attendance.html")
-    results = [send_to_enrollment(e, title, body, url) for e in enrollments]
+    results = []
+    for e in enrollments:
+        results.append(send_to_enrollment(e, title, body, url))
     return jsonify({"success": True, "results": results})
 
+
+# Marks update
 @notifications_bp.route('/api/notify/marks', methods=['POST'])
 def notify_marks():
     data = request.json
     enrollments = data.get('enrollments', [])
-    title = data.get('title', "Marks Update")
     body = data.get('body', "Your marks have been updated")
+    title = data.get('title', "Marks Update")
     url = data.get('url', "/marks.html")
 
     if not enrollments:
@@ -183,26 +240,28 @@ def notify_marks():
 
     return jsonify({"success": True, "results": results}), 200
 
-# Fine update (FCM-based)
+
+# Fine update
 @notifications_bp.route('/api/notify/fine', methods=['POST'])
-def notify_fine():
-    data = request.json
-    enrollment = data.get("enrollment")
-    title = data.get("title", "Fine Update")
-    body = data.get("body", "")
-    url = data.get("url", "/fine.html")
+def notify_fine(enrollment, title, body, url):
+    # 🔎 enrollment se student ka device token nikaalo
+    sub = db.notifications.find_one({"enrollment": enrollment})
+    if not sub:
+        return
 
-    if not enrollment:
-        return jsonify(success=False), 400
+    send_web_push(
+        subscription=sub["subscription"],
+        title=title,
+        body=body,
+        url=url
+    )
 
-    result = send_to_enrollment(enrollment, title, body, url)
-    return jsonify({"success": True, "result": result})
 
 # Notices / Assignments / Exams
 @notifications_bp.route('/api/notify/notices', methods=['POST'])
 def notify_notices():
     data = request.json
-    target_class = data.get('class')
+    target_class = data.get('class')  # can be None for all
     title = data.get('title')
     body = data.get('body')
     url = data.get('url', "/notices.html")
@@ -215,7 +274,7 @@ def notify_notices():
 @notifications_bp.route('/api/notify/assignments', methods=['POST'])
 def notify_assignments():
     data = request.json
-    class_name = data.get('class')
+    class_name = data.get('class')  # optional, send to specific class
     title = data.get('title')
     body = data.get('body')
     url = data.get('url', "/assignments.html")
@@ -230,6 +289,7 @@ def notify_assignments():
 
     return jsonify({"success": True, "result": result})
 
+
 @notifications_bp.route('/api/notify/exams', methods=['POST'])
 def notify_exams():
     data = request.json
@@ -243,6 +303,8 @@ def notify_exams():
         result = send_global(title, body, url)
     return jsonify({"success": True, "result": result})
 
+
+# Bus route update
 @notifications_bp.route('/api/notify/bus', methods=['POST'])
 def notify_bus():
     data = request.json
@@ -252,6 +314,8 @@ def notify_bus():
     result = send_global(title, body, url)
     return jsonify({"success": True, "result": result})
 
+
+# Events update (global)
 @notifications_bp.route('/api/notify/events', methods=['POST'])
 def notify_events():
     data = request.json
@@ -260,8 +324,47 @@ def notify_events():
     url = data.get('url', "/events.html")
     result = send_global(title, body, url)
     return jsonify({"success": True, "result": result})
+# --------------------------------------------------
+# 🔔 COMMON HELPER (Assignments / Notices / Exams)
+# --------------------------------------------------
+def send_notification_to_class(class_name, title, body, url="/"):
+    """
+    Wrapper for class-wise notifications
+    Used by assignments, notices, exams etc.
+    """
+    return send_to_class(
+        student_class=class_name,
+        title=title,
+        body=body,
+        url=url
+    )
+def send_web_notification(subscription, message, private_key):
+    webpush(
+        subscription_info=subscription,
+        data=message,
+        vapid_private_key=private_key,
+        vapid_claims={"sub": "mailto:your-email@example.com"}
+    )
+@notifications_bp.route('/api/subscribe', methods=['POST'])
+def subscribe():
+    data = request.json
+    enrollment = data.get('enrollment')  # frontend se enrollment pass karna zaruri
+    if not enrollment:
+        return jsonify({"success": False, "message": "Enrollment missing"}), 400
 
-# -------------------- Fetch & Delete --------------------
+    # subscription object
+    subscription = data.get('subscription') or data  # data me pura subscription object aa sakta hai
+
+    try:
+        tokens_col.update_one(
+            {'enrollment': enrollment},
+            {'$set': {'token': subscription}},
+            upsert=True
+        )
+        return jsonify({"success": True, "message": "Subscription saved"})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+    # 📥 Fetch notifications for a student
 @notifications_bp.route('/api/notifications', methods=['GET'])
 def get_notifications():
     enrollment = request.args.get('enrollment')
@@ -286,21 +389,35 @@ def get_notifications():
 
     for n in notifications:
         n["_id"] = str(n["_id"])
+
         ts = n.get("timestamp")
-        n["timestamp"] = ts.strftime("%Y-%m-%d %H:%M") if isinstance(ts, datetime) else str(ts or "")
+        if isinstance(ts, datetime):
+            n["timestamp"] = ts.strftime("%Y-%m-%d %H:%M")
+        else:
+            # old string or missing
+            n["timestamp"] = str(ts) if ts else ""
 
-    return jsonify({"success": True, "notifications": notifications})
-
+    return jsonify({
+        "success": True,
+        "notifications": notifications
+    })
 @notifications_bp.route("/api/notifications/<id>", methods=["DELETE"])
 def delete_notification(id):
     from bson import ObjectId
-    result = db.notifications.delete_one({"_id": ObjectId(id)})
-    return jsonify(success=result.deleted_count == 1)
 
+    result = db.notifications.delete_one({
+        "_id": ObjectId(id)
+    })
+
+    if result.deleted_count == 1:
+        return jsonify(success=True)
+
+    return jsonify(success=False), 404
 @notifications_bp.route("/api/notifications/clear-all", methods=["POST"])
 def clear_all_notifications():
     data = request.json
     enrollment = data.get("enrollment")
+
     if not enrollment:
         return jsonify(success=False), 400
 
@@ -308,16 +425,8 @@ def clear_all_notifications():
         "$or": [
             {"target_type": "global"},
             {"target_type": "class"},
-            {"target_type": "enrollment", "target": enrollment}
+            {"target_type": "enrollment", "target_value": enrollment}
         ]
     })
-    return jsonify(success=True)
 
-# Optional: expose for imports
-__all__ = [
-    "notifications_bp",
-    "send_notification_to_class",
-    "send_to_class",
-    "send_to_enrollment",
-    "send_global",
-]
+    return jsonify(success=True)
