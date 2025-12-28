@@ -1,4 +1,5 @@
 /* firebase-messaging-sw.js */
+// firebase-messaging-sw.js
 
 importScripts("https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js");
@@ -13,31 +14,21 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-/**
- * Background notification handler
- * (jab website band ho ya background me ho)
- */
-messaging.onBackgroundMessage(function (payload) {
-  console.log("[SW] Background message received:", payload);
-
-  const notificationTitle = payload.notification?.title || "New Notification";
-  const notificationOptions = {
-    body: payload.notification?.body || "",
-    icon: "/static/logo.jpg",   // optional
-    data: payload.data || {}
-  };
-
-  self.registration.showNotification(notificationTitle, notificationOptions);
+/* 🔔 BACKGROUND PUSH */
+messaging.onBackgroundMessage(function(payload) {
+  self.registration.showNotification(
+    payload.notification.title,
+    {
+      body: payload.notification.body,
+      data: payload.data,
+    }
+  );
 });
 
-/**
- * Notification click handler
- */
-self.addEventListener("notificationclick", function (event) {
+/* 👉 Tap → redirect */
+self.addEventListener("notificationclick", function(event) {
   event.notification.close();
-
-  const url = event.notification?.data?.url || "/notifications.html";
-
+  const url = event.notification.data?.url || "/";
   event.waitUntil(
     clients.openWindow(url)
   );

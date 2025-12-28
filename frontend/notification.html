@@ -113,11 +113,47 @@ async function init() {
     const enrollment   = localStorage.getItem("enrollment");
     const studentClass = localStorage.getItem("studentClass");
 
-    if(!enrollment){
+    if (!enrollment) {
         document.getElementById("container").innerHTML =
             "<div class='empty'>❌ Please login first</div>";
         return;
     }
+
+    try {
+        /* 🔥 Register service worker FIRST */
+        const registration = await navigator.serviceWorker.register(
+            "/firebase-messaging-sw.js"
+        );
+
+        /* 🔥 Wait until service worker is ACTIVE */
+        await navigator.serviceWorker.ready;
+
+        const messaging = firebase.messaging();
+
+        const token = await messaging.getToken({
+            vapidKey: "BNubnwV8CTYrdDmpyhdl4f8kHXQ8Q9XpTDYNsuN59eEgDXDgsm3ecXvO-rRWbQH6MR25RJWUm3-_813aDEHpzZ8",
+            serviceWorkerRegistration: registration
+        });
+
+        if (token) {
+            await fetch(`${API_BASE}/api/save-token`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    enrollment,
+                    studentClass,
+                    token
+                })
+            });
+            console.log("✅ Push notification token saved");
+        }
+    } catch (err) {
+        console.warn("Firebase token error:", err);
+    }
+
+    /* 🔔 Load notifications panel */
+    loadNotifications(enrollment, studentClass);
+}
 
     // Firebase messaging token
     try {
@@ -136,7 +172,7 @@ async function init() {
     }
 
     loadNotifications(enrollment, studentClass);
-}
+
 
 async function loadNotifications(enrollment, studentClass){
     const container = document.getElementById("container");
