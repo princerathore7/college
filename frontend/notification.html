@@ -94,6 +94,11 @@ header{
 <div id="container">
   <div class="empty">Loading notifications...</div>
 </div>
+<script type="module">
+let res = await fetch('/api/notifications?enrollment=123&class=A');
+let data = await res.json();
+console.log(data);
+</script>
 
 <script>
 const enrollment   = localStorage.getItem("enrollment");
