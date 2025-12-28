@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Admin — Notice Board</title>
+
+<style>
+  body{font-family:Inter,system-ui,sans-serif;background:#f5f6fc;margin:0;padding:20px;color:#111}
+  .card{background:#fff;padding:24px;border-radius:12px;max-width:900px;margin:0 auto;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+  h1{margin:0 0 16px;color:#4f46e5}
+  input,textarea,select,button{width:100%;margin:8px 0;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px}
+  button{background:#4f46e5;color:#fff;border:none;font-weight:600;cursor:pointer}
+  button:hover{background:#4338ca}
+  .notice{border:1px solid #eee;padding:14px;border-radius:8px;margin:12px 0}
+  .notice h3{margin:0;color:#4f46e5}
+  .meta{font-size:13px;color:#666;margin-top:6px}
+  .del{background:#ffecec;color:#9b1c1c;border:1px solid #f5c6c6;width:auto;padding:6px 12px;margin-top:8px}
+  .processing{color:#16a34a;font-weight:600;margin:10px 0}
+  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .muted{font-size:12px;color:#666}
+</style>
+</head>
+
+<body>
+<div class="card">
+  <button onclick="history.back()" style="background:#6b7280;margin-bottom:10px">← Back</button>
+  <h1>📢 Notice Management (Admin)</h1>
+
+  <h3>Add New Notice</h3>
+
+  <input id="title" placeholder="Notice title" />
+  <textarea id="message" rows="3" placeholder="Notice message"></textarea>
+
+  <label>Target Audience</label>
+  <select id="target">
+    <option value="all">All</option>
+    <option value="students">Students</option>
+    <option value="mentors">Mentors</option>
+  </select>
+
+  <label>Target Class (Optional)</label>
+  <div class="grid">
+    <select id="year">
+      <option value="">All Years</option>
+      <option value="1st Year">1st Year</option>
+      <option value="2nd Year">2nd Year</option>
+      <option value="3rd Year">3rd Year</option>
+      <option value="4th Year">4th Year</option>
+    </select>
+
+    <select id="branch">
+      <option value="">All Branches</option>
+      <option value="CSE">CSE</option>
+      <option value="IT">IT</option>
+      <option value="AIML">AIML</option>
+      <option value="AIDS">AIDS</option>
+      <option value="CSBS">CSBS</option>
+      <option value="ECE">ECE</option>
+      <option value="EEE">EEE</option>
+      <option value="EE">EE</option>
+      <option value="ME">ME</option>
+      <option value="CE">CE</option>
+      <option value="BT">BT</option>
+      <option value="DIPLOMA">Diploma</option>
+    </select>
+
+    <select id="section">
+      <option value="">All Sections</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+    </select>
+  </div>
+  <div class="muted">Final class will be stored like: <b>1st Year IT2</b></div>
+
+  <label>Image (Optional)</label>
+  <input type="file" id="image" accept="image/*" />
+
+  <button id="addNotice">Add Notice</button>
+  <div id="processing" class="processing" style="display:none">Processing…</div>
+
+  <hr />
+  <h3>All Notices</h3>
+  <div id="noticeList"></div>
+</div><script>
+const API = "https://college-hwbb.onrender.com/api/notices/";
+
+const el = id => document.getElementById(id);
+
+/* =============================
+   LOAD NOTICES
+============================= */
+async function loadNotices(){
+  try{
+    const res = await fetch(API);
+    const data = await res.json();
+    const box = el("noticeList");
+    box.innerHTML = "";
+
+    if(!data.success) return;
+
+    data.notices.forEach(n=>{
+      box.innerHTML += `
+        <div class="notice">
+          <h3>${n.title}</h3>
+          <div>${n.message}</div>
+
+          ${n.imageUrl ? `
+            <img src="${n.imageUrl}" 
+                 style="max-width:100%;margin-top:8px;border-radius:6px">
+          ` : ""}
+
+          <div class="meta">
+            Target: ${n.target}
+            ${n.targetClass ? " | Class: " + n.targetClass : ""}
+            | ${n.sender || "System"}
+            | ${new Date(n.timestamp).toLocaleString()}
+          </div>
+
+          <button class="del" onclick="deleteNotice('${encodeURIComponent(n.title)}')">
+            Delete
+          </button>
+        </div>`;
+    });
+  }catch(err){
+    console.error("Load notice error:", err);
+  }
+}
+
+/* =============================
+   DELETE NOTICE
+============================= */
+async function deleteNotice(title){
+  if(!confirm("Delete this notice?")) return;
+
+  const res = await fetch(API + title, { method: "DELETE" });
+  const data = await res.json();
+
+  alert(data.message || "Deleted");
+  loadNotices();
+}
+
+/* =============================
+   ADD NOTICE
+============================= */
+el("addNotice").onclick = async ()=>{
+  const title = el("title").value.trim();
+  const message = el("message").value.trim();
+
+  if(!title || !message){
+    alert("Title & message required");
+    return;
+  }
+
+  const year = el("year").value;
+  const branch = el("branch").value;
+  const section = el("section").value;
+
+  let targetClass = "";
+  if(year || branch || section){
+    targetClass = `${year} ${branch}${section}`.trim();
+  }
+
+  el("processing").style.display = "block";
+
+  try{
+    let res, data;
+
+    /* ===== IMAGE OPTIONAL ===== */
+    if(el("image").files.length > 0){
+      const fd = new FormData();
+      fd.append("title", title);
+      fd.append("message", message);
+      fd.append("target", el("target").value);
+      if(targetClass) fd.append("class", targetClass); // 🔥 backend expects 'class'
+      fd.append("sender", "Admin");
+      fd.append("image", el("image").files[0]);
+
+      res = await fetch(API, { method: "POST", body: fd });
+    }else{
+      const payload = {
+        title,
+        body: message,
+        target: el("target").value,
+        sender: "Admin"
+      };
+
+      if(targetClass) payload.class = targetClass; // 🔥 correct key
+
+      res = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    }
+
+    data = await res.json();
+    alert(data.message);
+
+    if(data.success){
+      ["title","message","year","branch","section","image"]
+        .forEach(i => el(i).value = "");
+      loadNotices();
+    }
+  }catch(err){
+    console.error("Add notice error:", err);
+    alert("Server error");
+  }
+
+  el("processing").style.display = "none";
+};
+
+/* =============================
+   INIT
+============================= */
+window.onload = loadNotices;
+</script>
+
+
+</body>
+</html>
