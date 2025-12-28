@@ -103,13 +103,32 @@ const API = "https://college-hwbb.onrender.com/api/notices/";
 const MY_KEY = "my_posted_notices";
 
 /* 🔐 AUTH CHECK */
-if(!localStorage.getItem("access_token")){
-  alert("Unauthorized access");
-  location.href = "notice.html";
+// if(!localStorage.getItem("access_token")){
+//   alert("Unauthorized access");
+//   location.href = "notice.html";
+// }
+
+// let currentTab="my";
+  
+    /* ===============================
+   ACCESS CONTROL — ADMIN PAGES
+================================ */
+
+const mentorId = localStorage.getItem("mentorId");
+const source   = sessionStorage.getItem("accessSource");
+
+// allowed sources
+const ALLOWED_SOURCES = ["ad", "admin"];
+
+if(!mentorId || !ALLOWED_SOURCES.includes(source)){
+  document.body.innerHTML = `
+    <h2 style="text-align:center;margin-top:20vh;color:red">
+      ❌ Access Denied <br>
+      Please open this page via Administration Panel
+    </h2>
+  `;
+  throw new Error("Unauthorized access");
 }
-
-let currentTab="my";
-
 /* TAB SWITCH */
 function switchTab(tab){
   currentTab=tab;
