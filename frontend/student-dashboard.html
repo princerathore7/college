@@ -403,17 +403,61 @@ input:checked + .slider {
 input:checked + .slider:before {
   transform: translateX(24px);
 }
-.notif-btn{
-  background:#2563eb;
-  color:white;
-  border:none;
-  padding:10px 16px;
-  border-radius:6px;
-  cursor:pointer;
-  font-size:14px;
+/* Notifications button */
+.notif-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: 0.25s ease;
+  position: relative;
 }
-.notif-btn:hover{
-  background:#1e40af;
+
+.notif-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(79, 70, 229, 0.4);
+}
+
+.notif-count {
+  background: #ff3b30;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 12px;
+  position: absolute;
+  top: -6px;
+  right: -6px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 600px) {
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .notif-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .logo-img {
+    height: 40px;
+  }
 }
 </style>
 </head>
@@ -427,13 +471,19 @@ input:checked + .slider:before {
     <h1>Acropolis — Student</h1>
   </div>
 <!-- 🔔 Notifications Button -->
-<button id="openNotifications" class="notif-btn">
+<!-- <button id="openNotifications" class="notif-btn">
   🔔 Notifications
 </button>
   <div class="top-actions">
     <div id="mentorIdDisplay" style="color:#fff;margin-right:8px">Student</div>
     <!-- <button class="action-btn" id="logoutBtn">Logout</button> -->
-  </div>
+  </div> -->
+  
+  <div class="header-actions">
+    <!-- Notifications -->
+    <button id="openNotifications" class="notif-btn">
+      🔔 Notifications <span id="notifCount" class="notif-count">0</span>
+    </button>
 </header>
 
 <!-- SIDEBAR -->
