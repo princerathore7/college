@@ -5,7 +5,7 @@ import cloudinary.uploader
 
 from db import db
 
-from auth.middleware import admin_required,teacher_required # teacher_required hata diya
+from auth.middleware import admin_required # teacher_required hata diya
 
 forms_bp = Blueprint("forms_bp", __name__)
 
@@ -20,7 +20,7 @@ submissions_col = db.form_submissions
 # CREATE FORM (ADMIN / TEACHER)
 # ==============================
 @forms_bp.route("/forms", methods=["POST"])
-@teacher_required
+@admin_required
 def create_form():
     data = request.form
 
@@ -64,7 +64,6 @@ def create_form():
 # GET ALL ACTIVE FORMS (STUDENT)
 # ==============================
 @forms_bp.route("/forms", methods=["GET"])
-@student_required
 def get_forms():
     forms = []
     for f in forms_col.find({"active": True}).sort("created_at", -1):
@@ -82,7 +81,6 @@ def get_forms():
 # GET SINGLE FORM (STUDENT)
 # ==============================
 @forms_bp.route("/forms/<form_id>", methods=["GET"])
-@student_required
 def get_single_form(form_id):
     form = forms_col.find_one({"_id": ObjectId(form_id), "active": True})
     if not form:
@@ -101,7 +99,7 @@ def get_single_form(form_id):
 # SUBMIT FORM (STUDENT)
 # ==============================
 @forms_bp.route("/forms/<form_id>/submit", methods=["POST"])
-@student_required
+
 def submit_form(form_id):
     form = forms_col.find_one({"_id": ObjectId(form_id)})
     if not form:
@@ -143,7 +141,7 @@ def submit_form(form_id):
 # GET FORMS WITH SUBMISSION COUNT (ADMIN / TEACHER)
 # ==============================
 @forms_bp.route("/admin/forms", methods=["GET"])
-@teacher_required
+@admin_required
 def get_forms_admin():
     forms = []
     for f in forms_col.find():
@@ -161,7 +159,7 @@ def get_forms_admin():
 # GET SUBMISSIONS OF A FORM
 # ==============================
 @forms_bp.route("/admin/forms/<form_id>/submissions", methods=["GET"])
-@teacher_required
+@admin_required
 def get_form_submissions(form_id):
     submissions = []
     for s in submissions_col.find({"form_id": ObjectId(form_id)}).sort("submitted_at", -1):
@@ -179,7 +177,7 @@ def get_form_submissions(form_id):
 # VIEW SINGLE SUBMISSION
 # ==============================
 @forms_bp.route("/admin/submissions/<submission_id>", methods=["GET"])
-@teacher_required
+@admin_required
 def view_submission(submission_id):
     s = submissions_col.find_one({"_id": ObjectId(submission_id)})
     if not s:
@@ -196,7 +194,7 @@ def view_submission(submission_id):
 # GET SUBMISSIONS OF A SINGLE FORM (ADMIN / TEACHER)
 # ==============================
 @forms_bp.route("/admin/forms/<form_id>/submissions", methods=["GET"])
-@teacher_required
+@admin_required
 def get_form_submissions(form_id):
     try:
         form = forms_col.find_one({"_id": ObjectId(form_id)})
@@ -230,7 +228,7 @@ def get_form_submissions(form_id):
 # APPROVE / DISAPPROVE SUBMISSION (ADMIN)
 # ==============================
 @forms_bp.route("/admin/submissions/<submission_id>/status", methods=["POST"])
-@teacher_required
+@admin_required
 def update_submission_status(submission_id):
     """
     Expected JSON:
@@ -267,7 +265,6 @@ def update_submission_status(submission_id):
 # GET MY SUBMITTED FORMS (STUDENT)
 # ==============================
 @forms_bp.route("/student/my-submissions", methods=["GET"])
-@student_required
 def get_my_submissions():
     enrollment = request.user["enrollment"]
 
