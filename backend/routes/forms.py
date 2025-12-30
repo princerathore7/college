@@ -3,7 +3,7 @@ from bson import ObjectId
 from datetime import datetime
 import cloudinary.uploader
 
-from backend.db import db
+from db import db
 
 from backend.auth.middleware import admin_required, teacher_required, student_required
 
