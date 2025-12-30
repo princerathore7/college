@@ -3,7 +3,8 @@ from bson import ObjectId
 from datetime import datetime
 import cloudinary.uploader
 
-from backend.config import db
+from backend.db import db
+
 from backend.auth.middleware import admin_required, teacher_required, student_required
 
 forms_bp = Blueprint("forms_bp", __name__)
