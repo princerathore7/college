@@ -195,7 +195,7 @@ def view_submission(submission_id):
 # ==============================
 @forms_bp.route("/admin/forms/<form_id>/submissions", methods=["GET"])
 @admin_required
-def get_form_submissions(form_id):
+def get_form_submissions_by_id(form_id):
     try:
         form = forms_col.find_one({"_id": ObjectId(form_id)})
         if not form:
