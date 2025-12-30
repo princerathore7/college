@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Create Form | Admin Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --navy:#0b1c2d;
+  --bg:#f4f6f9;
+  --card:#ffffff;
+  --border:#e1e5ec;
+  --yellow:#f4c430;
+  --yellow-dark:#e0b000;
+}
+
+*{
+  box-sizing:border-box;
+  font-family:'Inter',sans-serif;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  padding:32px;
+}
+
+.container{
+  max-width:1100px;
+  margin:auto;
+}
+
+.header{
+  margin-bottom:22px;
+}
+
+.header h1{
+  margin:0;
+  font-size:26px;
+  color:var(--navy);
+}
+
+.header p{
+  margin-top:6px;
+  font-size:13px;
+  color:#555;
+}
+
+/* Card */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  padding:22px;
+  margin-bottom:20px;
+}
+
+.card, input, select, textarea, button{
+  border-radius:3px;
+}
+
+/* Inputs */
+label{
+  font-size:13px;
+  font-weight:600;
+  display:block;
+  margin-bottom:6px;
+}
+
+input, select, textarea{
+  width:100%;
+  padding:10px 12px;
+  border:1px solid var(--border);
+  font-size:13px;
+}
+
+textarea{
+  resize:vertical;
+}
+
+/* Grid */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:14px;
+}
+
+/* PDF */
+.pdf-box{
+  border:1px dashed var(--border);
+  padding:14px;
+  background:#fafbfd;
+  font-size:13px;
+}
+
+/* Fields */
+.field-card{
+  border:1px solid var(--border);
+  padding:14px;
+  margin-bottom:12px;
+  position:relative;
+}
+
+.remove-btn{
+  position:absolute;
+  right:10px;
+  top:10px;
+  border:none;
+  background:#e63946;
+  color:white;
+  font-size:11px;
+  padding:4px 8px;
+  cursor:pointer;
+}
+
+/* Buttons */
+.actions{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.btn{
+  padding:10px 18px;
+  border:none;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+  letter-spacing:0.4px;
+}
+
+.btn.yellow{
+  background:var(--yellow);
+  color:#000;
+}
+
+.btn.yellow:hover{
+  background:var(--yellow-dark);
+}
+
+.btn.secondary{
+  background:#e9edf3;
+  color:#222;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>Create New Form</h1>
+    <p>Design digital forms for students (No hard copies required)</p>
+  </div>
+
+  <!-- FORM DETAILS -->
+  <div class="card">
+    <label>Form Title *</label>
+    <input type="text" id="formTitle" placeholder="e.g. Scholarship Form 2025">
+
+    <br><br>
+
+    <label>Description</label>
+    <textarea id="formDesc" placeholder="Optional description"></textarea>
+  </div>
+
+  <!-- PDF UPLOAD -->
+  <div class="card">
+    <label>Attach PDF Instructions</label>
+    <div class="pdf-box">
+      <input type="file" id="pdfUpload" multiple accept="application/pdf">
+      <p>Upload circulars / guidelines (PDF)</p>
+    </div>
+  </div>
+
+  <!-- FIELDS -->
+  <div class="card">
+    <label>Form Fields</label>
+    <div id="fieldsContainer"></div>
+
+    <button class="btn secondary" onclick="addField()">
+      + Add New Field
+    </button>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="actions">
+    <button class="btn secondary" onclick="history.back()">Cancel</button>
+    <button class="btn yellow" onclick="submitForm()">Create Form</button>
+  </div>
+
+</div>
+
+<script>
+function addField(){
+  const container = document.getElementById("fieldsContainer");
+
+  const div = document.createElement("div");
+  div.className = "field-card";
+
+  div.innerHTML = `
+    <button class="remove-btn" onclick="this.parentElement.remove()">X</button>
+    <div class="grid">
+      <input type="text" placeholder="Field Label" class="field-label">
+      <select class="field-type">
+        <option value="text">Text</option>
+        <option value="number">Number</option>
+        <option value="date">Date</option>
+        <option value="file">File Upload</option>
+      </select>
+      <select class="field-required">
+        <option value="true">Required</option>
+        <option value="false">Optional</option>
+      </select>
+    </div>
+  `;
+
+  container.appendChild(div);
+}
+
+async function submitForm(){
+  const title = document.getElementById("formTitle").value.trim();
+  const description = document.getElementById("formDesc").value.trim();
+  const pdfs = document.getElementById("pdfUpload").files;
+
+  if(!title){
+    alert("Form title is required");
+    return;
+  }
+
+  const fieldCards = document.querySelectorAll(".field-card");
+  if(fieldCards.length === 0){
+    alert("Add at least one field");
+    return;
+  }
+
+  const fields = [];
+  fieldCards.forEach(card => {
+    fields.push({
+      label: card.querySelector(".field-label").value,
+      type: card.querySelector(".field-type").value,
+      required: card.querySelector(".field-required").value === "true"
+    });
+  });
+
+  const formData = new FormData();
+  formData.append("title", title);
+  formData.append("description", description);
+  formData.append("fields", JSON.stringify(fields));
+
+  for(const pdf of pdfs){
+    formData.append("pdfs", pdf);
+  }
+
+  try{
+    const res = await fetch("/api/forms", {
+      method: "POST",
+      body: formData,
+      credentials: "include"
+    });
+
+    const data = await res.json();
+
+    if(!res.ok){
+      alert(data.error || "Failed to create form");
+      return;
+    }
+
+    alert("Form created successfully ✅");
+    window.location.href = "form-data.html";
+
+  }catch(err){
+    alert("Server error");
+    console.error(err);
+  }
+}
+</script>
+
+</body>
+</html>

@@ -29,7 +29,7 @@ from routes.fine_bp import fine_bp
 from routes.admin_students import admin_students_bp
 from routes.notifications import notifications_bp
 from routes.attendance_pdf_routes import attendance_pdf_bp
-
+from routes.forms import forms_bp
 # ---------------------------------------------
 # FLASK APP SETUP
 # ---------------------------------------------
@@ -90,7 +90,7 @@ for bp in [
     assignments_bp, classes_bp, class_mgmt_bp,
     events_bp, exams_bp, timetables_bp, marks_bp,
     bus_bp, management_bp, notes_bp, fine_bp,
-    admin_students_bp, notifications_bp, attendance_pdf_bp
+    admin_students_bp, notifications_bp, attendance_pdf_bp, forms_bp
 ]:
     app.register_blueprint(bp)
 

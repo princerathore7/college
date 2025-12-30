@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Fill Form | Student Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --navy:#0b1c2d;
+  --bg:#f3f5f8;
+  --card:#ffffff;
+  --border:#dfe3ea;
+  --accent:#1e90ff;
+}
+
+*{box-sizing:border-box;font-family:'Inter',sans-serif}
+
+body{
+  margin:0;
+  background:var(--bg);
+  padding:28px;
+}
+
+.container{max-width:900px;margin:auto}
+
+.header{margin-bottom:18px}
+.header h1{margin:0;color:var(--navy);font-size:24px}
+.header p{margin-top:6px;font-size:13px;color:#555}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  padding:22px;
+  margin-bottom:20px;
+  border-radius:3px;
+}
+
+.info-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:14px;
+}
+
+label{
+  font-size:13px;
+  font-weight:600;
+  color:#333;
+}
+
+input, textarea{
+  width:100%;
+  padding:10px 12px;
+  border:1px solid var(--border);
+  font-size:13px;
+  border-radius:3px;
+}
+
+input[readonly]{
+  background:#eef2f7;
+}
+
+.pdf-box{
+  border:1px dashed var(--border);
+  padding:14px;
+  background:#fafbfd;
+  font-size:13px;
+}
+
+.pdf-box a{
+  display:block;
+  margin-bottom:6px;
+  color:var(--accent);
+  text-decoration:none;
+}
+
+.field{margin-bottom:16px}
+
+.actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}
+
+.btn{
+  border:none;
+  padding:11px 18px;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+  border-radius:3px;
+}
+
+.btn.primary{background:var(--accent);color:#fff}
+.btn.secondary{background:#e9edf3;color:var(--navy)}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1 id="formTitle">Loading...</h1>
+    <p id="formDesc"></p>
+  </div>
+
+  <!-- STUDENT INFO -->
+  <div class="card">
+    <h3>Student Information</h3>
+    <div class="info-grid">
+      <div>
+        <label>Enrollment Number</label>
+        <input type="text" id="enrollment" readonly>
+      </div>
+      <div>
+        <label>Student Name</label>
+        <input type="text" id="studentName" readonly>
+      </div>
+    </div>
+  </div>
+
+  <!-- PDF -->
+  <div class="card" id="pdfSection" style="display:none;">
+    <h3>Instructions</h3>
+    <div class="pdf-box" id="pdfList"></div>
+  </div>
+
+  <!-- FORM -->
+  <div class="card">
+    <h3>Form Details</h3>
+    <form id="dynamicForm"></form>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="actions">
+    <button class="btn secondary" onclick="history.back()">Back</button>
+    <button class="btn primary" onclick="submitForm()">Submit Form</button>
+  </div>
+
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const formId = params.get("formId");
+
+const formEl = document.getElementById("dynamicForm");
+let formSchema = [];
+
+// 🔹 Load Form
+async function loadForm(){
+  try{
+    const res = await fetch(`/api/forms/${formId}`, {
+      credentials:"include"
+    });
+
+    if(!res.ok) throw new Error("Form not found");
+
+    const data = await res.json();
+
+    document.getElementById("formTitle").innerText = data.title;
+    document.getElementById("formDesc").innerText = data.description;
+
+    // PDFs
+    if(data.pdfs && data.pdfs.length){
+      document.getElementById("pdfSection").style.display = "block";
+      const pdfList = document.getElementById("pdfList");
+      data.pdfs.forEach(url => {
+        const a = document.createElement("a");
+        a.href = url;
+        a.target = "_blank";
+        a.innerText = "View PDF";
+        pdfList.appendChild(a);
+      });
+    }
+
+    // Fields
+    formSchema = data.fields;
+    formEl.innerHTML = "";
+
+    data.fields.forEach(field => {
+      const div = document.createElement("div");
+      div.className = "field";
+
+      let inputHTML = "";
+      if(field.type === "file"){
+        inputHTML = `<input type="file" name="${field.label}" ${field.required ? "required" : ""}>`;
+      }else{
+        inputHTML = `<input type="${field.type}" name="${field.label}" ${field.required ? "required" : ""}>`;
+      }
+
+      div.innerHTML = `
+        <label>${field.label} ${field.required ? "*" : ""}</label>
+        ${inputHTML}
+      `;
+      formEl.appendChild(div);
+    });
+
+  }catch(err){
+    alert("Unable to load form");
+    console.error(err);
+  }
+}
+
+// 🔹 Submit Form
+async function submitForm(){
+  const payload = new FormData();
+
+  formSchema.forEach(field => {
+    if(field.type === "file"){
+      const fileInput = formEl.querySelector(`input[name="${field.label}"]`);
+      if(fileInput.files.length){
+        payload.append(field.label, fileInput.files[0]);
+      }
+    }else{
+      payload.append(field.label,
+        formEl.querySelector(`input[name="${field.label}"]`).value
+      );
+    }
+  });
+
+  try{
+    const res = await fetch(`/api/forms/${formId}/submit`, {
+      method:"POST",
+      body: payload,
+      credentials:"include"
+    });
+
+    const data = await res.json();
+
+    if(!res.ok){
+      alert(data.error || "Submission failed");
+      return;
+    }
+
+    alert("Form submitted successfully ✅");
+    window.location.href = "forms.html";
+
+  }catch(err){
+    alert("Server error");
+    console.error(err);
+  }
+}
+
+// INIT
+loadForm();
+</script>
+
+</body>
+</html>

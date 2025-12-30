@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Form Submissions Details</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root{
+  --navy:#0b1f3a;
+  --light:#f4f7fb;
+  --border:#dbe2ef;
+}
+
+*{
+  box-sizing:border-box;
+  font-family:Inter, system-ui, sans-serif;
+}
+
+body{
+  margin:0;
+  background:var(--light);
+}
+
+/* CONTAINER */
+.container{
+  max-width:1200px;
+  margin:30px auto;
+  padding:0 16px;
+}
+
+/* HEADER */
+.header{
+  background:var(--navy);
+  color:#fff;
+  padding:20px;
+  border-radius:6px;
+}
+
+.header h1{
+  margin:0;
+  font-size:22px;
+}
+
+.header p{
+  margin-top:6px;
+  opacity:.85;
+  font-size:14px;
+}
+
+/* CARD */
+.card{
+  background:#fff;
+  margin-top:20px;
+  border:1px solid var(--border);
+  border-radius:6px;
+  overflow:hidden;
+}
+
+/* TABLE */
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+thead{
+  background:#eef2f8;
+}
+
+th, td{
+  padding:14px;
+  border-bottom:1px solid var(--border);
+  text-align:left;
+  font-size:14px;
+}
+
+th{
+  color:#333;
+  font-weight:600;
+}
+
+tr:hover{
+  background:#f9fbff;
+}
+
+/* BUTTON */
+.btn{
+  padding:8px 14px;
+  border:none;
+  border-radius:4px;
+  font-size:13px;
+  cursor:pointer;
+}
+
+.btn.view{
+  background:#2563eb;
+  color:#fff;
+}
+
+.btn.view:hover{
+  background:#1e4fd6;
+}
+
+/* EMPTY */
+.empty{
+  text-align:center;
+  padding:30px;
+  color:#777;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1 id="formTitle">Form Name</h1>
+    <p>
+      Total Submissions:
+      <strong id="totalCount">0</strong>
+    </p>
+  </div>
+
+  <!-- TABLE -->
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Enrollment No</th>
+          <th>Student Name</th>
+          <th>Submitted On</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+const tableBody = document.getElementById("tableBody");
+const formTitle = document.getElementById("formTitle");
+const totalCount = document.getElementById("totalCount");
+
+// 🔹 Read URL Params
+const params = new URLSearchParams(window.location.search);
+const formId = params.get("formId");
+const formName = params.get("formName");
+
+formTitle.textContent = decodeURIComponent(formName || "Form");
+
+// 🔹 Load submissions
+async function loadSubmissions(){
+  try{
+    const res = await fetch(`/api/admin/forms/${formId}/submissions`, {
+      credentials:"include"
+    });
+
+    if(!res.ok){
+      throw new Error("Failed to load");
+    }
+
+    const data = await res.json();
+    totalCount.textContent = data.total_submissions;
+
+    renderTable(data.submissions);
+
+  }catch(err){
+    console.error(err);
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="4" class="empty">
+          Unable to load submissions
+        </td>
+      </tr>
+    `;
+  }
+}
+
+// 🔹 Render table
+function renderTable(list){
+  tableBody.innerHTML = "";
+
+  if(list.length === 0){
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="4" class="empty">
+          No student has filled this form yet
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  list.forEach(s => {
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${s.enrollment}</td>
+      <td>${s.student_name}</td>
+      <td>${new Date(s.submitted_at).toLocaleDateString()}</td>
+      <td>
+        <button class="btn view"
+          onclick="viewSubmission('${s.id}')">
+          View →
+        </button>
+      </td>
+    `;
+
+    tableBody.appendChild(tr);
+  });
+}
+
+// 🔹 Redirect to filled form view
+function viewSubmission(id){
+  window.location.href = `form-view.html?submissionId=${id}`;
+}
+
+// INIT
+loadSubmissions();
+</script>
+
+</body>
+</html>

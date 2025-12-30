@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Available Forms | Student Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --navy:#0b1c2d;
+  --navy-light:#142f4c;
+  --bg:#f3f5f8;
+  --card:#ffffff;
+  --border:#e2e6ed;
+  --accent:#1e90ff;
+}
+
+*{
+  box-sizing:border-box;
+  font-family:'Inter',sans-serif;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  padding:30px;
+}
+
+.container{
+  max-width:1100px;
+  margin:auto;
+}
+
+.header{
+  margin-bottom:25px;
+}
+
+.header h1{
+  margin:0;
+  color:var(--navy);
+  font-size:26px;
+}
+
+.header p{
+  margin-top:6px;
+  color:#555;
+  font-size:14px;
+}
+
+/* Cards */
+.forms-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:18px;
+}
+
+.form-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  padding:18px;
+  transition:0.25s;
+}
+
+.form-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 8px 20px rgba(0,0,0,0.08);
+}
+
+.form-card h3{
+  margin:0;
+  color:var(--navy-light);
+  font-size:18px;
+}
+
+.form-card p{
+  margin:8px 0 14px;
+  font-size:13px;
+  color:#666;
+}
+
+/* Buttons */
+.actions{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.btn{
+  border:none;
+  padding:10px 16px;
+  cursor:pointer;
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:0.4px;
+}
+
+.btn.primary{
+  background:var(--accent);
+  color:white;
+}
+
+.btn.secondary{
+  background:#eef2f7;
+  color:var(--navy);
+}
+
+.badge{
+  font-size:11px;
+  padding:4px 8px;
+  background:#eef2f7;
+  color:#444;
+}
+
+/* Sharp edges */
+.btn, .form-card{
+  border-radius:3px;
+}
+
+/* Empty state */
+.empty{
+  grid-column:1/-1;
+  text-align:center;
+  padding:40px;
+  color:#777;
+  font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <h1>Available Forms</h1>
+    <p>Please select a form and complete the submission carefully.</p>
+  </div>
+
+  <div class="forms-grid" id="formsContainer">
+    <!-- Forms will load here -->
+  </div>
+
+</div>
+
+<script>
+const container = document.getElementById("formsContainer");
+
+// 🔹 Fetch forms from backend
+async function loadForms(){
+  try{
+    const res = await fetch("/api/forms", {
+      method: "GET",
+      credentials: "include"
+    });
+
+    if(!res.ok){
+      throw new Error("Failed to load forms");
+    }
+
+    const forms = await res.json();
+
+    container.innerHTML = "";
+
+    if(forms.length === 0){
+      container.innerHTML = `
+        <div class="empty">
+          No forms available at the moment.
+        </div>
+      `;
+      return;
+    }
+
+    forms.forEach(form => {
+      const card = document.createElement("div");
+      card.className = "form-card";
+
+      card.innerHTML = `
+        <h3>${form.title}</h3>
+        <p>${form.description || "No description provided"}</p>
+
+        <div class="actions">
+          <span class="badge">${form.fields_count} Fields</span>
+          <button class="btn primary" onclick="openForm('${form.id}')">
+            FILL FORM →
+          </button>
+        </div>
+      `;
+
+      container.appendChild(card);
+    });
+
+  }catch(err){
+    console.error(err);
+    container.innerHTML = `
+      <div class="empty">
+        Unable to load forms. Please try again later.
+      </div>
+    `;
+  }
+}
+
+// 🔹 Redirect to selected form
+function openForm(formId){
+  window.location.href = `form-students.html?formId=${formId}`;
+}
+
+// Load on page open
+loadForms();
+</script>
+
+</body>
+</html>

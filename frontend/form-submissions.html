@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Form Submissions | Admin Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --navy:#0b1c2d;
+  --navy-light:#14314f;
+  --bg:#f4f6f9;
+  --card:#ffffff;
+  --border:#e1e5ec;
+  --accent:#1e90ff;
+}
+
+*{
+  box-sizing:border-box;
+  font-family:'Inter',sans-serif;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  padding:28px;
+}
+
+.container{
+  max-width:1100px;
+  margin:auto;
+}
+
+.header{
+  margin-bottom:22px;
+}
+
+.header h1{
+  margin:0;
+  font-size:26px;
+  color:var(--navy);
+}
+
+.header p{
+  margin-top:6px;
+  font-size:13px;
+  color:#555;
+}
+
+/* Filters */
+.filters{
+  display:flex;
+  gap:12px;
+  margin-bottom:20px;
+}
+
+select,input{
+  padding:10px 12px;
+  border:1px solid var(--border);
+  font-size:13px;
+}
+
+select,input,.card,.btn{
+  border-radius:3px;
+}
+
+/* Table */
+.table-card{
+  background:var(--card);
+  border:1px solid var(--border);
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,td{
+  padding:14px;
+  font-size:13px;
+  border-bottom:1px solid var(--border);
+  text-align:left;
+}
+
+th{
+  background:#f1f4f8;
+  color:#333;
+}
+
+tbody tr:hover{
+  background:#fafcff;
+}
+
+/* Buttons */
+.btn{
+  padding:8px 14px;
+  border:none;
+  font-size:12px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.btn.primary{
+  background:var(--accent);
+  color:white;
+}
+
+.badge{
+  background:#eef2f7;
+  padding:4px 8px;
+  font-size:11px;
+}
+
+.empty{
+  text-align:center;
+  padding:30px;
+  color:#777;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>Form Submissions</h1>
+    <p>View and manage student filled forms</p>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <select id="formFilter">
+      <option value="">All Forms</option>
+    </select>
+
+    <input type="text" id="searchBox" placeholder="Search by form name">
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Form Name</th>
+          <th>Total Submissions</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+const tableBody = document.getElementById("tableBody");
+const formFilter = document.getElementById("formFilter");
+const searchBox = document.getElementById("searchBox");
+
+let formsData = [];
+
+// 🔹 Load forms with submission count
+async function loadForms(){
+  try{
+    const res = await fetch("/api/admin/forms", {
+      credentials: "include"
+    });
+
+    if(!res.ok){
+      throw new Error("Failed to load forms");
+    }
+
+    formsData = await res.json();
+
+    populateFilter(formsData);
+    renderTable(formsData);
+
+  }catch(err){
+    console.error(err);
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="4" class="empty">Unable to load submissions</td>
+      </tr>
+    `;
+  }
+}
+
+// 🔹 Populate dropdown
+function populateFilter(data){
+  data.forEach(f => {
+    const opt = document.createElement("option");
+    opt.value = f.id;
+    opt.textContent = f.name;
+    formFilter.appendChild(opt);
+  });
+}
+
+// 🔹 Render table
+function renderTable(data){
+  tableBody.innerHTML = "";
+
+  if(data.length === 0){
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="4" class="empty">No submissions found</td>
+      </tr>
+    `;
+    return;
+  }
+
+  data.forEach(form => {
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${form.name}</td>
+      <td><span class="badge">${form.submissions}</span></td>
+      <td>Active</td>
+      <td>
+        <button class="btn primary" onclick="openFormData('${form.id}','${form.name}')">
+          View Data →
+        </button>
+      </td>
+    `;
+
+    tableBody.appendChild(tr);
+  });
+}
+
+// 🔹 Filter dropdown
+formFilter.addEventListener("change", () => {
+  const val = formFilter.value;
+  if(!val){
+    renderTable(formsData);
+  }else{
+    renderTable(formsData.filter(f => f.id === val));
+  }
+});
+
+// 🔹 Search
+searchBox.addEventListener("input", () => {
+  const q = searchBox.value.toLowerCase();
+  renderTable(
+    formsData.filter(f => f.name.toLowerCase().includes(q))
+  );
+});
+
+// 🔹 Redirect
+function openFormData(formId, formName){
+  const name = encodeURIComponent(formName);
+  window.location.href = `form-data-details.html?formId=${formId}&formName=${name}`;
+}
+
+// INIT
+loadForms();
+</script>
+
+</body>
+</html>

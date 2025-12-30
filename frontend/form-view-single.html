@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>View Form Submission</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --navy:#0b1c2d;
+  --navy-light:#14314f;
+  --bg:#f4f6f9;
+  --card:#ffffff;
+  --border:#e1e5ec;
+  --accent:#1e90ff;
+  --red:#ff4d4f;
+  --green:#28a745;
+}
+
+*{
+  box-sizing:border-box;
+  font-family:'Inter',sans-serif;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  padding:26px;
+}
+
+.container{
+  max-width:900px;
+  margin:auto;
+}
+
+/* TOP BAR */
+.topbar{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:20px;
+}
+
+.topbar img{
+  height:42px;
+}
+
+.topbar h1{
+  font-size:22px;
+  margin:0;
+  color:var(--navy);
+}
+
+/* Card */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  padding:20px;
+  margin-bottom:18px;
+  border-radius:3px;
+}
+
+/* Info grid */
+.info-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;
+}
+
+.info-item span{
+  font-size:12px;
+  color:#666;
+}
+
+.info-item strong{
+  display:block;
+  margin-top:4px;
+  font-size:14px;
+}
+
+/* Fields */
+.field{
+  padding:12px 0;
+  border-bottom:1px solid var(--border);
+}
+
+.field:last-child{
+  border-bottom:none;
+}
+
+.field label{
+  font-size:13px;
+  font-weight:600;
+}
+
+.field .value{
+  margin-top:6px;
+  font-size:13px;
+}
+
+.field a{
+  color:var(--accent);
+  font-weight:600;
+  text-decoration:none;
+}
+
+/* Actions */
+.actions{
+  display:flex;
+  justify-content:space-between;
+  margin-top:14px;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.btn{
+  padding:9px 16px;
+  border:none;
+  font-size:12px;
+  font-weight:600;
+  cursor:pointer;
+  border-radius:3px;
+}
+
+.btn.primary{
+  background:var(--accent);
+  color:#fff;
+}
+
+.btn.secondary{
+  background:#e9edf3;
+  color:var(--navy);
+}
+
+.btn.approve{
+  background:var(--green);
+  color:#fff;
+}
+
+.btn.disapprove{
+  background:var(--red);
+  color:#fff;
+}
+
+/* Loader */
+.loading{
+  text-align:center;
+  padding:20px;
+  color:#666;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="topbar">
+    <img src="logo.jpg" alt="Logo">
+    <h1 id="formName">Form Details</h1>
+  </div>
+
+  <!-- STUDENT INFO -->
+  <div class="card">
+    <h3>Student Information</h3>
+    <div class="info-grid">
+      <div class="info-item">
+        <span>Enrollment Number</span>
+        <strong id="enrollment">—</strong>
+      </div>
+      <div class="info-item">
+        <span>Student Name</span>
+        <strong id="studentName">—</strong>
+      </div>
+      <div class="info-item">
+        <span>Submitted On</span>
+        <strong id="submittedAt">—</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORM DATA -->
+  <div class="card">
+    <h3>Submitted Form Data</h3>
+    <div id="formFields" class="loading">Loading submission...</div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="actions">
+    <button class="btn secondary" onclick="history.back()">← Back</button>
+    <button class="btn primary" onclick="window.print()">Print</button>
+    <button class="btn approve" onclick="updateStatus('approved')">Approve</button>
+    <button class="btn disapprove" onclick="promptDisapprove()">Disapprove</button>
+  </div>
+
+</div>
+
+<script>
+// 🔹 Get submissionId
+const params = new URLSearchParams(window.location.search);
+const submissionId = params.get("submissionId");
+
+let submissionData = null;
+
+// 🔹 Load submission
+async function loadSubmission(){
+  try{
+    const res = await fetch(`/api/admin/submissions/${submissionId}`, {
+      credentials: "include"
+    });
+
+    if(!res.ok){
+      throw new Error("Failed to load submission");
+    }
+
+    submissionData = await res.json();
+
+    document.getElementById("formName").innerText = submissionData.form_name;
+    document.getElementById("enrollment").innerText = submissionData.enrollment;
+    document.getElementById("studentName").innerText = submissionData.student_name;
+    document.getElementById("submittedAt").innerText =
+      new Date(submissionData.submitted_at).toLocaleString();
+
+    renderFields(submissionData.responses);
+
+  }catch(err){
+    document.getElementById("formFields").innerHTML =
+      "<div class='loading'>Unable to load submission</div>";
+    console.error(err);
+  }
+}
+
+// 🔹 Render responses
+function renderFields(responses){
+  const container = document.getElementById("formFields");
+  container.innerHTML = "";
+
+  responses.forEach(r => {
+    const div = document.createElement("div");
+    div.className = "field";
+
+    let value =
+      r.type === "file"
+        ? `<a href="${r.value}" target="_blank">View File</a>`
+        : r.value || "—";
+
+    div.innerHTML = `
+      <label>${r.label}</label>
+      <div class="value">${value}</div>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+// 🔹 Approve / Disapprove
+async function updateStatus(status, reason=""){
+  try{
+    const res = await fetch(`/api/admin/submissions/${submissionId}/status`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      credentials: "include",
+      body: JSON.stringify({status, reason})
+    });
+
+    if(!res.ok){
+      const data = await res.json();
+      throw new Error(data.error || "Failed to update status");
+    }
+
+    alert(`Submission marked as ${status}`);
+    loadSubmission(); // reload if needed
+  }catch(err){
+    alert(err.message);
+  }
+}
+
+// 🔹 Prompt disapprove reason
+function promptDisapprove(){
+  const reason = prompt("Enter reason for disapproval:");
+  if(reason && reason.trim() !== ""){
+    updateStatus("disapproved", reason);
+  } else {
+    alert("Disapproval reason is required!");
+  }
+}
+
+// INIT
+loadSubmission();
+</script>
+
+</body>
+</html>
