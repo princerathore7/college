@@ -5,8 +5,7 @@ import cloudinary.uploader
 
 from db import db
 
-from backend.auth.middleware import admin_required, teacher_required, student_required
-
+from auth.middleware import admin_required, teacher_required, student_required
 forms_bp = Blueprint("forms_bp", __name__)
 
 # ==============================
