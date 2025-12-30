@@ -23,24 +23,26 @@ submissions_col = db.form_submissions
 @admin_required
 def create_form():
     data = request.form
-
     title = data.get("title")
     description = data.get("description", "")
-    fields = request.json.get("fields", [])
+    fields_str = data.get("fields", "[]")
+    
+    try:
+        fields = json.loads(fields_str)
+    except:
+        return jsonify({"error": "Invalid fields format"}), 400
 
     if not title or not fields:
         return jsonify({"error": "Title and fields required"}), 400
 
-    # Upload PDFs
     pdf_urls = []
-    if "pdfs" in request.files:
-        for pdf in request.files.getlist("pdfs"):
-            upload = cloudinary.uploader.upload(
-                pdf,
-                resource_type="raw",
-                folder="forms/pdfs"
-            )
-            pdf_urls.append(upload["secure_url"])
+    for pdf in request.files.getlist("pdfs"):
+        upload = cloudinary.uploader.upload(
+            pdf,
+            resource_type="raw",
+            folder="forms/pdfs"
+        )
+        pdf_urls.append(upload["secure_url"])
 
     form_doc = {
         "title": title,
@@ -58,7 +60,6 @@ def create_form():
         "message": "Form created successfully",
         "form_id": str(result.inserted_id)
     }), 201
-
 
 # ==============================
 # GET ALL ACTIVE FORMS (STUDENT)
