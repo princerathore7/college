@@ -5,7 +5,7 @@ import cloudinary.uploader
 
 from db import db
 
-from auth.middleware import admin_required, student_required  # teacher_required hata diya
+from auth.middleware import admin_required,teacher_required # teacher_required hata diya
 
 forms_bp = Blueprint("forms_bp", __name__)
 
