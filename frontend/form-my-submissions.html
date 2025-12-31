@@ -148,7 +148,7 @@ const tableBody = document.getElementById("tableBody");
 // 🔹 Load student submissions
 async function loadSubmissions(){
   try{
-    const res = await fetch("/api/student/my-submissions", { credentials: "include" });
+    const res = await fetch("https://college-hwbb.onrender.com/api/student/my-submissions", { credentials: "include" });
     if(!res.ok) throw new Error("Failed to load submissions");
 
     const data = await res.json();
