@@ -44,7 +44,7 @@ const grid = document.getElementById("formsGrid");
 async function loadForms(){
   try{
     const res = await fetch(
-      "https://college-hwbb.onrender.com/api/admin/forms"
+      "https://college-hwbb.onrender.com/api/forms"
     );
 
     if(!res.ok) throw new Error("Server error");
