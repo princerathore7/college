@@ -121,7 +121,7 @@ def get_forms_admin():
 # GET SUBMISSIONS OF A FORM
 # ==============================
 @forms_bp.route("/admin/forms/<form_id>/submissions", methods=["GET"])
-@admin_required
+# @admin_required
 def get_form_submissions(form_id):
 
     submissions = []
@@ -140,7 +140,7 @@ def get_form_submissions(form_id):
 # VIEW SINGLE SUBMISSION
 # ==============================
 @forms_bp.route("/admin/submissions/<submission_id>", methods=["GET"])
-@admin_required
+# @admin_required
 def view_submission(submission_id):
     s = submissions_col.find_one({"_id": ObjectId(submission_id)})
     if not s:
@@ -157,7 +157,7 @@ def view_submission(submission_id):
 # GET SUBMISSIONS OF A SINGLE FORM (ADMIN / TEACHER)
 # ==============================
 @forms_bp.route("/admin/forms/<form_id>/submissions", methods=["GET"])
-@admin_required
+# @admin_required
 def get_form_submissions_by_id(form_id):
     try:
         form = forms_col.find_one({"_id": ObjectId(form_id)})
@@ -191,7 +191,7 @@ def get_form_submissions_by_id(form_id):
 # APPROVE / DISAPPROVE SUBMISSION (ADMIN)
 # ==============================
 @forms_bp.route("/admin/submissions/<submission_id>/status", methods=["POST"])
-@admin_required
+# @admin_required
 def update_submission_status(submission_id):
     """
     Expected JSON:
