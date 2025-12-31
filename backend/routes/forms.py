@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from bson import ObjectId
 from datetime import datetime
 import cloudinary.uploader
+from werkzeug.utils import secure_filename
 
 from db import db
 import json
