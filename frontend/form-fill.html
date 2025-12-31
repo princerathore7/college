@@ -208,6 +208,8 @@ async function loadForm(){
 // 🔹 Submit Form
 async function submitForm(){
   const payload = new FormData();
+payload.append("enrollment", document.getElementById("enrollment").value);
+payload.append("student_name", document.getElementById("studentName").value);
 
   formSchema.forEach(field => {
     if(field.type === "file"){
