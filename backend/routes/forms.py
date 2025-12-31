@@ -40,17 +40,20 @@ def create_form():
 
     for pdf in request.files.getlist("pdfs"):
         try:
+            filename = f"form_{ObjectId()}_{secure_filename(pdf.filename)}"
+
             upload = cloudinary.uploader.upload(
                 pdf,
                 resource_type="raw",
-                folder="forms/pdfs"
+                public_id=f"forms_pdfs/{filename}",
+                overwrite=True
             )
+
             pdf_urls.append(upload["secure_url"])
+
         except Exception as e:
-            print("❌ PDF upload failed:", e)
-            return jsonify({
-                "error": "PDF upload failed"
-            }), 500
+            print("❌ FORM PDF upload failed:", e)
+            return jsonify({"error": "PDF upload failed"}), 500
 
     form_doc = {
         "title": title,
@@ -67,7 +70,6 @@ def create_form():
         "message": "Form created successfully",
         "form_id": str(result.inserted_id)
     }), 201
-
 
 # ==============================
 # GET ALL ACTIVE FORMS (STUDENT)
