@@ -291,3 +291,45 @@ def get_my_submissions():
         })
 
     return jsonify(submissions), 200
+# ==============================
+# GET FORMS (optional search by title)
+# ==============================
+@forms_bp.route("/forms", methods=["GET"])
+def get_forms():
+    search = request.args.get("search", "").strip()
+    query = {}
+    if search:
+        query["title"] = {"$regex": search, "$options": "i"}  # case-insensitive search
+
+    forms = list(forms_col.find(query).sort("created_at", -1))
+    for f in forms:
+        f["_id"] = str(f["_id"])
+    return jsonify(forms)
+
+# ==============================
+# DELETE FORM
+# ==============================
+@forms_bp.route("/forms/<form_id>", methods=["DELETE"])
+def delete_form(form_id):
+    try:
+        obj_id = ObjectId(form_id)
+    except Exception:
+        return jsonify({"success": False, "message": "Invalid form ID"}), 400
+
+    # find the form
+    form = forms_col.find_one({"_id": obj_id})
+    if not form:
+        return jsonify({"success": False, "message": "Form not found"}), 404
+
+    # optional: delete PDFs from Cloudinary
+    for pdf_url in form.get("pdfs", []):
+        try:
+            public_id = pdf_url.split("/")[-1].split(".")[0]  # crude extraction
+            cloudinary.uploader.destroy(f"forms_pdfs/{public_id}", resource_type="raw")
+        except:
+            pass  # ignore cloudinary errors
+
+    # delete form
+    forms_col.delete_one({"_id": obj_id})
+
+    return jsonify({"success": True, "message": "Form deleted successfully"})

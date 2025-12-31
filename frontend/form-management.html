@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage Forms</title>
+<style>
+  body { font-family: Arial; background: #f4f4f4; margin: 0; padding: 0; }
+  .container { max-width: 900px; margin: 40px auto; padding: 20px; background: #fff; border-radius: 8px; }
+  input { width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 6px; border: 1px solid #ccc; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
+  button { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; }
+  .btn-delete { background: red; color: #fff; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Manage Forms</h1>
+  <input type="text" id="searchInput" placeholder="Search forms by title...">
+  <table>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Created At</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="formsTableBody">
+      <!-- Forms will be loaded here -->
+    </tbody>
+  </table>
+</div>
+
+<script>
+const apiBase = "https://college-hwbb.onrender.com/api";
+
+async function fetchForms(search="") {
+  try {
+    const res = await fetch(`${apiBase}/forms?search=${encodeURIComponent(search)}`);
+    const forms = await res.json();
+    const tbody = document.getElementById("formsTableBody");
+    tbody.innerHTML = "";
+
+    if(forms.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center">No forms found</td></tr>`;
+      return;
+    }
+
+    forms.forEach(f => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${f.title}</td>
+        <td>${f.description || "-"}</td>
+        <td>${new Date(f.created_at).toLocaleString()}</td>
+        <td>
+          <button class="btn-delete" onclick="deleteForm('${f._id}')">Delete</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    console.error(err);
+    alert("❌ Failed to load forms");
+  }
+}
+
+async function deleteForm(formId) {
+  if(!confirm("Are you sure you want to delete this form?")) return;
+
+  try {
+    const res = await fetch(`${apiBase}/forms/${formId}`, { method: "DELETE" });
+    const data = await res.json();
+    if(res.ok) {
+      alert("✅ Form deleted successfully");
+      fetchForms(document.getElementById("searchInput").value);
+    } else {
+      alert(data.message || "Failed to delete form");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("❌ Server error");
+  }
+}
+
+// search functionality
+document.getElementById("searchInput").addEventListener("input", e => {
+  fetchForms(e.target.value);
+});
+
+// initial load
+fetchForms();
+</script>
+
+</body>
+</html>
