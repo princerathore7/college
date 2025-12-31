@@ -10,6 +10,9 @@
   --navy:#0b1f3a;
   --light:#f4f7fb;
   --border:#dbe2ef;
+  --green:#16a34a;
+  --red:#dc2626;
+  --yellow:#ca8a04;
 }
 
 *{
@@ -22,7 +25,6 @@ body{
   background:var(--light);
 }
 
-/* CONTAINER */
 .container{
   max-width:1200px;
   margin:30px auto;
@@ -37,21 +39,41 @@ body{
   border-radius:6px;
 }
 
-.header h1{
-  margin:0;
-  font-size:22px;
+.header h1{ margin:0; font-size:22px; }
+.header p{ margin-top:6px; opacity:.85; font-size:14px; }
+
+/* FILTER BAR */
+.filters{
+  margin-top:16px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
 }
 
-.header p{
-  margin-top:6px;
-  opacity:.85;
-  font-size:14px;
+.filters input{
+  padding:8px 10px;
+  font-size:13px;
+  border:1px solid var(--border);
+  border-radius:4px;
 }
+
+.filters button{
+  padding:8px 14px;
+  border:none;
+  border-radius:4px;
+  font-size:13px;
+  cursor:pointer;
+}
+
+.btn-all{ background:#334155; color:#fff; }
+.btn-approved{ background:var(--green); color:#fff; }
+.btn-disapproved{ background:var(--red); color:#fff; }
+.btn-pending{ background:var(--yellow); color:#fff; }
 
 /* CARD */
 .card{
   background:#fff;
-  margin-top:20px;
+  margin-top:16px;
   border:1px solid var(--border);
   border-radius:6px;
   overflow:hidden;
@@ -63,45 +85,42 @@ table{
   border-collapse:collapse;
 }
 
-thead{
-  background:#eef2f8;
-}
+thead{ background:#eef2f8; }
 
 th, td{
   padding:14px;
   border-bottom:1px solid var(--border);
-  text-align:left;
   font-size:14px;
+  text-align:left;
 }
 
-th{
-  color:#333;
+tr:hover{ background:#f9fbff; }
+
+/* STATUS BADGE */
+.status{
+  padding:4px 10px;
+  font-size:12px;
   font-weight:600;
+  border-radius:999px;
+  display:inline-block;
 }
 
-tr:hover{
-  background:#f9fbff;
-}
+.status.approved{ background:#dcfce7; color:#166534; }
+.status.disapproved{ background:#fee2e2; color:#991b1b; }
+.status.pending{ background:#fef3c7; color:#92400e; }
 
-/* BUTTON */
+/* BUTTONS */
 .btn{
-  padding:8px 14px;
+  padding:6px 12px;
   border:none;
   border-radius:4px;
-  font-size:13px;
+  font-size:12px;
   cursor:pointer;
 }
 
-.btn.view{
-  background:#2563eb;
-  color:#fff;
-}
+.btn.view{ background:#2563eb; color:#fff; }
+.btn.reason{ background:#334155; color:#fff; }
 
-.btn.view:hover{
-  background:#1e4fd6;
-}
-
-/* EMPTY */
 .empty{
   text-align:center;
   padding:30px;
@@ -117,10 +136,16 @@ tr:hover{
   <!-- HEADER -->
   <div class="header">
     <h1 id="formTitle">Form Name</h1>
-    <p>
-      Total Submissions:
-      <strong id="totalCount">0</strong>
-    </p>
+    <p>Total Submissions: <strong id="totalCount">0</strong></p>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <input type="text" id="searchEnrollment" placeholder="Search Enrollment No">
+    <button class="btn-all" onclick="applyFilter('all')">All</button>
+    <button class="btn-approved" onclick="applyFilter('approved')">Approved</button>
+    <button class="btn-disapproved" onclick="applyFilter('disapproved')">Disapproved</button>
+    <button class="btn-pending" onclick="applyFilter('pending')">Pending</button>
   </div>
 
   <!-- TABLE -->
@@ -128,9 +153,11 @@ tr:hover{
     <table>
       <thead>
         <tr>
-          <th>Enrollment No</th>
+          <th>Enrollment</th>
           <th>Student Name</th>
           <th>Submitted On</th>
+          <th>Status</th>
+          <th>Reason</th>
           <th>Action</th>
         </tr>
       </thead>
@@ -144,84 +171,98 @@ tr:hover{
 const tableBody = document.getElementById("tableBody");
 const formTitle = document.getElementById("formTitle");
 const totalCount = document.getElementById("totalCount");
+const searchInput = document.getElementById("searchEnrollment");
 
-// 🔹 Read URL Params
 const params = new URLSearchParams(window.location.search);
 const formId = params.get("formId");
 const formName = params.get("formName");
 
 formTitle.textContent = decodeURIComponent(formName || "Form");
 
-// 🔹 Load submissions
+let allSubmissions = [];
+let currentFilter = "all";
+
 async function loadSubmissions(){
   try{
-    const res = await fetch(`https://college-hwbb.onrender.com/api/admin/forms/${formId}/submissions`, {
-      credentials:"include"
-    });
-
-    if(!res.ok){
-      throw new Error("Failed to load");
-    }
+    const res = await fetch(
+      `https://college-hwbb.onrender.com/api/admin/forms/${formId}/submissions`,
+      { credentials:"include" }
+    );
 
     const data = await res.json();
+    allSubmissions = data.submissions;
     totalCount.textContent = data.total_submissions;
 
-    renderTable(data.submissions);
-
+    renderTable();
   }catch(err){
-    console.error(err);
-    tableBody.innerHTML = `
-      <tr>
-        <td colspan="4" class="empty">
-          Unable to load submissions
-        </td>
-      </tr>
-    `;
+    tableBody.innerHTML =
+      `<tr><td colspan="6" class="empty">Unable to load submissions</td></tr>`;
   }
 }
 
-// 🔹 Render table
-function renderTable(list){
+function renderTable(){
   tableBody.innerHTML = "";
 
-  if(list.length === 0){
-    tableBody.innerHTML = `
-      <tr>
-        <td colspan="4" class="empty">
-          No student has filled this form yet
-        </td>
-      </tr>
-    `;
+  let filtered = allSubmissions.filter(s => {
+    const status = s.status ?? "pending";
+    if(currentFilter !== "all" && status !== currentFilter) return false;
+
+    if(searchInput.value &&
+      !s.enrollment.toLowerCase().includes(searchInput.value.toLowerCase())
+    ) return false;
+
+    return true;
+  });
+
+  if(filtered.length === 0){
+    tableBody.innerHTML =
+      `<tr><td colspan="6" class="empty">No matching submissions</td></tr>`;
     return;
   }
 
-  list.forEach(s => {
-    const tr = document.createElement("tr");
+  filtered.forEach(s => {
+    const status = s.status ?? "pending";
 
-    tr.innerHTML = `
-      <td>${s.enrollment}</td>
-      <td>${s.student_name}</td>
-      <td>${new Date(s.submitted_at).toLocaleDateString()}</td>
-      <td>
-        <button class="btn view"
-          onclick="viewSubmission('${s.id}')">
-          View →
-        </button>
-      </td>
+    tableBody.innerHTML += `
+      <tr>
+        <td>${s.enrollment}</td>
+        <td>${s.student_name}</td>
+        <td>${new Date(s.submitted_at).toLocaleDateString()}</td>
+        <td>
+          <span class="status ${status}">${status}</span>
+        </td>
+        <td>
+          ${status === "disapproved"
+            ? `<button class="btn reason" onclick="showReason('${s.reason || "No reason"}')">View</button>`
+            : "—"}
+        </td>
+        <td>
+          <button class="btn view"
+            onclick="viewSubmission('${s.id}')">View →</button>
+        </td>
+      </tr>
     `;
-
-    tableBody.appendChild(tr);
   });
 }
 
-// 🔹 Redirect to filled form view
+function applyFilter(status){
+  currentFilter = status;
+  renderTable();
+}
+
+searchInput.addEventListener("input", renderTable);
+
+function showReason(reason){
+  alert("Disapproval Reason:\n\n" + reason);
+}
+
 function viewSubmission(id){
   window.location.href = `form-view-single.html?submissionId=${id}`;
 }
 
-// INIT
 loadSubmissions();
 </script>
 
 </body>
 </html>
+
