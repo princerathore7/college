@@ -196,23 +196,27 @@ textarea{
 </div>
 
 <script>
-  
+
 /* ===============================
    ACCESS CONTROL — FORM CREATOR
+   (ONLY SOURCE CHECK, NO AUTH)
 ================================ */
 
-const mentorId = localStorage.getItem("mentorId");
-const source   = sessionStorage.getItem("accessSource"); // set by admin.html
+const source = sessionStorage.getItem("accessSource"); // set by admin.html
 
-if (!mentorId || source !== "ad") {
+if (source !== "ad") {
   document.body.innerHTML = `
     <h2 style="text-align:center;margin-top:20vh;color:red">
       ❌ Access Denied <br>
       Please open this page from Administration Panel only
     </h2>
   `;
-  throw new Error("Unauthorized access");
+  throw new Error("Invalid access source");
 }
+
+/* ===============================
+   FORM BUILDER LOGIC
+================================ */
 
 function addField() {
   const container = document.getElementById("fieldsContainer");
@@ -236,6 +240,7 @@ function addField() {
       </select>
     </div>
   `;
+
   container.appendChild(div);
 }
 
@@ -282,21 +287,10 @@ async function submitForm() {
   try {
     const res = await fetch("/api/forms", {
       method: "POST",
-      body: formData,
-      credentials: "include"
+      body: formData
     });
 
-    const text = await res.text();
-    let data;
-
-    try {
-      data = JSON.parse(text);
-    } catch {
-      console.error("Non-JSON response:", text);
-      alert("❌ Session expired or unauthorized. Please login again.");
-      location.href = "/mentor-dashboard.html";
-      return;
-    }
+    const data = await res.json();
 
     if (!res.ok) {
       alert(data.error || "Failed to create form");
@@ -311,7 +305,9 @@ async function submitForm() {
     alert("❌ Server error. Please try again.");
   }
 }
+
 </script>
+
 
 </body>
 </html>
