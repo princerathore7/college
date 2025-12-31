@@ -64,7 +64,6 @@
 </div>
 
 <script>
-
 /* ===============================
    ACCESS CONTROL — FORM CREATOR
    (ONLY SOURCE CHECK, NO AUTH)
@@ -85,10 +84,8 @@ if (source !== "ad") {
 ================================ */
 function addField() {
   const container = document.getElementById("fieldsContainer");
-
   const div = document.createElement("div");
   div.className = "field-card";
-
   div.innerHTML = `
     <button class="remove-btn" onclick="this.parentElement.remove()">✖</button>
     <div class="grid">
@@ -105,7 +102,6 @@ function addField() {
       </select>
     </div>
   `;
-
   container.appendChild(div);
 }
 
@@ -114,24 +110,15 @@ async function submitForm() {
   const description = document.getElementById("formDesc").value.trim();
   const pdfs = document.getElementById("pdfUpload").files;
 
-  if (!title) {
-    alert("Form title is required");
-    return;
-  }
+  if (!title) { alert("Form title is required"); return; }
 
   const fieldCards = document.querySelectorAll(".field-card");
-  if (fieldCards.length === 0) {
-    alert("Add at least one field");
-    return;
-  }
+  if (fieldCards.length === 0) { alert("Add at least one field"); return; }
 
   const fields = [];
   for (const card of fieldCards) {
     const label = card.querySelector(".field-label").value.trim();
-    if (!label) {
-      alert("All fields must have a label");
-      return;
-    }
+    if (!label) { alert("All fields must have a label"); return; }
     fields.push({
       label,
       type: card.querySelector(".field-type").value,
@@ -143,18 +130,16 @@ async function submitForm() {
   formData.append("title", title);
   formData.append("description", description);
   formData.append("fields", JSON.stringify(fields));
-
-  for (const pdf of pdfs) {
-    formData.append("pdfs", pdf);
-  }
+  for (const pdf of pdfs) formData.append("pdfs", pdf);
 
   try {
+    // 🔹 Backend URL (production)
     const res = await fetch("https://college-hwbb.onrender.com/api/forms", {
       method: "POST",
       body: formData
     });
 
-    const text = await res.text(); // safer for debugging
+    const text = await res.text();
     let data;
     try { data = JSON.parse(text); } 
     catch { 
@@ -176,7 +161,7 @@ async function submitForm() {
     alert("❌ Server error. Please try again.");
   }
 }
-
 </script>
+
 </body>
 </html>
