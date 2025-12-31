@@ -2,260 +2,90 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Form Submissions | Admin Panel</title>
+<title>Forms | Admin</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
-:root{
-  --navy:#0b1c2d;
-  --navy-light:#14314f;
-  --bg:#f4f6f9;
-  --card:#ffffff;
-  --border:#e1e5ec;
-  --accent:#1e90ff;
+body{margin:0;background:#f4f6f9;font-family:Inter;padding:30px}
+.container{max-width:1100px;margin:auto}
+.header{margin-bottom:20px}
+.header h1{margin:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+.card{
+  background:#fff;border:1px solid #e1e5ec;
+  padding:18px;border-radius:4px
 }
-
-*{
-  box-sizing:border-box;
-  font-family:'Inter',sans-serif;
-}
-
-body{
-  margin:0;
-  background:var(--bg);
-  padding:28px;
-}
-
-.container{
-  max-width:1100px;
-  margin:auto;
-}
-
-.header{
-  margin-bottom:22px;
-}
-
-.header h1{
-  margin:0;
-  font-size:26px;
-  color:var(--navy);
-}
-
-.header p{
-  margin-top:6px;
-  font-size:13px;
-  color:#555;
-}
-
-/* Filters */
-.filters{
-  display:flex;
-  gap:12px;
-  margin-bottom:20px;
-}
-
-select,input{
-  padding:10px 12px;
-  border:1px solid var(--border);
-  font-size:13px;
-}
-
-select,input,.card,.btn{
-  border-radius:3px;
-}
-
-/* Table */
-.table-card{
-  background:var(--card);
-  border:1px solid var(--border);
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-th,td{
-  padding:14px;
-  font-size:13px;
-  border-bottom:1px solid var(--border);
-  text-align:left;
-}
-
-th{
-  background:#f1f4f8;
-  color:#333;
-}
-
-tbody tr:hover{
-  background:#fafcff;
-}
-
-/* Buttons */
+.card h3{margin:0;font-size:18px}
+.card p{font-size:13px;color:#555}
 .btn{
-  padding:8px 14px;
-  border:none;
-  font-size:12px;
-  font-weight:600;
-  cursor:pointer;
+  margin-top:14px;padding:10px 14px;
+  border:none;background:#1e90ff;color:#fff;
+  font-size:13px;font-weight:600;cursor:pointer
 }
-
-.btn.primary{
-  background:var(--accent);
-  color:white;
-}
-
-.badge{
-  background:#eef2f7;
-  padding:4px 8px;
-  font-size:11px;
-}
-
-.empty{
-  text-align:center;
-  padding:30px;
-  color:#777;
-}
+.empty{text-align:center;color:#777;padding:40px}
 </style>
 </head>
 
 <body>
 
 <div class="container">
-
-  <!-- HEADER -->
   <div class="header">
-    <h1>Form Submissions</h1>
-    <p>View and manage student filled forms</p>
+    <h1>Forms</h1>
+    <p>Click a form to view submissions</p>
   </div>
 
-  <!-- FILTERS -->
-  <div class="filters">
-    <select id="formFilter">
-      <option value="">All Forms</option>
-    </select>
-
-    <input type="text" id="searchBox" placeholder="Search by form name">
-  </div>
-
-  <!-- TABLE -->
-  <div class="table-card">
-    <table>
-      <thead>
-        <tr>
-          <th>Form Name</th>
-          <th>Total Submissions</th>
-          <th>Status</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-  </div>
-
+  <div class="grid" id="formsGrid"></div>
 </div>
 
 <script>
-const tableBody = document.getElementById("tableBody");
-const formFilter = document.getElementById("formFilter");
-const searchBox = document.getElementById("searchBox");
+const grid = document.getElementById("formsGrid");
 
-let formsData = [];
-
-// 🔹 Load forms with submission count
 async function loadForms(){
   try{
-    const res = await fetch("https://college-hwbb.onrender.com/api/admin/forms", {
-      credentials: "include"
-    });
+    const res = await fetch(
+      "https://college-hwbb.onrender.com/api/admin/forms",
+      {
+        headers:{
+          "Authorization":"Bearer " + localStorage.getItem("adminToken")
+        }
+      }
+    );
 
-    if(!res.ok){
-      throw new Error("Failed to load forms");
+    if(!res.ok) throw new Error("Auth failed");
+
+    const forms = await res.json();
+    grid.innerHTML = "";
+
+    if(forms.length === 0){
+      grid.innerHTML = `<div class="empty">No forms found</div>`;
+      return;
     }
 
-    formsData = await res.json();
-
-    populateFilter(formsData);
-    renderTable(formsData);
+    forms.forEach(f=>{
+      const div = document.createElement("div");
+      div.className="card";
+      div.innerHTML=`
+        <h3>${f.name}</h3>
+        <p>Total Submissions: <b>${f.submissions}</b></p>
+        <button class="btn"
+          onclick="openForm('${f.id}','${f.name}')">
+          View Submissions →
+        </button>
+      `;
+      grid.appendChild(div);
+    });
 
   }catch(err){
     console.error(err);
-    tableBody.innerHTML = `
-      <tr>
-        <td colspan="4" class="empty">Unable to load submissions</td>
-      </tr>
-    `;
+    grid.innerHTML = `<div class="empty">Admin login required</div>`;
   }
 }
 
-// 🔹 Populate dropdown
-function populateFilter(data){
-  data.forEach(f => {
-    const opt = document.createElement("option");
-    opt.value = f.id;
-    opt.textContent = f.name;
-    formFilter.appendChild(opt);
-  });
+function openForm(id,name){
+  location.href=`form-data-details.html?formId=${id}&formName=${encodeURIComponent(name)}`;
 }
 
-// 🔹 Render table
-function renderTable(data){
-  tableBody.innerHTML = "";
-
-  if(data.length === 0){
-    tableBody.innerHTML = `
-      <tr>
-        <td colspan="4" class="empty">No submissions found</td>
-      </tr>
-    `;
-    return;
-  }
-
-  data.forEach(form => {
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td>${form.name}</td>
-      <td><span class="badge">${form.submissions}</span></td>
-      <td>Active</td>
-      <td>
-        <button class="btn primary" onclick="openFormData('${form.id}','${form.name}')">
-          View Data →
-        </button>
-      </td>
-    `;
-
-    tableBody.appendChild(tr);
-  });
-}
-
-// 🔹 Filter dropdown
-formFilter.addEventListener("change", () => {
-  const val = formFilter.value;
-  if(!val){
-    renderTable(formsData);
-  }else{
-    renderTable(formsData.filter(f => f.id === val));
-  }
-});
-
-// 🔹 Search
-searchBox.addEventListener("input", () => {
-  const q = searchBox.value.toLowerCase();
-  renderTable(
-    formsData.filter(f => f.name.toLowerCase().includes(q))
-  );
-});
-
-// 🔹 Redirect
-function openFormData(formId, formName){
-  const name = encodeURIComponent(formName);
-  window.location.href = `form-data-details.html?formId=${formId}&formName=${name}`;
-}
-
-// INIT
 loadForms();
 </script>
 
