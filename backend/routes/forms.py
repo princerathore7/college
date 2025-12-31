@@ -235,10 +235,16 @@ def update_submission_status(submission_id):
 # ==============================
 @forms_bp.route("/student/my-submissions", methods=["GET"])
 def get_my_submissions():
-    enrollment = request.user["enrollment"]
+    enrollment = request.args.get("enrollment")
+
+    if not enrollment:
+        return jsonify({"error": "Enrollment required"}), 400
 
     submissions = []
-    for s in submissions_col.find({"enrollment": enrollment}).sort("submitted_at", -1):
+    for s in submissions_col.find(
+        {"enrollment": enrollment}
+    ).sort("submitted_at", -1):
+
         submissions.append({
             "submission_id": str(s["_id"]),
             "form_title": s["form_title"],
@@ -248,6 +254,7 @@ def get_my_submissions():
         })
 
     return jsonify(submissions), 200
+
 # ==============================
 # GET FORMS (optional search by title)
 # ==============================

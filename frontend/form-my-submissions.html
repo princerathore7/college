@@ -148,15 +148,25 @@ const tableBody = document.getElementById("tableBody");
 // 🔹 Load student submissions
 async function loadSubmissions(){
   try{
-    const res = await fetch("https://college-hwbb.onrender.com/api/student/my-submissions", { credentials: "include" });
+    const enrollment = localStorage.getItem("enrollment");
+
+    if(!enrollment){
+      throw new Error("Enrollment not found in localStorage");
+    }
+
+    const res = await fetch(
+      `https://college-hwbb.onrender.com/api/student/my-submissions?enrollment=${encodeURIComponent(enrollment)}`
+    );
+
     if(!res.ok) throw new Error("Failed to load submissions");
 
     const data = await res.json();
     renderTable(data);
 
   }catch(err){
-    tableBody.innerHTML = `<tr><td colspan="4" class="loading">Unable to load submissions</td></tr>`;
     console.error(err);
+    tableBody.innerHTML =
+      `<tr><td colspan="4" class="loading">Unable to load submissions</td></tr>`;
   }
 }
 
@@ -165,47 +175,49 @@ function renderTable(submissions){
   tableBody.innerHTML = "";
 
   if(submissions.length === 0){
-    tableBody.innerHTML = `<tr><td colspan="4" class="loading">No submissions found</td></tr>`;
+    tableBody.innerHTML =
+      `<tr><td colspan="4" class="loading">No submissions found</td></tr>`;
     return;
   }
 
   submissions.forEach(s => {
-    const tr = document.createElement("tr");
+    const status = s.status || "pending";
 
-    let statusText = s.status || "pending";
-    let statusClass = s.status || "pending";
-    let actionBtn = "";
-
-    if(statusText === "disapproved"){
-      actionBtn = `<button class="btn primary" onclick="alertReason('${s.reason}')">View Reason</button>
-                   <button class="btn secondary" onclick="resubmitForm('${s.submission_id}')">Resubmit</button>`;
-    }else if(statusText === "pending"){
-      actionBtn = `<button class="btn secondary" onclick="resubmitForm('${s.submission_id}')">Edit / Resubmit</button>`;
-    }else{
-      actionBtn = `<button class="btn secondary" disabled>—</button>`;
+    let actionBtn = "—";
+    if(status === "disapproved"){
+      actionBtn = `
+        <button class="btn primary" onclick="alertReason('${s.reason || "No reason"}')">
+          View Reason
+        </button>
+        <button class="btn secondary" onclick="resubmitForm('${s.submission_id}')">
+          Resubmit
+        </button>`;
+    }else if(status === "pending"){
+      actionBtn = `
+        <button class="btn secondary"
+          onclick="resubmitForm('${s.submission_id}')">
+          Edit / Resubmit
+        </button>`;
     }
 
-    tr.innerHTML = `
-      <td>${s.form_title}</td>
-      <td>${new Date(s.submitted_at).toLocaleString()}</td>
-      <td><span class="status ${statusClass}">${statusText}</span></td>
-      <td>${actionBtn}</td>
+    tableBody.innerHTML += `
+      <tr>
+        <td>${s.form_title}</td>
+        <td>${new Date(s.submitted_at).toLocaleString()}</td>
+        <td><span class="status ${status}">${status}</span></td>
+        <td>${actionBtn}</td>
+      </tr>
     `;
-
-    tableBody.appendChild(tr);
   });
 }
 
-// 🔹 Alert disapproval reason
 function alertReason(reason){
-  alert(`Disapproved Reason: ${reason}`);
+  alert("Disapproved Reason:\n\n" + reason);
 }
 
-// 🔹 Resubmit form (redirect to student-form.html with formId)
 function resubmitForm(submissionId){
-  // Assuming you store formId along with submission, otherwise need to fetch
-  // Here we redirect to student form page with same formId
-  window.location.href = `student-form.html?submissionId=${submissionId}&resubmit=true`;
+  window.location.href =
+    `student-form.html?submissionId=${submissionId}&resubmit=true`;
 }
 
 // INIT
