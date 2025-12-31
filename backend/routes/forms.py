@@ -129,7 +129,9 @@ def get_form_submissions(form_id):
             "id": str(s["_id"]),
             "enrollment": s["enrollment"],
             "student_name": s["student_name"],
-            "submitted_at": s["submitted_at"]
+            "submitted_at": s["submitted_at"],
+             "status": s.get("status", "pending"),
+            "reason": s.get("reason", "")
         })
 
     return jsonify({
