@@ -2,151 +2,24 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Create Form | Admin Panel</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
+<title>Create New Form</title>
 <style>
-:root{
-  --navy:#0b1c2d;
-  --bg:#f4f6f9;
-  --card:#ffffff;
-  --border:#e1e5ec;
-  --yellow:#f4c430;
-  --yellow-dark:#e0b000;
-}
-
-*{
-  box-sizing:border-box;
-  font-family:'Inter',sans-serif;
-}
-
-body{
-  margin:0;
-  background:var(--bg);
-  padding:32px;
-}
-
-.container{
-  max-width:1100px;
-  margin:auto;
-}
-
-.header{
-  margin-bottom:22px;
-}
-
-.header h1{
-  margin:0;
-  font-size:26px;
-  color:var(--navy);
-}
-
-.header p{
-  margin-top:6px;
-  font-size:13px;
-  color:#555;
-}
-
-/* Card */
-.card{
-  background:var(--card);
-  border:1px solid var(--border);
-  padding:22px;
-  margin-bottom:20px;
-}
-
-.card, input, select, textarea, button{
-  border-radius:3px;
-}
-
-/* Inputs */
-label{
-  font-size:13px;
-  font-weight:600;
-  display:block;
-  margin-bottom:6px;
-}
-
-input, select, textarea{
-  width:100%;
-  padding:10px 12px;
-  border:1px solid var(--border);
-  font-size:13px;
-}
-
-textarea{
-  resize:vertical;
-}
-
-/* Grid */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-  gap:14px;
-}
-
-/* PDF */
-.pdf-box{
-  border:1px dashed var(--border);
-  padding:14px;
-  background:#fafbfd;
-  font-size:13px;
-}
-
-/* Fields */
-.field-card{
-  border:1px solid var(--border);
-  padding:14px;
-  margin-bottom:12px;
-  position:relative;
-}
-
-.remove-btn{
-  position:absolute;
-  right:10px;
-  top:10px;
-  border:none;
-  background:#e63946;
-  color:white;
-  font-size:11px;
-  padding:4px 8px;
-  cursor:pointer;
-}
-
-/* Buttons */
-.actions{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.btn{
-  padding:10px 18px;
-  border:none;
-  font-size:13px;
-  font-weight:700;
-  cursor:pointer;
-  letter-spacing:0.4px;
-}
-
-.btn.yellow{
-  background:var(--yellow);
-  color:#000;
-}
-
-.btn.yellow:hover{
-  background:var(--yellow-dark);
-}
-
-.btn.secondary{
-  background:#e9edf3;
-  color:#222;
-}
+  body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+  .container { max-width: 800px; margin: 40px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 0 12px rgba(0,0,0,0.1); }
+  h1 { margin-bottom: 5px; }
+  .card { background: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 6px; }
+  input, textarea, select { width: 100%; padding: 8px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; }
+  .pdf-box { border: 2px dashed #ccc; padding: 20px; text-align: center; cursor: pointer; border-radius: 6px; }
+  .field-card { background: #fff; padding: 10px; margin: 10px 0; border-radius: 6px; border: 1px solid #ddd; position: relative; }
+  .remove-btn { position: absolute; top: 5px; right: 5px; background: red; color: #fff; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; }
+  .grid { display: grid; grid-template-columns: 1fr 150px 120px; gap: 10px; align-items: center; }
+  .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; }
+  .btn.yellow { background: #f4c430; color: #000; }
+  .btn.secondary { background: #ccc; color: #000; margin-right: 10px; }
+  .actions { text-align: right; margin-top: 20px; }
 </style>
 </head>
-
 <body>
 
 <div class="container">
@@ -161,9 +34,7 @@ textarea{
   <div class="card">
     <label>Form Title *</label>
     <input type="text" id="formTitle" placeholder="e.g. Scholarship Form 2025">
-
     <br><br>
-
     <label>Description</label>
     <textarea id="formDesc" placeholder="Optional description"></textarea>
   </div>
@@ -181,10 +52,7 @@ textarea{
   <div class="card">
     <label>Form Fields</label>
     <div id="fieldsContainer"></div>
-
-    <button class="btn secondary" onclick="addField()">
-      + Add New Field
-    </button>
+    <button class="btn secondary" onclick="addField()">+ Add New Field</button>
   </div>
 
   <!-- ACTIONS -->
@@ -201,9 +69,7 @@ textarea{
    ACCESS CONTROL — FORM CREATOR
    (ONLY SOURCE CHECK, NO AUTH)
 ================================ */
-
 const source = sessionStorage.getItem("accessSource"); // set by admin.html
-
 if (source !== "ad") {
   document.body.innerHTML = `
     <h2 style="text-align:center;margin-top:20vh;color:red">
@@ -217,7 +83,6 @@ if (source !== "ad") {
 /* ===============================
    FORM BUILDER LOGIC
 ================================ */
-
 function addField() {
   const container = document.getElementById("fieldsContainer");
 
@@ -267,7 +132,6 @@ async function submitForm() {
       alert("All fields must have a label");
       return;
     }
-
     fields.push({
       label,
       type: card.querySelector(".field-type").value,
@@ -290,7 +154,14 @@ async function submitForm() {
       body: formData
     });
 
-    const data = await res.json();
+    const text = await res.text(); // safer for debugging
+    let data;
+    try { data = JSON.parse(text); } 
+    catch { 
+      console.error("Non-JSON response:", text); 
+      alert("❌ Server error or invalid response. Check backend logs."); 
+      return; 
+    }
 
     if (!res.ok) {
       alert(data.error || "Failed to create form");
@@ -307,7 +178,5 @@ async function submitForm() {
 }
 
 </script>
-
-
 </body>
 </html>
