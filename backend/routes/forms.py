@@ -121,7 +121,6 @@ def get_forms_admin():
 # GET SUBMISSIONS OF A FORM
 # ==============================
 @forms_bp.route("/admin/forms/<form_id>/submissions", methods=["GET"])
-# @admin_required
 def get_form_submissions(form_id):
 
     submissions = []
@@ -129,11 +128,14 @@ def get_form_submissions(form_id):
         submissions.append({
             "id": str(s["_id"]),
             "enrollment": s["enrollment"],
-            "name": s["student_name"],
+            "student_name": s["student_name"],
             "submitted_at": s["submitted_at"]
         })
 
-    return jsonify(submissions), 200
+    return jsonify({
+        "total_submissions": len(submissions),
+        "submissions": submissions
+    }), 200
 
 
 # ==============================
