@@ -4,10 +4,11 @@ from datetime import datetime
 import cloudinary.uploader
 
 from db import db
+import json
 
 from auth.middleware import admin_required # teacher_required hata diya
 
-forms_bp = Blueprint("forms_bp", __name__)
+forms_bp = Blueprint("forms_bp", __name__,url_prefix="/api")
 
 # ==============================
 # COLLECTIONS
