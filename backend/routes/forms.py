@@ -18,59 +18,7 @@ forms_col = db.forms              # form master
 submissions_col = db.form_submissions
 
 
-# ==============================
-# CREATE FORM (NO AUTH, SAFE)
-# ==============================
-@forms_bp.route("/forms", methods=["POST"])
-def create_form():
-    data = request.form
 
-    title = data.get("title")
-    description = data.get("description", "")
-    fields_str = data.get("fields", "[]")
-
-    try:
-        fields = json.loads(fields_str)
-    except Exception:
-        return jsonify({"error": "Invalid fields format"}), 400
-
-    if not title or not fields:
-        return jsonify({"error": "Title and fields required"}), 400
-
-    pdf_urls = []
-
-    for pdf in request.files.getlist("pdfs"):
-        try:
-            filename = f"form_{ObjectId()}_{secure_filename(pdf.filename)}"
-
-            upload = cloudinary.uploader.upload(
-                pdf,
-                resource_type="raw",
-                public_id=f"forms_pdfs/{filename}",
-                overwrite=True
-            )
-
-            pdf_urls.append(upload["secure_url"])
-
-        except Exception as e:
-            print("❌ FORM PDF upload failed:", e)
-            return jsonify({"error": "PDF upload failed"}), 500
-
-    form_doc = {
-        "title": title,
-        "description": description,
-        "fields": fields,
-        "pdfs": pdf_urls,
-        "created_at": datetime.utcnow(),
-        "active": True
-    }
-
-    result = forms_col.insert_one(form_doc)
-
-    return jsonify({
-        "message": "Form created successfully",
-        "form_id": str(result.inserted_id)
-    }), 201
 
 # ==============================
 # GET ALL ACTIVE FORMS (STUDENT)
@@ -294,17 +242,17 @@ def get_my_submissions():
 # ==============================
 # GET FORMS (optional search by title)
 # ==============================
-@forms_bp.route("/forms", methods=["GET"])
-def get_forms_by_search():
-    search = request.args.get("search", "").strip()
-    query = {}
-    if search:
-        query["title"] = {"$regex": search, "$options": "i"}  # case-insensitive search
+# @forms_bp.route("/forms", methods=["GET"])
+# def get_forms_by_search():
+#     search = request.args.get("search", "").strip()
+#     query = {}
+#     if search:
+#         query["title"] = {"$regex": search, "$options": "i"}  # case-insensitive search
 
-    forms = list(forms_col.find(query).sort("created_at", -1))
-    for f in forms:
-        f["_id"] = str(f["_id"])
-    return jsonify(forms)
+#     forms = list(forms_col.find(query).sort("created_at", -1))
+#     for f in forms:
+#         f["_id"] = str(f["_id"])
+#     return jsonify(forms)
 
 # ==============================
 # DELETE FORM
@@ -313,25 +261,44 @@ def get_forms_by_search():
 def delete_form(form_id):
     from bson import ObjectId
 
-    # strip any extra spaces
     form_id = form_id.strip()
 
+    # 1️⃣ Validate ObjectId
     try:
         obj_id = ObjectId(form_id)
     except Exception:
-        return jsonify({"success": False, "message": "Invalid form ID"}), 400
+        return jsonify({
+            "success": False,
+            "message": "Invalid form ID"
+        }), 400
 
+    # 2️⃣ Fetch form
     form = forms_col.find_one({"_id": obj_id})
     if not form:
-        return jsonify({"success": False, "message": "Form not found"}), 404
+        return jsonify({
+            "success": False,
+            "message": "Form not found"
+        }), 404
 
-    # Use saved cloudinary_id for deletion
-    for pdf in form.get("pdfs", []):
+    # 3️⃣ Delete PDFs from Cloudinary (URL → public_id)
+    for pdf_url in form.get("pdfs", []):
         try:
-            cloudinary.uploader.destroy(pdf['cloudinary_id'], resource_type="raw")
-        except:
-            pass
+            # Example URL:
+            # https://res.cloudinary.com/demo/raw/upload/v123/forms_pdfs/filename.pdf
+            public_id = pdf_url.split("/upload/")[1]
+            public_id = public_id.rsplit(".", 1)[0]  # remove .pdf
 
+            cloudinary.uploader.destroy(
+                public_id,
+                resource_type="raw"
+            )
+        except Exception as e:
+            print("⚠️ Cloudinary delete failed:", e)
+
+    # 4️⃣ Delete form from DB
     forms_col.delete_one({"_id": obj_id})
 
-    return jsonify({"success": True, "message": "Form deleted successfully"})
+    return jsonify({
+        "success": True,
+        "message": "Form deleted successfully"
+    }), 200
