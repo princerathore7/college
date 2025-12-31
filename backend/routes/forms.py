@@ -84,7 +84,7 @@ def submit_form(form_id):
             responses[label] = request.form.get(label)
 
     submission = {
-        "form_id": ObjectId(form_id),
+        "form_id": str(form_id),
         "form_title": form["title"],
         "enrollment": request.form.get("enrollment"),
         "student_name": request.form.get("student_name"),
@@ -105,7 +105,9 @@ def submit_form(form_id):
 def get_forms_admin():
     forms = []
     for f in forms_col.find():
-        count = submissions_col.count_documents({"form_id": f["_id"]})
+        count = submissions_col.count_documents({
+            "form_id": str(f["_id"])   # ✅ STRING MATCH
+        })
         forms.append({
             "id": str(f["_id"]),
             "name": f["title"],
@@ -121,8 +123,9 @@ def get_forms_admin():
 @forms_bp.route("/admin/forms/<form_id>/submissions", methods=["GET"])
 @admin_required
 def get_form_submissions(form_id):
+
     submissions = []
-    for s in submissions_col.find({"form_id": ObjectId(form_id)}).sort("submitted_at", -1):
+    for s in submissions_col.find({"form_id": form_id}).sort("submitted_at", -1):
         submissions.append({
             "id": str(s["_id"]),
             "enrollment": s["enrollment"],
