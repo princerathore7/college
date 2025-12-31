@@ -150,7 +150,7 @@ const container = document.getElementById("formsContainer");
 // 🔹 Fetch forms from backend
 async function loadForms(){
   try{
-    const res = await fetch("/api/forms", {
+    const res = await fetch("https://college-hwbb.onrender.com/api/forms", {
       method: "GET",
       credentials: "include"
     });

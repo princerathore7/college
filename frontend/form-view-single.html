@@ -259,7 +259,7 @@ function renderFields(responses){
 // 🔹 Approve / Disapprove
 async function updateStatus(status, reason=""){
   try{
-    const res = await fetch(`/api/admin/submissions/${submissionId}/status`, {
+    const res = await fetch(`https://college-hwbb.onrender.com/api/admin/submissions/${submissionId}/status`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

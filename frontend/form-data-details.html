@@ -155,7 +155,7 @@ formTitle.textContent = decodeURIComponent(formName || "Form");
 // 🔹 Load submissions
 async function loadSubmissions(){
   try{
-    const res = await fetch(`/api/admin/forms/${formId}/submissions`, {
+    const res = await fetch(`https://college-hwbb.onrender.com/api/admin/forms/${formId}/submissions`, {
       credentials:"include"
     });
 
