@@ -18,7 +18,7 @@ submissions_col = db.form_submissions
 
 
 # ==============================
-# CREATE FORM (NO AUTH)
+# CREATE FORM (NO AUTH, SAFE)
 # ==============================
 @forms_bp.route("/forms", methods=["POST"])
 def create_form():
@@ -37,13 +37,20 @@ def create_form():
         return jsonify({"error": "Title and fields required"}), 400
 
     pdf_urls = []
+
     for pdf in request.files.getlist("pdfs"):
-        upload = cloudinary.uploader.upload(
-            pdf,
-            resource_type="raw",
-            folder="forms/pdfs"
-        )
-        pdf_urls.append(upload["secure_url"])
+        try:
+            upload = cloudinary.uploader.upload(
+                pdf,
+                resource_type="raw",
+                folder="forms/pdfs"
+            )
+            pdf_urls.append(upload["secure_url"])
+        except Exception as e:
+            print("❌ PDF upload failed:", e)
+            return jsonify({
+                "error": "PDF upload failed"
+            }), 500
 
     form_doc = {
         "title": title,
