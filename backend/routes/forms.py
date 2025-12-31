@@ -295,7 +295,7 @@ def get_my_submissions():
 # GET FORMS (optional search by title)
 # ==============================
 @forms_bp.route("/forms", methods=["GET"])
-def get_forms():
+def get_forms_by_search():
     search = request.args.get("search", "").strip()
     query = {}
     if search:
