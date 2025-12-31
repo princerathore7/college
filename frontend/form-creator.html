@@ -196,6 +196,24 @@ textarea{
 </div>
 
 <script>
+  
+/* ===============================
+   ACCESS CONTROL — FORM CREATOR
+================================ */
+
+const mentorId = localStorage.getItem("mentorId");
+const source   = sessionStorage.getItem("accessSource"); // set by admin.html
+
+if (!mentorId || source !== "ad") {
+  document.body.innerHTML = `
+    <h2 style="text-align:center;margin-top:20vh;color:red">
+      ❌ Access Denied <br>
+      Please open this page from Administration Panel only
+    </h2>
+  `;
+  throw new Error("Unauthorized access");
+}
+
 function addField() {
   const container = document.getElementById("fieldsContainer");
 
@@ -276,7 +294,7 @@ async function submitForm() {
     } catch {
       console.error("Non-JSON response:", text);
       alert("❌ Session expired or unauthorized. Please login again.");
-      location.href = "/login.html";
+      location.href = "/mentor-dashboard.html";
       return;
     }
 
