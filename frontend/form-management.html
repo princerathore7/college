@@ -50,17 +50,20 @@ async function fetchForms(search="") {
     }
 
     forms.forEach(f => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${f.title}</td>
-        <td>${f.description || "-"}</td>
-        <td>${new Date(f.created_at).toLocaleString()}</td>
-        <td>
-          <button class="btn-delete" onclick="deleteForm('${f._id}')">Delete</button>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td>${f.title}</td>
+    <td>${f.description || "-"}</td>
+    <td>${f.fields_count}</td>
+    <td>
+      <button class="btn-delete" onclick="deleteForm('${f.id}')">
+        Delete
+      </button>
+    </td>
+  `;
+  tbody.appendChild(tr);
+});
+
   } catch (err) {
     console.error(err);
     alert("❌ Failed to load forms");
