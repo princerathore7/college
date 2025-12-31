@@ -246,32 +246,54 @@ function renderFields(responses){
   const container = document.getElementById("formFields");
   container.innerHTML = "";
 
-  if(!responses || responses.length === 0){
-    container.innerHTML = "<div class='loading'>No responses found</div>";
+  if(!responses){
+    container.innerHTML =
+      "<div class='loading'>No responses found</div>";
     return;
   }
 
-  responses.forEach(r => {
-    const div = document.createElement("div");
-    div.className = "field";
-
-    let value = "—";
-
-    if (typeof r === "object") {
-      if (r.type === "file") {
-        value = `<a href="${r.value}" target="_blank">View File</a>`;
-      } else {
-        value = r.value ?? r.answer ?? "—";
-      }
+  // ✅ CASE 1: responses is ARRAY
+  if (Array.isArray(responses)) {
+    if (responses.length === 0) {
+      container.innerHTML =
+        "<div class='loading'>No responses found</div>";
+      return;
     }
 
-    div.innerHTML = `
-      <label>${r.label ?? r.question ?? "Field"}</label>
-      <div class="value">${value}</div>
-    `;
+    responses.forEach(r => appendField(container, r.label ?? r.question, r.value, r.type));
+    return;
+  }
 
-    container.appendChild(div);
-  });
+  // ✅ CASE 2: responses is OBJECT (MOST LIKELY)
+  if (typeof responses === "object") {
+    Object.entries(responses).forEach(([key, value]) => {
+      appendField(container, key, value);
+    });
+    return;
+  }
+
+  container.innerHTML =
+    "<div class='loading'>Invalid response format</div>";
+}
+
+function appendField(container, label, value, type=null){
+  const div = document.createElement("div");
+  div.className = "field";
+
+  let displayValue = "—";
+
+  if (type === "file" || (typeof value === "string" && value.startsWith("http"))) {
+    displayValue = `<a href="${value}" target="_blank">View File</a>`;
+  } else {
+    displayValue = value ?? "—";
+  }
+
+  div.innerHTML = `
+    <label>${label}</label>
+    <div class="value">${displayValue}</div>
+  `;
+
+  container.appendChild(div);
 }
 
 // 🔹 Approve / Disapprove
