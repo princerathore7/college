@@ -200,26 +200,27 @@ async function loadForms(){
     `;
   }
 }
-function loadStudentFromStorage(){
-  const name = localStorage.getItem("studentName");
-  const enrollment = localStorage.getItem("studentEnrollment");
+function loadStudentInfo(){
+  const profile = JSON.parse(localStorage.getItem("studentProfile"));
 
-  if(!name || !enrollment){
+  if(!profile){
     alert("Session expired. Please login again.");
     window.location.href = "login.html";
     return;
   }
 
-  // agar forms.html pe show karna ho
+  console.log("✅ Student loaded on forms.html:", profile);
+
+  // agar forms.html pe dikhana ho
   const nameEl = document.getElementById("studentName");
   const enrollEl = document.getElementById("studentEnrollment");
 
-  if(nameEl) nameEl.textContent = name;
-  if(enrollEl) enrollEl.textContent = enrollment;
+  if(nameEl) nameEl.textContent = profile.name;
+  if(enrollEl) enrollEl.textContent = profile.enrollment;
 }
 
-// page load
-loadStudentFromStorage();
+document.addEventListener("DOMContentLoaded", loadStudentInfo);
+
 
 // 🔹 Redirect to selected form
 function openForm(formId){

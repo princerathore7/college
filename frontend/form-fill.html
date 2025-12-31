@@ -245,18 +245,18 @@ async function submitForm(){
   }
 }
 function autofillStudentInfo(){
-  const enrollment = localStorage.getItem("studentEnrollment");
-  const name = localStorage.getItem("studentName");
+  const profile = JSON.parse(localStorage.getItem("studentProfile"));
 
-  if(!enrollment || !name){
+  if(!profile){
     alert("Session expired. Please login again.");
     window.location.href = "login.html";
     return;
   }
 
-  document.getElementById("enrollment").value = enrollment;
-  document.getElementById("studentName").value = name;
+  document.getElementById("enrollment").value = profile.enrollment;
+  document.getElementById("studentName").value = profile.name;
 }
+
 
 // INIT
 loadForm();

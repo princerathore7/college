@@ -591,72 +591,7 @@ input:checked + .slider:before {
           </tbody>
         </table>
       </div>
-<!-- 
-  📅 Timetable Section 
-<div class="section" id="timetableSection">
-  <h2>Class Timetable And Notes</h2>
 
-  <label for="classSelect">Select Your Class:</label>
-  <select id="classSelect">
-    <option value="">-- Select Class --</option>
-    <option>1A</option><option>1B</option>
-    <option>2A</option><option>2B</option>
-    <option>3A</option><option>3B</option>
-    <option>4A</option><option>4B</option>
-    <option>5A</option><option>5B</option>
-    <option>6A</option><option>6B</option>
-    <option>7A</option><option>7B</option>
-    <option>8A</option><option>8B</option>
-    <option>9A</option><option>9B</option>
-    <option>10A</option><option>10B</option>
-    <option>11A</option><option>11B</option>
-    <option>12A</option><option>12B</option>
-  </select>
-
-  <button onclick="fetchTimetable()">View Timetable</button> -->
-<!-- <h2>Class Notes & PDF Resources</h2>
-
-<label for="yearSelect">Select Year:</label>
-<select id="yearSelect">
-  <option value="">-- Select Year --</option>
-  <option value="1">1st Year</option>
-  <option value="2nd Year">2nd Year</option>
-  <option value="3rd Year">3rd Year</option>
-  <option value="4th Year">4th Year</option>
-  <option value="5th Year">5th Year</option>
-</select>
-
-<label for="branchSelect">Select Branch:</label>
-<select id="branchSelect">
-  <option value="">-- Select Branch --</option>
-  <option value="CSE">CSE</option>
-  <option value="IT">IT</option>
-  <option value="ECE">ECE</option>
-  <option value="ME">ME</option>
-  <option value="CIVIL">CIVIL</option>
-</select>
-
-<label for="sectionSelect">Select Section:</label>
-<select id="sectionSelect">
-  <option value="">-- Select Section --</option>
-  <option value="1">1</option>
-  <option value="2">2</option>
-  <option value="3">3</option>
-  <option value="4">4</option>
-  <option value="5">5</option>
-</select>
-
-<button onclick="fetchNotes()">View Notes & PDF</button>
-
-<div id="notesContainer"></div>
-
-
-
-  <div id="pdfContainer" style="margin-top:20px; text-align:center;">
-    <p style="color:#666;">Select your class and click “View Timetable” to see the PDF.</p>
-  </div>
-</div> -->
-<!-- Fees Modal -->
 <div class="modal" id="feesModal" aria-hidden="true">
   <div class="modal-box">
     <span class="close-x" id="feesClose">&times;</span>
@@ -724,10 +659,20 @@ async function loadStudentProfileAPI(enrollment) {
 
 function renderProfile(s) {
   if (!s) return;
+
   document.getElementById("studentName").textContent = s.name || "Student";
   document.getElementById("studentEnrollment").textContent = s.enrollment;
   document.getElementById("studentClass").textContent = s.class || s.branch;
-  localStorage.setItem("studentClass", s.class || s.branch);
+
+  // 🔥 SINGLE SOURCE OF TRUTH
+  localStorage.setItem("studentProfile", JSON.stringify({
+    name: s.name,
+    enrollment: s.enrollment,
+    class: s.class || s.branch
+  }));
+
+  // (optional legacy support)
+  localStorage.setItem("enrollment", s.enrollment);
 }
 
 /* ------------------------------------------
@@ -1013,108 +958,6 @@ document.addEventListener("DOMContentLoaded", () => {
   subscribeUserToPush();
 });
 
-// /* =========================================================
-//    NOTIFICATION SWITCH LOGIC
-// ========================================================= */
-
-// const notificationSwitch = document.getElementById("notificationSwitch");
-
-
-// /* ---------- Base64 → Uint8Array ---------- */
-// function urlBase64ToUint8Array(base64String) {
-//   const padding = "=".repeat((4 - base64String.length % 4) % 4);
-//   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
-//   const rawData = window.atob(base64);
-//   return new Uint8Array([...rawData].map(c => c.charCodeAt(0)));
-// }
-
-// /* ---------- Load switch state ---------- */
-// document.addEventListener("DOMContentLoaded", () => {
-//   const enabled = localStorage.getItem("notificationsEnabled") === "true";
-//   notificationSwitch.checked = enabled;
-// });
-
-// /* ---------- Toggle Event ---------- */
-// notificationSwitch.addEventListener("change", async () => {
-//   if (notificationSwitch.checked) {
-//     await enableNotifications();
-//   } else {
-//     await disableNotifications();
-//   }
-// });
-
-// /* ---------- ENABLE ---------- */
-// async function enableNotifications() {
-//   try {
-//     const permission = await Notification.requestPermission();
-
-//     if (permission !== "granted") {
-//       notificationSwitch.checked = false;
-//       return;
-//     }
-
-//     const registration = await navigator.serviceWorker.ready;
-
-//     let subscription = await registration.pushManager.getSubscription();
-
-//     if (!subscription) {
-//       subscription = await registration.pushManager.subscribe({
-//         userVisibleOnly: true,
-//         applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY)
-//       });
-//     }
-
-//     const enrollment = localStorage.getItem("enrollment");
-
-//     await fetch(`${API_ROOT}/api/subscribe`, {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({ enrollment, subscription })
-//     });
-
-//     localStorage.setItem("notificationsEnabled", "true");
-//     console.log("🔔 Notifications enabled");
-
-//   } catch (err) {
-//     console.error(err);
-//   }
-// }
-
-
-// /* ---------- DISABLE ---------- */
-// async function disableNotifications() {
-//   try {
-//     const registration = await navigator.serviceWorker.ready;
-//     const subscription = await registration.pushManager.getSubscription();
-
-//     if (subscription) {
-//       await subscription.unsubscribe();
-//     }
-
-//     localStorage.removeItem("pushSubscription");
-//     localStorage.setItem("notificationsEnabled", "false");
-
-//     console.log("🔕 Notifications DISABLED");
-
-//   } catch (err) {
-//     console.error("Disable notifications failed:", err);
-//   }
-// }
-
-// document.addEventListener("DOMContentLoaded", async () => {
-//   if (!("serviceWorker" in navigator)) return;
-
-//   const registration = await navigator.serviceWorker.ready;
-//   const subscription = await registration.pushManager.getSubscription();
-
-//   if (subscription) {
-//     notificationSwitch.checked = true;
-//     localStorage.setItem("notificationsEnabled", "true");
-//   } else {
-//     notificationSwitch.checked = false;
-//     localStorage.setItem("notificationsEnabled", "false");
-//   }
-// });
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
