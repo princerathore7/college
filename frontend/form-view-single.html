@@ -181,6 +181,10 @@ body{
       </div>
     </div>
   </div>
+<div class="info-item">
+  <span>Status</span>
+  <strong id="status">Pending</strong>
+</div>
 
   <!-- FORM DATA -->
   <div class="card">
@@ -208,7 +212,8 @@ let submissionData = null;
 // 🔹 Load submission
 async function loadSubmission(){
   try{
-    const res = await fetch(`/api/admin/submissions/${submissionId}`, {
+    const res = await fetch(
+      `https://college-hwbb.onrender.com/api/admin/submissions/${submissionId}`, {
       credentials: "include"
     });
 
@@ -238,17 +243,27 @@ function renderFields(responses){
   const container = document.getElementById("formFields");
   container.innerHTML = "";
 
+  if(!responses || responses.length === 0){
+    container.innerHTML = "<div class='loading'>No responses found</div>";
+    return;
+  }
+
   responses.forEach(r => {
     const div = document.createElement("div");
     div.className = "field";
 
-    let value =
-      r.type === "file"
-        ? `<a href="${r.value}" target="_blank">View File</a>`
-        : r.value || "—";
+    let value = "—";
+
+    if (typeof r === "object") {
+      if (r.type === "file") {
+        value = `<a href="${r.value}" target="_blank">View File</a>`;
+      } else {
+        value = r.value ?? r.answer ?? "—";
+      }
+    }
 
     div.innerHTML = `
-      <label>${r.label}</label>
+      <label>${r.label ?? r.question ?? "Field"}</label>
       <div class="value">${value}</div>
     `;
 
@@ -289,6 +304,8 @@ function promptDisapprove(){
     alert("Disapproval reason is required!");
   }
 }
+document.getElementById("status").innerText =
+  submissionData.status ?? "Pending";
 
 // INIT
 loadSubmission();
