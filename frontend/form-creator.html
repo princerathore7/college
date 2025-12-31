@@ -196,16 +196,16 @@ textarea{
 </div>
 
 <script>
-function addField(){
+function addField() {
   const container = document.getElementById("fieldsContainer");
 
   const div = document.createElement("div");
   div.className = "field-card";
 
   div.innerHTML = `
-    <button class="remove-btn" onclick="this.parentElement.remove()">X</button>
+    <button class="remove-btn" onclick="this.parentElement.remove()">✖</button>
     <div class="grid">
-      <input type="text" placeholder="Field Label" class="field-label">
+      <input type="text" placeholder="Field Label" class="field-label" required>
       <select class="field-type">
         <option value="text">Text</option>
         <option value="number">Number</option>
@@ -218,64 +218,79 @@ function addField(){
       </select>
     </div>
   `;
-
   container.appendChild(div);
 }
 
-async function submitForm(){
+async function submitForm() {
   const title = document.getElementById("formTitle").value.trim();
   const description = document.getElementById("formDesc").value.trim();
   const pdfs = document.getElementById("pdfUpload").files;
 
-  if(!title){
+  if (!title) {
     alert("Form title is required");
     return;
   }
 
   const fieldCards = document.querySelectorAll(".field-card");
-  if(fieldCards.length === 0){
+  if (fieldCards.length === 0) {
     alert("Add at least one field");
     return;
   }
 
   const fields = [];
-  fieldCards.forEach(card => {
+  for (const card of fieldCards) {
+    const label = card.querySelector(".field-label").value.trim();
+    if (!label) {
+      alert("All fields must have a label");
+      return;
+    }
+
     fields.push({
-      label: card.querySelector(".field-label").value,
+      label,
       type: card.querySelector(".field-type").value,
       required: card.querySelector(".field-required").value === "true"
     });
-  });
+  }
 
   const formData = new FormData();
   formData.append("title", title);
   formData.append("description", description);
   formData.append("fields", JSON.stringify(fields));
 
-  for(const pdf of pdfs){
+  for (const pdf of pdfs) {
     formData.append("pdfs", pdf);
   }
 
-  try{
+  try {
     const res = await fetch("/api/forms", {
       method: "POST",
       body: formData,
       credentials: "include"
     });
 
-    const data = await res.json();
+    const text = await res.text();
+    let data;
 
-    if(!res.ok){
+    try {
+      data = JSON.parse(text);
+    } catch {
+      console.error("Non-JSON response:", text);
+      alert("❌ Session expired or unauthorized. Please login again.");
+      location.href = "/login.html";
+      return;
+    }
+
+    if (!res.ok) {
       alert(data.error || "Failed to create form");
       return;
     }
 
-    alert("Form created successfully ✅");
-    window.location.href = "form-data.html";
+    alert("✅ Form created successfully");
+    window.location.href = "/form-submissions.html";
 
-  }catch(err){
-    alert("Server error");
+  } catch (err) {
     console.error(err);
+    alert("❌ Server error. Please try again.");
   }
 }
 </script>
