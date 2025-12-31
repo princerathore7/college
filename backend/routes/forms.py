@@ -153,7 +153,9 @@ def view_submission(submission_id):
         "enrollment": s["enrollment"],
         "student_name": s["student_name"],
         "submitted_at": s["submitted_at"],
-        "responses": s["responses"]
+        "responses": s["responses"],
+        "status": s.get("status", "pending"),
+         "reason": s.get("reason", "")
     }), 200
 # ==============================
 # GET SUBMISSIONS OF A SINGLE FORM (ADMIN / TEACHER)

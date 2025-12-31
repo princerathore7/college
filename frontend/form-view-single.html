@@ -228,7 +228,10 @@ async function loadSubmission(){
     document.getElementById("studentName").innerText = submissionData.student_name;
     document.getElementById("submittedAt").innerText =
       new Date(submissionData.submitted_at).toLocaleString();
-
+const statusEl = document.getElementById("status");
+if (statusEl) {
+  statusEl.innerText = submissionData.status ?? "Pending";
+}
     renderFields(submissionData.responses);
 
   }catch(err){
@@ -304,8 +307,8 @@ function promptDisapprove(){
     alert("Disapproval reason is required!");
   }
 }
-document.getElementById("status").innerText =
-  submissionData.status ?? "Pending";
+// document.getElementById("status").innerText =
+//   submissionData.status ?? "Pending";
 
 // INIT
 loadSubmission();
