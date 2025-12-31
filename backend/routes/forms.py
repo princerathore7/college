@@ -59,8 +59,8 @@ def get_single_form(form_id):
 # SUBMIT FORM (STUDENT)
 # ==============================
 @forms_bp.route("/forms/<form_id>/submit", methods=["POST"])
-
 def submit_form(form_id):
+
     form = forms_col.find_one({"_id": ObjectId(form_id)})
     if not form:
         return jsonify({"error": "Invalid form"}), 404
@@ -86,8 +86,8 @@ def submit_form(form_id):
     submission = {
         "form_id": ObjectId(form_id),
         "form_title": form["title"],
-        "enrollment": request.user["enrollment"],
-        "student_name": request.user["name"],
+        "enrollment": request.form.get("enrollment"),
+        "student_name": request.form.get("student_name"),
         "responses": responses,
         "submitted_at": datetime.utcnow()
     }
