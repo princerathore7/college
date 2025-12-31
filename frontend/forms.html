@@ -200,6 +200,26 @@ async function loadForms(){
     `;
   }
 }
+function loadStudentFromStorage(){
+  const name = localStorage.getItem("studentName");
+  const enrollment = localStorage.getItem("studentEnrollment");
+
+  if(!name || !enrollment){
+    alert("Session expired. Please login again.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  // agar forms.html pe show karna ho
+  const nameEl = document.getElementById("studentName");
+  const enrollEl = document.getElementById("studentEnrollment");
+
+  if(nameEl) nameEl.textContent = name;
+  if(enrollEl) enrollEl.textContent = enrollment;
+}
+
+// page load
+loadStudentFromStorage();
 
 // 🔹 Redirect to selected form
 function openForm(formId){

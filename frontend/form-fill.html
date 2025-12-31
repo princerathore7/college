@@ -244,9 +244,25 @@ async function submitForm(){
     console.error(err);
   }
 }
+function autofillStudentInfo(){
+  const enrollment = localStorage.getItem("studentEnrollment");
+  const name = localStorage.getItem("studentName");
+
+  if(!enrollment || !name){
+    alert("Session expired. Please login again.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  document.getElementById("enrollment").value = enrollment;
+  document.getElementById("studentName").value = name;
+}
 
 // INIT
 loadForm();
+autofillStudentInfo();
+loadForm();
+
 </script>
 
 </body>
