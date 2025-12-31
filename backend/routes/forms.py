@@ -18,19 +18,19 @@ submissions_col = db.form_submissions
 
 
 # ==============================
-# CREATE FORM (ADMIN / TEACHER)
+# CREATE FORM (NO AUTH)
 # ==============================
 @forms_bp.route("/forms", methods=["POST"])
-# @admin_required
 def create_form():
     data = request.form
+
     title = data.get("title")
     description = data.get("description", "")
     fields_str = data.get("fields", "[]")
-    
+
     try:
         fields = json.loads(fields_str)
-    except:
+    except Exception:
         return jsonify({"error": "Invalid fields format"}), 400
 
     if not title or not fields:
@@ -50,7 +50,6 @@ def create_form():
         "description": description,
         "fields": fields,
         "pdfs": pdf_urls,
-        "created_by": request.headers.get("X-Admin-Id", "admin"),
         "created_at": datetime.utcnow(),
         "active": True
     }
@@ -61,6 +60,7 @@ def create_form():
         "message": "Form created successfully",
         "form_id": str(result.inserted_id)
     }), 201
+
 
 # ==============================
 # GET ALL ACTIVE FORMS (STUDENT)
