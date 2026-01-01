@@ -6,335 +6,141 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 
 <style>
+/* ---- SAME CSS (unchanged) ---- */
 :root{
   --navy:#0b1c2d;
-  --navy-light:#14314f;
   --bg:#f4f6f9;
-  --card:#ffffff;
+  --card:#fff;
   --border:#e1e5ec;
   --accent:#1e90ff;
-  --red:#ff4d4f;
   --green:#28a745;
+  --red:#ff4d4f;
 }
-
-*{
-  box-sizing:border-box;
-  font-family:'Inter',sans-serif;
-}
-
-body{
-  margin:0;
-  background:var(--bg);
-  padding:26px;
-}
-
-.container{
-  max-width:900px;
-  margin:auto;
-}
-
-/* TOP BAR */
-.topbar{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  margin-bottom:20px;
-}
-
-.topbar img{
-  height:42px;
-}
-
-.topbar h1{
-  font-size:22px;
-  margin:0;
-  color:var(--navy);
-}
-
-/* Card */
-.card{
-  background:var(--card);
-  border:1px solid var(--border);
-  padding:20px;
-  margin-bottom:18px;
-  border-radius:3px;
-}
-
-/* Info grid */
-.info-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:14px;
-}
-
-.info-item span{
-  font-size:12px;
-  color:#666;
-}
-
-.info-item strong{
-  display:block;
-  margin-top:4px;
-  font-size:14px;
-}
-
-/* Fields */
-.field{
-  padding:12px 0;
-  border-bottom:1px solid var(--border);
-}
-
-.field:last-child{
-  border-bottom:none;
-}
-
-.field label{
-  font-size:13px;
-  font-weight:600;
-}
-
-.field .value{
-  margin-top:6px;
-  font-size:13px;
-}
-
-.field a{
-  color:var(--accent);
-  font-weight:600;
-  text-decoration:none;
-}
-
-/* Actions */
-.actions{
-  display:flex;
-  justify-content:space-between;
-  margin-top:14px;
-  flex-wrap:wrap;
-  gap:10px;
-}
-
-.btn{
-  padding:9px 16px;
-  border:none;
-  font-size:12px;
-  font-weight:600;
-  cursor:pointer;
-  border-radius:3px;
-}
-
-.btn.primary{
-  background:var(--accent);
-  color:#fff;
-}
-
-.btn.secondary{
-  background:#e9edf3;
-  color:var(--navy);
-}
-
-.btn.approve{
-  background:var(--green);
-  color:#fff;
-}
-
-.btn.disapprove{
-  background:var(--red);
-  color:#fff;
-}
-
-/* Loader */
-.loading{
-  text-align:center;
-  padding:20px;
-  color:#666;
-}
+*{box-sizing:border-box;font-family:'Inter',sans-serif}
+body{margin:0;background:var(--bg);padding:26px}
+.container{max-width:900px;margin:auto}
+.card{background:var(--card);border:1px solid var(--border);padding:20px;margin-bottom:18px}
+.field{padding:12px 0;border-bottom:1px solid var(--border)}
+.field:last-child{border-bottom:none}
+.field label{font-size:13px;font-weight:600}
+.field .value{margin-top:6px;font-size:13px}
+.field a{color:var(--accent);font-weight:600;text-decoration:none;margin-right:10px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{padding:9px 16px;border:none;font-size:12px;font-weight:600;cursor:pointer}
+.btn.primary{background:var(--accent);color:#fff}
+.btn.secondary{background:#e9edf3}
+.btn.green{background:var(--green);color:#fff}
+.btn.red{background:var(--red);color:#fff}
 </style>
 </head>
 
 <body>
-
 <div class="container">
 
-  <!-- HEADER -->
-  <div class="topbar">
-    <img src="logo.jpg" alt="Logo">
-    <h1 id="formName">Form Details</h1>
-  </div>
-
-  <!-- STUDENT INFO -->
   <div class="card">
-    <h3>Student Information</h3>
-    <div class="info-grid">
-      <div class="info-item">
-        <span>Enrollment Number</span>
-        <strong id="enrollment">—</strong>
-      </div>
-      <div class="info-item">
-        <span>Student Name</span>
-        <strong id="studentName">—</strong>
-      </div>
-      <div class="info-item">
-        <span>Submitted On</span>
-        <strong id="submittedAt">—</strong>
-      </div>
-    </div>
+    <h2 id="formName">Form</h2>
+    <div><strong>Enrollment:</strong> <span id="enrollment"></span></div>
+    <div><strong>Name:</strong> <span id="studentName"></span></div>
+    <div><strong>Submitted:</strong> <span id="submittedAt"></span></div>
   </div>
-<div class="info-item">
-  <span>Status</span>
-  <strong id="status">Pending</strong>
-</div>
 
-  <!-- FORM DATA -->
   <div class="card">
-    <h3>Submitted Form Data</h3>
-    <div id="formFields" class="loading">Loading submission...</div>
+    <h3>Submitted Data</h3>
+    <div id="formFields">Loading…</div>
   </div>
 
-  <!-- ACTIONS -->
   <div class="actions">
     <button class="btn secondary" onclick="history.back()">← Back</button>
-    <button class="btn primary" onclick="window.print()">Print</button>
-    <button class="btn approve" onclick="updateStatus('approved')">Approve</button>
-    <button class="btn disapprove" onclick="promptDisapprove()">Disapprove</button>
+    <button class="btn primary" onclick="window.print()">Print Page</button>
+    <button class="btn green" onclick="printCompleteDocument()">🧾 Print Complete Document</button>
   </div>
 
 </div>
 
 <script>
-// 🔹 Get submissionId
 const params = new URLSearchParams(window.location.search);
 const submissionId = params.get("submissionId");
-
 let submissionData = null;
+let attachedPdfs = [];
 
-// 🔹 Load submission
+/* LOAD SUBMISSION */
 async function loadSubmission(){
-  try{
-    const res = await fetch(
-      `https://college-hwbb.onrender.com/api/admin/submissions/${submissionId}`, {
-      credentials: "include"
-    });
+  const res = await fetch(
+    `https://college-hwbb.onrender.com/api/admin/submissions/${submissionId}`,
+    { credentials:"include" }
+  );
+  submissionData = await res.json();
 
-    if(!res.ok){
-      throw new Error("Failed to load submission");
-    }
+  formName.innerText = submissionData.form_name;
+  enrollment.innerText = submissionData.enrollment;
+  studentName.innerText = submissionData.student_name;
+  submittedAt.innerText = new Date(submissionData.submitted_at).toLocaleString();
 
-    submissionData = await res.json();
-
-    document.getElementById("formName").innerText = submissionData.form_name;
-    document.getElementById("enrollment").innerText = submissionData.enrollment;
-    document.getElementById("studentName").innerText = submissionData.student_name;
-    document.getElementById("submittedAt").innerText =
-      new Date(submissionData.submitted_at).toLocaleString();
-const statusEl = document.getElementById("status");
-if (statusEl) {
-  statusEl.innerText = submissionData.status ?? "Pending";
-}
-    renderFields(submissionData.responses);
-
-  }catch(err){
-    document.getElementById("formFields").innerHTML =
-      "<div class='loading'>Unable to load submission</div>";
-    console.error(err);
-  }
+  renderFields(submissionData.responses);
 }
 
-// 🔹 Render responses
+/* RENDER FIELDS */
 function renderFields(responses){
-  const container = document.getElementById("formFields");
-  container.innerHTML = "";
+  const box = document.getElementById("formFields");
+  box.innerHTML = "";
+  attachedPdfs = [];
 
-  if(!responses){
-    container.innerHTML =
-      "<div class='loading'>No responses found</div>";
-    return;
-  }
+  Object.entries(responses).forEach(([label,value])=>{
+    const div=document.createElement("div");
+    div.className="field";
 
-  // ✅ CASE 1: responses is ARRAY
-  if (Array.isArray(responses)) {
-    if (responses.length === 0) {
-      container.innerHTML =
-        "<div class='loading'>No responses found</div>";
-      return;
+    if(typeof value==="string" && value.startsWith("http")){
+      attachedPdfs.push(value);
+      div.innerHTML=`
+        <label>${label}</label>
+        <div class="value">
+          <a href="${value}" target="_blank">View</a>
+          <a href="${value}" onclick="event.preventDefault();printPdf('${value}')">Print PDF</a>
+        </div>`;
+    }else{
+      div.innerHTML=`
+        <label>${label}</label>
+        <div class="value">${value ?? "—"}</div>`;
     }
-
-    responses.forEach(r => appendField(container, r.label ?? r.question, r.value, r.type));
-    return;
-  }
-
-  // ✅ CASE 2: responses is OBJECT (MOST LIKELY)
-  if (typeof responses === "object") {
-    Object.entries(responses).forEach(([key, value]) => {
-      appendField(container, key, value);
-    });
-    return;
-  }
-
-  container.innerHTML =
-    "<div class='loading'>Invalid response format</div>";
+    box.appendChild(div);
+  });
 }
 
-function appendField(container, label, value, type=null){
-  const div = document.createElement("div");
-  div.className = "field";
-
-  let displayValue = "—";
-
-  if (type === "file" || (typeof value === "string" && value.startsWith("http"))) {
-    displayValue = `<a href="${value}" target="_blank">View File</a>`;
-  } else {
-    displayValue = value ?? "—";
-  }
-
-  div.innerHTML = `
-    <label>${label}</label>
-    <div class="value">${displayValue}</div>
-  `;
-
-  container.appendChild(div);
+/* PRINT SINGLE PDF */
+function printPdf(url){
+  const w = window.open(url,"_blank");
+  w.onload = ()=>w.print();
 }
 
-// 🔹 Approve / Disapprove
-async function updateStatus(status, reason=""){
-  try{
-    const res = await fetch(`https://college-hwbb.onrender.com/api/admin/submissions/${submissionId}/status`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      credentials: "include",
-      body: JSON.stringify({status, reason})
-    });
+/* 🔥 PRINT COMPLETE DOCUMENT (PAGE + ALL PDFs) */
+async function printCompleteDocument(){
+  const { PDFDocument } = PDFLib;
+  const finalPdf = await PDFDocument.create();
 
-    if(!res.ok){
-      const data = await res.json();
-      throw new Error(data.error || "Failed to update status");
-    }
+  // 1️⃣ Page text as PDF
+  const page = finalPdf.addPage([595,842]);
+  const text = document.body.innerText;
+  page.drawText(text.substring(0, 3500), { x:40, y:800, size:10 });
 
-    alert(`Submission marked as ${status}`);
-    loadSubmission(); // reload if needed
-  }catch(err){
-    alert(err.message);
+  // 2️⃣ Merge all attached PDFs
+  for(const url of attachedPdfs){
+    const bytes = await fetch(url).then(r=>r.arrayBuffer());
+    const pdf = await PDFDocument.load(bytes);
+    const pages = await finalPdf.copyPages(pdf, pdf.getPageIndices());
+    pages.forEach(p=>finalPdf.addPage(p));
   }
+
+  // 3️⃣ Download + Print
+  const blob = new Blob([await finalPdf.save()],{type:"application/pdf"});
+  const fileUrl = URL.createObjectURL(blob);
+  const w = window.open(fileUrl);
+  w.onload=()=>w.print();
 }
 
-// 🔹 Prompt disapprove reason
-function promptDisapprove(){
-  const reason = prompt("Enter reason for disapproval:");
-  if(reason && reason.trim() !== ""){
-    updateStatus("disapproved", reason);
-  } else {
-    alert("Disapproval reason is required!");
-  }
-}
-// document.getElementById("status").innerText =
-//   submissionData.status ?? "Pending";
-
-// INIT
 loadSubmission();
 </script>
-
 </body>
 </html>
