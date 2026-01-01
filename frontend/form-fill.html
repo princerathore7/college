@@ -261,7 +261,7 @@ async function submitForm(e){
 
   try{
     const res=await fetch(
-      `https://college-hwbb.onrender.com/api/forms/${formId}/submit`,
+      `https://college-hwbb.onrender.com/forms/${formId}/submit`,
       {method:"POST",body:payload}
     );
 
