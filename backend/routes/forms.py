@@ -73,11 +73,13 @@ def submit_form(form_id):
 
         if field_type == "file":
             file = request.files.get(label)
-            if file:
+            if file and file.filename:
                 upload = cloudinary.uploader.upload(
                     file,
-                    resource_type="raw",
-                    folder="forms/submissions"
+                    resource_type="auto",   # ✅ FIX
+                    folder="forms/submissions",
+                    use_filename=True,
+                    unique_filename=False
                 )
                 responses[label] = upload["secure_url"]
         else:
