@@ -159,6 +159,58 @@ def view_submission(submission_id):
         "status": s.get("status", "pending"),
          "reason": s.get("reason", "")
     }), 200
+# =============================
+#form creator route 
+# =============================
+@forms_bp.route("/forms", methods=["POST"])
+# @admin_required  # baad me enable kar sakte ho
+def create_form():
+    try:
+        title = request.form.get("title", "").strip()
+        description = request.form.get("description", "").strip()
+        fields_raw = request.form.get("fields")
+
+        if not title or not fields_raw:
+            return jsonify({"error": "Title and fields are required"}), 400
+
+        try:
+            fields = json.loads(fields_raw)
+        except Exception:
+            return jsonify({"error": "Invalid fields format"}), 400
+
+        pdf_urls = []
+
+        if "pdfs" in request.files:
+            pdfs = request.files.getlist("pdfs")
+            for pdf in pdfs:
+                upload = cloudinary.uploader.upload(
+                    pdf,
+                    resource_type="raw",
+                    folder="forms/pdfs"
+                )
+                pdf_urls.append(upload["secure_url"])
+
+        form_doc = {
+            "title": title,
+            "description": description,
+            "fields": fields,
+            "pdfs": pdf_urls,
+            "active": True,
+            "created_at": datetime.utcnow()
+        }
+
+        result = forms_col.insert_one(form_doc)
+
+        return jsonify({
+            "success": True,
+            "form_id": str(result.inserted_id),
+            "message": "Form created successfully"
+        }), 201
+
+    except Exception as e:
+        print("CREATE FORM ERROR:", e)
+        return jsonify({"error": "Internal server error"}), 500
+
 # ==============================
 # GET SUBMISSIONS OF A SINGLE FORM (ADMIN / TEACHER)
 # ==============================
