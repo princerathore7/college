@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard — Acropolis</title>
+    <link rel="icon" href="https://i.ibb.co/8tZSKKT/logo-with-bg.webp">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #021355;
+            --secondary: #6366f1;
+            --bg-body: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-body); color: var(--text-main); line-height: 1.6; }
+
+        /* --- Header Styling --- */
+        header {
+            background: var(--primary-dark);
+            color: #fff;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .logo-area { display: flex; align-items: center; gap: 15px; }
+        .logo-area h1 { font-family: 'Playfair Display', serif; font-size: 1.2rem; letter-spacing: 0.5px; }
+        .logo-area img { height: 40px; border-radius: 8px; }
+
+        /* --- Sidebar & Backdrop --- */
+        .sidebar {
+            position: fixed; top: 0; left: 0; width: 280px; height: 100%;
+            background: var(--primary-dark); color: #fff; padding-top: 80px;
+            transform: translateX(-100%); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1500;
+        }
+        .sidebar-open { transform: translateX(0); }
+        .sidebar a {
+            display: flex; align-items: center; gap: 12px; padding: 12px 24px;
+            color: #cbd5e1; text-decoration: none; transition: 0.3s;
+        }
+        .sidebar a:hover { background: rgba(255,255,255,0.1); color: #fff; padding-left: 30px; }
+        .backdrop {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            display: none; z-index: 1400; backdrop-filter: blur(4px);
+        }
+
+        /* --- Main Layout --- */
+        main { max-width: 1300px; margin: 2rem auto; padding: 0 20px; }
+        .grid { display: grid; grid-template-columns: 350px 1fr; gap: 24px; }
+
+        .section {
+            background: var(--card-bg); border-radius: 16px; padding: 24px;
+            box-shadow: var(--shadow); margin-bottom: 24px; border: 1px solid #e2e8f0;
+        }
+        .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--primary-dark); display: flex; align-items: center; gap: 8px; }
+
+        /* --- Buttons --- */
+        .btn {
+            padding: 10px 20px; border-radius: 10px; border: none; font-weight: 600;
+            cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { background: transparent; border: 1.5px solid var(--primary); color: var(--primary); }
+        .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+        /* --- Assignment Table & Truncation --- */
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 12px; color: var(--text-muted); font-size: 0.85rem; border-bottom: 2px solid #f1f5f9; }
+        td { padding: 16px 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+        
+        .truncate { max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; vertical-align: middle; }
+        .see-more { color: var(--primary); cursor: pointer; font-size: 0.8rem; font-weight: 600; margin-left: 5px; }
+
+        /* --- Skeleton Loading --- */
+        .skeleton {
+            background: #eee;
+            background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%);
+            border-radius: 5px;
+            background-size: 200% 100%;
+            animation: 1.5s shine linear infinite;
+        }
+        .skeleton-text { height: 15px; width: 100%; margin-bottom: 10px; }
+        @keyframes shine { to { background-position-x: -200%; } }
+
+        /* --- Modal --- */
+        .modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px;
+        }
+        .modal.show { display: flex; }
+        .modal-content { background: #fff; padding: 30px; border-radius: 20px; width: 100%; max-width: 500px; position: relative; }
+        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; }
+
+        @media (max-width: 992px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-area">
+        <i class="fa-solid fa-bars" id="menuToggle" style="cursor:pointer; font-size: 1.2rem;"></i>
+        <img src="https://i.ibb.co/8tZSKKT/logo-with-bg.webp" alt="logo">
+        <h1>Acropolis <span style="font-weight: 300; opacity: 0.8;">Student</span></h1>
+    </div>
+    <div class="header-actions" style="display:flex; gap:15px; align-items:center;">
+        <button id="openNotifications" class="btn btn-primary" style="padding: 8px 15px; font-size: 0.85rem;">
+            <i class="fa-solid fa-bell"></i> <span id="notifCount">0</span>
+        </button>
+    </div>
+</header>
+
+<div class="sidebar" id="sidebar">
+    <a href="student-dashboard.html"><i class="fa-solid fa-house"></i> Dashboard</a>
+    <a href="notes-view.html"><i class="fa-solid fa-book"></i> Notes</a>
+    <a href="marks-view.html"><i class="fa-solid fa-trophy"></i> Results</a>
+    <a href="notice-read.html?userType=students"><i class="fa-solid fa-bullhorn"></i> Notices</a>
+    <a href="fees.html"><i class="fa-solid fa-wallet"></i> Fees</a>
+      <a href="/notes-view.html">📚 Notes</a>
+  <!-- <a href="exams.html">📝 Exams</a> -->
+ 
+<a href="forms.html">📝 forms</a>
+<a href="form-my-submissions.html">📝 my submissions</a>
+<a href="https://aitr.ac.in/">  📰Enquiry</a>
+<a href="settings.html">⚙️settings</a>
+  <a href="rules.html">📘 Rules</a>
+  <a href="bus-view.html">🚌 Bus</a>
+  <a href="fees.html">💰 Fees</a>
+  <a href="about-dev.html"> ABOUT DEV</a>
+ 
+    <a href="#" onclick="logout()" style="color: #ff4d4d; margin-top: 20px;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+</div>
+<div class="backdrop" id="backdrop" onclick="closeSidebar()"></div>
+
+<main>
+    <div class="grid">
+        <div class="left-col">
+            <div class="section profile-box" style="text-align:center;">
+                <div id="profileLoading" class="skeleton skeleton-text" style="height: 60px; width: 80%; margin: 0 auto 20px;"></div>
+                <div id="profileContent" style="display:none;">
+                    <h2 id="studentName" style="color: var(--primary);">Loading...</h2>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 5px;" id="studentEnrollment">—</p>
+                    <div style="background: #f1f5f9; padding: 10px; border-radius: 10px; margin-top: 15px;">
+                        <span id="studentClass" style="font-weight:600;">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title"><i class="fa-solid fa-calendar-check"></i> Attendance</h2>
+                <div id="attendanceLoading">
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton skeleton-text"></div>
+                </div>
+                <div id="attendanceContent" style="display:none;">
+                    <div style="display:flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>Progress</span>
+                        <span id="attPercent" style="font-weight:700; color:var(--primary);">0%</span>
+                    </div>
+                    <div style="height: 8px; background: #e2e8f0; border-radius: 4px; overflow:hidden;">
+                        <div id="attBar" style="height:100%; background:var(--primary); width: 0%; transition: 1s;"></div>
+                    </div>
+                    <p style="margin-top:15px; font-size: 0.85rem; color: var(--text-muted);">
+                        Present: <span id="attPresent">0</span> / Total: <span id="attTotal">0</span>
+                    </p>
+                </div>
+            </div>
+
+            <button id="refreshDashboard" class="btn btn-outline" style="width:100%;">
+                <i class="fa-solid fa-rotate"></i> Sync Data
+            </button>
+        </div>
+
+        <div class="right-col">
+            <div class="section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2 class="section-title" style="margin-bottom:0;"><i class="fa-solid fa-file-pen"></i> Assignments</h2>
+                    <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="location.href='notes-view.html'">
+                        <i class="fa-solid fa-book-open"></i> View All Notes
+                    </button>
+                </div>
+                
+                <div class="table-container">
+                    <table id="assignmentTable">
+                        <thead>
+                            <tr>
+                                <th>Assignment Title</th>
+                                <th>Subject</th>
+                                <th>Deadline</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assignmentBody">
+                            <tr class="assign-skeleton">
+                                <td colspan="4"><div class="skeleton skeleton-text"></div></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title"><i class="fa-solid fa-clock"></i> Upcoming Exams</h2>
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>Exam</th><th>Subject</th><th>Date</th></tr></thead>
+                        <tbody id="examsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div class="modal" id="detailsModal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <h3 id="modalTitle" style="color: var(--primary); margin-bottom: 15px;">Assignment Details</h3>
+        <div style="padding: 15px; background: #f8fafc; border-radius: 12px; margin-bottom: 15px;">
+            <p><strong>Subject:</strong> <span id="modalSubject"></span></p>
+            <p><strong>Due Date:</strong> <span id="modalDate"></span></p>
+        </div>
+        <p id="modalDesc" style="color: var(--text-main); white-space: pre-wrap;"></p>
+    </div>
+</div>
+
+<script>
+const API_ROOT = "https://college-hwbb.onrender.com";
+
+// --- UI Logic ---
+function openSidebar() { 
+    document.getElementById("sidebar").classList.add("sidebar-open"); 
+    document.getElementById("backdrop").style.display = "block";
+}
+function closeSidebar() { 
+    document.getElementById("sidebar").classList.remove("sidebar-open"); 
+    document.getElementById("backdrop").style.display = "none";
+}
+document.getElementById("menuToggle").onclick = openSidebar;
+
+// --- Modal Logic ---
+function showDetails(title, subject, deadline) {
+    document.getElementById("modalTitle").textContent = title;
+    document.getElementById("modalSubject").textContent = subject;
+    document.getElementById("modalDate").textContent = deadline;
+    document.getElementById("modalDesc").textContent = "Full assignment requirements and numericals for " + title + ". Please ensure submission before the deadline.";
+    document.getElementById("detailsModal").classList.add("show");
+}
+function closeModal() { document.getElementById("detailsModal").classList.remove("show"); }
+
+// --- Data Fetching & Rendering ---
+async function refreshDashboard() {
+    const enrollment = localStorage.getItem("enrollment");
+    if (!enrollment) return;
+    
+    // Show Skeletons
+    toggleLoading(true);
+
+    try {
+        await Promise.all([
+            loadStudentProfileAPI(enrollment),
+            loadAttendanceAPI(enrollment),
+            loadAssignmentsAPI(),
+            loadExamsAPI()
+        ]);
+    } catch (e) { console.error(e); }
+    
+    toggleLoading(false);
+}
+
+function toggleLoading(isLoading) {
+    document.getElementById("profileLoading").style.display = isLoading ? "block" : "none";
+    document.getElementById("profileContent").style.display = isLoading ? "none" : "block";
+    document.getElementById("attendanceLoading").style.display = isLoading ? "block" : "none";
+    document.getElementById("attendanceContent").style.display = isLoading ? "none" : "block";
+}
+
+async function loadStudentProfileAPI(enrollment) {
+    const res = await fetch(`${API_ROOT}/api/students/${enrollment}/class`);
+    const data = await res.json();
+    if (data.success) {
+        localStorage.setItem("studentProfile", JSON.stringify(data.student));
+        renderProfile(data.student);
+    }
+}
+
+function renderProfile(s) {
+    if (!s) return;
+    document.getElementById("studentName").textContent = s.name;
+    document.getElementById("studentEnrollment").textContent = s.enrollment;
+    document.getElementById("studentClass").textContent = s.class || s.branch;
+}
+
+async function loadAttendanceAPI(enrollment) {
+    const res = await fetch(`${API_ROOT}/api/attendance/student/${enrollment}`);
+    const data = await res.json();
+    if (data.success) {
+        localStorage.setItem("studentAttendance", JSON.stringify(data.attendance));
+        renderAttendance(data.attendance);
+    }
+}
+
+function renderAttendance(a) {
+    if (!a) return;
+    document.getElementById("attTotal").textContent = a.total;
+    document.getElementById("attPresent").textContent = a.present;
+    document.getElementById("attPercent").textContent = a.percentage + "%";
+    document.getElementById("attBar").style.width = a.percentage + "%";
+}
+
+async function loadAssignmentsAPI() {
+    const className = localStorage.getItem("studentClass") || "IT";
+    const res = await fetch(`${API_ROOT}/api/assignments/class/${className}`);
+    const data = await res.json();
+    if (data.success) {
+        localStorage.setItem("studentAssignments", JSON.stringify(data.assignments));
+        renderAssignments(data.assignments);
+    }
+}
+
+function renderAssignments(list) {
+    const tbody = document.getElementById("assignmentBody");
+    tbody.innerHTML = "";
+    if (!list || list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">No assignments found</td></tr>`;
+        return;
+    }
+    list.forEach(a => {
+        const row = `
+            <tr>
+                <td>
+                    <span class="truncate">${a.title}</span>
+                    <span class="see-more" onclick="showDetails('${a.title}', '${a.subject}', '${a.deadline}')">See details</span>
+                </td>
+                <td>${a.subject}</td>
+                <td><span style="color:#e53e3e; font-weight:500;">${a.deadline}</span></td>
+                <td><button class="btn btn-outline" style="padding:4px 10px; font-size:0.75rem;">Submit</button></td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
+}
+
+async function loadExamsAPI() {
+    const res = await fetch(`${API_ROOT}/api/exams`);
+    const data = await res.json();
+    if (data.success) {
+        const tbody = document.getElementById("examsBody");
+        tbody.innerHTML = data.exams.map(e => `
+            <tr>
+                <td><strong>${e.examName}</strong></td>
+                <td>${e.subject}</td>
+                <td>${e.date}</td>
+            </tr>
+        `).join('');
+    }
+}
+
+// Initial Load
+document.addEventListener("DOMContentLoaded", () => {
+    const enrollment = localStorage.getItem("enrollment");
+    if (!enrollment) { window.location.href = "login.html"; return; }
+    
+    // Quick Render from Cache
+    renderProfile(JSON.parse(localStorage.getItem("studentProfile")));
+    renderAttendance(JSON.parse(localStorage.getItem("studentAttendance")));
+    renderAssignments(JSON.parse(localStorage.getItem("studentAssignments")));
+    
+    // Auto-Sync
+    refreshDashboard();
+});
+
+function logout() {
+    localStorage.clear();
+    window.location.href = "login.html";
+}
+</script>
+</body>
+</html>
