@@ -398,6 +398,16 @@ async function saveSalary(){
     document.getElementById("loader").style.display = "none";
 
     if(data.success){
+       saveSalaryToDevice({
+    mentorId,
+    name,
+    designation,
+    month,
+    amount,
+    status,
+    updatedAt: new Date().toISOString()
+  });
+
       document.getElementById("successBox").innerHTML = 
         "<i class='fas fa-check-circle'></i> Record successfully synchronized with the central database.";
       document.getElementById("successBox").style.display = "block";
@@ -414,6 +424,31 @@ async function saveSalary(){
     alert("Internal System Fault: Contact Technical Support.");
   }
 }
+/* ===============================
+   DEVICE IDENTIFICATION
+================================ */
+let deviceId = localStorage.getItem("salary_device_id");
+
+if(!deviceId){
+  deviceId = "DEV-" + Date.now() + "-" + Math.random().toString(36).slice(2,8);
+  localStorage.setItem("salary_device_id", deviceId);
+}
+/* ===============================
+   SAVE SALARY PER DEVICE
+================================ */
+function saveSalaryToDevice(record){
+  const key = "device_salary_updates";
+
+  const existing = JSON.parse(localStorage.getItem(key) || "[]");
+
+  existing.push({
+    deviceId: deviceId,
+    ...record
+  });
+
+  localStorage.setItem(key, JSON.stringify(existing));
+}
+
 </script>
 
 </body>
