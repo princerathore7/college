@@ -204,6 +204,7 @@ function renderEvents(events) {
     card.innerHTML = `
       <img src="${ev.image || 'logo.jpg'}" alt="${ev.title}">
       <h3>${ev.title}</h3>
+         <h6>    click here to see the details<h6>
     `;
     card.onclick = () =>
       window.location.href = `eventDetails.html?eventId=${ev.eventId}`;
