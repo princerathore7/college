@@ -23,6 +23,7 @@
 </head>
 
 <body>
+  
 <div class="card">
   <button onclick="history.back()" style="background:#6b7280;margin-bottom:10px">← Back</button>
   <h1>📢 Notice Management (Admin)</h1>
@@ -213,11 +214,24 @@
 
   <button id="addNotice">Add Notice</button>
   <div id="processing" class="processing" style="display:none">Processing…</div>
+<label>Posted By</label>
+<input type="text" id="postedByInput" disabled>
 
   <hr />
   <h3>All Notices</h3>
   <div id="noticeList"></div>
 </div><script>
+
+const mentorId   = localStorage.getItem("mentorId");
+
+if(!mentorId){
+  alert("Unauthorized");
+  location.href = "/login.html";
+}
+
+document.getElementById("postedByInput").value =
+  mentorName ? mentorName : "Mentor";
+
 const API = "https://college-hwbb.onrender.com/api/notices/";
 
 const el = id => document.getElementById(id);
@@ -261,7 +275,23 @@ async function loadNotices(){
     console.error("Load notice error:", err);
   }
 }
+const titleInput = document.getElementById("noticeTitle").value;
+const description = document.getElementById("noticeDesc").value;
 
+const mentorName = localStorage.getItem("mentorName");
+
+const finalTitle = `${titleInput} (Posted by ${mentorName})`;
+
+fetch("/api/notices/create", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    title: finalTitle,
+    description: description,
+    postedBy: mentorName,
+    role: "mentor"
+  })
+});
 /* =============================
    DELETE NOTICE
 ============================= */
@@ -314,10 +344,10 @@ el("addNotice").onclick = async ()=>{
       res = await fetch(API, { method: "POST", body: fd });
     }else{
       const payload = {
-        title,
-        body: message,
+        title: title,
+        message: message,
         target: el("target").value,
-        sender: "Admin"
+        sender: "mentorName"
       };
 
       if(targetClass) payload.class = targetClass; // 🔥 correct key

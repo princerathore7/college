@@ -211,6 +211,7 @@ main h2 { color: var(--navy-dark); margin-bottom: 10px; }
     <button id="logoutBtn" title="Logout">Logout</button>
   </div>
 </header>
+<h3 id="postedBy"></h3>
 
 <div class="grid">
 <aside>
@@ -262,6 +263,7 @@ main h2 { color: var(--navy-dark); margin-bottom: 10px; }
 </div>
 
 <script>
+  
 // --- Stable Screen Logic: Anti-Zoom (Prevent accidental zooming on laptop trackpads) ---
 document.addEventListener('wheel', (e) => {
   if (e.ctrlKey) e.preventDefault();
@@ -322,6 +324,11 @@ document.getElementById("logoutBtn").onclick = ()=>{
     location.href="/login.html";
   }
 };
+const mentorName = localStorage.getItem("mentorName");
+
+// show mentor name somewhere (optional)
+document.getElementById("postedBy").innerText =
+  mentorName ? `Posted by ${mentorName}` : "Posted by Mentor";
 </script>
 </body>
 </html>
