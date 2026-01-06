@@ -1,233 +1,307 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Available Forms | Student Panel</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>Student Portal | Available Forms</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --navy: #0f172a;
+            --text-main: #334155;
+            --text-light: #64748b;
+            --bg: #f8fafc;
+            --white: #ffffff;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-:root{
-  --navy:#0b1c2d;
-  --navy-light:#142f4c;
-  --bg:#f3f5f8;
-  --card:#ffffff;
-  --border:#e2e6ed;
-  --accent:#1e90ff;
-}
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
 
-*{
-  box-sizing:border-box;
-  font-family:'Inter',sans-serif;
-}
+        body {
+            margin: 0;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.5;
+        }
 
-body{
-  margin:0;
-  background:var(--bg);
-  padding:30px;
-}
+        /* Navbar / Header */
+        .navbar {
+            background: var(--white);
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
 
-.container{
-  max-width:1100px;
-  margin:auto;
-}
+        .logo-area { display: flex; align-items: center; gap: 12px; }
+        .logo-area img { height: 40px; width: auto; border-radius: 4px; }
+        .logo-area h2 { font-size: 1.2rem; margin: 0; color: var(--navy); font-weight: 700; }
 
-.header{
-  margin-bottom:25px;
-}
+        .student-pill {
+            background: #eff6ff;
+            padding: 8px 16px;
+            border-radius: 50px;
+            border: 1px solid #dbeafe;
+            display: flex;
+            flex-direction: column;
+            text-align: right;
+        }
 
-.header h1{
-  margin:0;
-  color:var(--navy);
-  font-size:26px;
-}
+        .student-pill .name { font-weight: 700; color: var(--primary); font-size: 0.85rem; }
+        .student-pill .enroll { font-size: 0.75rem; color: var(--text-light); }
 
-.header p{
-  margin-top:6px;
-  color:#555;
-  font-size:14px;
-}
+        .main-content {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
 
-/* Cards */
-.forms-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
-  gap:18px;
-}
+        /* Search Section */
+        .search-container {
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
 
-.form-card{
-  background:var(--card);
-  border:1px solid var(--border);
-  padding:18px;
-  transition:0.25s;
-}
+        .search-bar-wrapper {
+            position: relative;
+            max-width: 500px;
+        }
 
-.form-card:hover{
-  transform:translateY(-4px);
-  box-shadow:0 8px 20px rgba(0,0,0,0.08);
-}
+        .search-bar {
+            width: 100%;
+            padding: 14px 20px;
+            padding-left: 45px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s;
+            box-shadow: var(--shadow);
+        }
 
-.form-card h3{
-  margin:0;
-  color:var(--navy-light);
-  font-size:18px;
-}
+        .search-bar:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
 
-.form-card p{
-  margin:8px 0 14px;
-  font-size:13px;
-  color:#666;
-}
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
 
-/* Buttons */
-.actions{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
+        /* Grid */
+        .forms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
 
-.btn{
-  border:none;
-  padding:10px 16px;
-  cursor:pointer;
-  font-size:13px;
-  font-weight:600;
-  letter-spacing:0.4px;
-}
+        .form-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
 
-.btn.primary{
-  background:var(--accent);
-  color:white;
-}
+        .form-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+            border-color: var(--primary);
+        }
 
-.btn.secondary{
-  background:#eef2f7;
-  color:var(--navy);
-}
+        .form-card h3 {
+            margin: 0 0 10px 0;
+            color: var(--navy);
+            font-size: 1.15rem;
+        }
 
-.badge{
-  font-size:11px;
-  padding:4px 8px;
-  background:#eef2f7;
-  color:#444;
-}
+        .form-card p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
 
-/* Sharp edges */
-.btn, .form-card{
-  border-radius:3px;
-}
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid #f1f5f9;
+        }
 
-/* Empty state */
-.empty{
-  grid-column:1/-1;
-  text-align:center;
-  padding:40px;
-  color:#777;
-  font-size:14px;
-}
-</style>
+        .badge {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .btn-fill {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-fill:hover { background: var(--primary-dark); }
+
+        .empty-state {
+            grid-column: 1/-1;
+            text-align: center;
+            padding: 60px;
+            color: var(--text-light);
+        }
+
+        @media (max-width: 600px) {
+            .navbar { flex-direction: column; gap: 15px; text-align: center; }
+            .student-pill { text-align: center; }
+        }
+    </style>
 </head>
-
 <body>
 
-<div class="container">
+<nav class="navbar">
+    <div class="logo-area">
+        <img src="logo.jpg" alt="University Logo" onerror="this.src='https://via.placeholder.com/40'">
+        <h2>Student Portal</h2>
+    </div>
+    <div class="student-pill">
+        <span class="name" id="studentName">Loading...</span>
+        <span class="enroll" id="studentEnrollment">Please wait</span>
+    </div>
+</nav>
 
-  <div class="header">
-    <h1>Available Forms</h1>
-    <p>Please select a form and complete the submission carefully.</p>
-  </div>
+<div class="main-content">
+    <div class="header-text">
+        <h1 style="font-size: 2rem; color: var(--navy); margin-bottom: 8px;">Available Forms</h1>
+        <p style="color: var(--text-light); margin-bottom: 30px;">Select a form to proceed with your application.</p>
+    </div>
 
-  <div class="forms-grid" id="formsContainer">
-    <!-- Forms will load here -->
-  </div>
+    <div class="search-container">
+        <div class="search-bar-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" class="search-bar" placeholder="Search forms by title or description..." onkeyup="filterForms()">
+        </div>
+    </div>
 
+    <div class="forms-grid" id="formsContainer">
+        <div class="empty-state">Fetching your forms...</div>
+    </div>
 </div>
 
 <script>
-const container = document.getElementById("formsContainer");
+let allForms = []; // Store forms globally for filtering
 
-// 🔹 Fetch forms from backend
-async function loadForms(){
-  try{
-    const res = await fetch("https://college-hwbb.onrender.com/api/forms", {
-      method: "GET",
-      credentials: "include"
-    });
+async function loadForms() {
+    const container = document.getElementById("formsContainer");
+    try {
+        const res = await fetch("https://college-hwbb.onrender.com/api/forms", {
+            method: "GET",
+            credentials: "include"
+        });
 
-    if(!res.ok){
-      throw new Error("Failed to load forms");
+        if (!res.ok) throw new Error("Failed to load");
+
+        allForms = await res.json();
+        renderForms(allForms);
+
+    } catch (err) {
+        console.error(err);
+        container.innerHTML = `<div class="empty-state">⚠️ Error loading forms. Please refresh the page.</div>`;
     }
+}
 
-    const forms = await res.json();
-
+function renderForms(forms) {
+    const container = document.getElementById("formsContainer");
     container.innerHTML = "";
 
-    if(forms.length === 0){
-      container.innerHTML = `
-        <div class="empty">
-          No forms available at the moment.
-        </div>
-      `;
-      return;
+    if (forms.length === 0) {
+        container.innerHTML = `<div class="empty-state">No forms found matching your search.</div>`;
+        return;
     }
 
     forms.forEach(form => {
-      const card = document.createElement("div");
-      card.className = "form-card";
-
-      card.innerHTML = `
-        <h3>${form.title}</h3>
-        <p>${form.description || "No description provided"}</p>
-
-        <div class="actions">
-          <span class="badge">${form.fields_count} Fields</span>
-          <button class="btn primary" onclick="openForm('${form.id}')">
-            FILL FORM →
-          </button>
-        </div>
-      `;
-
-      container.appendChild(card);
+        const card = document.createElement("div");
+        card.className = "form-card";
+        card.innerHTML = `
+            <div>
+                <h3>${form.title}</h3>
+                <p>${form.description || "No specific instructions provided for this form."}</p>
+            </div>
+            <div class="card-footer">
+                <span class="badge">${form.fields_count} FIELDS</span>
+                <button class="btn-fill" onclick="openForm('${form.id}')">
+                    FILL FORM →
+                </button>
+            </div>
+        `;
+        container.appendChild(card);
     });
-
-  }catch(err){
-    console.error(err);
-    container.innerHTML = `
-      <div class="empty">
-        Unable to load forms. Please try again later.
-      </div>
-    `;
-  }
-}
-function loadStudentInfo(){
-  const profile = JSON.parse(localStorage.getItem("studentProfile"));
-
-  if(!profile){
-    alert("Session expired. Please login again.");
-    window.location.href = "login.html";
-    return;
-  }
-
-  console.log("✅ Student loaded on forms.html:", profile);
-
-  // agar forms.html pe dikhana ho
-  const nameEl = document.getElementById("studentName");
-  const enrollEl = document.getElementById("studentEnrollment");
-
-  if(nameEl) nameEl.textContent = profile.name;
-  if(enrollEl) enrollEl.textContent = profile.enrollment;
 }
 
-document.addEventListener("DOMContentLoaded", loadStudentInfo);
-
-
-// 🔹 Redirect to selected form
-function openForm(formId){
-  window.location.href = `form-fill.html?formId=${formId}`;
+// 🔍 Search Functionality
+function filterForms() {
+    const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+    const filtered = allForms.filter(form => 
+        form.title.toLowerCase().includes(searchTerm) || 
+        (form.description && form.description.toLowerCase().includes(searchTerm))
+    );
+    renderForms(filtered);
 }
 
-// Load on page open
-loadForms();
+function loadStudentInfo() {
+    const profile = JSON.parse(localStorage.getItem("studentProfile"));
+
+    if (!profile) {
+        alert("Session expired. Please login again.");
+        window.location.href = "login.html";
+        return;
+    }
+
+    // Display in Navbar
+    document.getElementById("studentName").textContent = profile.name;
+    document.getElementById("studentEnrollment").textContent = `ID: ${profile.enrollment}`;
+    
+    // Update Header Text to make it personal
+    const headerP = document.querySelector(".header-text p");
+    headerP.innerHTML = `Welcome back, <b>${profile.name}</b> (${profile.enrollment}). Select a form below.`;
+}
+
+function openForm(formId) {
+    window.location.href = `form-fill.html?formId=${formId}`;
+}
+
+// Initialize
+document.addEventListener("DOMContentLoaded", () => {
+    loadStudentInfo();
+    loadForms();
+});
 </script>
+
 </body>
 </html>
