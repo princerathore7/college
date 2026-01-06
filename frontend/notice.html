@@ -220,42 +220,53 @@
   <hr />
   <h3>All Notices</h3>
   <div id="noticeList"></div>
-</div><script>
-
+</div>
+<script>
+/* =============================
+   AUTH CHECK
+============================= */
 const mentorId   = localStorage.getItem("mentorId");
+const mentorName = localStorage.getItem("mentorName");
 
-if(!mentorId){
+if (!mentorId) {
   alert("Unauthorized");
-  location.href = "/login.html";
+  window.top.location.href = "/login.html";
 }
 
-document.getElementById("postedByInput").value =
-  mentorName ? mentorName : "Mentor";
-
 const API = "https://college-hwbb.onrender.com/api/notices/";
-
 const el = id => document.getElementById(id);
+
+/* =============================
+   AUTO-FILL POSTED BY
+============================= */
+document.addEventListener("DOMContentLoaded", () => {
+  const postedBy = el("postedByInput");
+  if (postedBy) {
+    postedBy.value = mentorName || "Mentor";
+  }
+});
 
 /* =============================
    LOAD NOTICES
 ============================= */
-async function loadNotices(){
-  try{
+async function loadNotices() {
+  try {
     const res = await fetch(API);
     const data = await res.json();
+
     const box = el("noticeList");
     box.innerHTML = "";
 
-    if(!data.success) return;
+    if (!data.success) return;
 
-    data.notices.forEach(n=>{
+    data.notices.forEach(n => {
       box.innerHTML += `
         <div class="notice">
           <h3>${n.title}</h3>
           <div>${n.message}</div>
 
           ${n.imageUrl ? `
-            <img src="${n.imageUrl}" 
+            <img src="${n.imageUrl}"
                  style="max-width:100%;margin-top:8px;border-radius:6px">
           ` : ""}
 
@@ -266,91 +277,81 @@ async function loadNotices(){
             | ${new Date(n.timestamp).toLocaleString()}
           </div>
 
-          <button class="del" onclick="deleteNotice('${encodeURIComponent(n.title)}')">
+          <button class="del"
+            onclick="deleteNotice('${encodeURIComponent(n.title)}')">
             Delete
           </button>
         </div>`;
     });
-  }catch(err){
+
+  } catch (err) {
     console.error("Load notice error:", err);
   }
 }
-const titleInput = document.getElementById("noticeTitle").value;
-const description = document.getElementById("noticeDesc").value;
 
-const mentorName = localStorage.getItem("mentorName");
-
-const finalTitle = `${titleInput} (Posted by ${mentorName})`;
-
-fetch("/api/notices/create", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    title: finalTitle,
-    description: description,
-    postedBy: mentorName,
-    role: "mentor"
-  })
-});
 /* =============================
    DELETE NOTICE
 ============================= */
-async function deleteNotice(title){
-  if(!confirm("Delete this notice?")) return;
+async function deleteNotice(title) {
+  if (!confirm("Delete this notice?")) return;
 
-  const res = await fetch(API + title, { method: "DELETE" });
-  const data = await res.json();
-
-  alert(data.message || "Deleted");
-  loadNotices();
+  try {
+    const res = await fetch(API + title, { method: "DELETE" });
+    const data = await res.json();
+    alert(data.message || "Deleted");
+    loadNotices();
+  } catch (err) {
+    console.error("Delete error:", err);
+  }
 }
 
 /* =============================
    ADD NOTICE
 ============================= */
-el("addNotice").onclick = async ()=>{
-  const title = el("title").value.trim();
+el("addNotice").onclick = async () => {
+  const title   = el("title").value.trim();
   const message = el("message").value.trim();
 
-  if(!title || !message){
+  if (!title || !message) {
     alert("Title & message required");
     return;
   }
 
-  const year = el("year").value;
-  const branch = el("branch").value;
+  const year    = el("year").value;
+  const branch  = el("branch").value;
   const section = el("section").value;
 
   let targetClass = "";
-  if(year || branch || section){
+  if (year || branch || section) {
     targetClass = `${year} ${branch}${section}`.trim();
   }
 
   el("processing").style.display = "block";
 
-  try{
-    let res, data;
+  try {
+    let res;
 
     /* ===== IMAGE OPTIONAL ===== */
-    if(el("image").files.length > 0){
+    if (el("image").files.length > 0) {
       const fd = new FormData();
       fd.append("title", title);
       fd.append("message", message);
       fd.append("target", el("target").value);
-      if(targetClass) fd.append("class", targetClass); // 🔥 backend expects 'class'
-      fd.append("sender", "Admin");
+      fd.append("sender", mentorName || "Mentor");
+      if (targetClass) fd.append("class", targetClass);
       fd.append("image", el("image").files[0]);
 
       res = await fetch(API, { method: "POST", body: fd });
-    }else{
+
+    } else {
       const payload = {
-        title: title,
-        message: message,
+        title,
+        message,
         target: el("target").value,
-        sender: "mentorName"
+        sender: mentorName || "Mentor"
       };
 
-      if(targetClass) payload.class = targetClass; // 🔥 correct key
+      if (targetClass) payload.class = targetClass;
 
       res = await fetch(API, {
         method: "POST",
@@ -359,34 +360,46 @@ el("addNotice").onclick = async ()=>{
       });
     }
 
-    data = await res.json();
+    const data = await res.json();
     alert(data.message);
 
-    if(data.success){
-      saveMyNotice(title);  
+    if (data.success) {
+      saveMyNotice(title);
       ["title","message","year","branch","section","image"]
-        .forEach(i => el(i).value = "");
+        .forEach(id => el(id).value = "");
       loadNotices();
     }
-  }catch(err){
+
+  } catch (err) {
     console.error("Add notice error:", err);
     alert("Server error");
   }
 
   el("processing").style.display = "none";
 };
-function goToManageNotices(){
+
+/* =============================
+   LOCAL STORAGE TRACK
+============================= */
+function saveMyNotice(title) {
+  const list = JSON.parse(localStorage.getItem("my_posted_notices") || "[]");
+  list.push({
+    title,
+    device: localStorage.getItem("device_id")
+  });
+  localStorage.setItem("my_posted_notices", JSON.stringify(list));
+}
+
+/* =============================
+   NAVIGATION
+============================= */
+function goToManageNotices() {
   const token = localStorage.getItem("access_token");
-  if(!token){
+  if (!token) {
     alert("Unauthorized");
     return;
   }
   location.href = "manage-notice.html";
-}
-function saveMyNotice(title){
-  const list = JSON.parse(localStorage.getItem("my_posted_notices")||"[]");
-  list.push({ title, device: localStorage.getItem("device_id") });
-  localStorage.setItem("my_posted_notices", JSON.stringify(list));
 }
 
 /* =============================
