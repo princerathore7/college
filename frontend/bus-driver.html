@@ -35,6 +35,26 @@ header { z-index: 9999; }
   z-index: 1000;
   display: none;
 }
+.gmap-bus-pin {
+  width: 38px;
+  height: 38px;
+  background: #1e293b; /* dark navy */
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  position: relative;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.45);
+  border: 2px solid #fff;
+}
+
+.bus-emoji {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(45deg);
+  font-size: 18px;
+}
 
 .toggle-btn {
   padding: 8px 16px;
@@ -75,12 +95,23 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '© OpenStreetMap'
 }).addTo(map);
 
-// Bus icon
-const busIcon = L.divIcon({ html: "🚌", iconSize: [30, 30], className: "" });
+// Google-map style bus icon
+const busIcon = L.divIcon({
+  html: `
+    <div class="gmap-bus-pin">
+      <div class="bus-emoji">🚌</div>
+    </div>
+  `,
+  iconSize: [38, 38],
+  iconAnchor: [19, 38],
+  className: ""
+});
+
 let marker = L.marker([0, 0], { icon: busIcon }).addTo(map);
 
 let watchId = null;
 let trackingOn = false;
+
 
 // Status popup
 function showStatus(text) {
