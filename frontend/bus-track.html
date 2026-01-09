@@ -140,10 +140,17 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 }).addTo(map);
 
 const busIcon = L.divIcon({
-  html: "🚌",
-  iconSize: [30, 30],
+  html: `
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="#0f172a">
+      <path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7z"/>
+      <text x="12" y="13" text-anchor="middle" font-size="10" fill="#fff">🚌</text>
+    </svg>
+  `,
+  iconSize: [36, 36],
+  iconAnchor: [18, 36],
   className: ""
 });
+
 
 let marker = L.marker([0, 0], { icon: busIcon }).addTo(map);
 const infoText = document.getElementById("infoText");
