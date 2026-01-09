@@ -274,30 +274,40 @@
     <aside id="sidebar">
         <div class="sidebar-header">
             <div class="logo-box"><i data-lucide="shield-check"></i></div>
-            <h2 style="font-size: 1.1rem; font-weight: 700;">Acropolis Admin</h2>
+            <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--primary); letter-spacing: -0.5px;">Acropolis Admin</h2>
         </div>
 
         <div class="nav-container">
             <div class="nav-group">
                 <button class="group-title" onclick="toggleGroup('core')">
-                    Core Operations <i data-lucide="chevron-down"></i>
+                    Student & Class <i data-lucide="chevron-down"></i>
                 </button>
                 <div class="group-content active" id="core">
-                    <button class="nav-item" data-page="/admin-students.html"><i data-lucide="users"></i> Students</button>
-                    <button class="nav-item" data-page="/admin-marks.html"><i data-lucide="bar-chart-3"></i> Marks & Results</button>
-                    <button class="nav-item" data-page="/notes-post.html"><i data-lucide="book-open"></i> Study Notes</button>
+                    <button class="nav-item" data-page="/admin-students.html"><i data-lucide="users"></i> Student Management</button>
                     <button class="nav-item" data-page="/admin.html"><i data-lucide="settings-2"></i> Class Control</button>
+                    <button class="nav-item" data-page="/admin-marks.html"><i data-lucide="bar-chart-3"></i> Marks & Results</button>
+                    <button class="nav-item" data-page="/exam-ring.html"><i data-lucide="pencil-ruler"></i> Examination Setup</button>
                 </div>
             </div>
 
             <div class="nav-group">
                 <button class="group-title" onclick="toggleGroup('att')">
-                    Attendance <i data-lucide="chevron-down"></i>
+                    Attendance Portal <i data-lucide="chevron-down"></i>
                 </button>
                 <div class="group-content" id="att">
-                    <button class="nav-item" data-page="/class-attendace.html"><i data-lucide="clipboard-check"></i> Live Records</button>
-                    <button class="nav-item" data-page="/attendace-pdf-upload.html"><i data-lucide="file-up"></i> Upload PDF</button>
-                    <button class="nav-item" data-page="/attendace-pdf-view.html"><i data-lucide="file-search"></i> View Data</button>
+                    <button class="nav-item" data-page="/class-attendace.html"><i data-lucide="clipboard-check"></i> Attendance Records</button>
+                    <button class="nav-item" data-page="/attendace-pdf-upload.html"><i data-lucide="file-up"></i> Upload Attendance PDF</button>
+                    <button class="nav-item" data-page="/attendace-pdf-view.html"><i data-lucide="file-search"></i> View Attendance Data</button>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button class="group-title" onclick="toggleGroup('acad')">
+                    Academics <i data-lucide="chevron-down"></i>
+                </button>
+                <div class="group-content" id="acad">
+                    <button class="nav-item" data-page="/notes-post.html"><i data-lucide="book-open"></i> Upload Study Notes</button>
+                    <button class="nav-item" data-page="/post-assignments.html"><i data-lucide="file-text"></i> Post Assignments</button>
                 </div>
             </div>
 
@@ -307,72 +317,58 @@
                 </button>
                 <div class="group-content" id="forms">
                     <button class="nav-item" data-page="/form-creator.html"><i data-lucide="plus-square"></i> Create New Form</button>
-                    <button class="nav-item" data-page="/form-submissions.html"><i data-lucide="list-checks"></i> Submissions</button>
-                    <button class="nav-item" data-page="/form-management.html"><i data-lucide="trash-2"></i> Manage Forms</button>
+                    <button class="nav-item" data-page="/form-submissions.html"><i data-lucide="list-checks"></i> View Submissions</button>
+                    <button class="nav-item" data-page="/form-management.html"><i data-lucide="trash-2"></i> Delete/Manage Forms</button>
                 </div>
             </div>
 
             <div class="nav-group">
                 <button class="group-title" onclick="toggleGroup('bus')">
-                    Transport <i data-lucide="chevron-down"></i>
+                    Transport System <i data-lucide="chevron-down"></i>
                 </button>
                 <div class="group-content" id="bus">
-                    <button class="nav-item" data-page="/bus-route.html"><i data-lucide="map-pin"></i> Routes</button>
+                    <button class="nav-item" data-page="/bus-route.html"><i data-lucide="map-pin"></i> Transport Routes</button>
                     <button class="nav-item" data-page="/bus-admin.html"><i data-lucide="user-plus"></i> Create Driver ID</button>
-                    <button class="nav-item" data-page="/bus-delet.html"><i data-lucide="truck"></i> Manage Bus ID</button>
+                    <button class="nav-item" data-page="/bus-delet.html"><i data-lucide="truck"></i> Manage Bus IDs</button>
                 </div>
             </div>
 
             <div class="nav-group">
-                <button class="group-title" onclick="toggleGroup('id')">
-                    ID & Accounts <i data-lucide="chevron-down"></i>
+                <button class="group-title" onclick="toggleGroup('finance')">
+                    Finance & Staff <i data-lucide="chevron-down"></i>
                 </button>
-                <div class="group-content" id="id">
-                    <button class="nav-item" data-page="/signup.html"><i data-lucide="user-plus-2"></i> Student Signup</button>
-                    <button class="nav-item" data-page="/mentor-signup.html"><i data-lucide="user-cog"></i> Mentor Signup</button>
+                <div class="group-content" id="finance">
                     <button class="nav-item" data-page="/admin-salary.html"><i data-lucide="wallet"></i> Staff Salary</button>
+                    <button class="nav-item" data-page="/pending.html"><i data-lucide="hourglass"></i> Pending Fees</button>
+                    <button class="nav-item" data-page="/ewuhewbbewubewbeadmin-fine"><i data-lucide="credit-card"></i> Fines & Dues</button>
                 </div>
             </div>
 
             <div class="nav-group">
-                <button class="group-title" onclick="toggleGroup('extra')">
+                <button class="group-title" onclick="toggleGroup('comms')">
                     Communications <i data-lucide="chevron-down"></i>
                 </button>
-                <div class="group-content" id="extra">
+                <div class="group-content" id="comms">
                     <button class="nav-item" data-page="/notice.html"><i data-lucide="megaphone"></i> Notice Board</button>
-                    <button class="nav-item" data-page="/manage-notice.html"><i data-lucide="edit-3"></i> Manage Notices</button>
-                    <button class="nav-item" data-page="/manage.html"><i data-lucide="calendar"></i> Events</button>
+                    <button class="nav-item" data-page="/manage-notice.html"><i data-lucide="layout-list"></i> Manage Notices</button>
+                    <button class="nav-item" data-page="/manage.html"><i data-lucide="calendar"></i> Event Management</button>
+                    <button class="nav-item" data-page="/design.html"><i data-lucide="party-popper"></i> Post New Event</button>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button class="group-title" onclick="toggleGroup('ids')">
+                    Account Access <i data-lucide="chevron-down"></i>
+                </button>
+                <div class="group-content" id="ids">
+                    <button class="nav-item" data-page="/signup.html"><i data-lucide="user-plus-2"></i> Create Student ID</button>
+                    <button class="nav-item" data-page="/mentor-signup.html"><i data-lucide="user-cog"></i> Create Mentor ID</button>
                 </div>
             </div>
         </div>
     </aside>
 
     <main>
-        <header>
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <button class="menu-toggle" onclick="toggleSidebar()"><i data-lucide="menu"></i></button>
-                <div class="welcome-msg">Hello, <span id="mentorNameDisplay">Admin</span> 👋</div>
-            </div>
-            <div class="header-btns">
-                <button class="btn btn-outline" onclick="location.href='/mentor-dashboard.html'">
-                    <i data-lucide="layout-dashboard"></i> Dashboard
-                </button>
-                <button class="btn btn-danger" id="logoutBtn">
-                    <i data-lucide="log-out"></i> Logout
-                </button>
-            </div>
-        </header>
-
-        <div class="content-area">
-            <div class="hero-card">
-                <div style="background: #e2e8f0; width: 80px; height: 80px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 20px;">
-                    <i data-lucide="layout" size="40" style="color: var(--primary)"></i>
-                </div>
-                <h1 style="font-size: 2rem; margin-bottom: 10px;">Welcome to Administration</h1>
-                <p style="color: var(--text-muted); line-height: 1.6;">Access all management tools from the sidebar. High-level control for students, staff, and campus operations.</p>
-            </div>
-        </div>
-    </main>
 </div>
 
 <div class="page-overlay" id="pageOverlay">
