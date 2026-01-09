@@ -82,102 +82,61 @@
   <div class="info" id="infoText"></div>
 
   <script>
-    let selectedBusId = null;
-    let intervalId = null;
+    const BASE_URL = "https://college-hwbb.onrender.com";
 
-    // Init map
-    const map = L.map("map").setView([23.2599, 77.4126], 13);
+// Load all active buses
+async function loadBuses() {
+  const list = document.getElementById("busList");
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap"
-    }).addTo(map);
+  try {
+    const res = await fetch(`${BASE_URL}/api/bus/list`);
+    const buses = await res.json();
 
-    const busIcon = L.divIcon({
-      html: "🚌",
-      iconSize: [30, 30],
-      className: ""
+    if (!buses.length) {
+      list.innerHTML = "No active buses";
+      return;
+    }
+
+    list.innerHTML = "";
+
+    buses.forEach(bus => {
+      const div = document.createElement("div");
+      div.className = "bus-item";
+      div.textContent = bus.busId;
+
+      div.onclick = () => selectBus(bus.busId, div);
+
+      list.appendChild(div);
     });
 
-    let marker = L.marker([0, 0], { icon: busIcon }).addTo(map);
+  } catch (err) {
+    list.innerHTML = "Failed to load buses";
+    console.error(err);
+  }
+}
 
-    const infoText = document.getElementById("infoText");
+// Fetch bus live location
+async function fetchLocation() {
+  if (!selectedBusId) return;
 
-    function showInfo(text) {
-      infoText.textContent = text;
-      infoText.style.display = "block";
-      setTimeout(() => infoText.style.display = "none", 2000);
+  try {
+    const res = await fetch(`${BASE_URL}/api/bus/location/${selectedBusId}`);
+
+    if (!res.ok) {
+      showInfo("Location not available");
+      return;
     }
 
-    // Load all active buses
-    async function loadBuses() {
-      const list = document.getElementById("busList");
+    const data = await res.json();
+    marker.setLatLng([data.lat, data.lng]);
+    map.setView([data.lat, data.lng], 15);
 
-      try {
-        const res = await fetch("/api/bus/list");
-        const buses = await res.json();
+  } catch (err) {
+    showInfo("Error fetching location");
+    console.error(err);
+  }
+}
 
-        if (!buses.length) {
-          list.innerHTML = "No active buses";
-          return;
-        }
-
-        list.innerHTML = "";
-
-        buses.forEach(bus => {
-          const div = document.createElement("div");
-          div.className = "bus-item";
-          div.textContent = bus.busId;
-
-          div.onclick = () => selectBus(bus.busId, div);
-
-          list.appendChild(div);
-        });
-
-      } catch (err) {
-        list.innerHTML = "Failed to load buses";
-      }
-    }
-
-    // Select bus and start tracking
-    function selectBus(busId, element) {
-      selectedBusId = busId;
-
-      document.querySelectorAll(".bus-item").forEach(el =>
-        el.classList.remove("active")
-      );
-      element.classList.add("active");
-
-      if (intervalId) clearInterval(intervalId);
-
-      fetchLocation(); // instant fetch
-      intervalId = setInterval(fetchLocation, 3000);
-
-      showInfo("Tracking " + busId);
-    }
-
-    // Fetch bus live location
-    async function fetchLocation() {
-      if (!selectedBusId) return;
-
-      try {
-        const res = await fetch(`https://college-hwbb.onrender.com/api/bus/location/${selectedBusId}`);
-
-        if (!res.ok) {
-          showInfo("Location not available");
-          return;
-        }
-
-        const data = await res.json();
-
-        marker.setLatLng([data.lat, data.lng]);
-        map.setView([data.lat, data.lng], 15);
-
-      } catch (err) {
-        showInfo("Error fetching location");
-      }
-    }
-
-    loadBuses();
   </script>
 
 </body>

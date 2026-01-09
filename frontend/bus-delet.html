@@ -70,59 +70,62 @@
   </div>
 
   <script>
-    async function loadBuses() {
-      const container = document.getElementById("busList");
+   const BASE_URL = "https://college-hwbb.onrender.com";
 
-      try {
-        const res = await fetch("/api/bus/list");
-        const buses = await res.json();
+async function loadBuses() {
+  const container = document.getElementById("busList");
 
-        if (!buses.length) {
-          container.innerHTML = '<div class="empty">No active buses found</div>';
-          return;
-        }
+  try {
+    const res = await fetch(`${BASE_URL}/api/bus/list`);
+    const buses = await res.json();
 
-        container.innerHTML = "";
-
-        buses.forEach(bus => {
-          const row = document.createElement("div");
-          row.className = "bus-row";
-
-          row.innerHTML = `
-            <span class="bus-id">${bus.busId}</span>
-            <button onclick="deleteBus('${bus.busId}')">Delete</button>
-          `;
-
-          container.appendChild(row);
-        });
-
-      } catch (err) {
-        container.innerHTML = '<div class="empty">Failed to load buses</div>';
-      }
+    if (!buses.length) {
+      container.innerHTML = '<div class="empty">No active buses found</div>';
+      return;
     }
 
-    async function deleteBus(busId) {
-      if (!confirm(`Are you sure you want to delete ${busId}?`)) return;
+    container.innerHTML = "";
 
-      try {
-        const res = await fetch(`https://college-hwbb.onrender.com/api/admin/bus/delete/${busId}`, {
-          method: "DELETE"
-        });
+    buses.forEach(bus => {
+      const row = document.createElement("div");
+      row.className = "bus-row";
 
-        if (!res.ok) {
-          alert("Failed to delete bus");
-          return;
-        }
+      row.innerHTML = `
+        <span class="bus-id">${bus.busId}</span>
+        <button onclick="deleteBus('${bus.busId}')">Delete</button>
+      `;
 
-        // remove from UI instantly
-        loadBuses();
+      container.appendChild(row);
+    });
 
-      } catch (err) {
-        alert("Server error");
-      }
+  } catch (err) {
+    container.innerHTML = '<div class="empty">Failed to load buses</div>';
+    console.error(err);
+  }
+}
+
+async function deleteBus(busId) {
+  if (!confirm(`Are you sure you want to delete ${busId}?`)) return;
+
+  try {
+    const res = await fetch(`${BASE_URL}/api/admin/bus/delete/${busId}`, {
+      method: "DELETE"
+    });
+
+    if (!res.ok) {
+      alert("Failed to delete bus");
+      return;
     }
 
-    loadBuses();
+    loadBuses(); // reload list
+  } catch (err) {
+    alert("Server error");
+    console.error(err);
+  }
+}
+
+loadBuses();
+
   </script>
 
 </body>
