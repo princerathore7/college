@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Acropolis Admin | Premium Dashboard</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     
@@ -11,11 +12,8 @@
         :root {
             --primary: #0f172a;
             --accent: #ca8a04;
-            --accent-hover: #eab308;
-            --sidebar-bg: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
             --bg-light: #f8fafc;
+            --sidebar-width: 290px;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -23,31 +21,27 @@
             box-sizing: border-box;
             font-family: 'Inter', sans-serif;
             margin: 0; padding: 0;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             background-color: var(--bg-light);
-            color: var(--text-main);
+            color: #1e293b;
             height: 100vh;
             overflow: hidden;
         }
 
-        /* --- LAYOUT --- */
-        .wrapper {
-            display: flex;
-            height: 100vh;
-            width: 100%;
-        }
+        .wrapper { display: flex; height: 100vh; }
 
         /* --- SIDEBAR --- */
         aside {
-            width: 300px;
-            background: var(--sidebar-bg);
+            width: var(--sidebar-width);
+            background: #ffffff;
             border-right: 1px solid #e2e8f0;
             display: flex;
             flex-direction: column;
             transition: var(--transition);
-            z-index: 100;
+            z-index: 1000;
         }
 
         .sidebar-header {
@@ -72,10 +66,8 @@
             padding: 15px;
         }
 
-        /* Shutter / Accordion Styles */
-        .nav-group {
-            margin-bottom: 10px;
-        }
+        /* Group / Shutter Styling */
+        .nav-group { margin-bottom: 10px; }
 
         .group-title {
             width: 100%;
@@ -86,37 +78,30 @@
             align-items: center;
             justify-content: space-between;
             cursor: pointer;
-            color: var(--text-muted);
-            font-weight: 600;
-            font-size: 0.85rem;
+            color: #64748b;
+            font-weight: 700;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             border-radius: 8px;
-            transition: var(--transition);
         }
 
-        .group-title:hover {
-            background: #f1f5f9;
-            color: var(--primary);
-        }
+        .group-title:hover { background: #f1f5f9; }
 
         .group-content {
-            display: none; /* Hidden by default */
+            display: none;
             flex-direction: column;
             gap: 4px;
-            padding-left: 12px;
+            padding-left: 10px;
             margin-top: 5px;
         }
 
-        .group-content.active {
-            display: flex;
-        }
+        .group-content.active { display: flex; }
 
         .nav-item {
             padding: 10px 15px;
             border-radius: 8px;
-            color: var(--text-main);
-            text-decoration: none;
+            color: #334155;
             font-size: 14px;
             display: flex;
             align-items: center;
@@ -129,51 +114,24 @@
             text-align: left;
         }
 
-        .nav-item i { width: 18px; }
+        .nav-item:hover { background: #f1f5f9; color: var(--accent); }
+        .nav-item.active { background: var(--primary); color: white; }
 
-        .nav-item:hover {
-            background: #f1f5f9;
-            color: var(--accent);
-        }
-
-        .nav-item.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        /* --- MAIN CONTENT --- */
-        main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
+        /* --- MAIN --- */
+        main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 
         header {
             height: 70px;
             background: white;
-            padding: 0 30px;
+            padding: 0 25px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             border-bottom: 1px solid #e2e8f0;
         }
 
-        .welcome-msg {
-            font-size: 14px;
-            color: var(--text-muted);
-        }
-
-        .welcome-msg span {
-            color: var(--primary);
-            font-weight: 700;
-        }
-
-        .header-btns {
-            display: flex;
-            gap: 10px;
-        }
-
+        .header-actions { display: flex; gap: 10px; }
+        
         .btn {
             padding: 8px 16px;
             border-radius: 8px;
@@ -182,40 +140,26 @@
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
-            transition: var(--transition);
+            gap: 6px;
+            transition: 0.2s;
         }
 
-        .btn-outline {
-            background: transparent;
-            border: 1px solid #e2e8f0;
-            color: var(--text-main);
-        }
-
-        .btn-outline:hover { background: #f8fafc; }
-
-        .btn-danger {
-            background: #fee2e2;
-            color: #ef4444;
-            border: none;
-        }
-
-        .btn-danger:hover { background: #fecaca; }
+        .btn-outline { background: white; border: 1px solid #e2e8f0; color: #475569; }
+        .btn-danger { background: #fee2e2; color: #ef4444; border: none; }
 
         .content-area {
             flex: 1;
-            padding: 40px;
+            padding: 30px;
             overflow-y: auto;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            text-align: center;
         }
 
-        .hero-card {
+        .welcome-card {
+            text-align: center;
             max-width: 500px;
-            animation: slideUp 0.6s ease;
+            animation: slideUp 0.5s ease;
         }
 
         @keyframes slideUp {
@@ -223,7 +167,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- OVERLAY IFRAME --- */
+        /* --- OVERLAY --- */
         .page-overlay {
             position: fixed;
             inset: 0;
@@ -233,8 +177,8 @@
             flex-direction: column;
         }
 
-        .overlay-top {
-            padding: 15px 25px;
+        .overlay-header {
+            padding: 12px 20px;
             background: var(--primary);
             color: white;
             display: flex;
@@ -242,30 +186,15 @@
             justify-content: space-between;
         }
 
-        .page-overlay iframe {
-            flex: 1;
-            border: none;
-        }
+        .page-overlay iframe { flex: 1; border: none; }
 
-        /* --- RESPONSIVE --- */
-        @media (max-width: 992px) {
-            aside {
-                position: absolute;
-                left: -300px;
-                height: 100%;
-            }
+        .menu-toggle { display: none; background: none; border: none; cursor: pointer; padding: 10px; }
+
+        @media (max-width: 1024px) {
+            aside { position: fixed; left: -100%; height: 100%; }
             aside.open { left: 0; }
-            .menu-toggle { display: block !important; }
+            .menu-toggle { display: block; }
         }
-
-        .menu-toggle {
-            display: none;
-            background: none; border: none; cursor: pointer;
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -274,7 +203,7 @@
     <aside id="sidebar">
         <div class="sidebar-header">
             <div class="logo-box"><i data-lucide="shield-check"></i></div>
-            <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--primary); letter-spacing: -0.5px;">Acropolis Admin</h2>
+            <h2 style="font-size: 1.1rem; font-weight: 700;">Acropolis Admin</h2>
         </div>
 
         <div class="nav-container">
@@ -284,7 +213,7 @@
                 </button>
                 <div class="group-content active" id="core">
                     <button class="nav-item" data-page="/admin-students.html"><i data-lucide="users"></i> Student Management</button>
-                    <button class="nav-item" data-page="/admin.html"><i data-lucide="settings-2"></i> Class Control</button>
+                    <button class="nav-item" data-page="/admin.html"><i data-lucide="settings"></i> Class Control</button>
                     <button class="nav-item" data-page="/admin-marks.html"><i data-lucide="bar-chart-3"></i> Marks & Results</button>
                     <button class="nav-item" data-page="/exam-ring.html"><i data-lucide="pencil-ruler"></i> Examination Setup</button>
                 </div>
@@ -295,19 +224,9 @@
                     Attendance Portal <i data-lucide="chevron-down"></i>
                 </button>
                 <div class="group-content" id="att">
-                    <button class="nav-item" data-page="/class-attendace.html"><i data-lucide="clipboard-check"></i> Attendance Records</button>
-                    <button class="nav-item" data-page="/attendace-pdf-upload.html"><i data-lucide="file-up"></i> Upload Attendance PDF</button>
-                    <button class="nav-item" data-page="/attendace-pdf-view.html"><i data-lucide="file-search"></i> View Attendance Data</button>
-                </div>
-            </div>
-
-            <div class="nav-group">
-                <button class="group-title" onclick="toggleGroup('acad')">
-                    Academics <i data-lucide="chevron-down"></i>
-                </button>
-                <div class="group-content" id="acad">
-                    <button class="nav-item" data-page="/notes-post.html"><i data-lucide="book-open"></i> Upload Study Notes</button>
-                    <button class="nav-item" data-page="/post-assignments.html"><i data-lucide="file-text"></i> Post Assignments</button>
+                    <button class="nav-item" data-page="/class-attendace.html"><i data-lucide="clipboard-check"></i> Records</button>
+                    <button class="nav-item" data-page="/attendace-pdf-upload.html"><i data-lucide="file-up"></i> Upload PDF</button>
+                    <button class="nav-item" data-page="/attendace-pdf-view.html"><i data-lucide="file-search"></i> View Data</button>
                 </div>
             </div>
 
@@ -316,150 +235,151 @@
                     Form Engine <i data-lucide="chevron-down"></i>
                 </button>
                 <div class="group-content" id="forms">
-                    <button class="nav-item" data-page="/form-creator.html"><i data-lucide="plus-square"></i> Create New Form</button>
-                    <button class="nav-item" data-page="/form-submissions.html"><i data-lucide="list-checks"></i> View Submissions</button>
-                    <button class="nav-item" data-page="/form-management.html"><i data-lucide="trash-2"></i> Delete/Manage Forms</button>
+                    <button class="nav-item" data-page="/form-creator.html"><i data-lucide="plus-square"></i> Create Form</button>
+                    <button class="nav-item" data-page="/form-submissions.html"><i data-lucide="list-checks"></i> Submissions</button>
+                    <button class="nav-item" data-page="/form-management.html"><i data-lucide="trash-2"></i> Manage/Delete</button>
                 </div>
             </div>
 
             <div class="nav-group">
                 <button class="group-title" onclick="toggleGroup('bus')">
-                    Transport System <i data-lucide="chevron-down"></i>
+                    Transport <i data-lucide="chevron-down"></i>
                 </button>
                 <div class="group-content" id="bus">
-                    <button class="nav-item" data-page="/bus-route.html"><i data-lucide="map-pin"></i> Transport Routes</button>
-                    <button class="nav-item" data-page="/bus-admin.html"><i data-lucide="user-plus"></i> Create Driver ID</button>
+                    <button class="nav-item" data-page="/bus-route.html"><i data-lucide="map-pin"></i> Routes</button>
+                    <button class="nav-item" data-page="/bus-admin.html"><i data-lucide="user-plus"></i> Driver ID</button>
                     <button class="nav-item" data-page="/bus-delet.html"><i data-lucide="truck"></i> Manage Bus IDs</button>
                 </div>
             </div>
 
             <div class="nav-group">
-                <button class="group-title" onclick="toggleGroup('finance')">
-                    Finance & Staff <i data-lucide="chevron-down"></i>
+                <button class="group-title" onclick="toggleGroup('fin')">
+                    Finance & Comms <i data-lucide="chevron-down"></i>
                 </button>
-                <div class="group-content" id="finance">
-                    <button class="nav-item" data-page="/admin-salary.html"><i data-lucide="wallet"></i> Staff Salary</button>
-                    <button class="nav-item" data-page="/pending.html"><i data-lucide="hourglass"></i> Pending Fees</button>
-                    <button class="nav-item" data-page="/ewuhewbbewubewbeadmin-fine"><i data-lucide="credit-card"></i> Fines & Dues</button>
-                </div>
-            </div>
-
-            <div class="nav-group">
-                <button class="group-title" onclick="toggleGroup('comms')">
-                    Communications <i data-lucide="chevron-down"></i>
-                </button>
-                <div class="group-content" id="comms">
+                <div class="group-content" id="fin">
+                    <button class="nav-item" data-page="/admin-salary.html"><i data-lucide="wallet"></i> Salary</button>
+                    <button class="nav-item" data-page="/pending.html"><i data-lucide="clock"></i> Pending Fees</button>
+                    <button class="nav-item" data-page="/ewuhewbbewubewbeadmin-fine"><i data-lucide="credit-card"></i> Fines</button>
                     <button class="nav-item" data-page="/notice.html"><i data-lucide="megaphone"></i> Notice Board</button>
-                    <button class="nav-item" data-page="/manage-notice.html"><i data-lucide="layout-list"></i> Manage Notices</button>
-                    <button class="nav-item" data-page="/manage.html"><i data-lucide="calendar"></i> Event Management</button>
-                    <button class="nav-item" data-page="/design.html"><i data-lucide="party-popper"></i> Post New Event</button>
+                    <button class="nav-item" data-page="/manage-notice.html"><i data-lucide="edit-3"></i> Manage Notice</button>
                 </div>
             </div>
 
             <div class="nav-group">
-                <button class="group-title" onclick="toggleGroup('ids')">
-                    Account Access <i data-lucide="chevron-down"></i>
+                <button class="group-title" onclick="toggleGroup('other')">
+                    Others <i data-lucide="chevron-down"></i>
                 </button>
-                <div class="group-content" id="ids">
-                    <button class="nav-item" data-page="/signup.html"><i data-lucide="user-plus-2"></i> Create Student ID</button>
-                    <button class="nav-item" data-page="/mentor-signup.html"><i data-lucide="user-cog"></i> Create Mentor ID</button>
+                <div class="group-content" id="other">
+                    <button class="nav-item" data-page="/notes-post.html"><i data-lucide="book-open"></i> Study Notes</button>
+                    <button class="nav-item" data-page="/post-assignments.html"><i data-lucide="file-text"></i> Assignments</button>
+                    <button class="nav-item" data-page="/manage.html"><i data-lucide="calendar"></i> Events</button>
+                    <button class="nav-item" data-page="/design.html"><i data-lucide="sparkles"></i> Post Event</button>
+                    <button class="nav-item" data-page="/signup.html"><i data-lucide="user-plus-2"></i> Student ID</button>
+                    <button class="nav-item" data-page="/mentor-signup.html"><i data-lucide="user-cog"></i> Mentor ID</button>
                 </div>
             </div>
         </div>
     </aside>
 
     <main>
+        <header>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <button class="menu-toggle" onclick="toggleSidebar()"><i data-lucide="menu"></i></button>
+                <h3 id="postedBy" style="font-size: 1rem; font-weight: 500;">Welcome</h3>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-outline" id="backToMentorBtn"><i data-lucide="layout-dashboard"></i> Dashboard</button>
+                <button class="btn btn-danger" id="logoutBtn"><i data-lucide="log-out"></i> Logout</button>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <div class="welcome-card" id="welcomeScreen">
+                <div style="margin-bottom: 20px; color: var(--primary);"><i data-lucide="layout" size="48"></i></div>
+                <h2 style="margin-bottom: 10px;">Administrative Portal</h2>
+                <p style="color: #64748b;">Select a module from the sidebar to manage university operations.</p>
+            </div>
+        </div>
+    </main>
 </div>
 
 <div class="page-overlay" id="pageOverlay">
-    <div class="overlay-top">
+    <div class="overlay-header">
         <div style="display: flex; align-items: center; gap: 15px;">
-            <button class="btn btn-outline" style="background: white; color: black; border: none;" id="closeOverlay">
-                <i data-lucide="arrow-left"></i> Back
-            </button>
-            <h3 id="overlayTitle" style="font-weight: 500;">Module</h3>
+            <button class="btn btn-outline" style="border:none; padding: 5px 10px;" id="overlayBackBtn"><i data-lucide="arrow-left"></i> Close</button>
+            <strong id="pageTitle">Module Loading...</strong>
         </div>
-        <i data-lucide="info" size="20"></i>
     </div>
-    <iframe id="mainFrame"></iframe>
+    <iframe id="overlayFrame"></iframe>
 </div>
 
 <script>
-    // Initialize Lucide Icons
     lucide.createIcons();
 
-    // Toggle Shutter Groups
+    // Shutter Toggle Logic
     function toggleGroup(id) {
         const content = document.getElementById(id);
         const icon = content.previousElementSibling.querySelector('.lucide-chevron-down');
-        
-        // Close others (Optional: comment out if you want multiple open)
-        // document.querySelectorAll('.group-content').forEach(el => {
-        //     if(el.id !== id) el.classList.remove('active');
-        // });
-
         content.classList.toggle('active');
         icon.style.transform = content.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
     }
 
-    // Toggle Sidebar Mobile
     function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('open');
     }
 
-    // Auth Check & UI
+    // --- Backend Same Flow ---
     const mentorId = localStorage.getItem("mentorId");
-    const mentorName = localStorage.getItem("mentorName");
-    
-    if(!mentorId) {
+    if(!mentorId){
         window.location.href = "/login.html";
     }
-    if(mentorName) {
-        document.getElementById('mentorNameDisplay').innerText = mentorName;
-    }
+
+    const mentorName = localStorage.getItem("mentorName");
+    document.getElementById("postedBy").innerText = mentorName ? `Admin: ${mentorName}` : "Admin Panel";
 
     // Navigation Logic
-    const overlay = document.getElementById('pageOverlay');
-    const iframe = document.getElementById('mainFrame');
-    const title = document.getElementById('overlayTitle');
+    const buttons = document.querySelectorAll(".nav-item");
+    const overlay = document.getElementById("pageOverlay");
+    const frame = document.getElementById("overlayFrame");
+    const titleEl = document.getElementById("pageTitle");
 
-    document.querySelectorAll('.nav-item').forEach(btn => {
+    buttons.forEach(btn => {
         btn.onclick = () => {
-            const page = btn.getAttribute('data-page');
-            const label = btn.innerText.trim();
-            
             sessionStorage.setItem("accessSource", "ad");
-            
-            // Highlight active
-            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+            buttons.forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
 
-            // Open Iframe
-            title.innerText = label;
-            iframe.src = page;
-            overlay.style.display = 'flex';
+            titleEl.textContent = btn.innerText.trim();
+            frame.src = btn.dataset.page;
+            overlay.style.display = "flex";
             
-            // Close mobile sidebar if open
+            // Close sidebar on mobile after selection
             document.getElementById('sidebar').classList.remove('open');
         };
     });
 
-    document.getElementById('closeOverlay').onclick = () => {
-        overlay.style.display = 'none';
-        iframe.src = "";
+    document.getElementById("overlayBackBtn").onclick = () => {
+        overlay.style.display = "none";
+        frame.src = "";
     };
 
-    // Logout
-    document.getElementById('logoutBtn').onclick = () => {
-        if(confirm("Sign out of the administration panel?")) {
+    document.getElementById("backToMentorBtn").onclick = () => {
+        location.href = "/mentor-dashboard.html";
+    };
+
+    document.getElementById("logoutBtn").onclick = () => {
+        if(confirm("Are you sure you want to logout?")){
             localStorage.clear();
             sessionStorage.clear();
             location.href = "/login.html";
         }
     };
 
-    // Anti-Zoom
+    // Zoom Prevention
     document.addEventListener('wheel', (e) => { if (e.ctrlKey) e.preventDefault(); }, { passive: false });
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '0')) e.preventDefault();
+    });
 </script>
 
 </body>
