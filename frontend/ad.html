@@ -1,338 +1,393 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" href="https://i.ibb.co/8tZSKKT/logo-with-bg.webp">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Acropolis | Professional Admin Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Acropolis Admin — Stable Dashboard</title>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --secondary: #1e293b;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --bg-body: #f1f5f9;
+            --sidebar-width: 280px;
+            --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
 
-<style>
-:root {
-  --navy-dark: #001f3f;
-  --navy-light: #003366;
-  --accent-gold: #daa520;
-  --bg-gradient: linear-gradient(135deg, #f8f9ff 0%, #e2e8f0 100%);
-  --sidebar-width: 280px;
-}
+        * {
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
 
-* {
-  box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
-  /* Prevent text selection during fast clicks */
-  -webkit-tap-highlight-color: transparent;
-}
+        body {
+            background-color: var(--bg-body);
+            color: var(--primary);
+            height: 100vh;
+            overflow: hidden;
+        }
 
-body {
-  margin: 0;
-  background: var(--bg-gradient);
-  color: #333;
-  height: 100vh;
-  overflow: hidden; /* Desktop stability: no body scroll */
-}
+        .layout {
+            display: grid;
+            grid-template-columns: var(--sidebar-width) 1fr;
+            height: 100vh;
+        }
 
-.wrap {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
+        /* --- SIDEBAR --- */
+        aside {
+            background: var(--primary);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
 
-/* --- HEADER --- */
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: var(--navy-dark);
-  padding: 10px 25px;
-  color: white;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-  z-index: 10;
-}
+        .sidebar-header {
+            padding: 24px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-header h1 {
-  margin: 0;
-  font-size: 1.2rem;
-  letter-spacing: 1px;
-  font-weight: 500;
-}
+        .nav-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px 0;
+        }
 
-.header-actions {
-  display: flex;
-  gap: 12px;
-}
+        /* --- ACCORDION SYSTEM --- */
+        .nav-group {
+            margin-bottom: 5px;
+        }
 
-header button {
-  background: rgba(255,255,255,0.1);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.2);
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: 0.3s;
-}
+        .group-trigger {
+            width: 100%;
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
 
-header button:hover {
-  background: var(--accent-gold);
-  color: #001f3f;
-  border-color: var(--accent-gold);
-}
+        .group-trigger:hover {
+            color: white;
+            background: rgba(255,255,255,0.05);
+        }
 
-/* --- LAYOUT GRID --- */
-.grid {
-  display: grid;
-  grid-template-columns: var(--sidebar-width) 1fr;
-  flex: 1;
-  overflow: hidden;
-}
+        .group-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background: rgba(0,0,0,0.2);
+        }
 
-/* --- SIDEBAR --- */
-aside {
-  background: #fff;
-  border-right: 1px solid #d1d5db;
-  padding: 15px;
-  overflow-y: auto;
-  transition: 0.3s;
-}
+        .group-content.open {
+            max-height: 500px; /* Large enough to fit content */
+        }
 
-/* Custom scrollbar for Sidebar */
-aside::-webkit-scrollbar { width: 5px; }
-aside::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .nav-item {
+            width: 100%;
+            padding: 10px 20px 10px 45px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            text-align: left;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.2s;
+        }
 
-.nav {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
+        .nav-item:hover, .nav-item.active {
+            color: white;
+            background: var(--accent);
+        }
 
-.nav button {
-  padding: 12px 15px;
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
-  font-size: 14px;
-  color: #475569;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+        .nav-item i { width: 18px; text-align: center; }
 
-.nav button:hover {
-  background: #f1f5f9;
-  color: var(--navy-dark);
-  transform: translateX(5px);
-}
+        /* --- TOP BAR --- */
+        .top-bar {
+            background: white;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            box-shadow: var(--card-shadow);
+        }
 
-.nav button.active {
-  background: var(--navy-dark);
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(0,31,63,0.3);
-}
+        .welcome-msg { font-weight: 600; color: var(--secondary); }
 
-/* --- MAIN CONTENT --- */
-main {
-  padding: 30px;
-  overflow-y: auto;
-  animation: fadeIn 0.5s ease-in-out;
-}
+        .top-actions { display: flex; gap: 10px; }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-main h2 { color: var(--navy-dark); margin-bottom: 10px; }
+        .btn-outline { background: #f1f5f9; color: var(--secondary); }
+        .btn-outline:hover { background: #e2e8f0; }
+        .btn-danger { background: #fee2e2; color: #ef4444; }
+        .btn-danger:hover { background: #fecaca; }
 
-/* --- OVERLAY (Full Screen) --- */
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: #fff;
-  z-index: 1000;
-  display: none;
-  flex-direction: column;
-  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
+        /* --- MAIN CONTENT --- */
+        main {
+            padding: 40px;
+            overflow-y: auto;
+            background: var(--bg-body);
+        }
 
-@keyframes slideUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
-}
+        .dashboard-card {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+            max-width: 600px;
+            margin: 40px auto;
+        }
 
-.overlay-header {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  padding: 12px 20px;
-  background: var(--navy-dark);
-  color: white;
-}
+        /* --- OVERLAY IFRAME --- */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: white;
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-.overlay-header button {
-  background: var(--accent-gold);
-  border: 0;
-  padding: 6px 15px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-}
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
 
-.overlay iframe {
-  flex: 1;
-  width: 100%;
-  border: none;
-  background: #fff;
-}
+        .overlay-header {
+            padding: 15px 25px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
 
-/* --- MOBILE STABILITY --- */
-@media (max-width: 768px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
-  aside {
-    display: block; /* Normal mobile behavior */
-    border-right: none;
-    border-bottom: 1px solid #ddd;
-  }
-  body { overflow: auto; } /* Allow scroll on mobile */
-}
-</style>
+        iframe { border: none; flex: 1; width: 100%; }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .layout { grid-template-columns: 1fr; }
+            aside { display: none; }
+        }
+    </style>
 </head>
 
 <body>
-<div class="wrap">
 
-<header>
-  <h1>Acropolis Admin Panel</h1>
-  <div class="header-actions">
-    <button id="backToMentorBtn">⬅ Dashboard</button>
-    <button id="logoutBtn" title="Logout">Logout</button>
-  </div>
-</header>
-<h3 id="postedBy"></h3>
+<div class="layout">
+    <aside>
+        <div class="sidebar-header">
+            <i class="fas fa-university"></i> Acropolis Admin
+        </div>
+        
+        <div class="nav-container">
+            <div class="nav-group">
+                <button class="group-trigger" onclick="toggleGroup(this)">
+                    <span><i class="fas fa-graduation-cap"></i> &nbsp; Academic Control</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="group-content">
+                    <button class="nav-item" data-page="/admin-students.html"><i class="fas fa-user-graduate"></i> Student Mgmt</button>
+                    <button class="nav-item" data-page="/notes-post.html"><i class="fas fa-book-open"></i> Study Notes</button>
+                    <button class="nav-item" data-page="/admin-marks.html"><i class="fas fa-chart-line"></i> Marks & Results</button>
+                    <button class="nav-item" data-page="/admin.html"><i class="fas fa-chalkboard-teacher"></i> Class Control</button>
+                </div>
+            </div>
 
-<div class="grid">
-<aside>
-<nav class="nav">
-  <button data-page="/admin-students.html">🎓 Student Management</button>
-  <button data-page="/class-attendace.html">📋 Attendance Records</button> 
-    <button data-page="/attendace-pdf-upload.html">📋 Upload your attendace pdf</button> 
- <button data-page="/attendace-pdf-view.html">📋 View the attendance data</button> 
+            <div class="nav-group">
+                <button class="group-trigger" onclick="toggleGroup(this)">
+                    <span><i class="fas fa-calendar-check"></i> &nbsp; Attendance</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="group-content">
+                    <button class="nav-item" data-page="/class-attendace.html"><i class="fas fa-list"></i> Daily Records</button>
+                    <button class="nav-item" data-page="/attendace-pdf-upload.html"><i class="fas fa-upload"></i> Upload PDF</button>
+                    <button class="nav-item" data-page="/attendace-pdf-view.html"><i class="fas fa-file-pdf"></i> View Data</button>
+                </div>
+            </div>
 
-  <button data-page="/notes-post.html">📚 Upload Study Notes</button>
-  <button data-page="/admin-marks.html">📊 Marks & Results</button>
-  <button data-page="/exam-ring.html">📝 Examination Setup</button>
-  <button data-page="/bus-route.html">🚌 Transport Routes</button>
-   <button data-page="/bus-admin.html">🚌 Create bus drivers ID</button>
-    <button data-page="/bus-delet.html">🚌 Manage BUS ID</button>
-    
-  <button data-page="/admin.html">🧑‍🏫 Class Control</button>
-  <button data-page="/admin-salary.html">💰 Staff Salary</button>
-    <button data-page="/post-assignments.html">📝 post-assignments</button>
-  <button data-page="/pending.html">⏳ Pending Fees</button>
-  <button data-page="/ewuhewbbewubewbeadmin-fine">💳 Fines & Dues</button>
-  <button data-page="/notice.html">📢 Notice Board</button>
-    <button data-page="/manage-notice.html">📢 manage notices</button>
-      <!-- <a href="/form-creator.html">form creator</a> -->
-         <button data-page="/form-creator.html">📋 create a NEW FORM</button> 
-         <button data-page="/form-submissions.html">📋 View the submissions</button> 
-                  <button data-page="/form-management.html">📋 romove or delet form</button> 
-  <button data-page="/manage.html">🎉 Event Management</button>
-  <button data-page="/design.html">🎉 Post New Event</button>
-    <button data-page="/signup.html">➕ Create Student ID</button>
-  <button data-page="/mentor-signup.html">➕ Create Mentor ID</button>
-    <!-- <button data-page="/notice.html">➕ notice post test ID</button> -->
-  <!-- <button data-page="/class-attendace.html">➕ view students attendance</button> -->
-</nav>
-</aside>
+            <div class="nav-group">
+                <button class="group-trigger" onclick="toggleGroup(this)">
+                    <span><i class="fas fa-bus"></i> &nbsp; Transport</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="group-content">
+                    <button class="nav-item" data-page="/bus-route.html"><i class="fas fa-route"></i> Route Maps</button>
+                    <button class="nav-item" data-page="/bus-admin.html"><i class="fas fa-user-plus"></i> Create Driver ID</button>
+                    <button class="nav-item" data-page="/bus-delet.html"><i class="fas fa-tasks"></i> Manage Bus IDs</button>
+                </div>
+            </div>
 
-<main>
-  <div id="welcomeScreen">
-    <h2>Welcome to Administration</h2>
-    <p>Please select a module from the left menu to manage operations.</p>
-    <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
-  </div>
-</main>
-</div>
+            <div class="nav-group">
+                <button class="group-trigger" onclick="toggleGroup(this)">
+                    <span><i class="fas fa-wpforms"></i> &nbsp; Forms & Notices</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="group-content">
+                    <button class="nav-item" data-page="/form-creator.html"><i class="fas fa-plus-circle"></i> Create Form</button>
+                    <button class="nav-item" data-page="/form-submissions.html"><i class="fas fa-inbox"></i> Submissions</button>
+                    <button class="nav-item" data-page="/form-management.html"><i class="fas fa-trash-alt"></i> Delete Form</button>
+                    <button class="nav-item" data-page="/notice.html"><i class="fas fa-bullhorn"></i> Notice Board</button>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button class="group-trigger" onclick="toggleGroup(this)">
+                    <span><i class="fas fa-wallet"></i> &nbsp; Accounts</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="group-content">
+                    <button class="nav-item" data-page="/admin-salary.html"><i class="fas fa-money-bill-wave"></i> Staff Salary</button>
+                    <button class="nav-item" data-page="/pending.html"><i class="fas fa-clock"></i> Pending Fees</button>
+                    <button class="nav-item" data-page="/ewuhewbbewubewbeadmin-fine"><i class="fas fa-exclamation-circle"></i> Fines</button>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button class="group-trigger" onclick="toggleGroup(this)">
+                    <span><i class="fas fa-id-badge"></i> &nbsp; ID Management</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="group-content">
+                    <button class="nav-item" data-page="/signup.html"><i class="fas fa-user-plus"></i> Student ID</button>
+                    <button class="nav-item" data-page="/mentor-signup.html"><i class="fas fa-user-shield"></i> Mentor ID</button>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="content-wrapper">
+        <div class="top-bar">
+            <div class="welcome-msg" id="postedBy">Welcome, Admin</div>
+            <div class="top-actions">
+                <button class="btn btn-outline" onclick="location.href='/mentor-dashboard.html'">
+                    <i class="fas fa-columns"></i> Dashboard
+                </button>
+                <button class="btn btn-danger" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+
+        <main>
+            <div class="dashboard-card">
+                <img src="https://i.ibb.co/8tZSKKT/logo-with-bg.webp" alt="Logo" style="width: 80px; margin-bottom: 20px;">
+                <h2>Administrative Control Center</h2>
+                <p style="color: var(--text-muted); margin-top: 10px;">Select a module from the sidebar to manage university operations.</p>
+            </div>
+        </main>
+    </div>
 </div>
 
 <div class="overlay" id="pageOverlay">
-  <div class="overlay-header">
-    <button id="overlayBackBtn">⬅ Close</button>
-    <strong id="pageTitle">Module Loading...</strong>
-  </div>
-  <iframe id="overlayFrame"></iframe>
+    <div class="overlay-header">
+        <h3 id="pageTitle" style="font-size: 1rem;">Module</h3>
+        <button class="btn btn-danger" id="overlayBackBtn">Close <i class="fas fa-times"></i></button>
+    </div>
+    <iframe id="overlayFrame"></iframe>
 </div>
 
 <script>
-  
-// --- Stable Screen Logic: Anti-Zoom (Prevent accidental zooming on laptop trackpads) ---
-document.addEventListener('wheel', (e) => {
-  if (e.ctrlKey) e.preventDefault();
-}, { passive: false });
+    // --- ACCORDION LOGIC ---
+    function toggleGroup(btn) {
+        const content = btn.nextElementSibling;
+        const icon = btn.querySelector('.fa-chevron-down');
+        
+        // Close other groups
+        document.querySelectorAll('.group-content').forEach(el => {
+            if(el !== content) el.classList.remove('open');
+        });
+        document.querySelectorAll('.fa-chevron-down').forEach(el => {
+            if(el !== icon) el.style.transform = 'rotate(0deg)';
+        });
 
-document.addEventListener('keydown', (e) => {
-  if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '0')) {
-    e.preventDefault();
-  }
-});
+        // Toggle current
+        content.classList.toggle('open');
+        icon.style.transform = content.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
+    }
 
-/* ===============================
-   ACCESS CONTROL
-================================ */
-const mentorId = localStorage.getItem("mentorId");
-if(!mentorId){
-  document.body.innerHTML = `<h2 style="text-align:center;margin-top:20vh;color:#001f3f">❌ Unauthorized</h2>`;
-  window.location.href = "/login.html";
-}
+    // --- NAVIGATION LOGIC ---
+    const navItems = document.querySelectorAll(".nav-item");
+    const overlay = document.getElementById("pageOverlay");
+    const frame = document.getElementById("overlayFrame");
+    const titleEl = document.getElementById("pageTitle");
 
-/* DASHBOARD NAVIGATION */
-document.getElementById("backToMentorBtn").onclick = () => {
-  location.href = "/mentor-dashboard.html";
-};
+    navItems.forEach(item => {
+        item.onclick = () => {
+            sessionStorage.setItem("accessSource", "ad");
+            navItems.forEach(b => b.classList.remove("active"));
+            item.classList.add("active");
 
-/* SIDEBAR ACTIONS */
-const buttons = document.querySelectorAll(".nav button");
-const overlay = document.getElementById("pageOverlay");
-const frame   = document.getElementById("overlayFrame");
-const titleEl = document.getElementById("pageTitle");
+            titleEl.textContent = item.innerText;
+            frame.src = item.dataset.page;
+            overlay.style.display = "flex";
+        };
+    });
 
-buttons.forEach(btn=>{
-  btn.onclick = ()=>{
-    sessionStorage.setItem("accessSource","ad");
+    document.getElementById("overlayBackBtn").onclick = () => {
+        overlay.style.display = "none";
+        frame.src = "about:blank";
+    };
+
+    // --- ACCESS & LOGOUT ---
+    const mentorId = localStorage.getItem("mentorId");
+    const mentorName = localStorage.getItem("mentorName");
     
-    // UI Update
-    buttons.forEach(b=>b.classList.remove("active"));
-    btn.classList.add("active");
+    if(!mentorId){
+        window.location.href = "/login.html";
+    }
 
-    // Open Page
-    titleEl.textContent = btn.innerText;
-    frame.src = btn.dataset.page;
-    overlay.style.display = "flex";
-  };
-});
+    if(mentorName) {
+        document.getElementById("postedBy").innerText = `Welcome, ${mentorName}`;
+    }
 
-/* CLOSE OVERLAY */
-document.getElementById("overlayBackBtn").onclick = () => {
-  overlay.style.display = "none";
-  frame.src = ""; // Stop loading
-};
+    document.getElementById("logoutBtn").onclick = () => {
+        if(confirm("Are you sure you want to logout?")){
+            localStorage.clear();
+            sessionStorage.clear();
+            location.href = "/login.html";
+        }
+    };
 
-/* LOGOUT */
-document.getElementById("logoutBtn").onclick = ()=>{
-  if(confirm("Are you sure you want to logout?")){
-    localStorage.clear();
-    sessionStorage.clear();
-    location.href="/login.html";
-  }
-};
-const mentorName = localStorage.getItem("mentorName");
-
-// show mentor name somewhere (optional)
-document.getElementById("postedBy").innerText =
-  mentorName ? `Welcome to admins pannel, ${mentorName}` : "Posted by Mentor";
+    // Anti-Zoom
+    document.addEventListener('wheel', (e) => { if (e.ctrlKey) e.preventDefault(); }, { passive: false });
 </script>
 </body>
 </html>
