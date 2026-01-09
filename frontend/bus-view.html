@@ -29,7 +29,7 @@
   .topbar .small{font-size:0.85rem;color:#ffd700;}
   
   main{max-width:1100px;margin:28px auto;padding:18px;width:94%;}
-  
+
   .card{
     background:#fff;
     border-radius:12px;
@@ -142,6 +142,7 @@
         <button class="btn" id="refreshBtn">🔄 Refresh</button>
         <button class="btn ghost" id="openNewBtn">🌐 Open in new tab</button>
         <button class="btn ghost" id="backBtn">⬅ Back</button>
+        <button class="btn" id="trackBusBtn">🚍 Track Bus</button>
         <button class="btn ghost" id="downloadBtn">💾 Download PDF</button>
       </div>
     </div>
@@ -175,12 +176,23 @@ const fallbackMsg = document.getElementById('fallbackMsg');
 const fallbackHint = document.getElementById('fallbackHint');
 const downloadBtn = document.getElementById('downloadBtn');
 const openDirectLink = document.getElementById('openDirectLink');
+const trackBusBtn = document.getElementById('trackBusBtn');
 
 document.getElementById('refreshBtn').addEventListener('click', checkAndLoad);
 document.getElementById('retryBtn').addEventListener('click', checkAndLoad);
 document.getElementById('openNewBtn').addEventListener('click', ()=>{ if(currentPdfUrl) window.open(currentPdfUrl,'_blank'); });
 document.getElementById('backBtn').addEventListener('click', ()=> window.history.back());
 openDirectLink.addEventListener('click', ()=>{ if(currentPdfUrl) window.open(currentPdfUrl,'_blank'); });
+
+// 🚍 Track Bus button click
+trackBusBtn.addEventListener('click', ()=>{
+  if(!currentPdfUrl){
+    alert("Cannot track bus: PDF not loaded yet");
+    return;
+  }
+  const busId = "BUS123"; // optionally dynamic if needed
+  window.open(`bus-track.html?busId=${busId}`,'_blank');
+});
 
 // ✅ Download PDF like Notes system
 downloadBtn.addEventListener('click', async ()=> {
@@ -226,9 +238,7 @@ downloadBtn.addEventListener('click', async ()=> {
     }
 });
 
-
-
-// Fetch & display
+// Fetch & display PDF (no auto-download)
 async function checkAndLoad(){
     statusText.textContent = 'Fetching Bus PDF…';
     pdfWrap.style.display='none';
@@ -245,6 +255,7 @@ async function checkAndLoad(){
             statusText.textContent = 'Bus PDF is available 🚌';
             openDirectLink.href = currentPdfUrl;
             downloadBtn.style.display='inline-block';
+            trackBusBtn.style.display='inline-block';
         }else{
             currentPdfUrl='';
             statusText.textContent='Bus PDF not available ❌';
@@ -253,6 +264,7 @@ async function checkAndLoad(){
             fallback.style.display='block';
             openDirectLink.href='#';
             downloadBtn.style.display='none';
+            trackBusBtn.style.display='none';
         }
     }catch(err){
         console.error(err);
@@ -263,10 +275,11 @@ async function checkAndLoad(){
         fallback.style.display='block';
         openDirectLink.href='#';
         downloadBtn.style.display='none';
+        trackBusBtn.style.display='none';
     }
 }
 
-// Auto-load
+// Auto-load PDF view (no auto-download)
 document.addEventListener('DOMContentLoaded', checkAndLoad);
 </script>
 
