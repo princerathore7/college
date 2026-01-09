@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Track Bus</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet (FREE MAP) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f1f5f9;
+      display: flex;
+      height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: #0f172a;
+      color: #fff;
+      padding: 15px;
+      overflow-y: auto;
+    }
+
+    .sidebar h2 {
+      font-size: 18px;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .bus-item {
+      padding: 10px 14px;
+      background: #1e293b;
+      margin-bottom: 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .bus-item:hover {
+      background: #334155;
+    }
+
+    .bus-item.active {
+      background: #2563eb;
+    }
+
+    /* Map */
+    #map {
+      flex: 1;
+    }
+
+    .info {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: rgba(0,0,0,0.75);
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 14px;
+      z-index: 1000;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>🚌 Active Buses</h2>
+    <div id="busList">Loading...</div>
+  </div>
+
+  <!-- Map -->
+  <div id="map"></div>
+  <div class="info" id="infoText"></div>
+
+  <script>
+    let selectedBusId = null;
+    let intervalId = null;
+
+    // Init map
+    const map = L.map("map").setView([23.2599, 77.4126], 13);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap"
+    }).addTo(map);
+
+    const busIcon = L.divIcon({
+      html: "🚌",
+      iconSize: [30, 30],
+      className: ""
+    });
+
+    let marker = L.marker([0, 0], { icon: busIcon }).addTo(map);
+
+    const infoText = document.getElementById("infoText");
+
+    function showInfo(text) {
+      infoText.textContent = text;
+      infoText.style.display = "block";
+      setTimeout(() => infoText.style.display = "none", 2000);
+    }
+
+    // Load all active buses
+    async function loadBuses() {
+      const list = document.getElementById("busList");
+
+      try {
+        const res = await fetch("/api/bus/list");
+        const buses = await res.json();
+
+        if (!buses.length) {
+          list.innerHTML = "No active buses";
+          return;
+        }
+
+        list.innerHTML = "";
+
+        buses.forEach(bus => {
+          const div = document.createElement("div");
+          div.className = "bus-item";
+          div.textContent = bus.busId;
+
+          div.onclick = () => selectBus(bus.busId, div);
+
+          list.appendChild(div);
+        });
+
+      } catch (err) {
+        list.innerHTML = "Failed to load buses";
+      }
+    }
+
+    // Select bus and start tracking
+    function selectBus(busId, element) {
+      selectedBusId = busId;
+
+      document.querySelectorAll(".bus-item").forEach(el =>
+        el.classList.remove("active")
+      );
+      element.classList.add("active");
+
+      if (intervalId) clearInterval(intervalId);
+
+      fetchLocation(); // instant fetch
+      intervalId = setInterval(fetchLocation, 3000);
+
+      showInfo("Tracking " + busId);
+    }
+
+    // Fetch bus live location
+    async function fetchLocation() {
+      if (!selectedBusId) return;
+
+      try {
+        const res = await fetch(`https://college-hwbb.onrender.com/api/bus/location/${selectedBusId}`);
+
+        if (!res.ok) {
+          showInfo("Location not available");
+          return;
+        }
+
+        const data = await res.json();
+
+        marker.setLatLng([data.lat, data.lng]);
+        map.setView([data.lat, data.lng], 15);
+
+      } catch (err) {
+        showInfo("Error fetching location");
+      }
+    }
+
+    loadBuses();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bus Driver Tracking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet (FREE MAP) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f1f5f9;
+    }
+
+    .top-bar {
+      background: #1e293b;
+      color: #fff;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .bus-id {
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .toggle-btn {
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: none;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .on {
+      background: #16a34a;
+      color: white;
+    }
+
+    .off {
+      background: #dc2626;
+      color: white;
+    }
+
+    #map {
+      height: calc(100vh - 50px);
+      width: 100%;
+    }
+
+    .status {
+      position: absolute;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      z-index: 1000;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="bus-id" id="busIdText">Bus ID: --</div>
+    <button id="toggleBtn" class="toggle-btn off" onclick="toggleTracking()">
+      Location OFF
+    </button>
+  </div>
+
+  <div id="map"></div>
+  <div class="status" id="statusText">Tracking Started</div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const busId = params.get("busId");
+
+    document.getElementById("busIdText").textContent = "Bus ID: " + busId;
+
+    let map = L.map('map').setView([23.2599, 77.4126], 15);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // Bus emoji icon
+    const busIcon = L.divIcon({
+      html: "🚌",
+      iconSize: [30, 30],
+      className: ""
+    });
+
+    let marker = L.marker([0, 0], { icon: busIcon }).addTo(map);
+
+    let watchId = null;
+    let trackingOn = false;
+
+    function showStatus(text) {
+      const status = document.getElementById("statusText");
+      status.textContent = text;
+      status.style.display = "block";
+      setTimeout(() => status.style.display = "none", 2000);
+    }
+
+    function toggleTracking() {
+      if (!trackingOn) {
+        startTracking();
+      } else {
+        stopTracking();
+      }
+    }
+
+    function startTracking() {
+      if (!navigator.geolocation) {
+        alert("Geolocation not supported");
+        return;
+      }
+
+      watchId = navigator.geolocation.watchPosition(
+        pos => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+
+          marker.setLatLng([lat, lng]);
+          map.setView([lat, lng]);
+
+          fetch("https://college-hwbb.onrender.com/api/bus/update-location", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              busId: busId,
+              lat: lat,
+              lng: lng
+            })
+          });
+        },
+        err => alert("Location permission required"),
+        {
+          enableHighAccuracy: true,
+          maximumAge: 0,
+          timeout: 5000
+        }
+      );
+
+      trackingOn = true;
+      document.getElementById("toggleBtn").className = "toggle-btn on";
+      document.getElementById("toggleBtn").textContent = "Location ON";
+      showStatus("📍 Location Tracking ON");
+    }
+
+    function stopTracking() {
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+      }
+
+      fetch(`/api/bus/stop-location/${busId}`, {
+        method: "POST"
+      });
+
+      trackingOn = false;
+      document.getElementById("toggleBtn").className = "toggle-btn off";
+      document.getElementById("toggleBtn").textContent = "Location OFF";
+      showStatus("⛔ Location Tracking OFF");
+    }
+  </script>
+
+</body>
+</html>
