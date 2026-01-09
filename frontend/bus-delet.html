@@ -70,6 +70,21 @@
   </div>
 
   <script>
+        const mentorIdVal = localStorage.getItem("mentorId");
+const source = sessionStorage.getItem("accessSource");
+const ALLOWED_SOURCES = ["ad", "admin"];
+
+if(!mentorIdVal || !ALLOWED_SOURCES.includes(source)){
+  document.body.innerHTML = `
+    <div class="denied-container">
+      <h1 style="color:#d32f2f; font-size: 3rem;">❌</h1>
+      <h2 style="color:#d32f2f">Access Denied</h2>
+      <p>Security protocol triggered. This incident will be reported.<br>Please login via the Official Administration Panel.</p>
+      <button onclick="location.href='/'" style="width:200px">Back to Login</button>
+    </div>
+  `;
+  throw new Error("Unauthorized access");
+}
    const BASE_URL = "https://college-hwbb.onrender.com";
 
 async function loadBuses() {
