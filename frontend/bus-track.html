@@ -91,7 +91,7 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 }).addTo(map);
 
 const busIcon = L.divIcon({ html: "🚌", iconSize: [30, 30], className: "" });
-let marker = L.marker([0,0], { icon: busIcon }).addTo(map);
+let marker = L.marker([0, 0], { icon: busIcon }).addTo(map);
 const infoText = document.getElementById("infoText");
 
 function showInfo(text) {
@@ -114,12 +114,10 @@ async function loadBuses() {
     }
 
     list.innerHTML = "";
-
     buses.forEach(bus => {
       const div = document.createElement("div");
       div.className = "bus-item";
       div.textContent = bus.busId;
-
       div.onclick = () => selectBus(bus.busId, div);
       list.appendChild(div);
     });
@@ -139,13 +137,13 @@ function selectBus(busId, element) {
 
   if (intervalId) clearInterval(intervalId);
 
-  fetchLocation(); // fetch instantly
+  fetchLocation(); // instant fetch
   intervalId = setInterval(fetchLocation, 3000);
 
   showInfo("Tracking " + busId);
 }
 
-// Fetch bus live location
+// Fetch bus live location with high accuracy
 async function fetchLocation() {
   if (!selectedBusId) return;
 
@@ -156,8 +154,10 @@ async function fetchLocation() {
       return;
     }
     const data = await res.json();
-    marker.setLatLng([data.lat, data.lng]);
-    map.setView([data.lat, data.lng], 15);
+    if (data.lat && data.lng) {
+      marker.setLatLng([data.lat, data.lng]);
+      map.setView([data.lat, data.lng], 15);
+    }
   } catch (err) {
     showInfo("Error fetching location");
     console.error(err);
