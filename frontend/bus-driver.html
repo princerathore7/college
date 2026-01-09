@@ -1,105 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Bus Driver Tracking</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bus Driver Tracking – Ridofy Map</title>
 
-  <!-- Leaflet (FREE MAP) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com"></script>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #f1f5f9;
-    }
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-    .top-bar {
-      background: #1e293b;
-      color: #fff;
-      padding: 12px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+<!-- Turf.js for geo calculations -->
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 
-    .bus-id {
-      font-size: 16px;
-      font-weight: bold;
-    }
+<style>
+html, body { height: 100%; margin: 0; padding: 0; }
+#map { position: absolute; inset: 0; z-index: 0; }
 
-    .toggle-btn {
-      padding: 8px 16px;
-      border-radius: 20px;
-      border: none;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.2s;
-    }
+header { z-index: 9999; }
+.leaflet-control { border-radius: 0.5rem; }
 
-    .on {
-      background: #16a34a;
-      color: white;
-    }
+.status {
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  z-index: 1000;
+  display: none;
+}
 
-    .off {
-      background: #dc2626;
-      color: white;
-    }
-
-    #map {
-      height: calc(100vh - 50px);
-      width: 100%;
-    }
-
-    .status {
-      position: absolute;
-      top: 60px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.7);
-      color: #fff;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 13px;
-      z-index: 1000;
-      display: none;
-    }
-  </style>
+.toggle-btn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.toggle-btn.on { background: #16a34a; color: #fff; }
+.toggle-btn.off { background: #dc2626; color: #fff; }
+</style>
 </head>
-<body>
+<body class="bg-slate-900">
 
-  <div class="top-bar">
-    <div class="bus-id" id="busIdText">Bus ID: --</div>
-    <button id="toggleBtn" class="toggle-btn off" onclick="toggleTracking()">
-      Location OFF
-    </button>
+<header class="absolute left-0 right-0 top-0 z-50 m-3 flex justify-between items-center gap-3 max-w-4xl w-full">
+  <div class="flex items-center gap-2 rounded-2xl bg-white/90 px-3 py-2 shadow">
+    <span class="text-lg font-semibold text-slate-900">🚌 Bus Tracker</span>
   </div>
+  <div>
+    <span id="busIdText" class="font-bold text-white mr-3">Bus ID: --</span>
+    <button id="toggleBtn" class="toggle-btn off" onclick="toggleTracking()">Location OFF</button>
+  </div>
+</header>
 
-  <div id="map"></div>
-  <div class="status" id="statusText">Tracking Started</div>
+<div id="map"></div>
+<div class="status" id="statusText">Tracking Started</div>
 
- <script>
+<script>
 const BASE_URL = "https://college-hwbb.onrender.com";
 const params = new URLSearchParams(window.location.search);
-const busId = params.get("busId");
+const busId = params.get("busId") || "unknown";
 
 document.getElementById("busIdText").textContent = "Bus ID: " + busId;
 
-let map = L.map('map').setView([23.2599, 77.4126], 15);
+// Init Leaflet map (Ridofy style)
+const map = L.map('map').setView([23.2599, 77.4126], 15);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '© OpenStreetMap'
 }).addTo(map);
 
+// Bus icon
 const busIcon = L.divIcon({ html: "🚌", iconSize: [30, 30], className: "" });
 let marker = L.marker([0, 0], { icon: busIcon }).addTo(map);
 
 let watchId = null;
 let trackingOn = false;
 
+// Status popup
 function showStatus(text) {
   const status = document.getElementById("statusText");
   status.textContent = text;
@@ -107,16 +90,15 @@ function showStatus(text) {
   setTimeout(() => status.style.display = "none", 2000);
 }
 
+// Toggle tracking button
 function toggleTracking() {
   if (!trackingOn) startTracking();
   else stopTracking();
 }
 
+// Start high accuracy GPS tracking
 function startTracking() {
-  if (!navigator.geolocation) {
-    alert("Geolocation not supported");
-    return;
-  }
+  if (!navigator.geolocation) { alert("Geolocation not supported"); return; }
 
   watchId = navigator.geolocation.watchPosition(
     async pos => {
@@ -125,22 +107,20 @@ function startTracking() {
 
       // Update map instantly
       marker.setLatLng([lat, lng]);
-      map.setView([lat, lng]);
+      map.setView([lat, lng], 16);
 
-      // Send high accuracy location to server
+      // Send location to server
       try {
         await fetch(`${BASE_URL}/api/bus/update-location`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ busId, lat, lng })
         });
-      } catch (err) {
+      } catch(err) {
         console.error("Failed to send location", err);
       }
     },
-    err => {
-      alert("Location permission required: " + err.message);
-    },
+    err => alert("Location permission required: " + err.message),
     {
       enableHighAccuracy: true, // HIGH ACCURACY
       maximumAge: 0,
@@ -154,6 +134,7 @@ function startTracking() {
   showStatus("📍 Location Tracking ON");
 }
 
+// Stop tracking
 function stopTracking() {
   if (watchId !== null) navigator.geolocation.clearWatch(watchId);
   watchId = null;
