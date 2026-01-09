@@ -29,7 +29,8 @@ from routes.fine_bp import fine_bp
 from routes.admin_students import admin_students_bp
 from routes.notifications import notifications_bp
 from routes.attendance_pdf_routes import attendance_pdf_bp
-from routes.forms import forms_bp  # app.py backend folder me hai
+from routes.forms import forms_bp 
+from routes.bus_track import bus_bp # app.py backend folder me hai
 # ---------------------------------------------
 # FLASK APP SETUP
 # ---------------------------------------------
