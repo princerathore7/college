@@ -71,20 +71,36 @@
 </head>
 <body>
 
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <h2>🚌 Active Buses</h2>
-    <div id="busList">Loading...</div>
-  </div>
+<div class="sidebar">
+  <h2>🚌 Active Buses</h2>
+  <div id="busList">Loading...</div>
+</div>
 
-  <!-- Map -->
-  <div id="map"></div>
-  <div class="info" id="infoText"></div>
+<div id="map"></div>
+<div class="info" id="infoText"></div>
 
-  <script>
-    const BASE_URL = "https://college-hwbb.onrender.com";
+<script>
+const BASE_URL = "https://college-hwbb.onrender.com";
+let selectedBusId = null;
+let intervalId = null;
 
-// Load all active buses
+// Init map
+const map = L.map("map").setView([23.2599, 77.4126], 13);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "© OpenStreetMap"
+}).addTo(map);
+
+const busIcon = L.divIcon({ html: "🚌", iconSize: [30, 30], className: "" });
+let marker = L.marker([0,0], { icon: busIcon }).addTo(map);
+const infoText = document.getElementById("infoText");
+
+function showInfo(text) {
+  infoText.textContent = text;
+  infoText.style.display = "block";
+  setTimeout(() => infoText.style.display = "none", 2000);
+}
+
+// Load active buses
 async function loadBuses() {
   const list = document.getElementById("busList");
 
@@ -105,7 +121,6 @@ async function loadBuses() {
       div.textContent = bus.busId;
 
       div.onclick = () => selectBus(bus.busId, div);
-
       list.appendChild(div);
     });
 
@@ -115,29 +130,42 @@ async function loadBuses() {
   }
 }
 
+// Select bus and start tracking
+function selectBus(busId, element) {
+  selectedBusId = busId;
+
+  document.querySelectorAll(".bus-item").forEach(el => el.classList.remove("active"));
+  element.classList.add("active");
+
+  if (intervalId) clearInterval(intervalId);
+
+  fetchLocation(); // fetch instantly
+  intervalId = setInterval(fetchLocation, 3000);
+
+  showInfo("Tracking " + busId);
+}
+
 // Fetch bus live location
 async function fetchLocation() {
   if (!selectedBusId) return;
 
   try {
     const res = await fetch(`${BASE_URL}/api/bus/location/${selectedBusId}`);
-
     if (!res.ok) {
       showInfo("Location not available");
       return;
     }
-
     const data = await res.json();
     marker.setLatLng([data.lat, data.lng]);
     map.setView([data.lat, data.lng], 15);
-
   } catch (err) {
     showInfo("Error fetching location");
     console.error(err);
   }
 }
 
-  </script>
+loadBuses();
+</script>
 
 </body>
 </html>
