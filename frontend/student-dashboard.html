@@ -70,7 +70,7 @@ header {
     border-radius: 8px;
     border: none;
     background: #fff;
-    color: #a10000;
+    color: #2b5d03;
     font-weight: 600;
     cursor: pointer;
     transition: 0.2s;
@@ -464,33 +464,48 @@ input:checked + .slider:before {
     height: 40px;
   }
 }
-/* ===== STUDENT DASHBOARD FINE CARD ===== */
+/* ===== FINE TABLE (MATCHES ASSIGNMENTS SECTION) ===== */
 
-.fine-card {
-    background: linear-gradient(135deg, #003366, #0057ad);
-    color: white;
-    padding: 18px;
-    border-radius: 12px;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-    max-width: 320px;
+.fine-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-family: 'Poppins', sans-serif;
 }
 
-.fine-card h4 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 500;
-    opacity: 0.9;
-}
-
-.fine-amount {
-    margin: 10px 0 5px;
-    font-size: 30px;
-    font-weight: 700;
-}
-
-.fine-subtext {
+.fine-table th {
+    text-align: left;
     font-size: 13px;
-    opacity: 0.85;
+    font-weight: 600;
+    color: #555;
+    padding: 10px 8px;
+    border-bottom: 2px solid #e6e6e6;
+}
+
+.fine-table td {
+    padding: 10px 8px;
+    font-size: 14px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+}
+
+.fine-table tr:hover {
+    background: #f7f9fc;
+}
+
+/* Fine amount highlight */
+.fine-amount {
+    font-weight: 700;
+    color: #d32f2f;
+}
+
+/* Paid / Pending badge (already matching) */
+.badge.pending {
+    background: #ff9800;
+}
+
+.badge.paid {
+    background: #28a745;
 }
 
 </style>
@@ -519,12 +534,7 @@ input:checked + .slider:before {
       🔔 Notifications <span id="notifCount" class="notif-count">0</span>
     </button>
 </header>
-<!-- STUDENT TOTAL FINE CARD -->
-<div class="fine-card" id="fineCard">
-    <h4>Total Pending Fine</h4>
-    <p class="fine-amount">₹ <span id="totalFine">0</span></p>
-    <p class="fine-subtext">All institute fines combined</p>
-</div>
+
 
 <!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
@@ -612,7 +622,12 @@ input:checked + .slider:before {
   </svg>
   Refresh
 </button>
-
+<!-- STUDENT TOTAL FINE CARD -->
+<div class="fine-card" id="fineCard">
+    <h4>Total Pending Fine</h4>
+    <p class="fine-amount">₹ <span id="totalFine">0</span></p>
+    <p class="fine-subtext">All institute fines combined</p>
+</div>
       <div class="section" id="attendanceSection">
         
         <h2 class="section-title">Attendance</h2>
