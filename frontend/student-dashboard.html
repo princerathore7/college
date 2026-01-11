@@ -1046,7 +1046,7 @@ if ("serviceWorker" in navigator) {
    LOAD TOTAL FINE ON DASHBOARD
 =========================== */
 async function loadDashboardFine() {
-    const enrollment = localStorage.getItem("studentEnrollment");
+    const enrollment = localStorage.getItem("enrollment");
 
     if (!enrollment) {
         console.warn("Enrollment not found in localStorage");
