@@ -464,6 +464,35 @@ input:checked + .slider:before {
     height: 40px;
   }
 }
+/* ===== STUDENT DASHBOARD FINE CARD ===== */
+
+.fine-card {
+    background: linear-gradient(135deg, #003366, #0057ad);
+    color: white;
+    padding: 18px;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    max-width: 320px;
+}
+
+.fine-card h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+.fine-amount {
+    margin: 10px 0 5px;
+    font-size: 30px;
+    font-weight: 700;
+}
+
+.fine-subtext {
+    font-size: 13px;
+    opacity: 0.85;
+}
+
 </style>
 </head>
 <body>
@@ -490,6 +519,12 @@ input:checked + .slider:before {
       🔔 Notifications <span id="notifCount" class="notif-count">0</span>
     </button>
 </header>
+<!-- STUDENT TOTAL FINE CARD -->
+<div class="fine-card" id="fineCard">
+    <h4>Total Pending Fine</h4>
+    <p class="fine-amount">₹ <span id="totalFine">0</span></p>
+    <p class="fine-subtext">All institute fines combined</p>
+</div>
 
 <!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
@@ -1007,6 +1042,39 @@ if ("serviceWorker" in navigator) {
       });
   });
 }
+/* ===========================
+   LOAD TOTAL FINE ON DASHBOARD
+=========================== */
+async function loadDashboardFine() {
+    const enrollment = localStorage.getItem("studentEnrollment");
+
+    if (!enrollment) {
+        console.warn("Enrollment not found in localStorage");
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API_URL}/api/fines/${enrollment}`);
+        const fines = await res.json();
+
+        let total = 0;
+
+        if (Array.isArray(fines)) {
+            fines.forEach(f => {
+                if (!f.status || f.status.toLowerCase() !== "paid") {
+                    total += Number(f.fine);
+                }
+            });
+        }
+
+        document.getElementById("totalFine").innerText = total;
+
+    } catch (err) {
+        console.error("Error loading fine:", err);
+    }
+}
+/* AUTO LOAD ON DASHBOARD OPEN */
+document.addEventListener("DOMContentLoaded", loadDashboardFine);
 function logout() {
   // 🔴 Clear all student related data
   localStorage.removeItem("enrollment");
