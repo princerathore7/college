@@ -931,7 +931,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderExams(getLS("studentExams"));
   renderEvents(getLS("studentEvents"));
   renderUnreadNotices(getLS("studentNotices") || [], enrollment);
-
+  loadDashboardFine(); 
   // Refresh button event
   const btn = document.getElementById("refreshDashboard");
   if (btn) btn.addEventListener("click", refreshDashboard);
@@ -1054,7 +1054,7 @@ async function loadDashboardFine() {
     }
 
     try {
-        const res = await fetch(`${API_URL}/api/fines/${enrollment}`);
+        const res = await fetch(`${API_ROOT}/api/fines/${enrollment}`);
         const fines = await res.json();
 
         let total = 0;
@@ -1073,8 +1073,7 @@ async function loadDashboardFine() {
         console.error("Error loading fine:", err);
     }
 }
-/* AUTO LOAD ON DASHBOARD OPEN */
-document.addEventListener("DOMContentLoaded", loadDashboardFine);
+
 function logout() {
   // 🔴 Clear all student related data
   localStorage.removeItem("enrollment");
