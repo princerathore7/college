@@ -12,22 +12,22 @@
             font-family: "Poppins", sans-serif;
             background: #f4f6f9;
         }
+.topbar {
+    background: #6ca3d9;
+    color: white;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
 
-        .topbar {
-            background: #003366;
-            color: white;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .topbar img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-        }
+.topbar img {
+    width: 40px;        /* max width control */
+    height: auto;       /* ✅ aspect ratio safe */
+    border-radius: 0;   /* no circular border */
+    object-fit: contain;
+}
 
         .container {
             max-width: 700px;
@@ -117,15 +117,41 @@
         .hidden {
             display: none;
         }
+        .back-btn {
+  background: #003366;          /* Navy Blue */
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: 0.2s ease;
+}
+
+.back-btn:hover {
+  background: #002244;
+}
+
+.back-btn:active {
+  transform: scale(0.96);
+}
+
     </style>
 </head>
 <body>
 
 <!-- TOP BAR -->
 <div class="topbar">
-    <img src="logo.jpg" alt="Acropolis Logo">
+    <img src="logop.png" alt="Acropolis Logo">
     <h2>Acropolis Institute Indore — Fine Status</h2>
 </div>
+<button class="back-btn" onclick="goBack()">
+  ← Back
+</button>
 
 <div class="container">
 
@@ -219,6 +245,8 @@ function goToPayment() {
 
     window.location.href =
         `payment.html?enrollment=${encodeURIComponent(enr)}&amount=${amt}`;
+}function goBack() {
+  window.history.back(); 
 }
 </script>
 

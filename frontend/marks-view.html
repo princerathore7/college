@@ -15,6 +15,29 @@
   th,td{padding:10px;border-bottom:1px solid #e6eef7;text-align:left}
   .badge{padding:6px 10px;border-radius:8px;color:#fff;font-weight:700}
   .badge.good{background:#16a34a}
+  .back-btn {
+  background: #003366;          /* Navy Blue */
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: 0.2s ease;
+}
+
+.back-btn:hover {
+  background: #002244;
+}
+
+.back-btn:active {
+  transform: scale(0.96);
+}
+
 </style>
 </head>
 <body>
@@ -37,6 +60,10 @@
       </table>
     </div>
   </div>
+<button class="back-btn" onclick="goBack()">
+  ← Back
+</button>
+
 
 <script>
 function useStored(){
@@ -67,6 +94,9 @@ async function loadMarks(){
     console.error(err);
     alert('Error loading marks');
   }
+}
+function goBack() {
+  window.history.back(); 
 }
 </script>
 </body>

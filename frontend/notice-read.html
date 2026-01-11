@@ -8,6 +8,29 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
+    .back-btn {
+  background: #003366;          /* Navy Blue */
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: 0.2s ease;
+}
+
+.back-btn:hover {
+  background: #002244;
+}
+
+.back-btn:active {
+  transform: scale(0.96);
+}
+
     :root {
         --primary: #2563eb;
         --bg: #f8fafc;
@@ -185,7 +208,10 @@
     <div class="header-section">
         <h1>📢 Notices</h1>
         <p id="classDisplay" style="color: var(--text-sub); margin-top: -10px;"></p>
-        
+        <button class="back-btn" onclick="goBack()">
+  ← Back
+</button>
+
         <input type="text" id="searchInput" class="search-box" placeholder="Search notices by title or content..." onkeyup="filterNotices()">
         
         <button class="btn-toggle" onclick="toggleView()" id="viewBtn">View Class Only</button>
@@ -274,7 +300,9 @@ function renderNotices() {
 function filterNotices() {
     renderNotices();
 }
-
+function goBack() {
+  window.history.back(); 
+}
 function toggleView() {
     viewAll = !viewAll;
     document.getElementById("viewBtn").textContent = viewAll ? "View My Class Only" : "View All Notices";

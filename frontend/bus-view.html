@@ -6,123 +6,180 @@
 <title>🚌 View Bus Routes — Acropolis</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --primary:#e6c700;
-    --accent:#b37400;
-    --muted:#555;
-    --bus-yellow:#ffeb3b;
-    --bus-maroon:#800000;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Poppins',sans-serif;background:#f4f6f8;color:#222;min-height:100vh;display:flex;flex-direction:column;}
-  
-  .topbar{
-    background: linear-gradient(135deg,var(--bus-maroon),var(--accent));
-    color:#fff;
-    padding:14px 18px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    box-shadow:0 2px 8px rgba(0,0,0,0.15);
-  }
-  .topbar h1{font-size:1.1rem;font-weight:600}
-  .topbar .small{font-size:0.85rem;color:#ffd700;}
-  
-  main{max-width:1100px;margin:28px auto;padding:18px;width:94%;}
+:root{
+  --primary:#003366;
+  --accent:#0b4da2;
+  --highlight:#ffcc00;
+  --text:#222;
+  --muted:#666;
+  --bg:#f4f6f8;
+  --card:#ffffff;
+}
 
-  .card{
-    background:#fff;
-    border-radius:12px;
-    box-shadow:0 8px 26px rgba(10,20,30,0.08);
-    display:flex;
-    flex-direction:column;
-    overflow:hidden;
-    border-top:4px solid var(--bus-yellow);
-  }
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body{
+  font-family:'Poppins',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+}
+
+/* ===== TOPBAR ===== */
+.topbar{
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  color:#fff;
+  padding:14px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  box-shadow:0 2px 12px rgba(0,0,0,0.15);
+}
+
+.topbar h1{
+  font-size:1.15rem;
+  font-weight:600;
+}
+
+.topbar .small{
+  font-size:0.85rem;
+  opacity:0.9;
+}
+
+/* ===== MAIN ===== */
+main{
+  max-width:1100px;
+  margin:28px auto;
+  padding:16px;
+  width:94%;
+}
+
+/* ===== CARD ===== */
+.card{
+  background:var(--card);
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.08);
+  overflow:hidden;
+  border-top:4px solid var(--highlight);
+}
+
+.card-head{
+  padding:18px 20px;
+  border-bottom:1px solid #eee;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  flex-wrap:wrap;
+}
+
+.card-head .title{
+  font-size:1.1rem;
+  font-weight:700;
+  color:var(--primary);
+}
+
+.status{
+  font-size:0.9rem;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+/* ===== BUTTONS ===== */
+.controls{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.btn{
+  background:var(--primary);
+  color:#fff;
+  padding:9px 16px;
+  border-radius:8px;
+  border:none;
+  cursor:pointer;
+  font-size:0.9rem;
+  font-weight:600;
+  transition:0.2s ease;
+}
+
+.btn:hover{
+  background:var(--accent);
+  transform:translateY(-1px);
+}
+
+.btn.ghost{
+  background:#fff;
+  color:var(--primary);
+  border:1px solid var(--primary);
+}
+
+.btn.ghost:hover{
+  background:#f0f4ff;
+}
+
+/* ===== VIEWER ===== */
+.viewer{
+  height:75vh;
+  margin:16px;
+  border-radius:10px;
+  overflow:hidden;
+  background:#fff;
+  box-shadow:0 6px 18px rgba(0,0,0,0.06);
+}
+
+.pdf-wrap{
+  width:100%;
+  height:100%;
+}
+
+iframe{
+  width:100%;
+  height:100%;
+  border:none;
+}
+
+/* ===== FALLBACK ===== */
+.fallback{
+  padding:40px 20px;
+  text-align:center;
+}
+
+.msg{
+  color:var(--primary);
+  font-weight:700;
+  font-size:1.1rem;
+  margin-bottom:10px;
+}
+
+.hint{
+  color:var(--muted);
+  font-size:0.9rem;
+}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:720px){
   .card-head{
-    padding:18px;
-    border-bottom:1px solid #f0f0f0;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-    flex-wrap:wrap;
-  }
-  .card-head .title{
-    font-weight:700;
-    color:var(--bus-maroon);
-    font-size:1.05rem;
-  }
-  .status{
-    font-size:0.95rem;
-    color:var(--muted);
-    margin-top:4px;
-  }
-  .controls{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-  }
-  .btn{
-    background:var(--bus-yellow);
-    color:var(--bus-maroon);
-    padding:10px 16px;
-    border-radius:8px;
-    border:none;
-    cursor:pointer;
-    font-weight:600;
-    transition:0.2s;
-    position:relative;
-  }
-  .btn:hover{transform:scale(1.05);}
-  .btn.ghost{
-    background:transparent;
-    color:var(--bus-yellow);
-    border:1px solid var(--bus-yellow);
-  }
-  
-  .viewer{
-    height:76vh;
-    display:flex;
     flex-direction:column;
-    margin-top:12px;
-    border-radius:8px;
-    overflow:hidden;
-    position:relative;
-    animation: busBounce 1s infinite alternate;
+    align-items:flex-start;
   }
-  @keyframes busBounce{
-    0%{transform:translateY(0);}
-    100%{transform:translateY(2px);}
-  }
-  .pdf-wrap{
-    flex:1;
-    background:#fff;
-    border-radius:8px;
-    overflow:hidden;
-    box-shadow:0 4px 12px rgba(0,0,0,0.05);
-  }
-  iframe{
+
+  .controls{
     width:100%;
-    height:100%;
-    border:0;
-    display:block;
   }
-  .fallback{
-    padding:32px;
-    text-align:center;
-    background:#fff;
-    border-radius:8px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.05);
+
+  .viewer{
+    height:65vh;
+    margin:12px;
   }
-  .msg{color:var(--bus-yellow);font-weight:700;margin-bottom:12px;font-size:1.05rem;}
-  .hint{color:var(--muted);margin-bottom:18px;}
-  @media(max-width:720px){
-    .card-head{flex-direction:column;align-items:flex-start;gap:8px;}
-    .controls{width:100%;justify-content:flex-start;}
-    .viewer{height:66vh;}
-  }
+}
 </style>
+
 </head>
 <body>
 
