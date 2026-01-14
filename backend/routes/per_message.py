@@ -1,33 +1,26 @@
-from flask import Blueprint, request, jsonify, send_from_directory
-from flask_cors import cross_origin
+from flask import Blueprint, request, jsonify
 from werkzeug.utils import secure_filename
 from datetime import datetime
-from bson import ObjectId
 import os
-from db import db   # ✅ same db import jaise bus route me
+from db import db   # use same db as bus route
+from flask_cors import cross_origin
 
-per_message_bp = Blueprint(
-    "per_message",
+admin0_message_bp = Blueprint(
+    "admin0_message_bp",
     __name__,
-    url_prefix="/api"   # ✅ VERY IMPORTANT (production consistency)
+    url_prefix="/api/admin0"
 )
 
-# =========================
-# CONFIG
-# =========================
-UPLOAD_FOLDER = "uploads/messages"
+# ----------------- CONFIG -----------------
+UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploads/messages")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 messages_col = db.personal_messages
 
-# =========================
-# ADMIN: SEND PERSONAL MESSAGE
-# =========================
-@per_message_bp.route("/admin/personal-message/send", methods=["POST", "OPTIONS"])
-
+# ----------------- SEND PERSONAL MESSAGE -----------------
+@admin0_message_bp.route("/personal-message/send", methods=["POST", "OPTIONS"])
+@cross_origin()
 def send_personal_message():
-
-    # ✅ CORS preflight support
     if request.method == "OPTIONS":
         return jsonify({}), 200
 
@@ -37,10 +30,7 @@ def send_personal_message():
         enrollments = request.form.get("enrollments")
 
         if not title or not description or not enrollments:
-            return jsonify({
-                "success": False,
-                "message": "Required fields missing"
-            }), 400
+            return jsonify({"success": False, "message": "Required fields missing"}), 400
 
         enrollment_list = [e.strip() for e in enrollments.split(",") if e.strip()]
 
@@ -51,12 +41,9 @@ def send_personal_message():
             if file and file.filename:
                 filename = secure_filename(file.filename)
                 filepath = os.path.join(UPLOAD_FOLDER, filename)
+                # ✅ save file safely
                 file.save(filepath)
-
-                attachments.append({
-                    "filename": filename,
-                    "path": filepath
-                })
+                attachments.append({"filename": filename, "path": filepath})
 
         read_status = {enr: False for enr in enrollment_list}
 
@@ -65,21 +52,17 @@ def send_personal_message():
             "description": description,
             "enrollments": enrollment_list,
             "attachments": attachments,
-            "created_by": "admin",
+            "created_by": "admin0",
             "created_at": datetime.utcnow(),
             "is_read": read_status
         })
 
-        return jsonify({
-            "success": True,
-            "message": "Personal message sent successfully"
-        }), 201
+        return jsonify({"success": True, "message": "Personal message sent successfully"}), 201
 
     except Exception as e:
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
+        import traceback
+        print(traceback.format_exc())  # 🔥 print exact error
+        return jsonify({"success": False, "message": str(e)}), 500
 
 # =========================
 # STUDENT: FETCH MY MESSAGES

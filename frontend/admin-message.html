@@ -2,136 +2,28 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Admin | Personal Messaging</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<title>Admin0: Send Personal Message</title>
 <style>
-:root{
-  --primary:#0b1f3a;
-  --light:#f4f7fb;
-  --border:#dbe2ef;
-}
-
-*{
-  box-sizing:border-box;
-  font-family:Arial, Helvetica, sans-serif;
-}
-
-body{
-  background:var(--light);
-  padding:20px;
-}
-
-.container{
-  max-width:700px;
-  margin:auto;
-  background:#fff;
-  padding:20px;
-  border-radius:10px;
-  box-shadow:0 8px 20px rgba(0,0,0,.08);
-}
-
-h2{
-  margin-bottom:15px;
-  color:var(--primary);
-}
-
-label{
-  font-weight:600;
-  display:block;
-  margin-top:15px;
-}
-
-input, textarea{
-  width:100%;
-  padding:10px;
-  margin-top:6px;
-  border:1px solid var(--border);
-  border-radius:6px;
-  font-size:14px;
-}
-
-textarea{
-  min-height:120px;
-  resize:vertical;
-}
-
-.file-row{
-  display:flex;
-  gap:10px;
-  margin-top:8px;
-}
-
-.file-row input{
-  flex:1;
-}
-
-.file-row button{
-  background:#e74c3c;
-  color:#fff;
-  border:none;
-  border-radius:6px;
-  padding:8px 12px;
-  cursor:pointer;
-}
-
-.add-file{
-  margin-top:10px;
-  background:#27ae60;
-  color:#fff;
-  border:none;
-  padding:8px 14px;
-  border-radius:6px;
-  cursor:pointer;
-}
-
-button.submit{
-  margin-top:20px;
-  width:100%;
-  background:var(--primary);
-  color:#fff;
-  border:none;
-  padding:12px;
-  font-size:16px;
-  border-radius:8px;
-  cursor:pointer;
-}
-
-.msg{
-  margin-top:15px;
-  padding:10px;
-  border-radius:6px;
-  display:none;
-}
-
-.msg.success{
-  background:#eafaf1;
-  color:#1e8449;
-}
-
-.msg.error{
-  background:#fdecea;
-  color:#c0392b;
-}
+.container { max-width: 600px; margin: 50px auto; font-family: sans-serif; }
+.file-row { display: flex; align-items: center; gap: 10px; margin-top: 5px; }
+.msg { display: none; padding: 10px; margin-top: 10px; border-radius: 5px; }
+.msg.success { background: #d4edda; color: #155724; }
+.msg.error { background: #f8d7da; color: #721c24; }
 </style>
 </head>
-
 <body>
 
 <div class="container">
   <h2>📩 Send Personal Message</h2>
 
   <form id="messageForm">
-
     <label>Message Title</label>
     <input type="text" name="title" required>
 
     <label>Description</label>
     <textarea name="description" required></textarea>
 
-    <label>Enrollment Numbers  
-      <small>(comma separated)</small>
-    </label>
+    <label>Enrollment Numbers <small>(comma separated)</small></label>
     <input type="text" name="enrollments" placeholder="ENR001, ENR002" required>
 
     <label>Attachments</label>
@@ -142,12 +34,10 @@ button.submit{
       </div>
     </div>
 
-    <button type="button" class="add-file" onclick="addFile()">➕ Add More File</button>
-
-    <button type="submit" class="submit">🚀 Send Message</button>
+    <button type="button" onclick="addFile()">➕ Add More File</button>
+    <button type="submit">🚀 Send Message</button>
 
     <div id="responseMsg" class="msg"></div>
-
   </form>
 </div>
 
@@ -155,60 +45,43 @@ button.submit{
 const form = document.getElementById("messageForm");
 const msgBox = document.getElementById("responseMsg");
 
-function addFile(){
+function addFile() {
   const div = document.createElement("div");
   div.className = "file-row";
-  div.innerHTML = `
-    <input type="file" name="attachments">
-    <button type="button" onclick="removeFile(this)">X</button>
-  `;
+  div.innerHTML = `<input type="file" name="attachments"><button type="button" onclick="removeFile(this)">X</button>`;
   document.getElementById("fileContainer").appendChild(div);
 }
 
-function removeFile(btn){
+function removeFile(btn) {
   btn.parentElement.remove();
 }
 
-form.addEventListener("submit", async function(e){
+form.addEventListener("submit", async e => {
   e.preventDefault();
-
   msgBox.style.display = "none";
 
   const formData = new FormData(form);
 
-  try{
-    const res = await fetch("/api/admin/personal-message/send", {
-      method: "POST",
-      body: formData
-    });
+  try {
+    const res = await fetch("/api/admin0/personal-message/send", { method: "POST", body: formData });
+    const text = await res.text();
+    console.log(text);
 
-   const text = await res.text();
-console.log(text);
+    let data;
+    try { data = JSON.parse(text); } 
+    catch { throw new Error("Server returned HTML instead of JSON"); }
 
-let data;
-try {
-  data = JSON.parse(text);
-} catch {
-  throw new Error("Server returned HTML instead of JSON");
-}
-
-
-    if(res.ok){
+    if(res.ok) {
       msgBox.className = "msg success";
       msgBox.innerText = data.message || "Message sent successfully";
       msgBox.style.display = "block";
       form.reset();
       document.getElementById("fileContainer").innerHTML = `
-        <div class="file-row">
-          <input type="file" name="attachments">
-          <button type="button" onclick="removeFile(this)">X</button>
-        </div>
-      `;
-    }else{
-      throw new Error(data.error || "Something went wrong");
+        <div class="file-row"><input type="file" name="attachments"><button type="button" onclick="removeFile(this)">X</button></div>`;
+    } else {
+      throw new Error(data.message || "Something went wrong");
     }
-
-  }catch(err){
+  } catch(err) {
     msgBox.className = "msg error";
     msgBox.innerText = err.message;
     msgBox.style.display = "block";
