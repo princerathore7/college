@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My Inbox</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  font-family:Arial, sans-serif;
+  background:#f4f7fb;
+  padding:20px;
+}
+
+h2{
+  color:#0b1f3a;
+}
+
+.message-card{
+  background:#fff;
+  padding:12px;
+  border-radius:8px;
+  margin-bottom:10px;
+  cursor:pointer;
+  box-shadow:0 4px 10px rgba(0,0,0,.06);
+  display:flex;
+  justify-content:space-between;
+}
+
+.message-card.unread{
+  border-left:4px solid #e74c3c;
+  font-weight:bold;
+}
+
+.date{
+  font-size:12px;
+  color:#777;
+}
+
+/* POPUP */
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  align-items:center;
+  justify-content:center;
+}
+
+.modal-content{
+  background:#fff;
+  width:90%;
+  max-width:600px;
+  padding:20px;
+  border-radius:10px;
+}
+
+.modal h3{
+  margin-top:0;
+}
+
+.attachments a{
+  display:block;
+  margin-top:5px;
+  color:#0b1f3a;
+}
+
+.close{
+  float:right;
+  cursor:pointer;
+  font-size:18px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>📥 My Personal Messages</h2>
+<div id="messageList"></div>
+
+<!-- POPUP MODAL -->
+<div class="modal" id="messageModal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">✖</span>
+    <h3 id="mTitle"></h3>
+    <p id="mDesc"></p>
+    <div class="attachments" id="mFiles"></div>
+  </div>
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const enrollment = params.get("enr");
+
+const listDiv = document.getElementById("messageList");
+
+async function loadMessages(){
+  const res = await fetch(`/student/personal-messages/${enrollment}`);
+  const messages = await res.json();
+
+  if(messages.length === 0){
+    listDiv.innerHTML = "<p>No personal messages.</p>";
+    return;
+  }
+
+  messages.forEach(msg => {
+    const div = document.createElement("div");
+    div.className = "message-card " + (msg.is_read ? "" : "unread");
+    div.innerHTML = `
+      <span>${msg.title}</span>
+      <span class="date">${new Date(msg.created_at).toLocaleDateString()}</span>
+    `;
+    div.onclick = () => openMessage(msg);
+    listDiv.appendChild(div);
+  });
+}
+
+async function openMessage(msg){
+  document.getElementById("mTitle").innerText = msg.title;
+  document.getElementById("mDesc").innerText = msg.description;
+
+  const fileDiv = document.getElementById("mFiles");
+  fileDiv.innerHTML = "";
+
+  msg.attachments.forEach(f => {
+    const a = document.createElement("a");
+    a.href = `/personal-message/attachment/${f.filename}`;
+    a.innerText = "📎 " + f.filename;
+    a.target = "_blank";
+    fileDiv.appendChild(a);
+  });
+
+  document.getElementById("messageModal").style.display = "flex";
+
+  // MARK AS READ
+  await fetch(`/student/personal-message/read/${msg.id}`,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ enrollment })
+  });
+}
+
+function closeModal(){
+  document.getElementById("messageModal").style.display = "none";
+  listDiv.innerHTML = "";
+  loadMessages(); // refresh to remove unread mark
+}
+
+loadMessages();
+</script>
+
+</body>
+</html>

@@ -534,6 +534,8 @@ input:checked + .slider:before {
       🔔 Notifications <span id="notifCount" class="notif-count">0</span>
     </button>
 </header>
+<!-- Student Dashboard -->
+<button onclick="openInbox()">📩 Personal Messages</button>
 
 
 <!-- SIDEBAR -->
@@ -1123,7 +1125,11 @@ document.getElementById("openNotifications").addEventListener("click", () => {
     alert("Student info missing. Please login again.");
     return;
   }
-
+function openInbox(){
+  const enrollment = localStorage.getItem("enrollment"); 
+  // ya tumhare system se jo enrollment aa raha ho
+  window.location.href = `inbox.html?enr=${enrollment}`;
+}
   // extra safety ke liye dobara store kar rahe hain
   localStorage.setItem("enrollment", enrollment);
   localStorage.setItem("studentClass", studentClass);
