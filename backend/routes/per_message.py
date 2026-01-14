@@ -1,0 +1,129 @@
+from flask import Blueprint, request, jsonify, send_from_directory
+from werkzeug.utils import secure_filename
+from pymongo import MongoClient
+from bson import ObjectId
+from datetime import datetime
+import os
+
+per_message_bp = Blueprint("per_message", __name__)
+
+# =========================
+# CONFIG
+# =========================
+UPLOAD_FOLDER = "uploads/messages"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+client = MongoClient("mongodb://localhost:27017/")
+db = client["college_db"]
+messages_col = db["personal_messages"]
+
+# =========================
+# ADMIN: SEND PERSONAL MESSAGE
+# =========================
+@per_message_bp.route("/admin/personal-message/send", methods=["POST"])
+def send_personal_message():
+    try:
+        title = request.form.get("title")
+        description = request.form.get("description")
+        enrollments = request.form.get("enrollments")  # comma separated
+
+        if not title or not description or not enrollments:
+            return jsonify({"error": "Required fields missing"}), 400
+
+        enrollment_list = [e.strip() for e in enrollments.split(",") if e.strip()]
+
+        attachments = []
+        files = request.files.getlist("attachments")
+
+        for file in files:
+            if file.filename:
+                filename = secure_filename(file.filename)
+                filepath = os.path.join(UPLOAD_FOLDER, filename)
+                file.save(filepath)
+
+                attachments.append({
+                    "filename": filename,
+                    "path": filepath
+                })
+
+        read_status = {enr: False for enr in enrollment_list}
+
+        message_doc = {
+            "title": title,
+            "description": description,
+            "enrollments": enrollment_list,
+            "attachments": attachments,
+            "created_by": "admin",
+            "created_at": datetime.utcnow(),
+            "is_read": read_status
+        }
+
+        messages_col.insert_one(message_doc)
+
+        return jsonify({"message": "Personal message sent successfully"})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+  
+# =========================
+# STUDENT: FETCH MY MESSAGES
+# =========================
+@per_message_bp.route("/student/personal-messages/<enrollment>", methods=["GET"])
+def get_student_messages(enrollment):
+    messages = messages_col.find({"enrollments": enrollment}).sort("created_at", -1)
+
+    result = []
+    for msg in messages:
+        result.append({
+            "id": str(msg["_id"]),
+            "title": msg["title"],
+            "description": msg["description"],
+            "attachments": msg.get("attachments", []),
+            "created_at": msg["created_at"],
+            "is_read": msg["is_read"].get(enrollment, False)
+        })
+
+    return jsonify(result)
+
+# =========================
+# STUDENT: MARK AS READ
+# =========================
+@per_message_bp.route("/student/personal-message/read/<message_id>", methods=["POST"])
+def mark_message_read(message_id):
+    enrollment = request.json.get("enrollment")
+
+    if not enrollment:
+        return jsonify({"error": "Enrollment required"}), 400
+
+    messages_col.update_one(
+        {"_id": ObjectId(message_id)},
+        {"$set": {f"is_read.{enrollment}": True}}
+    )
+
+    return jsonify({"message": "Marked as read"})
+
+# =========================
+# DOWNLOAD ATTACHMENT
+# =========================
+@per_message_bp.route("/personal-message/attachment/<filename>")
+def download_attachment(filename):
+    return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=True)
+
+# =========================
+# ADMIN: GET ALL SENT MESSAGES
+# =========================
+@per_message_bp.route("/admin/personal-messages", methods=["GET"])
+def admin_all_messages():
+    messages = messages_col.find().sort("created_at", -1)
+
+    result = []
+    for msg in messages:
+        result.append({
+            "id": str(msg["_id"]),
+            "title": msg["title"],
+            "enrollments": msg["enrollments"],
+            "attachments_count": len(msg.get("attachments", [])),
+            "created_at": msg["created_at"]
+        })
+
+    return jsonify(result)
