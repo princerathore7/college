@@ -24,7 +24,7 @@ messages_col = db.personal_messages
 # ADMIN: SEND PERSONAL MESSAGE
 # =========================
 @per_message_bp.route("/admin/personal-message/send", methods=["POST", "OPTIONS"])
-@cross_origin()
+
 def send_personal_message():
 
     # ✅ CORS preflight support
