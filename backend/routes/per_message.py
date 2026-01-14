@@ -1,11 +1,16 @@
 from flask import Blueprint, request, jsonify, send_from_directory
+from flask_cors import cross_origin
 from werkzeug.utils import secure_filename
-from pymongo import MongoClient
-from bson import ObjectId
 from datetime import datetime
+from bson import ObjectId
 import os
+from db import db   # ✅ same db import jaise bus route me
 
-per_message_bp = Blueprint("per_message", __name__)
+per_message_bp = Blueprint(
+    "per_message",
+    __name__,
+    url_prefix="/api"   # ✅ VERY IMPORTANT (production consistency)
+)
 
 # =========================
 # CONFIG
@@ -13,22 +18,29 @@ per_message_bp = Blueprint("per_message", __name__)
 UPLOAD_FOLDER = "uploads/messages"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-client = MongoClient("mongodb://localhost:27017/")
-db = client["college_db"]
-messages_col = db["personal_messages"]
+messages_col = db.personal_messages
 
 # =========================
 # ADMIN: SEND PERSONAL MESSAGE
 # =========================
-@per_message_bp.route("/admin/personal-message/send", methods=["POST"])
+@per_message_bp.route("/admin/personal-message/send", methods=["POST", "OPTIONS"])
+@cross_origin()
 def send_personal_message():
+
+    # ✅ CORS preflight support
+    if request.method == "OPTIONS":
+        return jsonify({}), 200
+
     try:
         title = request.form.get("title")
         description = request.form.get("description")
-        enrollments = request.form.get("enrollments")  # comma separated
+        enrollments = request.form.get("enrollments")
 
         if not title or not description or not enrollments:
-            return jsonify({"error": "Required fields missing"}), 400
+            return jsonify({
+                "success": False,
+                "message": "Required fields missing"
+            }), 400
 
         enrollment_list = [e.strip() for e in enrollments.split(",") if e.strip()]
 
@@ -36,7 +48,7 @@ def send_personal_message():
         files = request.files.getlist("attachments")
 
         for file in files:
-            if file.filename:
+            if file and file.filename:
                 filename = secure_filename(file.filename)
                 filepath = os.path.join(UPLOAD_FOLDER, filename)
                 file.save(filepath)
@@ -48,7 +60,7 @@ def send_personal_message():
 
         read_status = {enr: False for enr in enrollment_list}
 
-        message_doc = {
+        messages_col.insert_one({
             "title": title,
             "description": description,
             "enrollments": enrollment_list,
@@ -56,15 +68,19 @@ def send_personal_message():
             "created_by": "admin",
             "created_at": datetime.utcnow(),
             "is_read": read_status
-        }
+        })
 
-        messages_col.insert_one(message_doc)
-
-        return jsonify({"message": "Personal message sent successfully"})
+        return jsonify({
+            "success": True,
+            "message": "Personal message sent successfully"
+        }), 201
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-  
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
+
 # =========================
 # STUDENT: FETCH MY MESSAGES
 # =========================
