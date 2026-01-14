@@ -133,3 +133,47 @@ def admin_all_messages():
         })
 
     return jsonify(result)
+# =========================
+# ADMIN: GET ALL PERSONAL MESSAGES
+# =========================
+@per_message_bp.route("/admin/personal-messages/all", methods=["GET"])
+def admin_get_all_messages():
+    try:
+        messages = messages_col.find().sort("created_at", -1)
+        result = []
+        for msg in messages:
+            result.append({
+                "id": str(msg["_id"]),
+                "title": msg["title"],
+                "description": msg["description"],
+                "enrollments": msg["enrollments"],
+                "attachments": msg.get("attachments", []),
+                "created_at": msg["created_at"]
+            })
+        return jsonify({"success": True, "messages": result})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+# =========================
+# ADMIN: DELETE PERSONAL MESSAGE
+# =========================
+@per_message_bp.route("/admin/personal-message/<message_id>", methods=["DELETE"])
+def admin_delete_message(message_id):
+    try:
+        msg = messages_col.find_one({"_id": ObjectId(message_id)})
+        if not msg:
+            return jsonify({"success": False, "message": "Message not found"}), 404
+
+        # Delete attachments from disk
+        for f in msg.get("attachments", []):
+            try:
+                if os.path.exists(f["path"]):
+                    os.remove(f["path"])
+            except:
+                pass  # ignore errors
+
+        messages_col.delete_one({"_id": ObjectId(message_id)})
+        return jsonify({"success": True, "message": "Message deleted successfully"})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
