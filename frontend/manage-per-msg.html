@@ -49,7 +49,7 @@ async function loadMessages() {
   msgBox.style.display = "none";
 
   try {
-    const res = await fetch("/api/admin/personal-messages/all");
+    const res = await fetch("https://college-hwbb.onrender.com/api/admin/personal-messages/all");
     const data = await res.json();
 
     if (!data.success) throw new Error(data.message || "Failed to load messages");
@@ -84,7 +84,7 @@ async function deleteMessage(id){
 
   msgBox.style.display = "none";
   try {
-    const res = await fetch(`/api/admin/personal-message/${id}`, { method: "DELETE" });
+    const res = await fetch(`https://college-hwbb.onrender.com/api/admin/personal-message/${id}`, { method: "DELETE" });
     const data = await res.json();
 
     if(!data.success) throw new Error(data.message || "Failed to delete");
