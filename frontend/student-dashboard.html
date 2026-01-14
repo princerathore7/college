@@ -534,7 +534,6 @@ input:checked + .slider:before {
       🔔 Notifications <span id="notifCount" class="notif-count">0</span>
     </button>
 </header>
-<button id="inboxBtn">📩 Personal Messages</button>
 
 
 <!-- SIDEBAR -->
@@ -543,6 +542,9 @@ input:checked + .slider:before {
 
   <a href="student-dashboard.html">
   <i class="fa-solid fa-house"></i> Dashboard
+</a>
+<a href="javascript:void(0)" id="inboxBtn">
+  <i class="fa-solid fa-inbox"></i> Messages
 </a>
 
 <a href="notes-view.html">
@@ -1124,14 +1126,19 @@ document.getElementById("openNotifications").addEventListener("click", () => {
     alert("Student info missing. Please login again.");
     return;
   }
-function openInbox(){
-  const enrollment = localStorage.getItem("enrollment");
+document.getElementById("inboxBtn").addEventListener("click", () => {
+  // yahan se enrollment uthao (tumhare system ke hisaab se)
+  const enrollment =
+    localStorage.getItem("enrollment") ||
+    document.getElementById("enrollment")?.innerText;
+
   if(!enrollment){
     alert("Enrollment number not found");
     return;
   }
+
   window.location.href = `inbox.html?enr=${enrollment}`;
-}
+});
   // extra safety ke liye dobara store kar rahe hain
   localStorage.setItem("enrollment", enrollment);
   localStorage.setItem("studentClass", studentClass);
