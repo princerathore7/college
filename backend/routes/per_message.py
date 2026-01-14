@@ -1,20 +1,23 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_from_directory
+from flask_cors import cross_origin
 from werkzeug.utils import secure_filename
 from datetime import datetime
+from bson import ObjectId
 import os
-from db import db   # use same db as bus route
-from flask_cors import cross_origin
+from db import db
 
-admin0_message_bp = Blueprint(
-    "admin0_message_bp",
+# ✅ Blueprint define first
+per_message_bp = Blueprint(
+    "per_message",
     __name__,
-    url_prefix="/api/admin0"
+    url_prefix="/api"
 )
 
-# ----------------- CONFIG -----------------
-UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploads/messages")
+# =========================
+# CONFIG
+# =========================
+UPLOAD_FOLDER = "uploads/messages"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
 messages_col = db.personal_messages
 
 # ----------------- SEND PERSONAL MESSAGE -----------------
