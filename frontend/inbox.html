@@ -95,7 +95,7 @@ const enrollment = params.get("enr");
 const listDiv = document.getElementById("messageList");
 
 async function loadMessages(){
-  const res = await fetch(`/student/personal-messages/${enrollment}`);
+  const res = await fetch(`https://college-hwbb.onrender.com/student/personal-messages/${enrollment}`);
   const messages = await res.json();
 
   if(messages.length === 0){
@@ -124,7 +124,7 @@ async function openMessage(msg){
 
   msg.attachments.forEach(f => {
     const a = document.createElement("a");
-    a.href = `/personal-message/attachment/${f.filename}`;
+    a.href = `https://college-hwbb.onrender.com/personal-message/attachment/${f.filename}`;
     a.innerText = "📎 " + f.filename;
     a.target = "_blank";
     fileDiv.appendChild(a);
@@ -133,7 +133,7 @@ async function openMessage(msg){
   document.getElementById("messageModal").style.display = "flex";
 
   // MARK AS READ
-  await fetch(`/student/personal-message/read/${msg.id}`,{
+  await fetch(`https://college-hwbb.onrender.com/student/personal-message/read/${msg.id}`,{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body: JSON.stringify({ enrollment })
