@@ -2,81 +2,28 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>My Inbox</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<title>📥 My Personal Messages</title>
 <style>
-body{
-  font-family:Arial, sans-serif;
-  background:#f4f7fb;
-  padding:20px;
-}
+  body { font-family: sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+  h2 { text-align: center; }
+  #messageList { max-width: 600px; margin: 20px auto; }
+  .message-card { padding: 10px 15px; background: #fff; border-radius: 5px; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+  .message-card.unread { border-left: 5px solid #28a745; }
+  .message-card span { display: inline-block; }
+  .date { font-size: 0.85em; color: #555; }
 
-h2{
-  color:#0b1f3a;
-}
-
-.message-card{
-  background:#fff;
-  padding:12px;
-  border-radius:8px;
-  margin-bottom:10px;
-  cursor:pointer;
-  box-shadow:0 4px 10px rgba(0,0,0,.06);
-  display:flex;
-  justify-content:space-between;
-}
-
-.message-card.unread{
-  border-left:4px solid #e74c3c;
-  font-weight:bold;
-}
-
-.date{
-  font-size:12px;
-  color:#777;
-}
-
-/* POPUP */
-.modal{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.5);
-  align-items:center;
-  justify-content:center;
-}
-
-.modal-content{
-  background:#fff;
-  width:90%;
-  max-width:600px;
-  padding:20px;
-  border-radius:10px;
-}
-
-.modal h3{
-  margin-top:0;
-}
-
-.attachments a{
-  display:block;
-  margin-top:5px;
-  color:#0b1f3a;
-}
-
-.close{
-  float:right;
-  cursor:pointer;
-  font-size:18px;
-}
+  /* MODAL */
+  .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
+  .modal-content { background:#fff; padding:20px; border-radius:8px; max-width:500px; width:90%; position: relative; }
+  .modal-content h3 { margin-top:0; }
+  .modal-content .attachments a { display:block; margin-top:5px; text-decoration:none; color:#007bff; }
+  .modal-content .close { position:absolute; top:10px; right:10px; cursor:pointer; font-size:18px; }
 </style>
 </head>
-
 <body>
 
 <h2>📥 My Personal Messages</h2>
-<div id="messageList"></div>
+<div id="messageList">Loading messages...</div>
 
 <!-- POPUP MODAL -->
 <div class="modal" id="messageModal">
@@ -91,28 +38,37 @@ h2{
 <script>
 const params = new URLSearchParams(window.location.search);
 const enrollment = params.get("enr");
-
 const listDiv = document.getElementById("messageList");
+const backendUrl = "https://college-hwbb.onrender.com"; // absolute backend URL
 
 async function loadMessages(){
-  const res = await fetch(`https://college-hwbb.onrender.com/student/personal-messages/${enrollment}`);
-  const messages = await res.json();
+  listDiv.innerHTML = "Loading messages...";
+  try {
+    const res = await fetch(`${backendUrl}/api/student/personal-messages/${enrollment}`);
+    if(!res.ok) throw new Error(`Server error: ${res.status}`);
+    const messages = await res.json();
 
-  if(messages.length === 0){
-    listDiv.innerHTML = "<p>No personal messages.</p>";
-    return;
+    listDiv.innerHTML = "";
+    if(messages.length === 0){
+      listDiv.innerHTML = "<p>No personal messages.</p>";
+      return;
+    }
+
+    messages.forEach(msg => {
+      const div = document.createElement("div");
+      div.className = "message-card " + (msg.is_read ? "" : "unread");
+      div.innerHTML = `
+        <span>${msg.title}</span>
+        <span class="date">${new Date(msg.created_at).toLocaleDateString()}</span>
+      `;
+      div.onclick = () => openMessage(msg);
+      listDiv.appendChild(div);
+    });
+
+  } catch(err) {
+    listDiv.innerHTML = `<p style="color:red;">Failed to load messages: ${err.message}</p>`;
+    console.error(err);
   }
-
-  messages.forEach(msg => {
-    const div = document.createElement("div");
-    div.className = "message-card " + (msg.is_read ? "" : "unread");
-    div.innerHTML = `
-      <span>${msg.title}</span>
-      <span class="date">${new Date(msg.created_at).toLocaleDateString()}</span>
-    `;
-    div.onclick = () => openMessage(msg);
-    listDiv.appendChild(div);
-  });
 }
 
 async function openMessage(msg){
@@ -121,10 +77,9 @@ async function openMessage(msg){
 
   const fileDiv = document.getElementById("mFiles");
   fileDiv.innerHTML = "";
-
   msg.attachments.forEach(f => {
     const a = document.createElement("a");
-    a.href = `https://college-hwbb.onrender.com/personal-message/attachment/${f.filename}`;
+    a.href = `${backendUrl}/api/personal-message/attachment/${f.filename}`;
     a.innerText = "📎 " + f.filename;
     a.target = "_blank";
     fileDiv.appendChild(a);
@@ -133,17 +88,21 @@ async function openMessage(msg){
   document.getElementById("messageModal").style.display = "flex";
 
   // MARK AS READ
-  await fetch(`https://college-hwbb.onrender.com/student/personal-message/read/${msg.id}`,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ enrollment })
-  });
+  try {
+    await fetch(`${backendUrl}/api/student/personal-message/read/${msg.id}`,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ enrollment })
+    });
+  } catch(err) {
+    console.error("Failed to mark as read:", err);
+  }
+
+  loadMessages(); // refresh to update unread badge
 }
 
 function closeModal(){
   document.getElementById("messageModal").style.display = "none";
-  listDiv.innerHTML = "";
-  loadMessages(); // refresh to remove unread mark
 }
 
 loadMessages();
