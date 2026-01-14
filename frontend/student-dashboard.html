@@ -30,49 +30,37 @@ body {
 
 /* HEADER */
 header {
-    background: var(--header-gradient); /* Added Gradient */
-    padding: 14px 25px;
+    background: linear-gradient(135deg, #0a1931, #112d4e);
+    color: #fff;
+    padding: 14px 18px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    color: #ffffff;
+    box-shadow: 0 3px 12px rgba(10,25,49,0.35);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
 }
+
+
+
 .logo-area {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 5px 0;
 }
 
 .logo-area img {
-    height: 40px; /* Thoda optimize kiya height ko */
-    width: auto;
-    border-radius: 4px;
-    
-    /* LOGO COLOR HACK: 
-       Ye filter logo ko pure white kar dega chahe original color kuch bhi ho.
-       Agar logo hide ho jaye to is line ko hata dein. */
-    filter: brightness(0) invert(1); 
-    
-    object-fit: contain;
-    transition: transform 0.3s ease;
+    height: 44px;
+    border-radius: 6px;
 }
 
 .logo-area h1 {
     font-family: 'Playfair Display', serif;
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: #ffffff; /* Text color ko logo ke saath match kiya */
-    margin: 0;
-    letter-spacing: 0.5px;
-    text-transform: uppercase; /* Professional look ke liye */
+    font-size: 1.4rem;
 }
 
-/* Hover effect for a premium feel */
-.logo-area:hover img {
-    transform: scale(1.05);
-}
 .top-actions {
     display: flex;
     align-items: center;
@@ -1150,7 +1138,6 @@ document.getElementById("openNotifications").addEventListener("click", () => {
   // 🚀 redirect
   window.location.href = "notification.html";
 });
-
 document.addEventListener("DOMContentLoaded", () => {
 
   const inboxBtn = document.getElementById("inboxBtn");
@@ -1172,6 +1159,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 });
+
 </script>
 </body>
 </html>
