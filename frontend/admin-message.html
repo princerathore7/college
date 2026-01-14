@@ -182,7 +182,16 @@ form.addEventListener("submit", async function(e){
       body: formData
     });
 
-    const data = await res.json();
+   const text = await res.text();
+console.log(text);
+
+let data;
+try {
+  data = JSON.parse(text);
+} catch {
+  throw new Error("Server returned HTML instead of JSON");
+}
+
 
     if(res.ok){
       msgBox.className = "msg success";
