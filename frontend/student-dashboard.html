@@ -543,9 +543,10 @@ input:checked + .slider:before {
   <a href="student-dashboard.html">
   <i class="fa-solid fa-house"></i> Dashboard
 </a>
-<a href="javascript:void(0)" id="inboxBtn">
+<a href="#" id="inboxBtn">
   <i class="fa-solid fa-inbox"></i> Messages
 </a>
+
 
 <a href="notes-view.html">
   <i class="fa-solid fa-book-open"></i> Notes
@@ -1126,19 +1127,7 @@ document.getElementById("openNotifications").addEventListener("click", () => {
     alert("Student info missing. Please login again.");
     return;
   }
-document.getElementById("inboxBtn").addEventListener("click", () => {
-  // yahan se enrollment uthao (tumhare system ke hisaab se)
-  const enrollment =
-    localStorage.getItem("enrollment") ||
-    document.getElementById("enrollment")?.innerText;
 
-  if(!enrollment){
-    alert("Enrollment number not found");
-    return;
-  }
-
-  window.location.href = `inbox.html?enr=${enrollment}`;
-});
   // extra safety ke liye dobara store kar rahe hain
   localStorage.setItem("enrollment", enrollment);
   localStorage.setItem("studentClass", studentClass);
@@ -1146,6 +1135,28 @@ document.getElementById("inboxBtn").addEventListener("click", () => {
 
   // 🚀 redirect
   window.location.href = "notification.html";
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const inboxBtn = document.getElementById("inboxBtn");
+  if(!inboxBtn) return;
+
+  inboxBtn.addEventListener("click", (e) => {
+    e.preventDefault(); // '#' ke default behavior ko roke
+
+    const enrollment =
+      localStorage.getItem("enrollment") ||
+      document.getElementById("enrollment")?.innerText;
+
+    if(!enrollment){
+      alert("Enrollment number not found");
+      return;
+    }
+
+    window.location.href = `inbox.html?enr=${enrollment}`;
+  });
+
 });
 </script>
 </body>
