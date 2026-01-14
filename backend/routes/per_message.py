@@ -6,11 +6,13 @@ from bson import ObjectId
 import os
 from db import db
 
-# ✅ Blueprint define first
+# =========================
+# ✅ BLUEPRINT
+# =========================
 per_message_bp = Blueprint(
     "per_message",
     __name__,
-    url_prefix="/api"
+    url_prefix="/api"  # /api ke under sab routes
 )
 
 # =========================
@@ -20,10 +22,13 @@ UPLOAD_FOLDER = "uploads/messages"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 messages_col = db.personal_messages
 
-# ----------------- SEND PERSONAL MESSAGE -----------------
-@admin0_message_bp.route("/personal-message/send", methods=["POST", "OPTIONS"])
+# =========================
+# ADMIN: SEND PERSONAL MESSAGE
+# =========================
+@per_message_bp.route("/admin/personal-message/send", methods=["POST", "OPTIONS"])
 @cross_origin()
 def send_personal_message():
+    # ✅ CORS preflight
     if request.method == "OPTIONS":
         return jsonify({}), 200
 
@@ -44,7 +49,6 @@ def send_personal_message():
             if file and file.filename:
                 filename = secure_filename(file.filename)
                 filepath = os.path.join(UPLOAD_FOLDER, filename)
-                # ✅ save file safely
                 file.save(filepath)
                 attachments.append({"filename": filename, "path": filepath})
 
@@ -55,7 +59,7 @@ def send_personal_message():
             "description": description,
             "enrollments": enrollment_list,
             "attachments": attachments,
-            "created_by": "admin0",
+            "created_by": "admin",
             "created_at": datetime.utcnow(),
             "is_read": read_status
         })
@@ -64,7 +68,7 @@ def send_personal_message():
 
     except Exception as e:
         import traceback
-        print(traceback.format_exc())  # 🔥 print exact error
+        print(traceback.format_exc())
         return jsonify({"success": False, "message": str(e)}), 500
 
 # =========================
