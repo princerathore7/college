@@ -119,6 +119,7 @@ def download_attachment(filename):
 # ADMIN: GET ALL SENT MESSAGES
 # =========================
 @per_message_bp.route("/admin/personal-messages", methods=["GET"])
+@cross_origin()
 def admin_all_messages():
     messages = messages_col.find().sort("created_at", -1)
 
@@ -137,6 +138,7 @@ def admin_all_messages():
 # ADMIN: GET ALL PERSONAL MESSAGES
 # =========================
 @per_message_bp.route("/admin/personal-messages/all", methods=["GET"])
+@cross_origin()
 def admin_get_all_messages():
     try:
         messages = messages_col.find().sort("created_at", -1)
@@ -159,6 +161,7 @@ def admin_get_all_messages():
 # ADMIN: DELETE PERSONAL MESSAGE
 # =========================
 @per_message_bp.route("/admin/personal-message/<message_id>", methods=["DELETE"])
+@cross_origin()
 def admin_delete_message(message_id):
     try:
         msg = messages_col.find_one({"_id": ObjectId(message_id)})
