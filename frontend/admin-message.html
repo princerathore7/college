@@ -71,7 +71,7 @@ form.addEventListener("submit", async e => {
   const formData = new FormData(form);
 
   try {
-    const res = await fetch("/api/admin/personal-message/send", {
+    const res = await fetch("https://college-hwbb.onrender.com/api/admin/personal-message/send", {
       method: "POST",
       body: formData
     });
