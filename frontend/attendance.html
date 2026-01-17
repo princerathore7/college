@@ -277,14 +277,22 @@ function formatClass(year,branch,section){
    FETCH STUDENTS
 ================================ */
 async function fetchStudents(){
-  loader.style.display="flex";
-  const res = await fetch(API_STUDENTS);
-  const d = await res.json();
-  if(d.success){
-    STUDENTS = d.students;
-    render();
+  loader.style.display = "flex";
+
+  try {
+    const res = await fetch(API_STUDENTS + `?ts=${Date.now()}`); // prevent caching
+    const d = await res.json();
+
+    if(d.success){
+      STUDENTS = d.students; // always fresh
+      render(); // render fresh data
+    }
+  } catch(err){
+    console.error(err);
+    studentsBody.innerHTML = `<tr><td colspan="5" class="no-data">Error loading students</td></tr>`;
+  } finally {
+    loader.style.display = "none";
   }
-  loader.style.display="none";
 }
 
 /* ===============================
