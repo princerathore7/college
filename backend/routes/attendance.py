@@ -317,3 +317,43 @@ def robot_update_attendance():
     except Exception as e:
         print("❌ ROBOT ERROR:", e)
         return jsonify({"success": False}), 500
+        # ===============================
+# RESET ATTENDANCE (ON CLASS CHANGE)
+# ===============================
+@attendance_bp.route("/reset", methods=["POST"])
+def reset_attendance():
+    try:
+        data = request.json or {}
+        enrollment = data.get("enrollment")
+        reason = data.get("reason", "Class Changed")
+
+        if not enrollment:
+            return jsonify({"success": False, "message": "Enrollment required"}), 400
+
+        attendance_override_collection.update_one(
+            {"enrollment": enrollment},
+            {
+                "$set": {
+                    "total": 0,
+                    "present": 0,
+                    "percentage": 0,
+                    "updatedAt": datetime.utcnow(),
+                    "updatedBy": "system",
+                    "resetReason": reason
+                }
+            },
+            upsert=True
+        )
+
+        send_to_enrollment(
+            enrollment,
+            "📘 Attendance Reset",
+            "Your attendance has been reset due to class/semester change.",
+            url="/student-dashboard.html"
+        )
+
+        return jsonify({"success": True}), 200
+
+    except Exception as e:
+        print("❌ reset_attendance error:", e)
+        return jsonify({"success": False}), 500
