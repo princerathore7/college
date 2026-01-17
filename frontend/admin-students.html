@@ -2,9 +2,11 @@
 <html lang="en">
 <head>
   <link rel="icon" href="https://i.ibb.co/8tZSKKT/logo-with-bg.webp">
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Admin — Students Management</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 
 <style>
@@ -29,28 +31,6 @@ th{background:#f1f3f8}
 .red{background:var(--red)}
 .actionBtn{padding:4px 8px;font-size:12px;border:0;border-radius:6px;cursor:pointer;background:var(--accent);color:#fff;margin-left:4px}
 .no-data{text-align:center;color:#888}
-
-/* LOADER */
-.loader{
-  display:none;
-  position:absolute;
-  right:10px;
-  top:50px;
-  font-size:14px;
-  color:#555;
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-.spinner{
-  width:16px;
-  height:16px;
-  border:3px solid #ccc;
-  border-top:3px solid var(--accent);
-  border-radius:50%;
-  animation:spin 1s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 
@@ -61,9 +41,7 @@ th{background:#f1f3f8}
   <button class="actionBtn" onclick="logout()">Logout</button>
 </header>
 
-<main style="padding:20px;max-width:1400px;margin:auto;position:relative">
-
-<div class="loader" id="loader"><div class="spinner"></div> Loading students...</div>
+<main style="padding:20px;max-width:1400px;margin:auto">
 
 <div class="controls">
   <select id="year">
@@ -76,10 +54,12 @@ th{background:#f1f3f8}
 
   <select id="branch">
     <option value="">All Branches</option>
+
+    <!-- Computer / IT -->
     <option value="CSE">CSE - Computer Science Engineering</option>
     <option value="IT">IT - Information Technology</option>
     <option value="AIML">AIML - Artificial Intelligence & Machine Learning</option>
-      <option value="AIDS">AIDS - Artificial Intelligence & Data Science</option>
+    <option value="AIDS">AIDS - Artificial Intelligence & Data Science</option>
     <option value="CSBS">CSBS - Computer Science & Business Systems</option>
     <option value="IOT">IoT - Internet of Things</option>
 
@@ -137,7 +117,6 @@ th{background:#f1f3f8}
     <option value="DPLASTIC">Diploma - Plastic Engineering</option>
     <option value="DPOLY">Diploma - Polymer Engineering</option>
   </select>
-  </select>
 
   <button class="actionBtn" id="refreshBtn">Refresh</button>
 </div>
@@ -146,8 +125,15 @@ th{background:#f1f3f8}
   type="text"
   id="searchEnrollment"
   placeholder="Search by Enrollment Number"
-  oninput="render()"
-  style="padding:8px 12px;border-radius:8px;border:1px solid #d1d5db;font-size:14px;min-width:220px;outline:none;"
+  oninput="render(false)"
+  style="
+    padding:8px 12px;
+    border-radius:8px;
+    border:1px solid #d1d5db;
+    font-size:14px;
+    min-width:220px;
+    outline:none;
+  "
 >
 
 <table>
@@ -168,199 +154,178 @@ th{background:#f1f3f8}
 </table>
 
 </main>
+
 <script>
 /* ===============================
    ACCESS CONTROL — ADMIN PAGES
 ================================ */
+
 const mentorId = localStorage.getItem("mentorId");
 const source   = sessionStorage.getItem("accessSource");
+
+// allowed sources
 const ALLOWED_SOURCES = ["ad", "admin"];
 
 if(!mentorId || !ALLOWED_SOURCES.includes(source)){
   document.body.innerHTML = `
     <h2 style="text-align:center;margin-top:20vh;color:red">
-      ❌ Access Denied <br>Please open via Administration Panel
-    </h2>`;
-  throw new Error("Unauthorized");
+      ❌ Access Denied <br>
+      Please open this page via Administration Panel
+    </h2>
+  `;
+  throw new Error("Unauthorized access");
 }
 
-/* ===============================
-   API
-================================ */
 const API_STUDENTS = "https://college-hwbb.onrender.com/api/admin/students";
 const API_ATT = "https://college-hwbb.onrender.com/api/attendance/student/";
 const API_FINE = "https://college-hwbb.onrender.com/api/fines/student-dashboard/";
 
-/* ===============================
-   DOM
-================================ */
-const loader = document.getElementById("loader");
-const studentsBody = document.getElementById("studentsBody");
-const yearSelect = document.getElementById("year");
-const branchSelect = document.getElementById("branch");
-const searchInput = document.getElementById("searchEnrollment");
-const refreshBtn = document.getElementById("refreshBtn");
-
-/* ===============================
-   HELPERS
-================================ */
 function logout(){
   localStorage.clear();
   location.href="login.html";
 }
 
-/* 🔥 MAIN FIX — class parser */
-function parseClass(classStr){
-  if(!classStr) return { year:"—", branch:"—", section:"—", label:"—" };
-
-  // Example: "2nd Year CSE1"
-  const parts = classStr.trim().split(" ");
-  const year = parts[0] + " " + parts[1];   // "2nd Year"
-
-  const rest = parts.slice(2).join("");     // "CSE1"
-  const match = rest.match(/^([A-Z]+)(\d+)$/);
-
-  return {
-    year,
-    branch: match ? match[1] : rest,
-    section: match ? match[2] : "—",
-    label: classStr
-  };
-}
-
-/* ===============================
-   FETCH
-================================ */
-async function fetchStudents(){
-  loader.style.display = "flex";
-  try{
-    const res = await fetch(API_STUDENTS);
-    const data = await res.json();
-    return data.success ? data.students : [];
-  }catch(e){
-    console.error(e);
-    return [];
-  }finally{
-    loader.style.display = "none";
+/* -------------------------
+   FETCH STUDENTS (CACHE)
+-------------------------- */
+async function fetchStudents(force=false){
+  if(!force){
+    const cached = localStorage.getItem("admin_students");
+    if(cached) return JSON.parse(cached);
   }
+
+  const res = await fetch(API_STUDENTS);
+  const data = await res.json();
+  if(data.success){
+    localStorage.setItem("admin_students", JSON.stringify(data.students));
+    return data.students;
+  }
+  return [];
 }
 
+/* -------------------------
+   FETCH ATTENDANCE (REFRESH)
+-------------------------- */
 async function fetchAttendance(enr){
-  try{
-    const r = await fetch(API_ATT + enr);
-    const d = await r.json();
-    return d.success ? d.attendance : null;
-  }catch(e){ return null; }
+  const res = await fetch(API_ATT + enr);
+  const d = await res.json();
+  return d.success ? d.attendance : null;
 }
 
+/* -------------------------
+   FETCH FINE (REFRESH)
+-------------------------- */
 async function fetchFine(enr){
-  try{
-    const r = await fetch(API_FINE + enr);
-    const d = await r.json();
-    if(d.success && d.fines?.length)
-      return d.fines.reduce((s,f)=>s+f.fine,0);
-    return 0;
-  }catch(e){ return 0; }
+  const res = await fetch(API_FINE + enr);
+  const d = await res.json();
+  if(d.success && d.fines.length){
+    return d.fines.reduce((s,f)=>s+f.fine,0);
+  }
+  return 0;
 }
 
-/* ===============================
+/* -------------------------
    RENDER
-================================ */
+-------------------------- */
 async function render(refresh=false){
-  studentsBody.innerHTML =
-    `<tr><td colspan="7" class="no-data">Loading...</td></tr>`;
+  const body = document.getElementById("studentsBody");
 
-  const students = await fetchStudents();
+  const yearVal = document.getElementById("year").value;
+  const branchVal = document.getElementById("branch").value.toLowerCase();
+  const searchEnr = document.getElementById("searchEnrollment").value.trim().toLowerCase();
 
-  const yearVal   = yearSelect.value;
-  const branchVal = branchSelect.value.toLowerCase();
-  const searchVal = searchInput.value.trim().toLowerCase();
+  const students = await fetchStudents(refresh);
 
-  let filtered = students.filter(s=>{
-    const cls = parseClass(s.class);
+  // 🔹 FILTER LOGIC (FIXED)
+  let filtered = students.filter(s => {
     let ok = true;
 
-    if(yearVal)   ok = ok && cls.year.includes(yearVal);
-    if(branchVal) ok = ok && cls.branch.toLowerCase().includes(branchVal);
-    if(searchVal) ok = ok && s.enrollment.toLowerCase().includes(searchVal);
+    if(yearVal) ok = ok && String(s.year) === yearVal;
+    if(branchVal) ok = ok && s.branch.toLowerCase().includes(branchVal);
+    if(searchEnr) ok = ok && s.enrollment.toLowerCase().includes(searchEnr);
 
     return ok;
   });
 
+  // 🔹 Enrollment search ko top pe laane ke liye
+  if(searchEnr){
+    filtered.sort((a,b)=>{
+      return a.enrollment.toLowerCase().startsWith(searchEnr) ? -1 : 1;
+    });
+  }
+
+  body.innerHTML = "";
+
   if(!filtered.length){
-    studentsBody.innerHTML =
-      `<tr><td colspan="7" class="no-data">No students found</td></tr>`;
+    body.innerHTML = `<tr><td colspan="7" class="no-data">No students found</td></tr>`;
     return;
   }
 
-  studentsBody.innerHTML = "";
-
   for(const s of filtered){
-    const cls = parseClass(s.class);
-    const att  = refresh ? await fetchAttendance(s.enrollment) : s.attendance;
-    const fine = refresh ? await fetchFine(s.enrollment) : (s.fine ?? 0);
+    let att = s.attendance;
+    let fine = s.fine ?? 0;
+
+    if(refresh){
+      att = await fetchAttendance(s.enrollment);
+      fine = await fetchFine(s.enrollment);
+      s.attendance = att;
+      s.fine = fine;
+    }
 
     const badge = att
-      ? `<span class="badge ${
-          att.percentage>=75?"green":
-          att.percentage>=60?"yellow":"red"
-        }">${att.percentage}%</span>
-        <button class="actionBtn"
-          onclick="editAttendance('${s.enrollment}')">Edit</button>`
+      ? `<span class="badge ${att.percentage>=75?"green":att.percentage>=60?"yellow":"red"}">${att.percentage}%</span>
+         <button class="actionBtn" onclick="editAttendance('${s.enrollment}')">Edit</button>`
       : "—";
 
-    studentsBody.innerHTML += `
+    body.innerHTML += `
       <tr>
         <td>${s.enrollment}</td>
         <td>${s.name}</td>
-        <td>${cls.year}</td>
-        <td>${cls.branch} ${cls.section}</td>
+        <td>${s.year}</td>
+        <td>${s.branch}</td>
         <td>${badge}</td>
         <td>₹ ${s.pendingFees ?? 0}
-          <button class="actionBtn"
-            onclick="editFees('${s.enrollment}')">Update</button>
+          <button class="actionBtn" onclick="editFees('${s.enrollment}')">Update</button>
         </td>
         <td>₹ ${fine}
-          <button class="actionBtn"
-            onclick="editFine('${s.enrollment}')">Update</button>
+          <button class="actionBtn" onclick="editFine('${s.enrollment}')">Update</button>
         </td>
-      </tr>`;
+      </tr>
+    `;
   }
-}
 
-/* ===============================
-   REDIRECTION
-================================ */
+  localStorage.setItem("admin_students", JSON.stringify(students));
+}
+/* -------------------------
+   REDIRECTION LOGIC
+-------------------------- */
 function editAttendance(enr){
-  localStorage.setItem("selectedEnrollment",enr);
-  location.href="admin.html";
+  localStorage.setItem("selectedEnrollment", enr);
+  window.location.href = "admin.html";
 }
+
 function editFees(enr){
-  localStorage.setItem("selectedEnrollment",enr);
-  location.href="pending.html";
+  localStorage.setItem("selectedEnrollment", enr);
+  window.location.href = "pending.html";
 }
+
 function editFine(enr){
-  localStorage.setItem("selectedEnrollment",enr);
-  location.href="admin-fine.html";
+  localStorage.setItem("selectedEnrollment", enr);
+  window.location.href = "admin-fine.html";
 }
+localStorage.removeItem("admin_students");
+render(true);   // force refresh
 
-/* ===============================
-   EVENTS
-================================ */
-yearSelect.addEventListener("change",()=>render());
-branchSelect.addEventListener("change",()=>render());
-searchInput.addEventListener("input",()=>render());
-refreshBtn.addEventListener("click",()=>render(true));
-document.addEventListener("DOMContentLoaded",()=>render(true));
-
-/* ===============================
-   REAL-TIME SYNC
-================================ */
-window.addEventListener("storage",(e)=>{
-  if(e.key === "refreshAdminStudents") render(true);
+/* -------------------------
+   FILTERS + REFRESH
+-------------------------- */
+["year","branch"].forEach(id=>{
+  document.getElementById(id).addEventListener("change",()=>render(false));
 });
-</script>
+refreshBtn.onclick = ()=>render(true);
 
+document.addEventListener("DOMContentLoaded",()=>render(false));
+</script>
 
 </body>
 </html>

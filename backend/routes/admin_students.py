@@ -113,3 +113,17 @@ def get_all_students():
             "success": False,
             "message": "Internal server error"
         }), 500
+@admin_students_bp.route("/students/classes", methods=["GET"])
+def get_students_with_classes():
+    students = list(students_collection.find({}, {"_id":0}))
+
+    for s in students:
+        cls = s.get("class","")
+        if cls:
+            parts = cls.split()
+            s["year"] = parts[0] + " " + parts[1]
+            rest = "".join(parts[2:])
+            s["branch"] = ''.join(filter(str.isalpha, rest))
+            s["section"] = ''.join(filter(str.isdigit, rest))
+
+    return jsonify({"success":True,"students":students})
