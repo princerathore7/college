@@ -55,7 +55,6 @@ button{padding:6px 10px;cursor:pointer}
   <th>Present</th>
   <th>Absent</th>
 </tr>
-
 </thead>
 <tbody id="studentsBody"></tbody>
 </table>
@@ -77,13 +76,25 @@ if(!mentorId || !ALLOWED_SOURCES.includes(source)){
 }
 
 /* ===============================
+   HELPERS
+================================ */
+function formatClass(year, branch, section){
+  if(!year || !branch) return "—";
+  const yearText =
+    year=="1" ? "1st" :
+    year=="2" ? "2nd" :
+    year=="3" ? "3rd" : "4th";
+  return `${yearText} Year ${branch} ${section ?? ""}`.trim();
+}
+
+/* ===============================
    API CONFIG
 ================================ */
 const API_STUDENTS = "https://college-hwbb.onrender.com/api/admin/students";
-const API_ROBOT = "https://college-hwbb.onrender.com/api/attendance/robot_update";
+const API_ROBOT    = "https://college-hwbb.onrender.com/api/attendance/robot_update";
 
 let STUDENTS = [];
-let RECORDS = {};   // { enrollment : "P" | "A" }
+let RECORDS = {}; // enrollment : P/A
 
 /* ===============================
    FETCH STUDENTS
@@ -101,27 +112,31 @@ async function fetchStudents(){
    RENDER TABLE
 ================================ */
 function render(){
-  const body = document.getElementById("studentsBody");
-  const year = document.getElementById("year").value;
+  const body   = document.getElementById("studentsBody");
+  const year   = document.getElementById("year").value;
   const branch = document.getElementById("branch").value;
 
   body.innerHTML = "";
 
-  const filtered = STUDENTS.filter(s=>{
-    return (!year || String(s.year)===year) &&
-           (!branch || s.branch===branch);
-  });
+  const filtered = STUDENTS.filter(s =>
+    (!year || String(s.year) === year) &&
+    (!branch || s.branch === branch)
+  );
 
   if(!filtered.length){
-    body.innerHTML = `<tr><td colspan="4" class="no-data">No students found</td></tr>`;
+    body.innerHTML =
+      `<tr><td colspan="5" class="no-data">No students found</td></tr>`;
     return;
   }
 
   filtered.forEach(s=>{
+    const classText = formatClass(s.year, s.branch, s.section);
+
     body.innerHTML += `
       <tr>
         <td>${s.enrollment}</td>
         <td>${s.name}</td>
+        <td><strong>${classText}</strong></td>
         <td>
           <button class="p" onclick="mark('${s.enrollment}','P',this)">P</button>
         </td>
@@ -139,9 +154,8 @@ function render(){
 function mark(enr,status,btn){
   RECORDS[enr] = status;
 
-  // visual selection
-  const td = btn.parentElement.parentElement;
-  td.querySelectorAll("button").forEach(b=>b.classList.remove("selected"));
+  const row = btn.parentElement.parentElement;
+  row.querySelectorAll("button").forEach(b=>b.classList.remove("selected"));
   btn.classList.add("selected");
 }
 
@@ -150,16 +164,14 @@ function mark(enr,status,btn){
 ================================ */
 async function submitAttendance(){
   const lectureId = document.getElementById("lectureId").value.trim();
+
   if(!lectureId) return alert("Lecture ID required");
   if(!Object.keys(RECORDS).length) return alert("No attendance marked");
 
   const res = await fetch(API_ROBOT,{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({
-      lectureId,
-      records: RECORDS
-    })
+    body: JSON.stringify({ lectureId, records: RECORDS })
   });
 
   const d = await res.json();
@@ -177,7 +189,7 @@ async function submitAttendance(){
    EVENTS
 ================================ */
 ["year","branch"].forEach(id=>{
-  document.getElementById(id).addEventListener("change",render);
+  document.getElementById(id).addEventListener("change", render);
 });
 
 fetchStudents();
