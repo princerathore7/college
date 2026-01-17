@@ -243,53 +243,69 @@ async function fetchFine(enr){
    RENDER
 ================================ */
 async function render(refresh=false){
-  studentsBody.innerHTML = `<tr><td colspan="7" class="no-data">Loading...</td></tr>`;
+  studentsBody.innerHTML =
+    `<tr><td colspan="7" class="no-data">Loading...</td></tr>`;
+
   const students = await fetchStudents();
 
-  const yearVal = yearSelect.value;
+  const yearVal   = yearSelect.value;
   const branchVal = branchSelect.value.toLowerCase();
   const searchEnr = searchInput.value.trim().toLowerCase();
 
   let filtered = students.filter(s=>{
+    const parsed = parseClass(s.class);
+
     let ok = true;
-    if(yearVal) ok = ok && String(s.year) === yearVal;
-    if(branchVal) ok = ok && s.branch.toLowerCase().includes(branchVal);
+    if(yearVal)   ok = ok && parsed.year === yearVal;
+    if(branchVal) ok = ok && parsed.branch.toLowerCase().includes(branchVal);
     if(searchEnr) ok = ok && s.enrollment.toLowerCase().includes(searchEnr);
+
     return ok;
   });
 
   if(!filtered.length){
-    studentsBody.innerHTML = `<tr><td colspan="7" class="no-data">No students found</td></tr>`;
+    studentsBody.innerHTML =
+      `<tr><td colspan="7" class="no-data">No students found</td></tr>`;
     return;
   }
 
   studentsBody.innerHTML = "";
+
   for(const s of filtered){
-    let att = refresh ? await fetchAttendance(s.enrollment) : s.attendance;
+    const parsed = parseClass(s.class);
+
+    let att  = refresh ? await fetchAttendance(s.enrollment) : s.attendance;
     let fine = refresh ? await fetchFine(s.enrollment) : (s.fine ?? 0);
 
     const badge = att
-      ? `<span class="badge ${att.percentage>=75?"green":att.percentage>=60?"yellow":"red"}">${att.percentage}%</span>
-         <button class="actionBtn" onclick="editAttendance('${s.enrollment}')">Edit</button>`
+      ? `<span class="badge ${
+          att.percentage>=75?"green":
+          att.percentage>=60?"yellow":"red"
+        }">${att.percentage}%</span>
+        <button class="actionBtn"
+          onclick="editAttendance('${s.enrollment}')">Edit</button>`
       : "—";
 
     studentsBody.innerHTML += `
       <tr>
         <td>${s.enrollment}</td>
         <td>${s.name}</td>
-       <td>${s.class || s.year}</td> 
-        <td>${s.branch}</td>
+        <td>${parsed.year}</td>
+        <td>${parsed.branch} ${parsed.section}</td>
         <td>${badge}</td>
         <td>₹ ${s.pendingFees ?? 0}
-          <button class="actionBtn" onclick="editFees('${s.enrollment}')">Update</button>
+          <button class="actionBtn"
+            onclick="editFees('${s.enrollment}')">Update</button>
         </td>
         <td>₹ ${fine}
-          <button class="actionBtn" onclick="editFine('${s.enrollment}')">Update</button>
+          <button class="actionBtn"
+            onclick="editFine('${s.enrollment}')">Update</button>
         </td>
       </tr>
     `;
   }
 }
+
 
 /* ===============================
    REDIRECTION
