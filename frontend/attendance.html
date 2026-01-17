@@ -1,61 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" href="https://i.ibb.co/8tZSKKT/logo-with-bg.webp">
-
 <meta charset="UTF-8">
-<title>Attendance</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+<title>Attendance (Robot Auto)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
-body{font-family:Inter,system-ui,sans-serif;background:#f5f6fc;margin:0;padding:20px}
-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
-select,button{padding:8px 12px;border-radius:6px;border:1px solid #ccc}
-button{background:#003366;color:#fff;cursor:pointer}
-table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden}
-th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:center}
-th{background:#eef3ff}
-.mark-btn{padding:6px 12px;border:none;border-radius:6px;cursor:pointer}
-.present{background:#16a34a;color:#fff}
-.absent{background:#dc2626;color:#fff}
-.selected{outline:3px solid #00000022}
-.no-data{color:#666}
+body{font-family:Arial;background:#f4f7fb;margin:0;padding:20px}
+h2{margin-bottom:10px}
 .controls{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
+table{width:100%;border-collapse:collapse;background:#fff}
+th,td{border:1px solid #ddd;padding:8px;text-align:center}
+th{background:#0b1f3a;color:#fff}
+button{padding:6px 10px;cursor:pointer}
+.p{background:#2ecc71;color:#fff}
+.a{background:#e74c3c;color:#fff}
+.selected{outline:3px solid #000}
+.saveBtn{background:#0b1f3a;color:#fff}
+.no-data{text-align:center;color:#888}
 </style>
 </head>
 
 <body>
 
-<header>
-  <h2>Attendance Marking</h2>
-  <button onclick="logout()">Logout</button>
-</header>
+<h2>🤖 Attendance (Robot Auto Percentage)</h2>
 
 <div class="controls">
   <select id="year">
-    <option value="">Year</option>
-    <option value="1">1st</option>
-    <option value="2">2nd</option>
-    <option value="3">3rd</option>
-    <option value="4">4th</option>
+    <option value="">All Years</option>
+    <option value="1">1st Year</option>
+    <option value="2">2nd Year</option>
+    <option value="3">3rd Year</option>
+    <option value="4">4th Year</option>
   </select>
 
   <select id="branch">
-    <option value="">Branch</option>
-    <option value="CSE">CSE</option>
-    <option value="IT">IT</option>
-    <option value="ECE">ECE</option>
+    <option value="">Select Branch</option>
+    <option value="CSE1">CSE1</option>
+    <option value="CSE2">CSE2</option>
+    <option value="CSE3">CSE3</option>
+    <option value="CSE4">CSE4</option>
   </select>
 
-  <select id="section">
-    <option value="">Section</option>
-    <option value="1">1</option>
-    <option value="2">2</option>
-    <option value="3">3</option>
-  </select>
-
-  <button id="loadBtn">Load Students</button>
-  <button id="refreshBtn">Refresh Data</button>
+  <input id="lectureId" placeholder="Lecture ID (required)">
+  <button class="saveBtn" onclick="submitAttendance()">🚀 Submit</button>
 </div>
 
 <table>
@@ -63,160 +51,134 @@ th{background:#eef3ff}
 <tr>
   <th>Enrollment</th>
   <th>Name</th>
-  <th>Attendance</th>
+  <th>Present</th>
+  <th>Absent</th>
 </tr>
 </thead>
-<tbody id="studentsBody">
-<tr><td colspan="3" class="no-data">Select filters & load students</td></tr>
-</tbody>
+<tbody id="studentsBody"></tbody>
 </table>
-
-<br>
-<button onclick="submitAttendance()">Submit Attendance</button>
 
 <script>
 /* ===============================
    ACCESS CONTROL
 ================================ */
 const mentorId = localStorage.getItem("mentorId");
-const source = sessionStorage.getItem("accessSource");
+const source   = sessionStorage.getItem("accessSource");
+const ALLOWED_SOURCES = ["ad","admin"];
 
-if(!mentorId || !["ad","admin"].includes(source)){
-  document.body.innerHTML =
-    "<h2 style='text-align:center;margin-top:20vh;color:red'>Access Denied</h2>";
+if(!mentorId || !ALLOWED_SOURCES.includes(source)){
+  document.body.innerHTML = `
+    <h2 style="text-align:center;margin-top:20vh;color:red">
+      ❌ Access Denied
+    </h2>`;
   throw new Error("Unauthorized");
 }
 
 /* ===============================
    API CONFIG
 ================================ */
-const API_ALL_STUDENTS = "https://college-hwbb.onrender.com/api/students"; // fetch all
-const API_SUBMIT       = "https://college-hwbb.onrender.com/api/attendance/mark";
+const API_STUDENTS = "https://college-hwbb.onrender.com/api/admin/students";
+const API_ROBOT = "https://college-hwbb.onrender.com/api/attendance/robot_update";
 
-let allStudents = []; // all students cached
-let marked = {};
+let STUDENTS = [];
+let RECORDS = {};   // { enrollment : "P" | "A" }
 
 /* ===============================
-   FETCH ALL STUDENTS (CACHE)
+   FETCH STUDENTS
 ================================ */
-async function fetchAllStudents(force=false){
-  if(!force){
-    const cached = localStorage.getItem("attendance_students");
-    if(cached){
-      allStudents = JSON.parse(cached);
-      return allStudents;
-    }
-  }
-
-  try{
-    const res = await fetch(API_ALL_STUDENTS);
-    const data = await res.json();
-    if(data.success){
-      allStudents = data.students;
-      localStorage.setItem("attendance_students", JSON.stringify(allStudents));
-      return allStudents;
-    }
-    return [];
-  }catch(err){
-    console.error(err);
-    return [];
+async function fetchStudents(){
+  const res = await fetch(API_STUDENTS);
+  const d = await res.json();
+  if(d.success){
+    STUDENTS = d.students;
+    render();
   }
 }
 
 /* ===============================
-   RENDER STUDENTS WITH FILTER
+   RENDER TABLE
 ================================ */
-function renderTable(){
+function render(){
   const body = document.getElementById("studentsBody");
   const year = document.getElementById("year").value;
-  const branch = document.getElementById("branch").value.toLowerCase();
-  const section = document.getElementById("section").value;
-
-  let filtered = allStudents.filter(s=>{
-    let ok = true;
-    if(year) ok = ok && String(s.year) === year;
-    if(branch) ok = ok && s.branch.toLowerCase() === branch;
-    if(section) ok = ok && s.section == section;
-    return ok;
-  });
+  const branch = document.getElementById("branch").value;
 
   body.innerHTML = "";
+
+  const filtered = STUDENTS.filter(s=>{
+    return (!year || String(s.year)===year) &&
+           (!branch || s.branch===branch);
+  });
+
   if(!filtered.length){
-    body.innerHTML = `<tr><td colspan="3" class="no-data">No students found</td></tr>`;
+    body.innerHTML = `<tr><td colspan="4" class="no-data">No students found</td></tr>`;
     return;
   }
 
-  for(const s of filtered){
+  filtered.forEach(s=>{
     body.innerHTML += `
       <tr>
         <td>${s.enrollment}</td>
         <td>${s.name}</td>
         <td>
-          <button class="mark-btn present" onclick="mark('${s.enrollment}','P',this)">P</button>
-          <button class="mark-btn absent" onclick="mark('${s.enrollment}','A',this)">A</button>
+          <button class="p" onclick="mark('${s.enrollment}','P',this)">P</button>
+        </td>
+        <td>
+          <button class="a" onclick="mark('${s.enrollment}','A',this)">A</button>
         </td>
       </tr>
     `;
-  }
+  });
 }
 
 /* ===============================
-   MARK ATTENDANCE
+   MARK P / A
 ================================ */
 function mark(enr,status,btn){
-  marked[enr] = status;
-  btn.parentElement.querySelectorAll("button")
-     .forEach(b=>b.classList.remove("selected"));
+  RECORDS[enr] = status;
+
+  // visual selection
+  const td = btn.parentElement.parentElement;
+  td.querySelectorAll("button").forEach(b=>b.classList.remove("selected"));
   btn.classList.add("selected");
 }
 
 /* ===============================
-   SUBMIT ATTENDANCE
+   SUBMIT → ROBOT
 ================================ */
 async function submitAttendance(){
-  if(!Object.keys(marked).length){
-    alert("No attendance marked");
-    return;
-  }
+  const lectureId = document.getElementById("lectureId").value.trim();
+  if(!lectureId) return alert("Lecture ID required");
+  if(!Object.keys(RECORDS).length) return alert("No attendance marked");
 
-  try{
-    const res = await fetch(API_SUBMIT,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({records:marked})
-    });
-    const d = await res.json();
-    alert(d.success ? "Attendance Saved" : "Error saving attendance");
-  }catch(err){
-    console.error(err);
-    alert("Server error");
+  const res = await fetch(API_ROBOT,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      lectureId,
+      records: RECORDS
+    })
+  });
+
+  const d = await res.json();
+  if(d.success){
+    alert("✅ Robot processed: " + d.processed);
+    RECORDS = {};
+    document.querySelectorAll(".selected")
+      .forEach(b=>b.classList.remove("selected"));
+  }else{
+    alert("❌ Robot failed");
   }
 }
 
 /* ===============================
-   LOAD & REFRESH BUTTONS
+   EVENTS
 ================================ */
-document.getElementById("loadBtn").addEventListener("click",()=>{
-  renderTable();
+["year","branch"].forEach(id=>{
+  document.getElementById(id).addEventListener("change",render);
 });
 
-document.getElementById("refreshBtn").addEventListener("click",async()=>{
-  await fetchAllStudents(true); // force fetch from API
-  renderTable();
-});
-
-/* ===============================
-   INITIAL LOAD (CACHE)
-================================ */
-document.addEventListener("DOMContentLoaded",async()=>{
-  await fetchAllStudents();
-});
-  
-function logout(){
-  localStorage.clear();
-  sessionStorage.clear();
-  location.href="login.html";
-}
+fetchStudents();
 </script>
 
 </body>

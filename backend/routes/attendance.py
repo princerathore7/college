@@ -17,7 +17,7 @@ db = client["college_db"]
 students_collection = db["student"]
 attendance_collection = db["attendance"]
 attendance_override_collection = db["attendance_override"]
-
+robot_log_collection = db["attendance_robot_log"]
 # ------------------------------------------------
 # 1️⃣ Get students by class (GET)
 # ------------------------------------------------
@@ -40,41 +40,36 @@ def mark_attendance():
         records = data.get("records", {})
         lecture_id = data.get("lectureId")
 
-        if not isinstance(records, dict) or not lecture_id:
+        if not lecture_id or not isinstance(records, dict):
             return jsonify({"success": False, "message": "Invalid payload"}), 400
 
-        today = datetime.utcnow().strftime("%Y-%m-%d")
         saved = 0
 
         for enrollment, status in records.items():
             enrollment = enrollment.strip().upper()
-            if status not in ("P", "A"):
-                continue
 
-            student = students_collection.find_one({"enrollment": enrollment})
-            if not student:
+            if status not in ("P", "A"):
                 continue
 
             attendance_override_collection.update_one(
                 {
-                    "enrollment": enrollment,
-                    "date": today,
-                    "lectureId": lecture_id
+                    "lectureId": lecture_id,
+                    "enrollment": enrollment
                 },
                 {
                     "$set": {
-                        "status": status,
-                        "year": student.get("year"),
-                        "branch": student.get("branch"),
-                        "section": student.get("section"),
-                        "markedAt": datetime.utcnow()
+                        "status": status
                     }
                 },
                 upsert=True
             )
+
             saved += 1
 
-        return jsonify({"success": True, "saved": saved}), 200
+        return jsonify({
+            "success": True,
+            "saved": saved
+        }), 200
 
     except Exception as e:
         print("❌ Attendance error:", e)
@@ -261,3 +256,64 @@ def attendance_summary(enrollment):
             "percentage": percentage
         }
     })
+@attendance_bp.route("/robot_update", methods=["POST"])
+def robot_update_attendance():
+    try:
+        data = request.json or {}
+        lecture_id = data.get("lectureId")
+        records = data.get("records", {})
+
+        if not lecture_id or not isinstance(records, dict):
+            return jsonify({"success": False, "message": "Invalid payload"}), 400
+
+        processed = 0
+
+        for enrollment, status in records.items():
+            enrollment = enrollment.strip().upper()
+            if status not in ("P", "A"):
+                continue
+
+            old = attendance_override_collection.find_one(
+                {"enrollment": enrollment},
+                {"_id": 0}
+            ) or {"total": 0, "present": 0}
+
+            new_total = old["total"] + 1
+            new_present = old["present"] + (1 if status == "P" else 0)
+            percentage = round((new_present / new_total) * 100, 2)
+
+            attendance_override_collection.update_one(
+                {"enrollment": enrollment},
+                {
+                    "$set": {
+                        "total": new_total,
+                        "present": new_present,
+                        "percentage": percentage,
+                        "updatedAt": datetime.utcnow(),
+                        "source": "robot"
+                    }
+                },
+                upsert=True
+            )
+
+            robot_log_collection.insert_one({
+                "lectureId": lecture_id,
+                "enrollment": enrollment,
+                "status": status,
+                "old_total": old["total"],
+                "old_present": old["present"],
+                "new_total": new_total,
+                "new_present": new_present,
+                "processedAt": datetime.utcnow()
+            })
+
+            processed += 1
+
+        return jsonify({
+            "success": True,
+            "processed": processed
+        }), 200
+
+    except Exception as e:
+        print("❌ ROBOT ERROR:", e)
+        return jsonify({"success": False}), 500
