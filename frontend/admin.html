@@ -428,55 +428,82 @@ if(!mentorId || !ALLOWED_SOURCES.includes(source)){
       }
     }
 
-    async function updateClass() {
-      const enrollment = document.getElementById("enrollment").value.trim();
-      const newClass = document.getElementById("newClass").value;
-      const year = document.getElementById("yearSelect").value;
-      const msg = document.getElementById("msg");
+   async function updateClass() {
+  const enrollment = document.getElementById("enrollment").value.trim();
+  const newClass = document.getElementById("newClass").value;
+  const year = document.getElementById("yearSelect").value;
+  const msg = document.getElementById("msg");
 
-      if (!newClass || !year) { 
-        msg.textContent = "Please select both year and class"; 
-        msg.style.color = "red"; 
-        return; 
-      }
+  if (!enrollment) {
+    msg.textContent = "Please enter enrollment number";
+    msg.style.color = "red";
+    return;
+  }
 
-      const combinedClass = `${year} ${newClass}`;
+  if (!newClass || !year) { 
+    msg.textContent = "Please select both year and class"; 
+    msg.style.color = "red"; 
+    return; 
+  }
 
-      try {
-        const res = await fetch(`https://college-hwbb.onrender.com/api/students/${enrollment}/class`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ class: combinedClass })
-        });
-        const data = await res.json();
-        if (res.ok && data.success) { 
-          msg.textContent = `Class updated successfully! (${combinedClass})`; 
-          // After successful update
-await fetch("/api/notify/class", {
-  method: "POST",
-  headers: {"Content-Type":"application/json"},
-  body: JSON.stringify({
-    class: combinedClass,
-    title: "Class Updated",
-    body: `Your class has been updated to ${combinedClass}`,
-    url: "/student-dashboard.html"
-  })
-});
+  const combinedClass = `${year} ${newClass}`;
+  msg.textContent = "⏳ Updating class...";
+  msg.style.color = "blue";
 
-          msg.style.color = "green"; 
-          document.getElementById("sClass").textContent = combinedClass;
-          localStorage.setItem("selectedClass", combinedClass);
-          fetchStudent();
-        } else { 
-          msg.textContent = data.message || "Error updating class"; 
-          msg.style.color = "red"; 
-        }
-      } catch (err) { 
-        console.error(err); 
-        msg.textContent = "Error connecting to server"; 
-        msg.style.color = "red"; 
-      }
+  try {
+    // 1️⃣ Update class on server
+    const res = await fetch(`https://college-hwbb.onrender.com/api/students/${enrollment}/class`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ class: combinedClass })
+    });
+
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      msg.textContent = `✅ Class updated successfully! (${combinedClass})`;
+      msg.style.color = "green";
+      document.getElementById("sClass").textContent = combinedClass;
+      localStorage.setItem("selectedClass", combinedClass);
+
+      // 2️⃣ Send notification about class update
+      await fetch("/api/notify/class", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+          class: combinedClass,
+          title: "Class Updated",
+          body: `Your class has been updated to ${combinedClass}`,
+          url: "/student-dashboard.html"
+        })
+      });
+
+      // 3️⃣ Reset attendance to 0
+      await fetch("https://college-hwbb.onrender.com/api/attendance/reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          enrollment: enrollment,
+          reason: "Class changed"
+        })
+      });
+
+      // 4️⃣ Refresh student info & attendance UI
+      await fetchStudent();
+      alert("✅ Attendance has been reset due to class change");
+
+    } else {
+      msg.textContent = data.message || "❌ Error updating class"; 
+      msg.style.color = "red";
     }
+
+  } catch (err) { 
+    console.error(err); 
+    msg.textContent = "❌ Error connecting to server"; 
+    msg.style.color = "red"; 
+  }
+}
+
 
     async function fetchAttendance(enrollment) {
       try {
@@ -601,6 +628,7 @@ async function init() {
     }
   }
 }
+
 
 </script>
 <script src="/static/js/notifications.js"></script>
