@@ -238,97 +238,58 @@ async function fetchFine(enr){
     return 0;
   }catch(e){return 0;}
 }
-function parseClass(cls){
-  if(!cls) return { year:"—", branch:"—", section:"—" };
-
-  const parts = cls.trim().split(" ");
-  const year = parts[0] || "—";
-  const section = parts.length > 2 ? parts[parts.length - 1] : "—";
-  const branch = parts.slice(1, parts.length > 2 ? -1 : parts.length).join(" ");
-
-  return { year, branch, section };
-}
 
 /* ===============================
    RENDER
 ================================ */
-async function render(refresh = false){
+async function render(refresh=false){
+  studentsBody.innerHTML = `<tr><td colspan="7" class="no-data">Loading...</td></tr>`;
+  const students = await fetchStudents();
 
-  studentsBody.innerHTML =
-    `<tr><td colspan="7" class="no-data">Loading...</td></tr>`;
-
-  const students = await fetchStudents(); // ALWAYS fresh list
-
-  const yearVal   = yearSelect.value;
+  const yearVal = yearSelect.value;
   const branchVal = branchSelect.value.toLowerCase();
   const searchEnr = searchInput.value.trim().toLowerCase();
 
-  let filtered = students.filter(s => {
-    const parsed = parseClass(s.class);
-
+  let filtered = students.filter(s=>{
     let ok = true;
-    if(yearVal)   ok = ok && String(parsed.year) === yearVal;
-    if(branchVal) ok = ok && parsed.branch.toLowerCase().includes(branchVal);
+    if(yearVal) ok = ok && String(s.year) === yearVal;
+    if(branchVal) ok = ok && s.branch.toLowerCase().includes(branchVal);
     if(searchEnr) ok = ok && s.enrollment.toLowerCase().includes(searchEnr);
-
     return ok;
   });
 
   if(!filtered.length){
-    studentsBody.innerHTML =
-      `<tr><td colspan="7" class="no-data">No students found</td></tr>`;
+    studentsBody.innerHTML = `<tr><td colspan="7" class="no-data">No students found</td></tr>`;
     return;
   }
 
   studentsBody.innerHTML = "";
-
   for(const s of filtered){
-
-    // 🔹 ENSURE enrollment is original backend enrollment
-    const enrollment = s.enrollment;
-
-    // 🔹 Always parse latest class
-    const parsed = parseClass(s.class);
-
-    // 🔹 Attendance / Fine
-    let att  = refresh ? await fetchAttendance(enrollment) : s.attendance;
-    let fine = refresh ? await fetchFine(enrollment) : (s.fine ?? 0);
+    let att = refresh ? await fetchAttendance(s.enrollment) : s.attendance;
+    let fine = refresh ? await fetchFine(s.enrollment) : (s.fine ?? 0);
 
     const badge = att
-      ? `
-        <span class="badge ${
-          att.percentage >= 75 ? "green" :
-          att.percentage >= 60 ? "yellow" : "red"
-        }">
-          ${att.percentage}%
-        </span>
-        <button class="actionBtn"
-          onclick="editAttendance('${enrollment}')">Edit</button>
-        `
+      ? `<span class="badge ${att.percentage>=75?"green":att.percentage>=60?"yellow":"red"}">${att.percentage}%</span>
+         <button class="actionBtn" onclick="editAttendance('${s.enrollment}')">Edit</button>`
       : "—";
 
     studentsBody.innerHTML += `
       <tr>
-        <td><strong>${enrollment}</strong></td>
+        <td>${s.enrollment}</td>
         <td>${s.name}</td>
-        <td>${parsed.year}</td>
-        <td>${parsed.branch} ${parsed.section !== "—" ? parsed.section : ""}</td>
+       <td>${s.class || s.year}</td> 
+        <td>${s.branch}</td>
         <td>${badge}</td>
-        <td>
-          ₹ ${s.pendingFees ?? 0}
-          <button class="actionBtn"
-            onclick="editFees('${enrollment}')">Update</button>
+        <td>₹ ${s.pendingFees ?? 0}
+          <button class="actionBtn" onclick="editFees('${s.enrollment}')">Update</button>
         </td>
-        <td>
-          ₹ ${fine}
-          <button class="actionBtn"
-            onclick="editFine('${enrollment}')">Update</button>
+        <td>₹ ${fine}
+          <button class="actionBtn" onclick="editFine('${s.enrollment}')">Update</button>
         </td>
       </tr>
     `;
   }
 }
-
 
 /* ===============================
    REDIRECTION
