@@ -14,11 +14,51 @@ select,input{padding:8px;border-radius:6px;border:1px solid #ccc}
 table{width:100%;border-collapse:collapse}
 th,td{border:1px solid #ddd;padding:8px;text-align:center}
 th{background:#0b1f3a;color:#fff}
-button{padding:6px 10px;border:none;border-radius:5px;cursor:pointer}
+button{padding:6px 12px;border:none;border-radius:5px;cursor:pointer}
 .p{background:#2ecc71;color:#fff}
 .a{background:#e74c3c;color:#fff}
 .selected{outline:3px solid #000}
 .no-data{text-align:center;color:#888}
+
+/* Loading button */
+.loading{
+  pointer-events:none;
+  opacity:.7;
+}
+.spinner{
+  width:16px;height:16px;
+  border:3px solid #fff;
+  border-top:3px solid transparent;
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+  display:inline-block;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Popup modal */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+.modal-content{
+  background:#fff;
+  padding:20px;
+  border-radius:10px;
+  width:300px;
+  text-align:center;
+  box-shadow:0 10px 25px rgba(0,0,0,.2);
+}
+.modal-content h3{margin-top:0;color:#0b1f3a}
+.modal-content p{margin:6px 0}
+.modal-content button{
+  margin-top:10px;
+  background:#0b1f3a;
+  color:#fff;
+}
 </style>
 </head>
 
@@ -52,7 +92,7 @@ button{padding:6px 10px;border:none;border-radius:5px;cursor:pointer}
   </select>
 
   <input id="lectureId" placeholder="Lecture ID">
-  <button onclick="submitAttendance()">🚀 Submit</button>
+  <button id="submitBtn" onclick="submitAttendance()">🚀 Submit</button>
 </div>
 
 <table>
@@ -74,6 +114,17 @@ button{padding:6px 10px;border:none;border-radius:5px;cursor:pointer}
 
 </div>
 
+<!-- RESULT POPUP -->
+<div class="modal" id="resultModal">
+  <div class="modal-content">
+    <h3>✅ Attendance Submitted</h3>
+    <p id="totalCount"></p>
+    <p id="presentCount"></p>
+    <p id="absentCount"></p>
+    <button onclick="closeModal()">OK</button>
+  </div>
+</div>
+
 <script>
 const API_STUDENTS = "https://college-hwbb.onrender.com/api/admin/students";
 const API_ROBOT = "https://college-hwbb.onrender.com/api/attendance/robot_update";
@@ -85,11 +136,20 @@ let RECORDS = {};
    FETCH STUDENTS
 ================================ */
 async function fetchStudents(){
-  const res = await fetch(API_STUDENTS);
-  const d = await res.json();
-  if(d.success){
-    STUDENTS = d.students;
-    render();
+  try{
+    console.log("📡 Fetching students...");
+    const res = await fetch(API_STUDENTS);
+    const d = await res.json();
+    console.log("✅ Students API response:", d);
+
+    if(d.success){
+      STUDENTS = d.students;
+      render();
+    }else{
+      console.error("❌ Students fetch failed");
+    }
+  }catch(err){
+    console.error("🔥 Fetch students error:", err);
   }
 }
 
@@ -98,15 +158,17 @@ async function fetchStudents(){
 ================================ */
 function render(){
   const body = document.getElementById("studentsBody");
-  const y = document.getElementById("year").value;
-  const b = document.getElementById("branch").value;
-  const s = document.getElementById("section").value;
+  const y = year.value;
+  const b = branch.value;
+  const s = section.value;
 
   const filtered = STUDENTS.filter(st =>
     (!y || st.year === y) &&
     (!b || st.branch === b) &&
     (!s || st.section === s)
   );
+
+  console.log("🔍 Filtered students:", filtered.length);
 
   body.innerHTML = "";
   if(!filtered.length){
@@ -129,32 +191,84 @@ function render(){
 }
 
 function mark(enr,status,btn){
-  RECORDS[enr]=status;
+  RECORDS[enr] = status;
+  console.log(`📝 Marked ${enr} as ${status}`);
   btn.closest("tr").querySelectorAll("button").forEach(b=>b.classList.remove("selected"));
   btn.classList.add("selected");
 }
 
+/* ===============================
+   SUBMIT ATTENDANCE
+================================ */
 async function submitAttendance(){
-  const lectureId = lectureId.value.trim();
-  if(!lectureId) return alert("Lecture ID required");
-  if(!Object.keys(RECORDS).length) return alert("No attendance marked");
+  const lecture = lectureId.value.trim();
+  const btn = submitBtn;
 
-  await fetch(API_ROBOT,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({lectureId,records:RECORDS})
-  });
+  if(!lecture){
+    console.warn("⚠ Lecture ID missing");
+    return alert("Lecture ID required");
+  }
+  if(!Object.keys(RECORDS).length){
+    console.warn("⚠ No attendance marked");
+    return alert("No attendance marked");
+  }
 
-  alert("✅ Attendance submitted");
-  RECORDS = {};
-  document.querySelectorAll(".selected").forEach(b=>b.classList.remove("selected"));
+  btn.classList.add("loading");
+  btn.innerHTML = `<span class="spinner"></span> Submitting`;
+
+  try{
+    console.log("🚀 Submitting attendance:", RECORDS);
+    const res = await fetch(API_ROBOT,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({lectureId:lecture,records:RECORDS})
+    });
+
+    const d = await res.json();
+    console.log("✅ Submit response:", d);
+
+    // counts
+    const total = Object.keys(RECORDS).length;
+    const present = Object.values(RECORDS).filter(v=>v==="P").length;
+    const absent = Object.values(RECORDS).filter(v=>v==="A").length;
+
+    showModal(total,present,absent);
+
+    RECORDS = {};
+    document.querySelectorAll(".selected").forEach(b=>b.classList.remove("selected"));
+
+  }catch(err){
+    console.error("🔥 Submit error:", err);
+    alert("Something went wrong while submitting");
+  }
+
+  btn.classList.remove("loading");
+  btn.innerHTML = "🚀 Submit";
 }
 
+/* ===============================
+   MODAL
+================================ */
+function showModal(total,present,absent){
+  totalCount.textContent = `👥 Total Marked: ${total}`;
+  presentCount.textContent = `✅ Present: ${present}`;
+  absentCount.textContent = `❌ Absent: ${absent}`;
+  resultModal.style.display="flex";
+}
+
+function closeModal(){
+  resultModal.style.display="none";
+}
+
+/* ===============================
+   FILTER LISTENERS
+================================ */
 ["year","branch","section"].forEach(id=>{
   document.getElementById(id).addEventListener("change",render);
 });
 
 fetchStudents();
 </script>
+
 </body>
 </html>
