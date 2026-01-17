@@ -51,9 +51,11 @@ button{padding:6px 10px;cursor:pointer}
 <tr>
   <th>Enrollment</th>
   <th>Name</th>
+  <th>Class</th>
   <th>Present</th>
   <th>Absent</th>
 </tr>
+
 </thead>
 <tbody id="studentsBody"></tbody>
 </table>
@@ -72,6 +74,11 @@ if(!mentorId || !ALLOWED_SOURCES.includes(source)){
       ❌ Access Denied
     </h2>`;
   throw new Error("Unauthorized");
+}
+function formatClass(year, branch, section){
+  if(!year || !branch) return "—";
+  const yearText = year=="1"?"1st":year=="2"?"2nd":year=="3"?"3rd":"4th";
+  return `${yearText} Year ${branch} ${section ?? ""}`.trim();
 }
 
 /* ===============================
@@ -115,21 +122,23 @@ function render(){
     return;
   }
 
-  filtered.forEach(s=>{
-    body.innerHTML += `
-      <tr>
-        <td>${s.enrollment}</td>
-        <td>${s.name}</td>
-        <td>
-          <button class="p" onclick="mark('${s.enrollment}','P',this)">P</button>
-        </td>
-        <td>
-          <button class="a" onclick="mark('${s.enrollment}','A',this)">A</button>
-        </td>
-      </tr>
-    `;
-  });
-}
+filtered.forEach(s=>{
+  const classText = formatClass(s.year, s.branch, s.section);
+
+  body.innerHTML += `
+    <tr>
+      <td>${s.enrollment}</td>
+      <td>${s.name}</td>
+      <td><strong>${classText}</strong></td>
+      <td>
+        <button class="p" onclick="mark('${s.enrollment}','P',this)">P</button>
+      </td>
+      <td>
+        <button class="a" onclick="mark('${s.enrollment}','A',this)">A</button>
+      </td>
+    </tr>
+  `;
+});
 
 /* ===============================
    MARK P / A
