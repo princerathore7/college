@@ -55,7 +55,7 @@ def mark_attendance():
             if not student:
                 continue
 
-            attendance_collection.update_one(
+            attendance_override_collection.update_one(
                 {
                     "enrollment": enrollment,
                     "date": today,
