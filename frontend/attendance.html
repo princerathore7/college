@@ -177,6 +177,23 @@ button{
   padding:8px 14px;
   border-radius:6px;
 }
+.refreshBtn, .backBtn{
+  background:#4f46e5; /* nice blue */
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  padding:8px 14px;
+  cursor:pointer;
+  transition:opacity .2s;
+}
+
+.refreshBtn:hover, .backBtn:hover{
+  opacity:.9;
+}
+
+.backBtn{
+  background:#6b7280; /* gray for back */
+}
 
 /* ===============================
    RESPONSIVE
@@ -209,16 +226,17 @@ button{
       <option value="CSE3">CSE3</option>
       <option value="CSE4">CSE4</option>
     </select>
-
-    <input id="lectureId" placeholder="Lecture ID (required)">
-    <button class="saveBtn" onclick="submitAttendance()">🚀 Submit</button>
-  </div>
-
-  <div class="table-wrap">
+ <div class="table-wrap">
     <div class="loader" id="loader">
       <div class="spinner"></div> Loading students...
     </div>
 
+    <input id="lectureId" placeholder="Lecture ID (required)">
+    <button class="saveBtn" onclick="submitAttendance()">🚀 Submit</button>
+  </div>
+  <button class="refreshBtn" onclick="refreshStudents()">🔄 Refresh</button>
+  <button class="backBtn" onclick="goBack()">⬅ Back</button>
+ 
     <table>
       <thead>
         <tr>
@@ -326,6 +344,30 @@ function render(){
         <td><button class="a" onclick="mark('${s.enrollment}','A',this)">A</button></td>
       </tr>`;
   });
+}
+// 🔹 Refresh latest students from server
+async function refreshStudents(){
+  loader.style.display="flex";
+  try {
+    const res = await fetch(API_STUDENTS + `?ts=${Date.now()}`); // prevent caching
+    const d = await res.json();
+    if(d.success){
+      STUDENTS = d.students;
+      render(); // render fresh table
+    } else {
+      alert("❌ Failed to fetch students");
+    }
+  } catch(err){
+    console.error(err);
+    alert("❌ Network error while fetching students");
+  } finally {
+    loader.style.display="none";
+  }
+}
+
+// 🔹 Go back to previous page
+function goBack(){
+  window.history.back();
 }
 
 /* ===============================
