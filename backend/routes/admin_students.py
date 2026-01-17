@@ -24,16 +24,32 @@ attendance_collection = college_db["attendance"]
 
 # -------------------- Helpers --------------------
 
-def extract_year(class_name: str):
+def parse_class_info(class_name: str):
     """
-    "1st Year IT" -> 1
-    "2nd Year CSE" -> 2
+    "2nd Year CSE3" → year=2, branch=CSE, section=3
     """
     if not class_name:
-        return "—"
+        return {
+            "year": "—",
+            "branch": "—",
+            "section": "—"
+        }
 
-    m = re.search(r'(\d)(st|nd|rd|th)\s*Year', class_name)
-    return m.group(1) if m else "—"
+    # year
+    year_match = re.search(r'(\d)(st|nd|rd|th)\s*Year', class_name)
+    year = year_match.group(1) if year_match else "—"
+
+    # branch + section (CSE3, IT2, AIML1 etc)
+    rest = class_name.split("Year")[-1].strip()
+
+    branch = ''.join(filter(str.isalpha, rest)) or "—"
+    section = ''.join(filter(str.isdigit, rest)) or "—"
+
+    return {
+        "year": year,
+        "branch": branch,
+        "section": section
+    }
 
 
 def attendance_summary(enrollment):
@@ -60,7 +76,6 @@ def total_fine(enrollment):
     )
     return sum(f.get("fine", 0) for f in fines)
 
-
 # -------------------- API --------------------
 
 @admin_students_bp.route("", methods=["GET"])
@@ -72,7 +87,8 @@ def get_all_students():
         for s in students:
             enrollment = s.get("enrollment")
 
-            # ✅ Pending Fees (DON'T TOUCH)
+            class_info = parse_class_info(s.get("class"))
+
             fees_doc = fees_collection.find_one(
                 {"enrollment": enrollment},
                 {"_id": 0, "pending_fees": 1}
@@ -82,22 +98,16 @@ def get_all_students():
                 "name": s.get("name"),
                 "enrollment": enrollment,
 
-                # ✅ Branch fix
-                "branch": s.get("branch"),
+                # ✅ ONLY class-derived data
+                "year": class_info["year"],
+                "branch": class_info["branch"],
+                "section": class_info["section"],
 
-                # ❌ Section hata diya (as per your rule)
-                "section": "—",
-
-                # ✅ Proper year from class
-                "year": extract_year(s.get("class")),
-
-                # ✅ FULL attendance object
+                # ✅ Attendance object
                 "attendance": attendance_summary(enrollment),
 
-                # ✅ Fees unchanged
+                # ✅ Fees & fine
                 "pendingFees": fees_doc.get("pending_fees", 0) if fees_doc else 0,
-
-                # ✅ TOTAL fine (FIXED)
                 "fine": total_fine(enrollment)
             })
 
@@ -113,17 +123,3 @@ def get_all_students():
             "success": False,
             "message": "Internal server error"
         }), 500
-@admin_students_bp.route("/students/classes", methods=["GET"])
-def get_students_with_classes():
-    students = list(students_collection.find({}, {"_id":0}))
-
-    for s in students:
-        cls = s.get("class","")
-        if cls:
-            parts = cls.split()
-            s["year"] = parts[0] + " " + parts[1]
-            rest = "".join(parts[2:])
-            s["branch"] = ''.join(filter(str.isalpha, rest))
-            s["section"] = ''.join(filter(str.isdigit, rest))
-
-    return jsonify({"success":True,"students":students})
