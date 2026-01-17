@@ -64,10 +64,8 @@ button{padding:6px 10px;cursor:pointer}
    ACCESS CONTROL
 ================================ */
 const mentorId = localStorage.getItem("mentorId");
-const source   = sessionStorage.getItem("accessSource");
-const ALLOWED_SOURCES = ["ad","admin"];
 
-if(!mentorId || !ALLOWED_SOURCES.includes(source)){
+if (!mentorId) {
   document.body.innerHTML = `
     <h2 style="text-align:center;margin-top:20vh;color:red">
       ❌ Access Denied
