@@ -23,14 +23,8 @@ body{
   padding:15px;
 }
 
-h2{
-  margin:5px 0 15px;
-  color:var(--navy);
-}
+h2{margin:5px 0 15px;color:var(--navy)}
 
-/* ===============================
-   CARD
-================================ */
 .card{
   background:var(--card);
   padding:15px;
@@ -38,9 +32,6 @@ h2{
   box-shadow:0 6px 15px rgba(0,0,0,.08);
 }
 
-/* ===============================
-   CONTROLS
-================================ */
 .controls{
   display:flex;
   gap:10px;
@@ -48,8 +39,7 @@ h2{
   margin-bottom:15px;
 }
 
-.controls select,
-.controls input{
+.controls select,.controls input{
   padding:8px 10px;
   border:1px solid #ccc;
   border-radius:6px;
@@ -65,21 +55,9 @@ h2{
   cursor:pointer;
 }
 
-.saveBtn:hover{opacity:.9}
+.table-wrap{position:relative;overflow-x:auto}
 
-/* ===============================
-   TABLE
-================================ */
-.table-wrap{
-  position:relative;
-  overflow-x:auto;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  background:#fff;
-}
+table{width:100%;border-collapse:collapse;background:#fff}
 
 th,td{
   border:1px solid #ddd;
@@ -88,119 +66,16 @@ th,td{
   font-size:14px;
 }
 
-th{
-  background:var(--navy);
-  color:#fff;
-}
+th{background:var(--navy);color:#fff}
 
-button{
-  padding:6px 10px;
-  border:none;
-  border-radius:5px;
-  cursor:pointer;
-}
+button{padding:6px 10px;border:none;border-radius:5px;cursor:pointer}
 
 .p{background:var(--green);color:#fff}
 .a{background:var(--red);color:#fff}
 
-.selected{
-  outline:3px solid #000;
-}
+.selected{outline:3px solid #000}
 
-.no-data{
-  text-align:center;
-  color:#888;
-}
-
-/* ===============================
-   LOADER
-================================ */
-.loader{
-  position:absolute;
-  top:10px;
-  right:10px;
-  display:none;
-  align-items:center;
-  gap:6px;
-  font-size:13px;
-  color:#555;
-}
-
-.spinner{
-  width:18px;
-  height:18px;
-  border:3px solid #ccc;
-  border-top:3px solid var(--navy);
-  border-radius:50%;
-  animation:spin 1s linear infinite;
-}
-
-@keyframes spin{
-  to{transform:rotate(360deg)}
-}
-
-/* ===============================
-   POPUP
-================================ */
-.popup{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.5);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:1000;
-}
-
-.popup-box{
-  background:#fff;
-  padding:20px;
-  border-radius:10px;
-  max-width:320px;
-  width:90%;
-  text-align:center;
-}
-
-.popup-box h3{
-  color:var(--green);
-  margin-top:0;
-}
-
-.popup-box p{
-  margin:6px 0;
-}
-
-.popup-box button{
-  margin-top:10px;
-  background:var(--navy);
-  color:#fff;
-  padding:8px 14px;
-  border-radius:6px;
-}
-.refreshBtn, .backBtn{
-  background:#4f46e5; /* nice blue */
-  color:#fff;
-  border:none;
-  border-radius:6px;
-  padding:8px 14px;
-  cursor:pointer;
-  transition:opacity .2s;
-}
-
-.refreshBtn:hover, .backBtn:hover{
-  opacity:.9;
-}
-
-.backBtn{
-  background:#6b7280; /* gray for back */
-}
-
-/* ===============================
-   RESPONSIVE
-================================ */
-@media(max-width:600px){
-  th,td{font-size:12px}
-}
+.no-data{text-align:center;color:#888}
 </style>
 </head>
 
@@ -210,274 +85,157 @@ button{
 
 <div class="card">
 
-  <div class="controls">
-    <select id="year">
-      <option value="">All Years</option>
-      <option value="1">1st Year</option>
-      <option value="2">2nd Year</option>
-      <option value="3">3rd Year</option>
-      <option value="4">4th Year</option>
-    </select>
+<div class="controls">
+  <select id="year">
+    <option value="">All Years</option>
+    <option value="1">1st Year</option>
+    <option value="2">2nd Year</option>
+    <option value="3">3rd Year</option>
+    <option value="4">4th Year</option>
+  </select>
 
-    <select id="branch">
-      <option value="">Select Branch</option>
-      <option value="CSE1">CSE1</option>
-      <option value="CSE2">CSE2</option>
-      <option value="CSE3">CSE3</option>
-      <option value="CSE4">CSE4</option>
-    </select>
- <div class="table-wrap">
-    <div class="loader" id="loader">
-      <div class="spinner"></div> Loading students...
-    </div>
+  <select id="branch">
+    <option value="">All Branches</option>
+  </select>
 
-    <input id="lectureId" placeholder="Lecture ID (required)">
-    <button class="saveBtn" onclick="submitAttendance()">🚀 Submit</button>
-  </div>
-  <button class="refreshBtn" onclick="refreshStudents()">🔄 Refresh</button>
-  <button class="backBtn" onclick="goBack()">⬅ Back</button>
- 
-    <table>
-      <thead>
-        <tr>
-          <th>Enrollment</th>
-          <th>Name</th>
-          <th>Class</th>
-          <th>Present</th>
-          <th>Absent</th>
-        </tr>
-      </thead>
-      <tbody id="studentsBody"></tbody>
-    </table>
-  </div>
+  <select id="section">
+    <option value="">All Sections</option>
+  </select>
 
+  <input id="lectureId" placeholder="Lecture ID">
+  <button class="saveBtn" onclick="submitAttendance()">🚀 Submit</button>
 </div>
 
-<!-- POPUP -->
-<div class="popup" id="popup">
-  <div class="popup-box">
-    <h3>✅ Attendance Updated</h3>
-    <p id="popupText"></p>
-    <button onclick="closePopup()">OK</button>
-  </div>
+<table>
+<thead>
+<tr>
+  <th>Enrollment</th>
+  <th>Name</th>
+  <th>Class</th>
+  <th>P</th>
+  <th>A</th>
+</tr>
+</thead>
+<tbody id="studentsBody"></tbody>
+</table>
+
 </div>
 
 <script>
-/* ===============================
-   ACCESS CONTROL
-================================ */
-const mentorId = localStorage.getItem("mentorId");
-if(!mentorId){
-  document.body.innerHTML =
-    `<h2 style="text-align:center;margin-top:20vh;color:red">❌ Access Denied</h2>`;
-  throw new Error("Unauthorized");
-}
-
-/* ===============================
-   API
-================================ */
 const API_STUDENTS = "https://college-hwbb.onrender.com/api/admin/students";
-const API_ROBOT   = "https://college-hwbb.onrender.com/api/attendance/robot_update";
+const API_ROBOT = "https://college-hwbb.onrender.com/api/attendance/robot_update";
 
 let STUDENTS = [];
 let RECORDS = {};
 
-/* ===============================
-   HELPERS
-================================ */
-function formatClass(year,branch,section){
-  if(!year||!branch) return "—";
-  const y = year=="1"?"1st":year=="2"?"2nd":year=="3"?"3rd":"4th";
-  return `${y} Year ${branch} ${section||""}`.trim();
+/* 🔹 ENROLLMENT PARSER */
+function parseEnrollment(enr){
+  enr = enr.toUpperCase();
+  const year = enr[0];
+  const section = enr[enr.length-1];
+  const branch = enr.slice(1,-1);
+  return {year,branch,section};
 }
 
-/* ===============================
-   FETCH STUDENTS
-================================ */
-async function fetchStudent() {
-  const enrollment = document.getElementById("enrollment").value.trim();
-  const msg = document.getElementById("msg");
-
-  if (!enrollment) { 
-    msg.textContent = "Please enter enrollment number"; 
-    msg.style.color = "red"; 
-    return; 
-  }
-
-  msg.textContent = "⏳ Please wait, fetching details...";
-  msg.style.color = "blue";
-
-  try {
-    const res = await fetch(`https://college-hwbb.onrender.com/api/students/${enrollment}/class`);
-    const data = await res.json();
-
-    if (res.ok && data.success) {
-      const student = data.student;
-      document.getElementById("studentInfo").style.display = "block";
-      document.getElementById("sName").textContent = student.name;
-      document.getElementById("sClass").textContent = student.class || "Not Assigned";
-      document.getElementById("yearSelect").value = student.year || "";
-      
-      msg.textContent = "";
-
-      // ✅ Also update STUDENTS array so render() shows correct class
-      const idx = STUDENTS.findIndex(s => s.enrollment === enrollment);
-      if(idx >= 0) STUDENTS[idx].branch = student.branch;
-      if(idx >= 0) STUDENTS[idx].year = student.year;
-      if(idx >= 0) STUDENTS[idx].section = student.section;
-      
-      fetchAttendance(enrollment);
-    } else {
-      msg.textContent = data.message || "Student not found";
-      msg.style.color = "red";
-      document.getElementById("studentInfo").style.display = "none";
-    }
-  } catch (err) {
-    console.error(err);
-    msg.textContent = "Error connecting to server";
-    msg.style.color = "red";
+/* 🔹 FETCH STUDENTS */
+async function fetchStudents(){
+  const res = await fetch(API_STUDENTS);
+  const d = await res.json();
+  if(d.success){
+    STUDENTS = d.students.map(s=>{
+      const p = parseEnrollment(s.enrollment);
+      return {...s,...p};
+    });
+    populateFilters();
+    render();
   }
 }
 
+/* 🔹 POPULATE BRANCH + SECTION */
+function populateFilters(){
+  const branchSet = new Set();
+  const sectionSet = new Set();
 
-/* ===============================
-   RENDER
-================================ */
+  STUDENTS.forEach(s=>{
+    branchSet.add(s.branch);
+    sectionSet.add(s.section);
+  });
+
+  branch.innerHTML = `<option value="">All Branches</option>`;
+  section.innerHTML = `<option value="">All Sections</option>`;
+
+  [...branchSet].sort().forEach(b=>{
+    branch.innerHTML += `<option value="${b}">${b}</option>`;
+  });
+
+  [...sectionSet].sort().forEach(s=>{
+    section.innerHTML += `<option value="${s}">${s}</option>`;
+  });
+}
+
+/* 🔹 RENDER */
 function render(){
-  const body = studentsBody;
-  const year = yearSelect.value;
-  const branch = branchSelect.value;
+  const y = year.value;
+  const b = branch.value;
+  const s = section.value;
 
-  body.innerHTML="";
+  studentsBody.innerHTML="";
 
-  const filtered = STUDENTS.filter(s =>
-    (!year || String(s.year)===year) &&
-    (!branch || s.branch===branch)
+  const filtered = STUDENTS.filter(st =>
+    (!y || st.year===y) &&
+    (!b || st.branch===b) &&
+    (!s || st.section===s)
   );
 
   if(!filtered.length){
-    body.innerHTML =
+    studentsBody.innerHTML =
       `<tr><td colspan="5" class="no-data">No students found</td></tr>`;
     return;
   }
 
-  filtered.forEach(s=>{
-    body.innerHTML += `
-      <tr>
-        <td>${s.enrollment}</td>
-        <td>${s.name}</td>
-        <td><strong>${formatClass(s.year,s.branch,s.section)}</strong></td>
-        <td><button class="p" onclick="mark('${s.enrollment}','P',this)">P</button></td>
-        <td><button class="a" onclick="mark('${s.enrollment}','A',this)">A</button></td>
-      </tr>`;
+  filtered.forEach(st=>{
+    studentsBody.innerHTML += `
+    <tr>
+      <td>${st.enrollment}</td>
+      <td>${st.name}</td>
+      <td><b>${st.year} ${st.branch} ${st.section}</b></td>
+      <td><button class="p" onclick="mark('${st.enrollment}','P',this)">P</button></td>
+      <td><button class="a" onclick="mark('${st.enrollment}','A',this)">A</button></td>
+    </tr>`;
   });
 }
-// 🔹 Refresh latest students from server
-async function refreshStudents() {
-  loader.style.display = "flex";
-  try {
-    const res = await fetch(API_STUDENTS + `?ts=${Date.now()}`); // no cache
-    const d = await res.json();
-    if(d.success){
-      STUDENTS = d.students;
 
-      // Update class in table if student is present
-      render();
-
-      // If currently selected student is visible, refresh their info
-      const enrollment = document.getElementById("enrollment").value.trim();
-      if(enrollment) fetchStudent();
-    } else {
-      alert("❌ Failed to fetch students");
-    }
-  } catch(err){
-    console.error(err);
-    alert("❌ Network error while fetching students");
-  } finally {
-    loader.style.display = "none";
-  }
-}
-
-// 🔹 Go back to previous page
-function goBack(){
-  window.history.back();
-}
-
-/* ===============================
-   MARK
-================================ */
+/* 🔹 MARK */
 function mark(enr,status,btn){
   RECORDS[enr]=status;
-  const row = btn.closest("tr");
-  row.querySelectorAll("button").forEach(b=>b.classList.remove("selected"));
+  btn.closest("tr").querySelectorAll("button")
+    .forEach(b=>b.classList.remove("selected"));
   btn.classList.add("selected");
 }
+
+/* 🔹 SUBMIT */
 async function submitAttendance(){
-  const lectureId = lectureIdInput.value.trim();
-  if(!lectureId) return alert("Lecture ID required");
+  if(!lectureId.value) return alert("Lecture ID required");
   if(!Object.keys(RECORDS).length) return alert("No attendance marked");
 
-  // 🔹 Submit button animation
-  const btn = document.querySelector(".saveBtn");
-  const originalText = btn.innerHTML;
-  btn.innerHTML = '⏳ Submitting...';
-  btn.disabled = true;
+  const res = await fetch(API_ROBOT,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({lectureId:lectureId.value,records:RECORDS})
+  });
 
-  try {
-    const res = await fetch(API_ROBOT,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({lectureId,records:RECORDS})
-    });
-
-    const d = await res.json();
-
-    if(d.success){
-      const total = Object.keys(RECORDS).length;
-      const present = Object.values(RECORDS).filter(v=>v==="P").length;
-      const absent = total - present;
-
-      popupText.innerHTML = `
-        👨‍🎓 Total Updated: <b>${total}</b><br>
-        ✅ Present: <b>${present}</b><br>
-        ❌ Absent: <b>${absent}</b>
-      `;
-
-      popup.style.display="flex";
-      RECORDS={};
-      document.querySelectorAll(".selected")
-        .forEach(b=>b.classList.remove("selected"));
-    } else {
-      alert("❌ Attendance update failed");
-    }
-  } catch(err) {
-    console.error(err);
-    alert("❌ Network or server error");
-  } finally {
-    // 🔹 Reset button after submission
-    btn.innerHTML = originalText;
-    btn.disabled = false;
+  const d = await res.json();
+  if(d.success){
+    alert("✅ Attendance Updated");
+    RECORDS={};
+    document.querySelectorAll(".selected")
+      .forEach(b=>b.classList.remove("selected"));
+  } else {
+    alert("❌ Failed");
   }
 }
 
-
-function closePopup(){
-  popup.style.display="none";
-}
-
-/* ===============================
-   EVENTS
-================================ */
-const yearSelect = document.getElementById("year");
-const branchSelect = document.getElementById("branch");
-const lectureIdInput = document.getElementById("lectureId");
-const loader = document.getElementById("loader");
-const popup = document.getElementById("popup");
-const popupText = document.getElementById("popupText");
-
-yearSelect.onchange = render;
-branchSelect.onchange = render;
-
+year.onchange = branch.onchange = section.onchange = render;
 fetchStudents();
 </script>
 
