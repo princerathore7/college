@@ -155,99 +155,103 @@ th{background:#f1f3f8}
 
 </main>
 
+
 <script>
 /* ===============================
    ACCESS CONTROL — ADMIN PAGES
 ================================ */
-
 const mentorId = localStorage.getItem("mentorId");
 const source   = sessionStorage.getItem("accessSource");
-
-// allowed sources
 const ALLOWED_SOURCES = ["ad", "admin"];
 
 if(!mentorId || !ALLOWED_SOURCES.includes(source)){
   document.body.innerHTML = `
     <h2 style="text-align:center;margin-top:20vh;color:red">
-      ❌ Access Denied <br>
-      Please open this page via Administration Panel
-    </h2>
-  `;
+      ❌ Access Denied <br>Please open this page via Administration Panel
+    </h2>`;
   throw new Error("Unauthorized access");
 }
 
+/* ===============================
+   API ENDPOINTS
+================================ */
 const API_STUDENTS = "https://college-hwbb.onrender.com/api/admin/students";
 const API_ATT = "https://college-hwbb.onrender.com/api/attendance/student/";
 const API_FINE = "https://college-hwbb.onrender.com/api/fines/student-dashboard/";
 
+/* ===============================
+   LOGOUT
+================================ */
 function logout(){
   localStorage.clear();
   location.href="login.html";
 }
 
-/* -------------------------
-   FETCH STUDENTS (CACHE)
--------------------------- */
+/* ===============================
+   FETCH STUDENTS
+================================ */
 async function fetchStudents(force=false){
   if(!force){
     const cached = localStorage.getItem("admin_students");
     if(cached) return JSON.parse(cached);
   }
-
-  const res = await fetch(API_STUDENTS);
-  const data = await res.json();
-  if(data.success){
-    localStorage.setItem("admin_students", JSON.stringify(data.students));
-    return data.students;
+  try{
+    const res = await fetch(API_STUDENTS);
+    const data = await res.json();
+    if(data.success){
+      localStorage.setItem("admin_students", JSON.stringify(data.students));
+      return data.students;
+    }
+    return [];
+  }catch(e){
+    console.error(e);
+    return [];
   }
-  return [];
 }
 
-/* -------------------------
-   FETCH ATTENDANCE (REFRESH)
--------------------------- */
+/* ===============================
+   FETCH ATTENDANCE
+================================ */
 async function fetchAttendance(enr){
-  const res = await fetch(API_ATT + enr);
-  const d = await res.json();
-  return d.success ? d.attendance : null;
+  try{
+    const res = await fetch(API_ATT + enr);
+    const data = await res.json();
+    return data.success ? data.attendance : null;
+  }catch(e){ return null; }
 }
 
-/* -------------------------
-   FETCH FINE (REFRESH)
--------------------------- */
+/* ===============================
+   FETCH FINE
+================================ */
 async function fetchFine(enr){
-  const res = await fetch(API_FINE + enr);
-  const d = await res.json();
-  if(d.success && d.fines.length){
-    return d.fines.reduce((s,f)=>s+f.fine,0);
-  }
-  return 0;
+  try{
+    const res = await fetch(API_FINE + enr);
+    const data = await res.json();
+    if(data.success && data.fines?.length)
+      return data.fines.reduce((s,f)=>s+f.fine,0);
+    return 0;
+  }catch(e){ return 0; }
 }
 
-/* -------------------------
-   RENDER
--------------------------- */
+/* ===============================
+   RENDER STUDENTS TABLE
+================================ */
 async function render(refresh=false){
   const body = document.getElementById("studentsBody");
-
   const yearVal = document.getElementById("year").value;
   const branchVal = document.getElementById("branch").value.toLowerCase();
   const searchEnr = document.getElementById("searchEnrollment").value.trim().toLowerCase();
 
   const students = await fetchStudents(refresh);
 
-  // 🔹 FILTER LOGIC (FIXED)
-  let filtered = students.filter(s => {
+  let filtered = students.filter(s=>{
     let ok = true;
-
     if(yearVal) ok = ok && String(s.year) === yearVal;
-    if(branchVal) ok = ok && s.branch.toLowerCase().includes(branchVal);
+    if(branchVal) ok = ok && (s.branch || "").toLowerCase().includes(branchVal);
     if(searchEnr) ok = ok && s.enrollment.toLowerCase().includes(searchEnr);
-
     return ok;
   });
 
-  // 🔹 Enrollment search ko top pe laane ke liye
   if(searchEnr){
     filtered.sort((a,b)=>{
       return a.enrollment.toLowerCase().startsWith(searchEnr) ? -1 : 1;
@@ -255,7 +259,6 @@ async function render(refresh=false){
   }
 
   body.innerHTML = "";
-
   if(!filtered.length){
     body.innerHTML = `<tr><td colspan="7" class="no-data">No students found</td></tr>`;
     return;
@@ -264,7 +267,6 @@ async function render(refresh=false){
   for(const s of filtered){
     let att = s.attendance;
     let fine = s.fine ?? 0;
-
     if(refresh){
       att = await fetchAttendance(s.enrollment);
       fine = await fetchFine(s.enrollment);
@@ -290,42 +292,37 @@ async function render(refresh=false){
         <td>₹ ${fine}
           <button class="actionBtn" onclick="editFine('${s.enrollment}')">Update</button>
         </td>
-      </tr>
-    `;
+      </tr>`;
   }
 
   localStorage.setItem("admin_students", JSON.stringify(students));
 }
-/* -------------------------
+
+/* ===============================
    REDIRECTION LOGIC
--------------------------- */
+================================ */
 function editAttendance(enr){
   localStorage.setItem("selectedEnrollment", enr);
   window.location.href = "admin.html";
 }
-
 function editFees(enr){
   localStorage.setItem("selectedEnrollment", enr);
   window.location.href = "pending.html";
 }
-
 function editFine(enr){
   localStorage.setItem("selectedEnrollment", enr);
   window.location.href = "admin-fine.html";
 }
-localStorage.removeItem("admin_students");
-render(true);   // force refresh
 
-/* -------------------------
-   FILTERS + REFRESH
--------------------------- */
+/* ===============================
+   EVENTS
+================================ */
 ["year","branch"].forEach(id=>{
   document.getElementById(id).addEventListener("change",()=>render(false));
 });
-refreshBtn.onclick = ()=>render(true);
-
+document.getElementById("searchEnrollment").addEventListener("input",()=>render(false));
+document.getElementById("refreshBtn").addEventListener("click",()=>render(true));
 document.addEventListener("DOMContentLoaded",()=>render(false));
 </script>
-
 </body>
 </html>
