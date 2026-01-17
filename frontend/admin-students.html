@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" href="https://i.ibb.co/8tZSKKT/logo-with-bg.webp">
+<link rel="icon" href="https://i.ibb.co/8tZSKKT/logo-with-bg.webp">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Admin — Students Management</title>
@@ -30,7 +30,6 @@ th{background:#f1f3f8}
 .actionBtn{padding:4px 8px;font-size:12px;border:0;border-radius:6px;cursor:pointer;background:var(--accent);color:#fff;margin-left:4px}
 .no-data{text-align:center;color:#888}
 
-/* LOADER */
 .loader{
   display:none;
   position:absolute;
@@ -76,26 +75,15 @@ th{background:#f1f3f8}
 
   <select id="branch">
     <option value="">All Branches</option>
-    <option value="CSE">CSE - Computer Science Engineering</option>
-    <option value="IT">IT - Information Technology</option>
-    <option value="AIML">AIML - Artificial Intelligence & Machine Learning</option>
-      <option value="AIDS">AIDS - Artificial Intelligence & Data Science</option>
-    <option value="CSBS">CSBS - Computer Science & Business Systems</option>
-    <option value="IOT">IoT - Internet of Things</option>
-
-    <!-- Electrical / Electronics -->
-    <option value="ECE">ECE - Electronics & Communication</option>
-    <option value="EEE">EEE - Electrical & Electronics</option>
-    <option value="EE">EE - Electrical Engineering</option>
-
-    <!-- Mechanical / Automobile -->
-    <option value="ME">ME - Mechanical Engineering</option>
-    <option value="AU">AU - Automobile Engineering</option>
-    <option value="MT">MT - Mechatronics</option>
-
-    <!-- Civil / Core -->
-    <option value="CE">CE - Civil Engineering</option>
-    <option value="CHE">CHE - Chemical Engineering</option>
+    <option value="CSE">CSE</option>
+    <option value="IT">IT</option>
+    <option value="AIML">AIML</option>
+    <option value="AIDS">AIDS</option>
+    <option value="CSBS">CSBS</option>
+    <option value="ECE">ECE</option>
+    <option value="ME">ME</option>
+    <option value="CE">CE</option>
+     <option value="CHE">CHE - Chemical Engineering</option>
     <option value="MIN">MIN - Mining Engineering</option>
     <option value="PET">PET - Petroleum Engineering</option>
 
@@ -137,7 +125,6 @@ th{background:#f1f3f8}
     <option value="DPLASTIC">Diploma - Plastic Engineering</option>
     <option value="DPOLY">Diploma - Polymer Engineering</option>
   </select>
-  </select>
 
   <button class="actionBtn" id="refreshBtn">Refresh</button>
 </div>
@@ -146,7 +133,6 @@ th{background:#f1f3f8}
   type="text"
   id="searchEnrollment"
   placeholder="Search by Enrollment Number"
-  oninput="render()"
   style="padding:8px 12px;border-radius:8px;border:1px solid #d1d5db;font-size:14px;min-width:220px;outline:none;"
 >
 
@@ -171,15 +157,12 @@ th{background:#f1f3f8}
 
 <script>
 /* ===============================
-   ACCESS CONTROL — ADMIN PAGES
+   ACCESS CONTROL
 ================================ */
 const mentorId = localStorage.getItem("mentorId");
 const source   = sessionStorage.getItem("accessSource");
-const ALLOWED_SOURCES = ["ad", "admin"];
-if(!mentorId || !ALLOWED_SOURCES.includes(source)){
-  document.body.innerHTML = `<h2 style="text-align:center;margin-top:20vh;color:red">
-      ❌ Access Denied <br>Please open via Administration Panel
-    </h2>`;
+if(!mentorId || !["ad","admin"].includes(source)){
+  document.body.innerHTML = "<h2 style='text-align:center;color:red'>❌ Access Denied</h2>";
   throw new Error("Unauthorized");
 }
 
@@ -201,127 +184,98 @@ const searchInput = document.getElementById("searchEnrollment");
 const refreshBtn = document.getElementById("refreshBtn");
 
 /* ===============================
-   FUNCTIONS
+   HELPERS
 ================================ */
+function parseClass(cls){
+  if(!cls) return {year:"", branch:"", section:""};
+  const p = cls.trim().split(" ");
+  return {
+    year: p[0] || "",
+    branch: p.slice(1, p.length>2?-1:p.length).join(" "),
+    section: p.length>2 ? p[p.length-1] : ""
+  };
+}
+
 function logout(){
   localStorage.clear();
   location.href="login.html";
 }
 
 async function fetchStudents(){
-  loader.style.display = "flex";
+  loader.style.display="flex";
   try{
-    const res = await fetch(API_STUDENTS);
-    const data = await res.json();
-    return data.success ? data.students : [];
-  }catch(err){
-    console.error(err);
-    return [];
-  }finally{
-    loader.style.display = "none";
-  }
+    const r = await fetch(API_STUDENTS);
+    const d = await r.json();
+    return d.success ? d.students : [];
+  }catch{ return []; }
+  finally{ loader.style.display="none"; }
 }
 
-async function fetchAttendance(enr){
+async function fetchAttendance(e){
   try{
-    const res = await fetch(API_ATT + enr);
-    const d = await res.json();
+    const r = await fetch(API_ATT+e);
+    const d = await r.json();
     return d.success ? d.attendance : null;
-  }catch(e){return null;}
+  }catch{ return null; }
 }
 
-async function fetchFine(enr){
+async function fetchFine(e){
   try{
-    const res = await fetch(API_FINE + enr);
-    const d = await res.json();
-    if(d.success && d.fines.length) return d.fines.reduce((sum,f)=>sum+f.fine,0);
-    return 0;
-  }catch(e){return 0;}
+    const r = await fetch(API_FINE+e);
+    const d = await r.json();
+    return d.success ? d.fines.reduce((s,f)=>s+f.fine,0) : 0;
+  }catch{ return 0; }
 }
 
 /* ===============================
    RENDER
 ================================ */
 async function render(refresh=false){
-  studentsBody.innerHTML =
-    `<tr><td colspan="7" class="no-data">Loading...</td></tr>`;
-
+  studentsBody.innerHTML=`<tr><td colspan="7" class="no-data">Loading...</td></tr>`;
   const students = await fetchStudents();
 
-  const yearVal   = yearSelect.value;
-  const branchVal = branchSelect.value.toLowerCase();
-  const searchEnr = searchInput.value.trim().toLowerCase();
+  const y = yearSelect.value;
+  const b = branchSelect.value.toLowerCase();
+  const s = searchInput.value.toLowerCase();
 
-  let filtered = students.filter(s=>{
-    const parsed = parseClass(s.class);
-
-    let ok = true;
-    if(yearVal)   ok = ok && parsed.year === yearVal;
-    if(branchVal) ok = ok && parsed.branch.toLowerCase().includes(branchVal);
-    if(searchEnr) ok = ok && s.enrollment.toLowerCase().includes(searchEnr);
-
-    return ok;
+  const filtered = students.filter(st=>{
+    const c = parseClass(st.class);
+    return (!y||c.year===y) &&
+           (!b||c.branch.toLowerCase().includes(b)) &&
+           (!s||st.enrollment.toLowerCase().includes(s));
   });
 
   if(!filtered.length){
-    studentsBody.innerHTML =
-      `<tr><td colspan="7" class="no-data">No students found</td></tr>`;
+    studentsBody.innerHTML=`<tr><td colspan="7" class="no-data">No students found</td></tr>`;
     return;
   }
 
-  studentsBody.innerHTML = "";
+  studentsBody.innerHTML="";
+  for(const st of filtered){
+    const c = parseClass(st.class);
+    const att = refresh ? await fetchAttendance(st.enrollment) : st.attendance;
+    const fine = refresh ? await fetchFine(st.enrollment) : (st.fine??0);
 
-  for(const s of filtered){
-    const parsed = parseClass(s.class);
-
-    let att  = refresh ? await fetchAttendance(s.enrollment) : s.attendance;
-    let fine = refresh ? await fetchFine(s.enrollment) : (s.fine ?? 0);
-
-    const badge = att
-      ? `<span class="badge ${
-          att.percentage>=75?"green":
-          att.percentage>=60?"yellow":"red"
-        }">${att.percentage}%</span>
-        <button class="actionBtn"
-          onclick="editAttendance('${s.enrollment}')">Edit</button>`
-      : "—";
-
-    studentsBody.innerHTML += `
-      <tr>
-        <td>${s.enrollment}</td>
-        <td>${s.name}</td>
-        <td>${parsed.year}</td>
-        <td>${parsed.branch} ${parsed.section}</td>
-        <td>${badge}</td>
-        <td>₹ ${s.pendingFees ?? 0}
-          <button class="actionBtn"
-            onclick="editFees('${s.enrollment}')">Update</button>
-        </td>
-        <td>₹ ${fine}
-          <button class="actionBtn"
-            onclick="editFine('${s.enrollment}')">Update</button>
-        </td>
-      </tr>
-    `;
+    studentsBody.innerHTML+=`
+    <tr>
+      <td>${st.enrollment}</td>
+      <td>${st.name}</td>
+      <td>${c.year}</td>
+      <td>${c.branch} ${c.section}</td>
+      <td>${att?`<span class="badge ${att.percentage>=75?"green":att.percentage>=60?"yellow":"red"}">${att.percentage}%</span>`:"—"}</td>
+      <td>₹ ${st.pendingFees??0}</td>
+      <td>₹ ${fine}</td>
+    </tr>`;
   }
 }
-
-
-/* ===============================
-   REDIRECTION
-================================ */
-function editAttendance(enr){ localStorage.setItem("selectedEnrollment",enr); window.location.href="admin.html"; }
-function editFees(enr){ localStorage.setItem("selectedEnrollment",enr); window.location.href="pending.html"; }
-function editFine(enr){ localStorage.setItem("selectedEnrollment",enr); window.location.href="admin-fine.html"; }
 
 /* ===============================
    EVENTS
 ================================ */
-yearSelect.addEventListener("change",()=>render());
-branchSelect.addEventListener("change",()=>render());
-searchInput.addEventListener("input",()=>render());
-refreshBtn.addEventListener("click",()=>render(true));
-
+yearSelect.onchange=()=>render();
+branchSelect.onchange=()=>render();
+searchInput.oninput=()=>render();
+refreshBtn.onclick=()=>render(true);
 document.addEventListener("DOMContentLoaded",()=>render(true));
 </script>
 
