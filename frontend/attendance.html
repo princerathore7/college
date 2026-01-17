@@ -294,24 +294,51 @@ function formatClass(year,branch,section){
 /* ===============================
    FETCH STUDENTS
 ================================ */
-async function fetchStudents(){
-  loader.style.display = "flex";
+async function fetchStudent() {
+  const enrollment = document.getElementById("enrollment").value.trim();
+  const msg = document.getElementById("msg");
+
+  if (!enrollment) { 
+    msg.textContent = "Please enter enrollment number"; 
+    msg.style.color = "red"; 
+    return; 
+  }
+
+  msg.textContent = "⏳ Please wait, fetching details...";
+  msg.style.color = "blue";
 
   try {
-    const res = await fetch(API_STUDENTS + `?ts=${Date.now()}`); // prevent caching
-    const d = await res.json();
+    const res = await fetch(`https://college-hwbb.onrender.com/api/students/${enrollment}/class`);
+    const data = await res.json();
 
-    if(d.success){
-      STUDENTS = d.students; // always fresh
-      render(); // render fresh data
+    if (res.ok && data.success) {
+      const student = data.student;
+      document.getElementById("studentInfo").style.display = "block";
+      document.getElementById("sName").textContent = student.name;
+      document.getElementById("sClass").textContent = student.class || "Not Assigned";
+      document.getElementById("yearSelect").value = student.year || "";
+      
+      msg.textContent = "";
+
+      // ✅ Also update STUDENTS array so render() shows correct class
+      const idx = STUDENTS.findIndex(s => s.enrollment === enrollment);
+      if(idx >= 0) STUDENTS[idx].branch = student.branch;
+      if(idx >= 0) STUDENTS[idx].year = student.year;
+      if(idx >= 0) STUDENTS[idx].section = student.section;
+      
+      fetchAttendance(enrollment);
+    } else {
+      msg.textContent = data.message || "Student not found";
+      msg.style.color = "red";
+      document.getElementById("studentInfo").style.display = "none";
     }
-  } catch(err){
+  } catch (err) {
     console.error(err);
-    studentsBody.innerHTML = `<tr><td colspan="5" class="no-data">Error loading students</td></tr>`;
-  } finally {
-    loader.style.display = "none";
+    msg.textContent = "Error connecting to server";
+    msg.style.color = "red";
   }
 }
+
 
 /* ===============================
    RENDER
@@ -346,14 +373,20 @@ function render(){
   });
 }
 // 🔹 Refresh latest students from server
-async function refreshStudents(){
-  loader.style.display="flex";
+async function refreshStudents() {
+  loader.style.display = "flex";
   try {
-    const res = await fetch(API_STUDENTS + `?ts=${Date.now()}`); // prevent caching
+    const res = await fetch(API_STUDENTS + `?ts=${Date.now()}`); // no cache
     const d = await res.json();
     if(d.success){
       STUDENTS = d.students;
-      render(); // render fresh table
+
+      // Update class in table if student is present
+      render();
+
+      // If currently selected student is visible, refresh their info
+      const enrollment = document.getElementById("enrollment").value.trim();
+      if(enrollment) fetchStudent();
     } else {
       alert("❌ Failed to fetch students");
     }
@@ -361,7 +394,7 @@ async function refreshStudents(){
     console.error(err);
     alert("❌ Network error while fetching students");
   } finally {
-    loader.style.display="none";
+    loader.style.display = "none";
   }
 }
 
