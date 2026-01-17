@@ -209,15 +209,23 @@ function logout(){
   location.href="login.html";
 }
 
-function getClassLabel(s){
-  // 1️⃣ exact class from admin.html update
-  if(s.class && s.class.trim()) return s.class;
+/* 🔥 MAIN FIX — class parser */
+function parseClass(classStr){
+  if(!classStr) return { year:"—", branch:"—", section:"—", label:"—" };
 
-  // 2️⃣ fallback = year + branch
-  if(s.year && s.branch) return `${s.year} ${s.branch}`;
+  // Example: "2nd Year CSE1"
+  const parts = classStr.trim().split(" ");
+  const year = parts[0] + " " + parts[1];   // "2nd Year"
 
-  // 3️⃣ final fallback
-  return "—";
+  const rest = parts.slice(2).join("");     // "CSE1"
+  const match = rest.match(/^([A-Z]+)(\d+)$/);
+
+  return {
+    year,
+    branch: match ? match[1] : rest,
+    section: match ? match[2] : "—",
+    label: classStr
+  };
 }
 
 /* ===============================
@@ -229,8 +237,8 @@ async function fetchStudents(){
     const res = await fetch(API_STUDENTS);
     const data = await res.json();
     return data.success ? data.students : [];
-  }catch(err){
-    console.error(err);
+  }catch(e){
+    console.error(e);
     return [];
   }finally{
     loader.style.display = "none";
@@ -239,18 +247,18 @@ async function fetchStudents(){
 
 async function fetchAttendance(enr){
   try{
-    const res = await fetch(API_ATT + enr);
-    const d = await res.json();
+    const r = await fetch(API_ATT + enr);
+    const d = await r.json();
     return d.success ? d.attendance : null;
   }catch(e){ return null; }
 }
 
 async function fetchFine(enr){
   try{
-    const res = await fetch(API_FINE + enr);
-    const d = await res.json();
+    const r = await fetch(API_FINE + enr);
+    const d = await r.json();
     if(d.success && d.fines?.length)
-      return d.fines.reduce((sum,f)=>sum+f.fine,0);
+      return d.fines.reduce((s,f)=>s+f.fine,0);
     return 0;
   }catch(e){ return 0; }
 }
@@ -264,15 +272,18 @@ async function render(refresh=false){
 
   const students = await fetchStudents();
 
-  const yearVal = yearSelect.value;
+  const yearVal   = yearSelect.value;
   const branchVal = branchSelect.value.toLowerCase();
-  const searchEnr = searchInput.value.trim().toLowerCase();
+  const searchVal = searchInput.value.trim().toLowerCase();
 
   let filtered = students.filter(s=>{
+    const cls = parseClass(s.class);
     let ok = true;
-    if(yearVal) ok = ok && String(s.year) === yearVal;
-    if(branchVal) ok = ok && s.branch?.toLowerCase().includes(branchVal);
-    if(searchEnr) ok = ok && s.enrollment.toLowerCase().includes(searchEnr);
+
+    if(yearVal)   ok = ok && cls.year.includes(yearVal);
+    if(branchVal) ok = ok && cls.branch.toLowerCase().includes(branchVal);
+    if(searchVal) ok = ok && s.enrollment.toLowerCase().includes(searchVal);
+
     return ok;
   });
 
@@ -285,6 +296,7 @@ async function render(refresh=false){
   studentsBody.innerHTML = "";
 
   for(const s of filtered){
+    const cls = parseClass(s.class);
     const att  = refresh ? await fetchAttendance(s.enrollment) : s.attendance;
     const fine = refresh ? await fetchFine(s.enrollment) : (s.fine ?? 0);
 
@@ -293,16 +305,16 @@ async function render(refresh=false){
           att.percentage>=75?"green":
           att.percentage>=60?"yellow":"red"
         }">${att.percentage}%</span>
-         <button class="actionBtn"
-           onclick="editAttendance('${s.enrollment}')">Edit</button>`
+        <button class="actionBtn"
+          onclick="editAttendance('${s.enrollment}')">Edit</button>`
       : "—";
 
     studentsBody.innerHTML += `
       <tr>
         <td>${s.enrollment}</td>
         <td>${s.name}</td>
-        <td>${getClassLabel(s)}</td>
-        <td>${s.branch || "—"}</td>
+        <td>${cls.year}</td>
+        <td>${cls.branch} ${cls.section}</td>
         <td>${badge}</td>
         <td>₹ ${s.pendingFees ?? 0}
           <button class="actionBtn"
@@ -321,15 +333,15 @@ async function render(refresh=false){
 ================================ */
 function editAttendance(enr){
   localStorage.setItem("selectedEnrollment",enr);
-  window.location.href="admin.html";
+  location.href="admin.html";
 }
 function editFees(enr){
   localStorage.setItem("selectedEnrollment",enr);
-  window.location.href="pending.html";
+  location.href="pending.html";
 }
 function editFine(enr){
   localStorage.setItem("selectedEnrollment",enr);
-  window.location.href="admin-fine.html";
+  location.href="admin-fine.html";
 }
 
 /* ===============================
@@ -339,16 +351,13 @@ yearSelect.addEventListener("change",()=>render());
 branchSelect.addEventListener("change",()=>render());
 searchInput.addEventListener("input",()=>render());
 refreshBtn.addEventListener("click",()=>render(true));
-
 document.addEventListener("DOMContentLoaded",()=>render(true));
 
 /* ===============================
-   REAL-TIME SYNC (ADMIN.HTML)
+   REAL-TIME SYNC
 ================================ */
 window.addEventListener("storage",(e)=>{
-  if(e.key === "refreshAdminStudents"){
-    render(true);
-  }
+  if(e.key === "refreshAdminStudents") render(true);
 });
 </script>
 
