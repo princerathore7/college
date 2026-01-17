@@ -277,7 +277,7 @@ async function render(refresh=false){
       <tr>
         <td>${s.enrollment}</td>
         <td>${s.name}</td>
-        <td>${s.year}</td>
+       <td>${s.class || s.year}</td> 
         <td>${s.branch}</td>
         <td>${badge}</td>
         <td>₹ ${s.pendingFees ?? 0}
