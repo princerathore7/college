@@ -250,10 +250,22 @@ async function render(refresh=false){
   const branchVal = branchSelect.value.toLowerCase();
   const searchEnr = searchInput.value.trim().toLowerCase();
 
+  // Helper: parse class string "3 CSE 2" => {year, branch, section}
+  function parseClass(cls){
+    if(!cls) return {year:"—", branch:"—", section:"—"};
+    const parts = cls.trim().split(" ");
+    const year = parts[0] || "—";
+    const section = parts[parts.length-1] || "—";
+    const branch = parts.slice(1, parts.length-1).join(" ") || "—";
+    return {year, branch, section};
+  }
+
+  // Filter students
   let filtered = students.filter(s=>{
+    const parsed = parseClass(s.class);
     let ok = true;
-    if(yearVal) ok = ok && String(s.year) === yearVal;
-    if(branchVal) ok = ok && s.branch.toLowerCase().includes(branchVal);
+    if(yearVal) ok = ok && String(parsed.year) === yearVal;
+    if(branchVal) ok = ok && parsed.branch.toLowerCase().includes(branchVal);
     if(searchEnr) ok = ok && s.enrollment.toLowerCase().includes(searchEnr);
     return ok;
   });
@@ -263,8 +275,10 @@ async function render(refresh=false){
     return;
   }
 
+  // Render table
   studentsBody.innerHTML = "";
   for(const s of filtered){
+    const parsed = parseClass(s.class);
     let att = refresh ? await fetchAttendance(s.enrollment) : s.attendance;
     let fine = refresh ? await fetchFine(s.enrollment) : (s.fine ?? 0);
 
@@ -277,8 +291,8 @@ async function render(refresh=false){
       <tr>
         <td>${s.enrollment}</td>
         <td>${s.name}</td>
-       <td>${s.class || s.year}</td> 
-        <td>${s.branch}</td>
+        <td>${parsed.year}</td>
+        <td>${parsed.branch}</td>
         <td>${badge}</td>
         <td>₹ ${s.pendingFees ?? 0}
           <button class="actionBtn" onclick="editFees('${s.enrollment}')">Update</button>
