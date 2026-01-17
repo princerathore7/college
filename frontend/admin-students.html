@@ -168,7 +168,6 @@ th{background:#f1f3f8}
 </table>
 
 </main>
-
 <script>
 /* ===============================
    ACCESS CONTROL — ADMIN PAGES
@@ -176,8 +175,10 @@ th{background:#f1f3f8}
 const mentorId = localStorage.getItem("mentorId");
 const source   = sessionStorage.getItem("accessSource");
 const ALLOWED_SOURCES = ["ad", "admin"];
+
 if(!mentorId || !ALLOWED_SOURCES.includes(source)){
-  document.body.innerHTML = `<h2 style="text-align:center;margin-top:20vh;color:red">
+  document.body.innerHTML = `
+    <h2 style="text-align:center;margin-top:20vh;color:red">
       ❌ Access Denied <br>Please open via Administration Panel
     </h2>`;
   throw new Error("Unauthorized");
@@ -201,13 +202,27 @@ const searchInput = document.getElementById("searchEnrollment");
 const refreshBtn = document.getElementById("refreshBtn");
 
 /* ===============================
-   FUNCTIONS
+   HELPERS
 ================================ */
 function logout(){
   localStorage.clear();
   location.href="login.html";
 }
 
+function getClassLabel(s){
+  // 1️⃣ exact class from admin.html update
+  if(s.class && s.class.trim()) return s.class;
+
+  // 2️⃣ fallback = year + branch
+  if(s.year && s.branch) return `${s.year} ${s.branch}`;
+
+  // 3️⃣ final fallback
+  return "—";
+}
+
+/* ===============================
+   FETCH
+================================ */
 async function fetchStudents(){
   loader.style.display = "flex";
   try{
@@ -227,23 +242,26 @@ async function fetchAttendance(enr){
     const res = await fetch(API_ATT + enr);
     const d = await res.json();
     return d.success ? d.attendance : null;
-  }catch(e){return null;}
+  }catch(e){ return null; }
 }
 
 async function fetchFine(enr){
   try{
     const res = await fetch(API_FINE + enr);
     const d = await res.json();
-    if(d.success && d.fines.length) return d.fines.reduce((sum,f)=>sum+f.fine,0);
+    if(d.success && d.fines?.length)
+      return d.fines.reduce((sum,f)=>sum+f.fine,0);
     return 0;
-  }catch(e){return 0;}
+  }catch(e){ return 0; }
 }
 
 /* ===============================
    RENDER
 ================================ */
 async function render(refresh=false){
-  studentsBody.innerHTML = `<tr><td colspan="7" class="no-data">Loading...</td></tr>`;
+  studentsBody.innerHTML =
+    `<tr><td colspan="7" class="no-data">Loading...</td></tr>`;
+
   const students = await fetchStudents();
 
   const yearVal = yearSelect.value;
@@ -253,50 +271,66 @@ async function render(refresh=false){
   let filtered = students.filter(s=>{
     let ok = true;
     if(yearVal) ok = ok && String(s.year) === yearVal;
-    if(branchVal) ok = ok && s.branch.toLowerCase().includes(branchVal);
+    if(branchVal) ok = ok && s.branch?.toLowerCase().includes(branchVal);
     if(searchEnr) ok = ok && s.enrollment.toLowerCase().includes(searchEnr);
     return ok;
   });
 
   if(!filtered.length){
-    studentsBody.innerHTML = `<tr><td colspan="7" class="no-data">No students found</td></tr>`;
+    studentsBody.innerHTML =
+      `<tr><td colspan="7" class="no-data">No students found</td></tr>`;
     return;
   }
 
   studentsBody.innerHTML = "";
+
   for(const s of filtered){
-    let att = refresh ? await fetchAttendance(s.enrollment) : s.attendance;
-    let fine = refresh ? await fetchFine(s.enrollment) : (s.fine ?? 0);
+    const att  = refresh ? await fetchAttendance(s.enrollment) : s.attendance;
+    const fine = refresh ? await fetchFine(s.enrollment) : (s.fine ?? 0);
 
     const badge = att
-      ? `<span class="badge ${att.percentage>=75?"green":att.percentage>=60?"yellow":"red"}">${att.percentage}%</span>
-         <button class="actionBtn" onclick="editAttendance('${s.enrollment}')">Edit</button>`
+      ? `<span class="badge ${
+          att.percentage>=75?"green":
+          att.percentage>=60?"yellow":"red"
+        }">${att.percentage}%</span>
+         <button class="actionBtn"
+           onclick="editAttendance('${s.enrollment}')">Edit</button>`
       : "—";
 
     studentsBody.innerHTML += `
       <tr>
         <td>${s.enrollment}</td>
         <td>${s.name}</td>
-       <td>${s.class || s.year}</td> 
-        <td>${s.branch}</td>
+        <td>${getClassLabel(s)}</td>
+        <td>${s.branch || "—"}</td>
         <td>${badge}</td>
         <td>₹ ${s.pendingFees ?? 0}
-          <button class="actionBtn" onclick="editFees('${s.enrollment}')">Update</button>
+          <button class="actionBtn"
+            onclick="editFees('${s.enrollment}')">Update</button>
         </td>
         <td>₹ ${fine}
-          <button class="actionBtn" onclick="editFine('${s.enrollment}')">Update</button>
+          <button class="actionBtn"
+            onclick="editFine('${s.enrollment}')">Update</button>
         </td>
-      </tr>
-    `;
+      </tr>`;
   }
 }
 
 /* ===============================
    REDIRECTION
 ================================ */
-function editAttendance(enr){ localStorage.setItem("selectedEnrollment",enr); window.location.href="admin.html"; }
-function editFees(enr){ localStorage.setItem("selectedEnrollment",enr); window.location.href="pending.html"; }
-function editFine(enr){ localStorage.setItem("selectedEnrollment",enr); window.location.href="admin-fine.html"; }
+function editAttendance(enr){
+  localStorage.setItem("selectedEnrollment",enr);
+  window.location.href="admin.html";
+}
+function editFees(enr){
+  localStorage.setItem("selectedEnrollment",enr);
+  window.location.href="pending.html";
+}
+function editFine(enr){
+  localStorage.setItem("selectedEnrollment",enr);
+  window.location.href="admin-fine.html";
+}
 
 /* ===============================
    EVENTS
@@ -307,7 +341,17 @@ searchInput.addEventListener("input",()=>render());
 refreshBtn.addEventListener("click",()=>render(true));
 
 document.addEventListener("DOMContentLoaded",()=>render(true));
+
+/* ===============================
+   REAL-TIME SYNC (ADMIN.HTML)
+================================ */
+window.addEventListener("storage",(e)=>{
+  if(e.key === "refreshAdminStudents"){
+    render(true);
+  }
+});
 </script>
+
 
 </body>
 </html>
