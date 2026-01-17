@@ -329,42 +329,54 @@ function mark(enr,status,btn){
   row.querySelectorAll("button").forEach(b=>b.classList.remove("selected"));
   btn.classList.add("selected");
 }
-
-/* ===============================
-   SUBMIT
-================================ */
 async function submitAttendance(){
   const lectureId = lectureIdInput.value.trim();
   if(!lectureId) return alert("Lecture ID required");
   if(!Object.keys(RECORDS).length) return alert("No attendance marked");
 
-  const res = await fetch(API_ROBOT,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({lectureId,records:RECORDS})
-  });
+  // 🔹 Submit button animation
+  const btn = document.querySelector(".saveBtn");
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '⏳ Submitting...';
+  btn.disabled = true;
 
-  const d = await res.json();
+  try {
+    const res = await fetch(API_ROBOT,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({lectureId,records:RECORDS})
+    });
 
-  if(d.success){
-    const total = Object.keys(RECORDS).length;
-    const present = Object.values(RECORDS).filter(v=>v==="P").length;
-    const absent = total - present;
+    const d = await res.json();
 
-    popupText.innerHTML = `
-      👨‍🎓 Total Updated: <b>${total}</b><br>
-      ✅ Present: <b>${present}</b><br>
-      ❌ Absent: <b>${absent}</b>
-    `;
+    if(d.success){
+      const total = Object.keys(RECORDS).length;
+      const present = Object.values(RECORDS).filter(v=>v==="P").length;
+      const absent = total - present;
 
-    popup.style.display="flex";
-    RECORDS={};
-    document.querySelectorAll(".selected")
-      .forEach(b=>b.classList.remove("selected"));
-  }else{
-    alert("❌ Attendance update failed");
+      popupText.innerHTML = `
+        👨‍🎓 Total Updated: <b>${total}</b><br>
+        ✅ Present: <b>${present}</b><br>
+        ❌ Absent: <b>${absent}</b>
+      `;
+
+      popup.style.display="flex";
+      RECORDS={};
+      document.querySelectorAll(".selected")
+        .forEach(b=>b.classList.remove("selected"));
+    } else {
+      alert("❌ Attendance update failed");
+    }
+  } catch(err) {
+    console.error(err);
+    alert("❌ Network or server error");
+  } finally {
+    // 🔹 Reset button after submission
+    btn.innerHTML = originalText;
+    btn.disabled = false;
   }
 }
+
 
 function closePopup(){
   popup.style.display="none";
