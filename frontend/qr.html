@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pay with QR</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<style>
+body{
+  font-family: Arial;
+  background:#f4f7fb;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+.box{
+  background:#fff;
+  padding:25px;
+  width:320px;
+  border-radius:10px;
+  box-shadow:0 10px 25px rgba(0,0,0,.1);
+  text-align:center;
+}
+#timer{color:#e74c3c;font-weight:bold;margin-top:10px}
+button{
+  background:#003366;
+  color:#fff;
+  border:none;
+  padding:12px;
+  width:100%;
+  border-radius:6px;
+  font-size:16px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2>Scan & Pay</h2>
+  <p><b>Enrollment:</b> <span id="enr"></span></p>
+  <p><b>Amount:</b> ₹<span id="amt"></span></p>
+
+  <button onclick="startPayment()">Generate QR</button>
+  <div id="timer"></div>
+</div>
+
+<script>
+const API_BASE = "https://college-hwbb.onrender.com";
+
+const params = new URLSearchParams(window.location.search);
+const enrollment = params.get("enrollment");
+const amount = params.get("amount");
+
+document.getElementById("enr").innerText = enrollment;
+document.getElementById("amt").innerText = amount;
+
+let rzp;
+let timeLeft = 300;
+let timerInterval;
+
+function startTimer(){
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    document.getElementById("timer").innerText =
+      `Time left: ${Math.floor(timeLeft/60)}:${(timeLeft%60).toString().padStart(2,"0")}`;
+
+    if(timeLeft <= 0){
+      clearInterval(timerInterval);
+      alert("QR expired");
+      if(rzp) rzp.close();
+    }
+  }, 1000);
+}
+
+async function startPayment(){
+  try{
+    const res = await fetch(`${API_BASE}/api/fines/create-order`,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({
+        enrollment: enrollment,
+        amount: amount
+      })
+    });
+
+    const data = await res.json();
+    if(!data.success){
+      alert("Order create failed");
+      return;
+    }
+
+    const options = {
+      key: "RAZORPAY_KEY_ID",
+      amount: data.amount * 100,
+      currency: "INR",
+      name: "Acropolis Institute",
+      description: "Fine Payment (QR)",
+      order_id: data.order_id,
+
+      notes: { enrollment },
+
+      handler: function () {
+        clearInterval(timerInterval);
+        alert("Payment received. Please wait for confirmation.");
+        window.location.href = "fine.html";
+      },
+
+      method:{ upi:true },
+      theme:{ color:"#003366" }
+    };
+
+    rzp = new Razorpay(options);
+    rzp.open();
+    startTimer();
+
+  }catch(e){
+    alert("Server error");
+    console.error(e);
+  }
+}
+</script>
+
+</body>
+</html>

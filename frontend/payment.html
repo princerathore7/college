@@ -83,7 +83,8 @@ button {
   </div>
 
   <button id="upiBtn" onclick="startPayment()">Pay via UPI (GPay / PhonePe / Paytm)</button>
-  <button id="qrBtn" onclick="startPayment()">Pay via QR Code</button>
+<button id="qrBtn" onclick="openQRPage()">Pay via QR Code</button>
+
 
   <p class="note">
     Please complete the payment. Partial payments are supported.
@@ -103,11 +104,10 @@ document.getElementById("amount").innerText = amount;
 document.getElementById("reason").innerText = reason;
 
 /************************************************
-  START PAYMENT (SECURE FLOW)
+  UPI DIRECT PAYMENT (NO QR PAGE)
 ************************************************/
 async function startPayment() {
   try {
-    // 1️⃣ Create order from backend
     const res = await fetch(`${API_BASE}/api/fines/create-order`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -118,15 +118,13 @@ async function startPayment() {
     });
 
     const data = await res.json();
-
     if (!data.success) {
       alert("Unable to start payment");
       return;
     }
 
-    // 2️⃣ Open Razorpay checkout
     const options = {
-      key: "RAZORPAY_KEY_ID_HERE", // later env se aayega
+      key: "RAZORPAY_KEY_ID_HERE",
       amount: data.amount * 100,
       currency: "INR",
       name: "Acropolis Institute Indore",
@@ -135,7 +133,6 @@ async function startPayment() {
 
       handler: function () {
         alert("Payment received. Verification in progress...");
-        // Real confirmation webhook se hogi
         window.location.href = "fine.html";
       },
 
@@ -143,8 +140,8 @@ async function startPayment() {
         enrollment: enrollment
       },
 
-      prefill: {
-        method: "upi"
+      method: {
+        upi: true
       },
 
       theme: {
@@ -159,6 +156,14 @@ async function startPayment() {
     console.error(err);
     alert("Server error. Please try again.");
   }
+}
+
+/************************************************
+  QR PAYMENT → REDIRECT TO LOCKED QR PAGE
+************************************************/
+function openQRPage() {
+  const qrUrl = `qr.html?enrollment=${encodeURIComponent(enrollment)}&amount=${encodeURIComponent(amount)}&reason=${encodeURIComponent(reason)}`;
+  window.location.href = qrUrl;
 }
 </script>
 
