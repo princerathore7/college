@@ -95,8 +95,8 @@ async function startPayment(){
     }
 
     const options = {
-      key: "RAZORPAY_KEY_ID",
-      amount: data.amount * 100,
+      key: data.key,
+      amount: data.amount,
       currency: "INR",
       name: "Acropolis Institute",
       description: "Fine Payment (QR)",
