@@ -90,7 +90,9 @@ button {
     Please complete the payment. Partial payments are supported.
   </p>
 </div>
-
+   <button class="back-btn" onclick="goBack()">
+  ← Back
+</button>
 <script>
 const API_BASE = "https://college-hwbb.onrender.com";
 
@@ -164,6 +166,9 @@ async function startPayment() {
 function openQRPage() {
   const qrUrl = `qr.html?enrollment=${encodeURIComponent(enrollment)}&amount=${encodeURIComponent(amount)}&reason=${encodeURIComponent(reason)}`;
   window.location.href = qrUrl;
+}
+function goBack() {
+  window.history.back(); 
 }
 </script>
 
