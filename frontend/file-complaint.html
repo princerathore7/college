@@ -109,18 +109,40 @@ button:hover{
 
     <div class="msg" id="msg"></div>
 </div>
-
 <script>
+/* ==============================
+   GET QUERY PARAMS
+================================ */
+function getQueryParam(key) {
+  return new URLSearchParams(window.location.search).get(key);
+}
+
 /* ==============================
    LOAD STUDENT DATA (Auto-Fill)
 ================================ */
 const enrollmentEl = document.getElementById("enrollment");
-const nameEl = document.getElementById("name");
-const classEl = document.getElementById("class");
+const nameEl       = document.getElementById("name");
+const classEl      = document.getElementById("class");
 
-enrollmentEl.value = localStorage.getItem("student_enrollment") || "";
-nameEl.value       = localStorage.getItem("student_name") || "";
-classEl.value      = localStorage.getItem("student_class") || "";
+// 🔹 URL se lo
+const enrollmentQP = getQueryParam("enrollment");
+const nameQP       = getQueryParam("name");
+const classQP      = getQueryParam("class");
+
+// 🔹 URL > localStorage priority
+const enrollment = enrollmentQP || localStorage.getItem("enrollment") || "";
+const name       = nameQP       || localStorage.getItem("name") || "";
+const studentClass = classQP    || localStorage.getItem("studentClass") || "";
+
+// 🔹 Inputs fill
+enrollmentEl.value = enrollment;
+nameEl.value       = name;
+classEl.value      = studentClass;
+
+// 🔹 future pages ke liye save
+localStorage.setItem("enrollment", enrollment);
+localStorage.setItem("name", name);
+localStorage.setItem("studentClass", studentClass);
 
 /* ==============================
    IMAGE → BASE64 + PREVIEW
@@ -131,74 +153,73 @@ const photoInput = document.getElementById("photo");
 const previewBox = document.getElementById("preview");
 
 photoInput.addEventListener("change", () => {
-    const file = photoInput.files[0];
-    if (!file) return;
+  const file = photoInput.files[0];
+  if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-        base64Image = reader.result;
-        previewBox.innerHTML = `<img src="${base64Image}" alt="Preview">`;
-    };
-    reader.readAsDataURL(file);
+  const reader = new FileReader();
+  reader.onload = () => {
+    base64Image = reader.result;
+    previewBox.innerHTML = `<img src="${base64Image}" style="max-width:120px">`;
+  };
+  reader.readAsDataURL(file);
 });
 
 /* ==============================
    SUBMIT COMPLAINT
 ================================ */
 function submitComplaint() {
-    const data = {
-        enrollment: enrollmentEl.value.trim(),
-        name: nameEl.value.trim(),
-        class: classEl.value.trim(),
-        category: document.getElementById("category").value,
-        description: document.getElementById("description").value.trim(),
-        photo: base64Image
-    };
+  const data = {
+    enrollment: enrollmentEl.value.trim(),
+    name: nameEl.value.trim(),
+    class: classEl.value.trim(),
+    category: document.getElementById("category").value,
+    description: document.getElementById("description").value.trim(),
+    photo: base64Image
+  };
 
-    if (!data.category || !data.description || !data.photo) {
-        showMsg("❌ Please fill all required fields", "red");
-        return;
+  if (!data.enrollment || !data.name || !data.class ||
+      !data.category || !data.description || !data.photo) {
+    showMsg("❌ Please fill all required fields", "red");
+    return;
+  }
+
+  showMsg("⏳ Submitting complaint...", "orange");
+
+  fetch("/api/missing/submit", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  })
+  .then(res => res.json())
+  .then(res => {
+    if (res.success) {
+      showMsg("✅ Complaint submitted successfully", "green");
+      resetForm();
+    } else {
+      showMsg("❌ " + (res.message || "Submission failed"), "red");
     }
-
-    showMsg("⏳ Submitting complaint...", "orange");
-
-    fetch("/api/missing/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-    })
-    .then(res => res.json())
-    .then(res => {
-        if (res.success) {
-            showMsg("✅ Complaint submitted successfully", "green");
-            resetForm();
-        } else {
-            showMsg("❌ " + (res.message || "Submission failed"), "red");
-        }
-    })
-    .catch(() => {
-        showMsg("❌ Server error. Please try again later", "red");
-    });
+  })
+  .catch(() => {
+    showMsg("❌ Server error. Please try again later", "red");
+  });
 }
 
 /* ==============================
    HELPERS
 ================================ */
 function resetForm() {
-    document.getElementById("description").value = "";
-    document.getElementById("category").value = "";
-    photoInput.value = "";
-    previewBox.innerHTML = "";
-    base64Image = "";
+  document.getElementById("description").value = "";
+  document.getElementById("category").value = "";
+  photoInput.value = "";
+  previewBox.innerHTML = "";
+  base64Image = "";
 }
 
 function showMsg(text, color) {
-    const msg = document.getElementById("msg");
-    msg.style.color = color;
-    msg.innerText = text;
+  const msg = document.getElementById("msg");
+  msg.style.color = color;
+  msg.innerText = text;
 }
 </script>
-
-
 </body>
 </html>
