@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendance — Acropolis College</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Poppins', sans-serif; background: #f5f5f5; margin: 0; padding: 0; color: #3e2723; }
+  header { background: linear-gradient(135deg,#6d1b1b,#8d6e63); color: #fff; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+  header img { height: 50px; border-radius: 8px; }
+  header h1 { margin: 0; font-family: 'Playfair Display', serif; font-size: 1.8rem; letter-spacing: 1px; }
+  nav button { background: #fff; color: #6d1b1b; border: none; padding: 8px 15px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
+  nav button:hover { background: #ffd700; color: #3e2723; }
+  main { padding: 25px 20px; max-width: 900px; margin: auto; }
+  .section { background: #fff; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  .section h2 { font-family: 'Playfair Display', serif; color: #6d1b1b; margin-top: 0; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  table th, table td { padding: 10px; text-align: left; border-bottom: 1px solid #ccc; }
+  table th { background: #f0e6e6; color: #6d1b1b; }
+  button.att-btn { padding: 5px 10px; margin-right: 5px; border: none; border-radius: 5px; font-weight: 600; cursor: pointer; }
+  button.present { background: #4caf50; color: #fff; }
+  button.absent { background: #f44336; color: #fff; }
+  @media (max-width: 768px){ table th, table td { font-size: 14px; } header h1 { font-size: 1.4rem; } }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="logo.jpg" alt="Acropolis College Logo">
+  <h1>Attendance</h1>
+  <nav>
+    <button onclick="goBack()">Back</button>
+  </nav>
+</header>
+
+<main>
+  <div class="section">
+    <h2 id="classTitle">Class: </h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Enrollment Number</th>
+          <th>Name</th>
+          <th>Attendance</th>
+        </tr>
+      </thead>
+      <tbody id="studentsTable">
+        <!-- Student rows injected via JS -->
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<script>
+  // Get URL params
+  const params = new URLSearchParams(window.location.search);
+  const className = params.get('class') || "Unknown Class";
+  const mentorId = params.get('mentorId') || "M101";
+  document.getElementById('classTitle').textContent = "Class: " + className;
+
+  // Example fetch - replace with real API endpoint
+  const API_BASE = 'https://roomofy-app-1.onrender.com/api'; // replace with your college API
+  async function fetchAttendance(){
+    try {
+      // Replace with your API for fetching students of the class
+      // Example: GET /attendance?class=3rd%20Year%20-%20A
+      const res = await fetch(`${API_BASE}/attendance?class=${encodeURIComponent(className)}`);
+      const data = await res.json();
+      displayStudents(data);
+    } catch(err){
+      console.error("Error fetching attendance:", err);
+      // Fallback example data
+      const exampleStudents = [
+        { enrollmentNumber: "CS2025A001", name: "Amit Sharma", status: "Present" },
+        { enrollmentNumber: "CS2025A002", name: "Rina Mehta", status: "Absent" },
+      ];
+      displayStudents(exampleStudents);
+    }
+  }
+
+  function displayStudents(students){
+    const tbody = document.getElementById('studentsTable');
+    tbody.innerHTML = '';
+    students.forEach(s => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${s.enrollmentNumber}</td>
+        <td>${s.name}</td>
+        <td>
+          <button class="att-btn present" onclick="markAttendance('${s.enrollmentNumber}','Present',this)">P</button>
+          <button class="att-btn absent" onclick="markAttendance('${s.enrollmentNumber}','Absent',this)">A</button>
+          <span id="status-${s.enrollmentNumber}" style="margin-left:10px;">${s.status || ''}</span>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function markAttendance(enroll, status, btn){
+    document.getElementById('status-' + enroll).textContent = status;
+    console.log(`Marked ${enroll} as ${status}`);
+    // TODO: send POST to API to save attendance
+    // fetch(`${API_BASE}/attendance/${enroll}`, { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({status, className, mentorId}) })
+  }
+
+  function goBack(){
+    window.history.back();
+  }
+
+  fetchAttendance();
+</script>
+
+</body>
+</html>

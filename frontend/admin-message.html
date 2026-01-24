@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin0: Send Personal Message</title>
+<style>
+  body { font-family: sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
+  .container { max-width: 600px; margin: 50px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  .file-row { display: flex; align-items: center; gap: 10px; margin-top: 5px; }
+  .file-row input[type="file"] { flex: 1; }
+  .file-row button { background: #dc3545; color: #fff; border: none; padding: 3px 8px; border-radius: 3px; cursor: pointer; }
+  button[type="submit"], button.addFileBtn { margin-top: 10px; padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; }
+  button[type="submit"] { background: #28a745; color: #fff; }
+  button.addFileBtn { background: #007bff; color: #fff; margin-left: 5px; }
+  label { display: block; margin-top: 10px; font-weight: bold; }
+  input, textarea { width: 100%; padding: 8px; margin-top: 3px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box; }
+  .msg { display: none; padding: 10px; margin-top: 10px; border-radius: 5px; }
+  .msg.success { background: #d4edda; color: #155724; }
+  .msg.error { background: #f8d7da; color: #721c24; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2>📩 Send Personal Message</h2>
+
+  <form id="messageForm">
+    <label>Message Title</label>
+    <input type="text" name="title" required>
+
+    <label>Description</label>
+    <textarea name="description" rows="4" required></textarea>
+
+    <label>Enrollment Numbers <small>(comma separated)</small></label>
+    <input type="text" name="enrollments" placeholder="ENR001, ENR002" required>
+
+    <label>Attachments</label>
+    <div id="fileContainer">
+      <div class="file-row">
+        <input type="file" name="attachments">
+        <button type="button" onclick="removeFile(this)">X</button>
+      </div>
+    </div>
+
+    <button type="button" class="addFileBtn" onclick="addFile()">➕ Add More File</button>
+    <button type="submit">🚀 Send Message</button>
+
+    <div id="responseMsg" class="msg"></div>
+  </form>
+</div>
+
+<script>
+    /* ===============================
+   ACCESS CONTROL — ADMIN PAGES
+================================ */
+
+const mentorId = localStorage.getItem("mentorId");
+const source   = sessionStorage.getItem("accessSource");
+
+// allowed sources
+const ALLOWED_SOURCES = ["ad", "admin"];
+
+if(!mentorId || !ALLOWED_SOURCES.includes(source)){
+  document.body.innerHTML = `
+    <h2 style="text-align:center;margin-top:20vh;color:red">
+      ❌ Access Denied <br>
+      Please open this page via Administration Panel
+    </h2>
+  `;
+  throw new Error("Unauthorized access");
+}
+const form = document.getElementById("messageForm");
+const msgBox = document.getElementById("responseMsg");
+
+function addFile() {
+  const div = document.createElement("div");
+  div.className = "file-row";
+  div.innerHTML = `<input type="file" name="attachments"><button type="button" onclick="removeFile(this)">X</button>`;
+  document.getElementById("fileContainer").appendChild(div);
+}
+
+function removeFile(btn) {
+  btn.parentElement.remove();
+}
+
+form.addEventListener("submit", async e => {
+  e.preventDefault();
+  msgBox.style.display = "none";
+
+  const formData = new FormData(form);
+
+  try {
+    const res = await fetch("https://college-hwbb.onrender.com/api/admin/personal-message/send", {
+      method: "POST",
+      body: formData
+    });
+
+    const text = await res.text();
+
+    let data;
+    try { data = JSON.parse(text); } 
+    catch { throw new Error("Server returned HTML instead of JSON"); }
+
+    if(res.ok) {
+      msgBox.className = "msg success";
+      msgBox.innerText = data.message || "Message sent successfully";
+      msgBox.style.display = "block";
+      form.reset();
+      document.getElementById("fileContainer").innerHTML = `
+        <div class="file-row"><input type="file" name="attachments"><button type="button" onclick="removeFile(this)">X</button></div>`;
+    } else {
+      throw new Error(data.message || "Something went wrong");
+    }
+  } catch(err) {
+    msgBox.className = "msg error";
+    msgBox.innerText = err.message;
+    msgBox.style.display = "block";
+  }
+});
+</script>
+
+</body>
+</html>

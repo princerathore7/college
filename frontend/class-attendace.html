@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Attendance View</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body{font-family:Inter,system-ui,sans-serif;background:#f5f6fc;margin:0;padding:20px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+select,button,input{padding:9px 14px;border-radius:8px;border:1px solid #cbd5e1;font-size:14px}
+button{background:#003366;color:#fff;cursor:pointer}
+.controls{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden}
+th{background:#eef3ff;padding:12px}
+td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:center}
+.mark-btn{padding:6px 14px;border:none;border-radius:20px;cursor:pointer;font-weight:600;margin:2px}
+.present{background:#16a34a;color:#fff}
+.absent{background:#dc2626;color:#fff}
+.badge{padding:4px 8px;border-radius:6px;font-size:12px;font-weight:700}
+.perc{background:#e0e7ff;color:#1e3a8a}
+.no-data{color:#666}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h2>Attendance Overview</h2>
+  <button onclick="logout()">Logout</button>
+</header>
+
+<div class="controls">
+  <input id="lectureName" placeholder="Lecture Name (eg. DSA – Unit 3)">
+  <input id="teacherName" placeholder="Teacher Name">
+  <input id="lectureDate" type="date">
+  
+  <select id="year">
+    <option value="">All Years</option>
+    <option value="1">1st</option>
+    <option value="2">2nd</option>
+    <option value="3">3rd</option>
+    <option value="4">4th</option>
+        <option value="5">5th</option>
+  </select>
+
+  <select id="branch">
+    <option value="">All Branches</option>
+    <option value="CSE1">CSE1</option>
+    <option value="CSE2">CSE2</option>
+    <option value="CSE3">CSE3</option>
+    <option value="CSE4">CSE4</option>
+    <option value="CSE5">CSE5</option>
+      <option value="IT1">IT1</option>
+    <option value="IT2">IT2</option>
+    <option value="IT3">IT3</option>
+    <option value="IT4">IT4</option>
+    <option value="IT5">IT5</option>
+    
+    <option value="AIML1">AIML1</option>
+    <option value="AIML2">AIML2</option>
+    <option value="AIML3">AIML3</option>
+    <option value="AIML4">AIML4</option>
+    <option value="AIML5">AIML5</option>
+    
+    <option value="AIDS1">AIDS1</option>
+    <option value="AIDS2">AIDS2</option>
+    <option value="AIDS3">AIDS3</option>
+    <option value="AIDS4">AIDS4</option>
+    <option value="AIDS5">AIDS5</option>
+    
+    <option value="CSBS1">CSBS1</option>
+    <option value="CSBS2">CSBS2</option>
+    <option value="CSBS3">CSBS3</option>
+    <option value="CSBS4">CSBS4</option>
+    <option value="CSBS5">CSBS5</option>
+
+    <option value="IOT1">IOT1</option>
+    <option value="IOT2">IOT2</option>
+    <option value="IOT3">IOT3</option>
+    <option value="IOT4">IOT4</option>
+    <option value="IOT5">IOT5</option>
+    
+    <option value="ECE1">ECE1</option>
+    <option value="ECE2">ECE2</option>
+    <option value="ECE3">ECE3</option>
+    <option value="ECE4">ECE4</option>
+    <option value="ECE5">ECE5</option>
+
+    <option value="EEE1">EEE1</option>
+    <option value="EEE2">EEE2</option>
+    <option value="EEE3">EEE3</option>
+    <option value="EEE4">EEE4</option>
+    <option value="EEE5">EEE5</option>
+
+    <option value="EE1">EE1</option>
+    <option value="EE2">EE2</option>
+    <option value="EE3">EE3</option>
+    <option value="EE4">EE4</option>
+    <option value="EE5">EE5</option>
+
+    <option value="ME1">ME1</option>
+    <option value="ME2">ME2</option>
+    <option value="ME3">ME3</option>
+    <option value="ME4">ME4</option>
+    <option value="ME5">ME5</option>
+
+    <option value="AU1">AU1</option>
+    <option value="AU2">AU2</option>
+    <option value="AU3">AU3</option>
+    <option value="AU4">AU4</option>
+    <option value="AU5">AU5</option>
+
+    <option value="MT1">MT1</option>
+    <option value="MT2">MT2</option>
+    <option value="MT3">MT3</option>
+    <option value="MT4">MT4</option>
+    <option value="MT5">MT5</option>
+
+    <option value="CE1">CE1</option>
+    <option value="CE2">CE2</option>
+    <option value="CE3">CE3</option>
+    <option value="CE4">CE4</option>
+    <option value="CE5">CE5</option>
+
+    <option value="CHE1">CHE1</option>
+    <option value="CHE2">CHE2</option>
+    <option value="CHE3">CHE3</option>
+    <option value="CHE4">CHE4</option>
+    <option value="CHE5">CHE5</option>
+
+    <option value="MIN1">MIN1</option>
+    <option value="MIN2">MIN2</option>
+    <option value="MIN3">MIN3</option>
+    <option value="MIN4">MIN4</option>
+    <option value="MIN5">MIN5</option>
+
+    <option value="PET1">PET1</option>
+    <option value="PET2">PET2</option>
+    <option value="PET3">PET3</option>
+    <option value="PET4">PET4</option>
+    <option value="PET5">PET5</option>
+
+    <option value="BT1">BT1</option>
+    <option value="BT2">BT2</option>
+    <option value="BT3">BT3</option>
+    <option value="BT4">BT4</option>
+    <option value="BT5">BT5</option>
+
+    <option value="BME1">BME1</option>
+    <option value="BME2">BME2</option>
+    <option value="BME3">BME3</option>
+    <option value="BME4">BME4</option>
+    <option value="BME5">BME5</option>
+
+    <option value="FT1">FT1</option>
+    <option value="FT2">FT2</option>
+    <option value="FT3">FT3</option>
+    <option value="FT4">FT4</option>
+    <option value="FT5">FT5</option>
+
+    <option value="AG1">AG1</option>
+    <option value="AG2">AG2</option>
+    <option value="AG3">AG3</option>
+    <option value="AG4">AG4</option>
+    <option value="AG5">AG5</option>
+
+    <option value="ENV1">ENV1</option>
+    <option value="ENV2">ENV2</option>
+    <option value="ENV3">ENV3</option>
+    <option value="ENV4">ENV4</option>
+    <option value="ENV5">ENV5</option>
+
+    <option value="TX1">TX1</option>
+    <option value="TX2">TX2</option>
+    <option value="TX3">TX3</option>
+    <option value="TX4">TX4</option>
+    <option value="TX5">TX5</option>
+
+    <option value="PIE1">PIE1</option>
+    <option value="PIE2">PIE2</option>
+    <option value="PIE3">PIE3</option>
+    <option value="PIE4">PIE4</option>
+    <option value="PIE5">PIE5</option>
+
+    <option value="IM1">IM1</option>
+    <option value="IM2">IM2</option>
+    <option value="IM3">IM3</option>
+    <option value="IM4">IM4</option>
+    <option value="IM5">IM5</option>
+  </select>
+
+  <button onclick="render()">Refresh</button>
+  <button onclick="undoLast()" style="background:#7c2d12">Undo Last</button>
+  <button onclick="downloadPDF()" style="background:#065f46">Download PDF</button>
+</div>
+
+<div id="pdfArea">
+<table>
+<thead>
+<tr>
+  <th>Enrollment</th>
+  <th>Name</th>
+  <th>Year</th>
+  <th>Branch</th>
+  <th>Present</th>
+  <th>Absent</th>
+  <th>%</th>
+</tr>
+</thead>
+<tbody id="studentsBody">
+<tr><td colspan="7" class="no-data">Loading...</td></tr>
+</tbody>
+</table>
+</div>
+
+<script>
+/* ============ ACCESS ============ */
+const mentorId=localStorage.getItem("mentorId");
+const source=sessionStorage.getItem("accessSource");
+if(!mentorId||!["ad","admin"].includes(source)){
+  document.body.innerHTML="<h2 style='text-align:center;margin-top:20vh;color:red'>Access Denied</h2>";
+  throw new Error("Unauthorized");
+}
+
+/* ============ STORAGE ============ */
+const DEVICE_KEY="attendance_device_count";
+let deviceData=JSON.parse(localStorage.getItem(DEVICE_KEY)||"{}");
+let history=[];
+
+const API_STUDENTS="https://college-hwbb.onrender.com/api/admin/students";
+
+/* ============ LOGIC ============ */
+function logout(){localStorage.clear();location.href="login.html";}
+
+async function fetchStudents(){
+  const c=localStorage.getItem("admin_students");
+  if(c) return JSON.parse(c);
+  const r=await fetch(API_STUDENTS);
+  const d=await r.json();
+  if(d.success){
+    localStorage.setItem("admin_students",JSON.stringify(d.students));
+    return d.students;
+  }
+  return [];
+}
+
+function mark(enr,status){
+  if(!deviceData[enr]) deviceData[enr]={P:0,A:0};
+  deviceData[enr][status]++;
+  history.push({enr,status});
+  localStorage.setItem(DEVICE_KEY,JSON.stringify(deviceData));
+  render();
+}
+
+function undoLast(){
+  if(!history.length){ alert("Nothing to undo"); return; }
+  const last=history.pop();
+  deviceData[last.enr][last.status]--;
+  if(deviceData[last.enr][last.status]<0) deviceData[last.enr][last.status]=0;
+  localStorage.setItem(DEVICE_KEY,JSON.stringify(deviceData));
+  render();
+}
+
+async function render(){
+  const body=document.getElementById("studentsBody");
+  const year=document.getElementById("year").value;
+  const branch=document.getElementById("branch").value;
+
+  const students=await fetchStudents();
+  const filtered=students.filter(s=>{
+    if(year && String(s.year)!==year) return false;
+    if(branch && s.branch!==branch) return false;
+    return true;
+  });
+
+  body.innerHTML="";
+  if(!filtered.length){
+    body.innerHTML=`<tr><td colspan="7" class="no-data">No students</td></tr>`;
+    return;
+  }
+
+  filtered.forEach(s=>{
+    const d=deviceData[s.enrollment]||{P:0,A:0};
+    const total=d.P+d.A;
+    const perc=total?((d.P/total)*100).toFixed(1):"0.0";
+    body.innerHTML+=`
+      <tr>
+        <td>${s.enrollment}</td>
+        <td>${s.name}</td>
+        <td>${s.year}</td>
+        <td>${s.branch}</td>
+        <td><button class="mark-btn present" onclick="mark('${s.enrollment}','P')">P (${d.P})</button></td>
+        <td><button class="mark-btn absent" onclick="mark('${s.enrollment}','A')">A (${d.A})</button></td>
+        <td><span class="badge perc">${perc}%</span></td>
+      </tr>
+    `;
+  });
+}
+
+/* ============ PDF DOWNLOAD ============ */
+async function downloadPDF(){
+  const lecture=document.getElementById("lectureName").value.trim();
+  const teacher=document.getElementById("teacherName").value.trim();
+  const date=document.getElementById("lectureDate").value;
+
+  if(!lecture || !teacher){
+    alert("Please enter Lecture Name and Teacher Name");
+    return;
+  }
+
+  const area=document.getElementById("pdfArea");
+  const canvas=await html2canvas(area,{scale:2});
+  const img=canvas.toDataURL("image/png");
+
+  const { jsPDF } = window.jspdf;
+  const pdf=new jsPDF("p","mm","a4");
+
+  pdf.setFontSize(16);
+  pdf.text("Attendance Sheet",105,10,{align:"center"});
+
+  pdf.setFontSize(12);
+  pdf.text(`Lecture : ${lecture}`,10,20);
+  pdf.text(`Teacher : ${teacher}`,10,28);
+  pdf.text(`Date    : ${date || new Date().toLocaleDateString()}`,10,36);
+
+  pdf.addImage(img,"PNG",10,45,190,0);
+  pdf.save(`${lecture}_attendance.pdf`);
+}
+
+document.addEventListener("DOMContentLoaded",render);
+</script>
+
+</body>
+</html>

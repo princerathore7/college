@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Attendance Engine</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{font-family:Arial;background:#f4f7fb;margin:0;padding:15px}
+h2{color:#0b1f3a}
+.card{background:#fff;padding:15px;border-radius:10px;box-shadow:0 6px 15px rgba(0,0,0,.08)}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px}
+select,input{padding:8px;border-radius:6px;border:1px solid #ccc}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #ddd;padding:8px;text-align:center}
+th{background:#0b1f3a;color:#fff}
+button{padding:6px 12px;border:none;border-radius:5px;cursor:pointer}
+.p{background:#2ecc71;color:#fff}
+.a{background:#e74c3c;color:#fff}
+.selected{outline:3px solid #000}
+.no-data{text-align:center;color:#888}
+
+/* Loading button */
+.loading{
+  pointer-events:none;
+  opacity:.7;
+}
+.spinner{
+  width:16px;height:16px;
+  border:3px solid #fff;
+  border-top:3px solid transparent;
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+  display:inline-block;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Popup modal */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+.modal-content{
+  background:#fff;
+  padding:20px;
+  border-radius:10px;
+  width:300px;
+  text-align:center;
+  box-shadow:0 10px 25px rgba(0,0,0,.2);
+}
+.modal-content h3{margin-top:0;color:#0b1f3a}
+.modal-content p{margin:6px 0}
+.modal-content button{
+  margin-top:10px;
+  background:#0b1f3a;
+  color:#fff;
+}
+</style>
+</head>
+
+<body>
+
+<h2>📊 Attendance Engine</h2>
+
+<div class="card">
+
+<div class="controls">
+  <select id="year">
+    <option value="">All Years</option>
+    <option value="1">1st Year</option>
+    <option value="2">2nd Year</option>
+    <option value="3">3rd Year</option>
+    <option value="4">4th Year</option>
+    <option value="5">5th Year</option>
+  </select>
+
+  <select id="branch">
+    <option value="">All Branches</option>
+     <option value="CSE">CSE - Computer Science Engineering</option>
+    <option value="IT">IT - Information Technology</option>
+    <option value="AIML">AIML - Artificial Intelligence & Machine Learning</option>
+      <option value="AIDS">AIDS - Artificial Intelligence & Data Science</option>
+    <option value="CSBS">CSBS - Computer Science & Business Systems</option>
+    <option value="IOT">IoT - Internet of Things</option>
+
+    <!-- Electrical / Electronics -->
+    <option value="ECE">ECE - Electronics & Communication</option>
+    <option value="EEE">EEE - Electrical & Electronics</option>
+    <option value="EE">EE - Electrical Engineering</option>
+
+    <!-- Mechanical / Automobile -->
+    <option value="ME">ME - Mechanical Engineering</option>
+    <option value="AU">AU - Automobile Engineering</option>
+    <option value="MT">MT - Mechatronics</option>
+
+    <!-- Civil / Core -->
+    <option value="CE">CE - Civil Engineering</option>
+    <option value="CHE">CHE - Chemical Engineering</option>
+    <option value="MIN">MIN - Mining Engineering</option>
+    <option value="PET">PET - Petroleum Engineering</option>
+
+    <!-- Bio / Agri -->
+    <option value="BT">BT - Biotechnology</option>
+    <option value="BME">BME - Biomedical Engineering</option>
+    <option value="AG">AG - Agriculture Engineering</option>
+    <option value="FT">FT - Food Technology</option>
+    <option value="ENV">ENV - Environmental Engineering</option>
+    <option value="TX">TX - Textile Engineering</option>
+
+    <!-- Management / Pharma -->
+    <option value="PIE">PIE - Production & Industrial Engineering</option>
+    <option value="IM">IM - Industrial Management</option>
+    <option value="DPHARMA">D.Pharmacy</option>
+    <option value="BPHARMA">B.Pharmacy</option>
+    <option value="MPHARMA">M.Pharmacy</option>
+    <option value="PHARMA-CHEM">Pharmaceutical Chemistry</option>
+    <option value="PHARMA-ANALYTICAL">Pharmaceutical Analysis</option>
+    <option value="PHARMA-QUALITY">Quality Assurance</option>
+    <option value="PHARMA-PHARMACO">Pharmacology</option>
+    <option value="PHARMA-PHARMACEUTICS">Pharmaceutics</option>
+    <option value="PHARMA-BIOTECH">Pharmaceutical Biotechnology</option>
+    <option value="PHARMA-REGULATORY">Regulatory Affairs</option>
+
+    <!-- Diploma -->
+    <option value="DCSE">Diploma - Computer Science Engineering</option>
+    <option value="DIT">Diploma - Information Technology</option>
+    <option value="DCYBER">Diploma - Cyber Security</option>
+    <option value="DECE">Diploma - Electronics & Communication</option>
+    <option value="DEEE">Diploma - Electrical & Electronics</option>
+    <option value="DEE">Diploma - Electrical Engineering</option>
+    <option value="DME">Diploma - Mechanical Engineering</option>
+    <option value="DCE">Diploma - Civil Engineering</option>
+    <option value="DMIN">Diploma - Mining Engineering</option>
+    <option value="DCHE">Diploma - Chemical Engineering</option>
+    <option value="DAG">Diploma - Agriculture Engineering</option>
+    <option value="DTX">Diploma - Textile Technology</option>
+    <option value="DPLASTIC">Diploma - Plastic Engineering</option>
+    <option value="DPOLY">Diploma - Polymer Engineering</option>
+  </select>
+
+  <select id="section">
+    <option value="">All Sections</option>
+    <option value="1">Section 1</option>
+    <option value="2">Section 2</option>
+    <option value="3">Section 3</option>
+    <option value="4">Section 4</option>
+    <option value="5">Section 5</option>
+  </select>
+
+  <input id="lectureId" placeholder="Lecture ID">
+  <button id="submitBtn" onclick="submitAttendance()">🚀 Submit</button>
+</div>
+
+<table>
+<thead>
+<tr>
+  <th>Enrollment</th>
+  <th>Name</th>
+  <th>Year</th>
+  <th>Branch</th>
+  <th>Section</th>
+  <th>P</th>
+  <th>A</th>
+</tr>
+</thead>
+<tbody id="studentsBody">
+<tr><td colspan="7" class="no-data">Loading...</td></tr>
+</tbody>
+</table>
+
+</div>
+
+<!-- RESULT POPUP -->
+<div class="modal" id="resultModal">
+  <div class="modal-content">
+    <h3>✅ Attendance Submitted</h3>
+    <p id="totalCount"></p>
+    <p id="presentCount"></p>
+    <p id="absentCount"></p>
+    <button onclick="closeModal()">OK</button>
+  </div>
+</div>
+
+<script>
+const API_STUDENTS = "https://college-hwbb.onrender.com/api/admin/students";
+const API_ROBOT = "https://college-hwbb.onrender.com/api/attendance/robot_update";
+
+let STUDENTS = [];
+let RECORDS = {};
+
+/* ===============================
+   FETCH STUDENTS
+================================ */
+async function fetchStudents(){
+  try{
+    console.log("📡 Fetching students...");
+    const res = await fetch(API_STUDENTS);
+    const d = await res.json();
+    console.log("✅ Students API response:", d);
+
+    if(d.success){
+      STUDENTS = d.students;
+      render();
+    }else{
+      console.error("❌ Students fetch failed");
+    }
+  }catch(err){
+    console.error("🔥 Fetch students error:", err);
+  }
+}
+
+/* ===============================
+   RENDER
+================================ */
+function render(){
+  const body = document.getElementById("studentsBody");
+  const y = year.value;
+  const b = branch.value;
+  const s = section.value;
+
+  const filtered = STUDENTS.filter(st =>
+    (!y || st.year === y) &&
+    (!b || st.branch === b) &&
+    (!s || st.section === s)
+  );
+
+  console.log("🔍 Filtered students:", filtered.length);
+
+  body.innerHTML = "";
+  if(!filtered.length){
+    body.innerHTML = `<tr><td colspan="7" class="no-data">No students found</td></tr>`;
+    return;
+  }
+
+  filtered.forEach(st=>{
+    body.innerHTML += `
+      <tr>
+        <td>${st.enrollment}</td>
+        <td>${st.name}</td>
+        <td>${st.year}</td>
+        <td>${st.branch}</td>
+        <td>${st.section}</td>
+        <td><button class="p" onclick="mark('${st.enrollment}','P',this)">P</button></td>
+        <td><button class="a" onclick="mark('${st.enrollment}','A',this)">A</button></td>
+      </tr>`;
+  });
+}
+
+function mark(enr,status,btn){
+  RECORDS[enr] = status;
+  console.log(`📝 Marked ${enr} as ${status}`);
+  btn.closest("tr").querySelectorAll("button").forEach(b=>b.classList.remove("selected"));
+  btn.classList.add("selected");
+}
+
+/* ===============================
+   SUBMIT ATTENDANCE
+================================ */
+async function submitAttendance(){
+  const lecture = lectureId.value.trim();
+  const btn = submitBtn;
+
+  if(!lecture){
+    console.warn("⚠ Lecture ID missing");
+    return alert("Lecture ID required");
+  }
+  if(!Object.keys(RECORDS).length){
+    console.warn("⚠ No attendance marked");
+    return alert("No attendance marked");
+  }
+
+  btn.classList.add("loading");
+  btn.innerHTML = `<span class="spinner"></span> Submitting`;
+
+  try{
+    console.log("🚀 Submitting attendance:", RECORDS);
+    const res = await fetch(API_ROBOT,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({lectureId:lecture,records:RECORDS})
+    });
+
+    const d = await res.json();
+    console.log("✅ Submit response:", d);
+
+    // counts
+    const total = Object.keys(RECORDS).length;
+    const present = Object.values(RECORDS).filter(v=>v==="P").length;
+    const absent = Object.values(RECORDS).filter(v=>v==="A").length;
+
+    showModal(total,present,absent);
+
+    RECORDS = {};
+    document.querySelectorAll(".selected").forEach(b=>b.classList.remove("selected"));
+
+  }catch(err){
+    console.error("🔥 Submit error:", err);
+    alert("Something went wrong while submitting");
+  }
+
+  btn.classList.remove("loading");
+  btn.innerHTML = "🚀 Submit";
+}
+
+/* ===============================
+   MODAL
+================================ */
+function showModal(total,present,absent){
+  totalCount.textContent = `👥 Total Marked: ${total}`;
+  presentCount.textContent = `✅ Present: ${present}`;
+  absentCount.textContent = `❌ Absent: ${absent}`;
+  resultModal.style.display="flex";
+}
+
+function closeModal(){
+  resultModal.style.display="none";
+}
+
+/* ===============================
+   FILTER LISTENERS
+================================ */
+["year","branch","section"].forEach(id=>{
+  document.getElementById(id).addEventListener("change",render);
+});
+
+fetchStudents();
+</script>
+
+</body>
+</html>

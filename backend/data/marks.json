@@ -1,0 +1,32 @@
+{
+    "EN001": {
+        "enrollment": "EN001",
+        "name": "Aisha Khan",
+        "class": "1A",
+        "mst": 78,
+        "internal": 82,
+        "assignments": 85,
+        "weights": {
+            "mst": 0.3333,
+            "internal": 0.3333,
+            "assignments": 0.3333
+        },
+        "percentage": 81.67,
+        "notes": "Good"
+    },
+    "0827IT241105": {
+        "enrollment": "0827IT241105",
+        "name": "princerathore",
+        "class": "1A",
+        "mst": 52.0,
+        "internal": 100.0,
+        "assignments": 80.0,
+        "weights": {
+            "mst": 0.3333,
+            "internal": 0.3333,
+            "assignments": 0.3333
+        },
+        "percentage": 77.33,
+        "notes": ""
+    }
+}

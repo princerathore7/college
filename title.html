@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Title Slide — Acropolis HSS</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+  }
+  .title-container {
+    text-align: center;
+    padding: 20px 30px;
+    background: rgba(0,0,0,0.4);
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    max-width: 800px;
+  }
+  .title-container h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    letter-spacing: 1.5px;
+  }
+  .title-container h2 {
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin-bottom: 10px;
+  }
+  .subtitle {
+    font-size: 1.1rem;
+    color: #f0f0f0;
+    margin-top: 10px;
+  }
+
+  /* Optional animated bus icon */
+  .bus {
+    width: 50px;
+    height: 30px;
+    background: #ff4757;
+    border-radius: 5px;
+    position: absolute;
+    bottom: 20px;
+    left: -60px;
+    animation: drive 10s linear infinite;
+  }
+  @keyframes drive {
+    0% { left: -60px; }
+    100% { left: 100%; }
+  }
+
+  @media(max-width: 768px){
+    .title-container h1 { font-size: 2rem; }
+    .title-container h2 { font-size: 1.2rem; }
+  }
+  @media(max-width: 480px){
+    .title-container h1 { font-size: 1.6rem; }
+    .title-container h2 { font-size: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="title-container">
+  <h1>An App for Acropolis Institute Indore</h1>
+  <h2>Student Dashboard & Admin Panel</h2>
+  <p class="subtitle">Dual-View Functional Demonstration</p>
+</div>
+
+<div class="bus"></div>
+
+</body>
+</html>

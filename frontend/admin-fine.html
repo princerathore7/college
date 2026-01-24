@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="https://i.ibb.co/8tZSKKT/logo-with-bg.webp">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin – Fine Management</title>
+
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background:#f3f3f3;
+        margin:0;
+        padding:0;
+    }
+    .topbar {
+        display:flex;
+        align-items:center;
+        gap:15px;
+        background:white;
+        padding:10px 20px;
+        border-bottom:1px solid #ddd;
+    }
+    .topbar img {
+        height:45px;
+    }
+    .topbar h2 {
+        margin:0;
+        font-size:20px;
+        font-weight:600;
+    }
+    .container {
+        max-width:900px;
+        margin:25px auto;
+        background:white;
+        padding:20px;
+        border-radius:10px;
+        box-shadow:0 0 10px rgba(0,0,0,0.1);
+    }
+    h3 {
+        text-align:center;
+        margin:0 0 15px;
+        font-size:20px;
+        font-weight:600;
+    }
+    .row {
+        display:flex;
+        gap:10px;
+        margin-bottom:12px;
+        flex-wrap:wrap;
+    }
+    input, select {
+        padding:10px;
+        width:100%;
+        border:1px solid #ccc;
+        border-radius:5px;
+    }
+    .student-block {
+        border:1px solid #ddd;
+        padding:15px;
+        border-radius:8px;
+        margin-bottom:10px;
+        background:#f9f9f9;
+    }
+    button {
+        background:#002147;
+        color:white;
+        padding:12px 20px;
+        border:none;
+        border-radius:6px;
+        cursor:pointer;
+        font-size:15px;
+    }
+    button:hover {
+        opacity:0.9;
+    }
+    #fineTable {
+        width:100%;
+        margin-top:20px;
+        border-collapse:collapse;
+    }
+    #fineTable th, #fineTable td {
+        border:1px solid #ccc;
+        padding:8px;
+        font-size:14px;
+    }
+    #fineTable th {
+        background:#002147;
+        color:white;
+    }
+    .editBtn { background:#ff9800; }
+    .deleteBtn { background:#d32f2f; }
+    @media(max-width:600px){
+        h3 { font-size:18px; }
+        .topbar h2 { font-size:17px; }
+    }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+    <img src="logo.jpg" alt="Acropolis Logo">
+    <h2>Acropolis Institute Indore —- Fine Management</h2>
+</div>
+
+<div class="container">
+    <h3>Add Fine (Single / Bulk)</h3>
+    <div id="studentsContainer"></div>
+    <button onclick="addStudentBlock()">➕ Add More Student</button>
+    <button onclick="submitFines()">✔ Submit All Fines</button>
+</div>
+
+<div class="container">
+    <h3>Search & Filter Fines</h3>
+    <div class="row">
+        <input type="text" id="searchEnrollment" placeholder="Enter Enrollment Number">
+        <input type="text" id="searchClass" placeholder="Enter Class (optional)">
+    </div>
+    <button onclick="searchFine()">Search / Filter</button>
+    <button onclick="refreshFines()">🔄 Refresh All Fines</button>
+
+    <table id="fineTable" style="display:none;">
+        <thead>
+            <tr>
+                <th>Enrollment</th>
+                <th>Class</th>
+                <th>Fine</th>
+                <th>Reason</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="fineBody"></tbody>
+    </table>
+</div>
+
+
+<script>
+const API_URL = "https://college-hwbb.onrender.com";
+/* ===============================
+   ACCESS CONTROL — ADMIN PAGES
+================================ */
+
+const mentorId = localStorage.getItem("mentorId");
+const source   = sessionStorage.getItem("accessSource");
+
+// allowed sources
+const ALLOWED_SOURCES = ["ad", "admin"];
+
+if(!mentorId || !ALLOWED_SOURCES.includes(source)){
+  document.body.innerHTML = `
+    <h2 style="text-align:center;margin-top:20vh;color:red">
+      ❌ Access Denied <br>
+      Please open this page via Administration Panel
+    </h2>
+  `;
+  throw new Error("Unauthorized access");
+}
+// -----------------------------
+// LOCAL STORAGE HELPERS
+// -----------------------------
+function saveLS(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
+function getLS(key) { 
+    const v = localStorage.getItem(key); 
+    return v ? JSON.parse(v) : null; 
+}
+
+// -----------------------------
+// ADD STUDENT BLOCK
+// -----------------------------
+function addStudentBlock() {
+    const container = document.getElementById("studentsContainer");
+
+    const lastBlock = container.querySelector(".student-block:last-child");
+    let fineVal = lastBlock ? lastBlock.querySelector(".fineAmount").value : "";
+    let reasonVal = lastBlock ? lastBlock.querySelector(".reason").value : "";
+    let classVal = lastBlock ? lastBlock.querySelector(".class").value : "";
+
+    const block = document.createElement("div");
+    block.className = "student-block";
+
+    block.innerHTML = `
+        <div class="row">
+            <input type="text" class="enrollment" placeholder="Enrollment Number">
+        </div>
+        <div class="row">
+            <input type="text" class="class" placeholder="Class (e.g., CSE 2nd Year)" value="${classVal}">
+        </div>
+        <div class="row">
+            <input type="number" class="fineAmount" placeholder="Fine Amount (₹)" value="${fineVal}">
+        </div>
+        <div class="row">
+            <input type="text" class="reason" placeholder="Reason" value="${reasonVal}">
+        </div>
+        <button onclick="this.parentElement.remove()">❌ Remove</button>
+    `;
+
+    container.appendChild(block);
+}
+
+addStudentBlock(); // Initial block
+
+// -----------------------------
+// SUBMIT FINES
+// -----------------------------
+async function submitFines() {
+    const blocks = document.querySelectorAll(".student-block");
+    const fines = [];
+
+    blocks.forEach(b => {
+        const enrollment = b.querySelector(".enrollment").value.trim();
+        const cls = b.querySelector(".class").value.trim();
+        const amount = b.querySelector(".fineAmount").value.trim();
+        const reason = b.querySelector(".reason").value.trim();
+
+        if (enrollment && cls && amount && reason) {
+            fines.push({ enrollment, class: cls, fine: Number(amount), reason });
+        }
+    });
+
+    if (fines.length === 0) { alert("Enter at least one valid fine."); return; }
+
+    try {
+        const res = await fetch(`${API_URL}/api/fines/bulk-add`, {
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            body:JSON.stringify({ fines })
+        });
+        const data = await res.json();
+        alert(data.message || "Fines Added!");
+        refreshFines(true);
+    } catch(e) {
+        console.error(e);
+        alert("Error submitting fines!");
+    }
+}
+
+// -----------------------------
+// LOAD ALL FINES
+// -----------------------------
+async function refreshFines(force=false) {
+    let cached = getLS("allFines");
+    if(cached && !force) {
+        renderFinesTable(cached);
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API_URL}/api/fines/all`);
+        const data = await res.json();
+        if(data.success) {
+            saveLS("allFines", data.fines);
+            renderFinesTable(data.fines);
+        } else {
+            alert("No fines found!");
+        }
+    } catch(e) { console.error(e); alert("Error fetching fines!"); }
+}
+
+// -----------------------------
+// SEARCH / FILTER FINES
+// -----------------------------
+function searchFine() {
+    let allFines = getLS("allFines") || [];
+    const enr = document.getElementById("searchEnrollment").value.trim().toLowerCase();
+    const cls = document.getElementById("searchClass").value.trim().toLowerCase();
+
+    let filtered = allFines.filter(f => {
+        let cond = true;
+        if(enr) cond = cond && f.enrollment.toLowerCase().includes(enr);
+        if(cls) cond = cond && f.class.toLowerCase().includes(cls);
+        return cond;
+    });
+
+    renderFinesTable(filtered);
+}
+
+// -----------------------------
+// RENDER TABLE
+// -----------------------------
+function renderFinesTable(fines) {
+    const table = document.getElementById("fineTable");
+    const body = document.getElementById("fineBody");
+    body.innerHTML = "";
+
+    if(!fines || fines.length===0) { table.style.display="none"; return; }
+
+    table.style.display="table";
+    fines.forEach(f=>{
+        body.innerHTML += `
+            <tr>
+                <td>${f.enrollment}</td>
+                <td>${f.class}</td>
+                <td><input type="number" id="editFine-${f._id}" value="${f.fine}"></td>
+                <td><input type="text" id="editReason-${f._id}" value="${f.reason}"></td>
+                <td>
+                    <button class="editBtn" onclick="updateFine('${f._id}')">Update</button>
+                    <button class="deleteBtn" onclick="deleteFine('${f._id}')">Delete</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+// -----------------------------
+// UPDATE FINE
+// -----------------------------
+async function updateFine(id) {
+    const newFine = Number(document.getElementById(`editFine-${id}`).value) || 0;
+    const newReason = document.getElementById(`editReason-${id}`).value.trim() || "Fine updated";
+
+    try {
+        const res = await fetch(`${API_URL}/api/fines/update/${id}`, {
+            method:"PUT",
+            headers:{ "Content-Type":"application/json" },
+            body:JSON.stringify({ fine:newFine, reason:newReason })
+        });
+        const data = await res.json();
+        if(data.success){
+            alert(data.message);
+            refreshFines(true);
+        }else{
+            alert(data.message || "Error updating fine");
+        }
+    } catch(e) {
+        console.error(e);
+        alert("Error updating fine!");
+    }
+}
+
+
+// -----------------------------
+// DELETE FINE
+// -----------------------------
+async function deleteFine(id) {
+    if(!confirm("Delete this fine?")) return;
+
+    try {
+        await fetch(`${API_URL}/api/fines/delete/${id}`, { method:"DELETE" });
+        alert("Deleted!");
+        refreshFines(true);
+    } catch(e) {
+        console.error(e);
+        alert("Error deleting fine!");
+    }
+}
+
+// -----------------------------
+// ON PAGE LOAD
+// -----------------------------
+document.addEventListener("DOMContentLoaded", () => {
+    refreshFines(); // Force load on first visit
+
+    // Auto-fill search field with selected enrollment and trigger search
+    const selectedEnr = localStorage.getItem("selectedEnrollment");
+    const searchInput = document.getElementById("searchEnrollment");
+    if(selectedEnr && searchInput){
+        searchInput.value = selectedEnr;
+        searchFine(); // auto filter on load
+    }
+});
+</script></body>
+</html>

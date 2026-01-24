@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin • Manage Personal Messages</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-navy: #1e293b; /* Deep Navy */
+            --accent-blue: #3b82f6;  /* Professional Blue */
+            --danger: #ef4444;       /* Modern Red */
+            --success: #10b981;      /* Modern Green */
+            --bg-light: #f8fafc;     /* Slate Gray Background */
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --white: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        /* --- HEADER --- */
+        header {
+            background: var(--primary-navy);
+            padding: 0.75rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--white);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        header img {
+            height: 35px;
+            filter: brightness(0) invert(1); /* Logo ko white karne ke liye */
+        }
+
+        header h1 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin: 0;
+        }
+
+        /* --- CONTAINER --- */
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+            padding: 24px;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* --- SEARCH & FILTERS --- */
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .search-bar select, 
+        .search-bar input {
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .search-bar input {
+            flex: 1;
+            outline: none;
+        }
+
+        .search-bar input:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* --- BULK ACTIONS --- */
+        .bulk-box {
+            display: none;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .bulk-box span {
+            color: #1e40af;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        /* --- TABLE STYLE --- */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        th {
+            background: #f1f5f9;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 12px;
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        td {
+            padding: 16px 15px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 14px;
+            color: var(--text-main);
+        }
+
+        tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        /* --- BUTTONS --- */
+        .btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover { opacity: 0.85; }
+
+        .viewBtn { background: var(--accent-blue); color: #fff; margin-right: 5px; }
+        .deleteBtn { background: var(--danger); color: #fff; }
+        .bulkDeleteBtn { background: var(--danger); color: #fff; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; }
+
+        /* --- MODAL --- */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #fff;
+            width: 550px;
+            border-radius: 16px;
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .modal-content h3 { margin-top: 0; color: var(--primary-navy); font-size: 1.5rem; }
+        .modal-content p { color: var(--text-muted); margin: 15px 0; }
+        .label { font-weight: 600; color: var(--text-main); margin-right: 5px; }
+
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="header-brand">
+        <img src="logo.jpg" alt="Logo">
+        <h1>Admin Portal</h1>
+    </div>
+    <div style="font-size: 13px; opacity: 0.8;">Welcome, Administrator</div>
+</header>
+
+<div class="container">
+    <div class="card">
+        <h2 style="margin-top:0; font-size: 1.25rem; margin-bottom: 20px;">Personal Messages Management</h2>
+        
+        <div class="search-bar">
+            <select id="searchType">
+                <option value="enrollment">Enrollment No.</option>
+                <option value="title">Message Title</option>
+            </select>
+            <input type="text" id="searchInput" placeholder="Search across messages...">
+        </div>
+
+        <div class="bulk-box" id="bulkBox">
+            <span id="bulkCount">0 messages selected</span>
+            <button class="bulkDeleteBtn" onclick="bulkDelete()">Delete Selected Items</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 40px;"><input type="checkbox" id="selectAll"></th>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Enrollments</th>
+                        <th>Date</th>
+                        <th style="text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="messageTable">
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td style="font-weight: 600;">Fees Reminder</td>
+                        <td style="color: var(--text-muted);">Please submit your semester fees...</td>
+                        <td><span style="background: #e2e8f0; padding: 2px 8px; border-radius: 10px; font-size: 12px;">CS101, CS102</span></td>
+                        <td>Oct 24, 2023</td>
+                        <td style="text-align: center;">
+                            <button class="btn viewBtn">View</button>
+                            <button class="btn deleteBtn">Delete</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="viewModal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">×</span>
+        <h3 id="mTitle">Message Title</h3>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+        <p id="mDesc"></p>
+        <div style="background: #f8fafc; padding: 15px; border-radius: 8px;">
+            <p style="margin: 0;"><span class="label">Target Enrollments:</span> <span id="mEnroll"></span></p>
+            <p style="margin: 10px 0 0 0;"><span class="label">Sent On:</span> <span id="mDate"></span></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // JS Logic remains same as your original functionality
+    function closeModal() {
+        document.getElementById('viewModal').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>
+<script>
+      
+/* ===============================
+   ACCESS CONTROL — ADMIN PAGES
+================================ */
+
+const mentorId = localStorage.getItem("mentorId");
+const source   = sessionStorage.getItem("accessSource");
+
+// allowed sources
+const ALLOWED_SOURCES = ["ad", "admin"];
+
+if(!mentorId || !ALLOWED_SOURCES.includes(source)){
+  document.body.innerHTML = `
+    <h2 style="text-align:center;margin-top:20vh;color:red">
+      ❌ Access Denied <br>
+      Please open this page via Administration Panel
+    </h2>
+  `;
+  throw new Error("Unauthorized access");
+}
+const API = "https://college-hwbb.onrender.com/api";
+let messages = [];
+let selected = new Set();
+
+const table = document.getElementById("messageTable");
+const bulkBox = document.getElementById("bulkBox");
+const bulkCount = document.getElementById("bulkCount");
+
+async function loadMessages(){
+  const res = await fetch(API + "/admin/personal-messages/all");
+  const data = await res.json();
+  messages = data.messages;
+  render(messages);
+}
+
+function render(list){
+  table.innerHTML="";
+  selected.clear();
+  updateBulk();
+
+  list.forEach(m=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td><input type="checkbox" onchange="toggleSelect('${m.id}',this)"></td>
+      <td>${m.title}</td>
+      <td>${m.description.slice(0,40)}... 
+        <button class="viewBtn" onclick='viewMsg(${JSON.stringify(m)})'>View</button>
+      </td>
+      <td>${m.enrollments.join(", ")}</td>
+      <td>${new Date(m.created_at).toLocaleString()}</td>
+      <td><button class="deleteBtn" onclick="deleteMsg('${m.id}')">Delete</button></td>
+    `;
+    table.appendChild(tr);
+  });
+}
+
+function toggleSelect(id,cb){
+  cb.checked ? selected.add(id) : selected.delete(id);
+  updateBulk();
+}
+
+function updateBulk(){
+  bulkBox.style.display = selected.size ? "block":"none";
+  bulkCount.innerText = selected.size + " selected";
+}
+
+async function bulkDelete(){
+  if(!confirm("Delete selected messages?")) return;
+  for(let id of selected){
+    await fetch(API + "/admin/personal-message/" + id,{method:"DELETE"});
+  }
+  loadMessages();
+}
+
+async function deleteMsg(id){
+  if(!confirm("Delete this message?")) return;
+  await fetch(API + "/admin/personal-message/" + id,{method:"DELETE"});
+  loadMessages();
+}
+
+function viewMsg(m){
+  document.getElementById("mTitle").innerText = m.title;
+  document.getElementById("mDesc").innerText = m.description;
+  document.getElementById("mEnroll").innerText = m.enrollments.join(", ");
+  document.getElementById("mDate").innerText = new Date(m.created_at).toLocaleString();
+  document.getElementById("viewModal").style.display="flex";
+}
+
+function closeModal(){
+  document.getElementById("viewModal").style.display="none";
+}
+
+document.getElementById("searchInput").addEventListener("input",()=>{
+  const val = event.target.value.toLowerCase();
+  const type = document.getElementById("searchType").value;
+  render(messages.filter(m =>
+    type==="title"
+      ? m.title.toLowerCase().includes(val)
+      : m.enrollments.join(" ").toLowerCase().includes(val)
+  ));
+});
+
+loadMessages();
+</script>
+
+</body>
+</html>
