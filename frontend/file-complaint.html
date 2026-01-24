@@ -185,7 +185,7 @@ function submitComplaint() {
 
   showMsg("⏳ Submitting complaint...", "orange");
 
-  fetch("/api/missing/submit", {
+  fetch("https://college-hwbb.onrender.com/api/missing/submit", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
