@@ -111,57 +111,49 @@ button:hover{
 </div>
 <script>
 /* ==============================
-   GET QUERY PARAMS
+   GLOBAL ELEMENT REFERENCES
 ================================ */
-function getQueryParam(key) {
+const enrollmentEl = document.getElementById("enrollment");
+const nameEl = document.getElementById("name");
+const classEl = document.getElementById("class");
+const photoInput = document.getElementById("photo");
+const previewBox = document.getElementById("preview");
+
+let base64Image = "";
+
+/* ==============================
+   GET QUERY PARAM
+================================ */
+function getQP(key) {
   return new URLSearchParams(window.location.search).get(key);
 }
 
 /* ==============================
-   LOAD STUDENT DATA (Auto-Fill)
+   AUTOFILL ON LOAD
 ================================ */
 document.addEventListener("DOMContentLoaded", () => {
 
-  function getQP(key) {
-    return new URLSearchParams(window.location.search).get(key);
-  }
+  const profile = JSON.parse(
+    localStorage.getItem("studentProfile") || "{}"
+  );
 
-  const enrollmentEl = document.getElementById("enrollment");
-  const nameEl = document.getElementById("name");
-  const classEl = document.getElementById("class");
-
-  // 🔥 SINGLE SOURCE OF TRUTH
-  const profileLS = JSON.parse(localStorage.getItem("studentProfile") || "{}");
-
-  // 🔹 URL > localStorage priority
   const enrollment =
-    getQP("enrollment") || profileLS.enrollment || "";
+    getQP("enrollment") || profile.enrollment || "";
 
   const name =
-    getQP("name") || profileLS.name || "";
+    getQP("name") || profile.name || "";
 
   const studentClass =
-    getQP("class") || profileLS.class || "";
+    getQP("class") || profile.class || "";
 
-  // 🔹 Fill inputs
   enrollmentEl.value = enrollment;
   nameEl.value = name;
   classEl.value = studentClass;
-
 });
-// 🔹 future pages ke liye save
-localStorage.setItem("enrollment", enrollment);
-localStorage.setItem("name", name);
-localStorage.setItem("studentClass", studentClass);
 
 /* ==============================
-   IMAGE → BASE64 + PREVIEW
+   IMAGE → BASE64
 ================================ */
-let base64Image = "";
-
-const photoInput = document.getElementById("photo");
-const previewBox = document.getElementById("preview");
-
 photoInput.addEventListener("change", () => {
   const file = photoInput.files[0];
   if (!file) return;
@@ -187,8 +179,14 @@ function submitComplaint() {
     photo: base64Image
   };
 
-  if (!data.enrollment || !data.name || !data.class ||
-      !data.category || !data.description || !data.photo) {
+  if (
+    !data.enrollment ||
+    !data.name ||
+    !data.class ||
+    !data.category ||
+    !data.description ||
+    !data.photo
+  ) {
     showMsg("❌ Please fill all required fields", "red");
     return;
   }
@@ -200,18 +198,18 @@ function submitComplaint() {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
   })
-  .then(res => res.json())
-  .then(res => {
-    if (res.success) {
-      showMsg("✅ Complaint submitted successfully", "green");
-      resetForm();
-    } else {
-      showMsg("❌ " + (res.message || "Submission failed"), "red");
-    }
-  })
-  .catch(() => {
-    showMsg("❌ Server error. Please try again later", "red");
-  });
+    .then(res => res.json())
+    .then(res => {
+      if (res.success) {
+        showMsg("✅ Complaint submitted successfully", "green");
+        resetForm();
+      } else {
+        showMsg("❌ " + (res.message || "Submission failed"), "red");
+      }
+    })
+    .catch(() => {
+      showMsg("❌ Server error. Try again later", "red");
+    });
 }
 
 /* ==============================
@@ -231,5 +229,6 @@ function showMsg(text, color) {
   msg.innerText = text;
 }
 </script>
+
 </body>
 </html>
