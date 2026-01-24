@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>File Missing Complaint</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f7fb;
+    margin:0;
+    padding:20px;
+}
+.container{
+    max-width:500px;
+    background:#fff;
+    margin:auto;
+    padding:20px;
+    border-radius:8px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.08);
+}
+h2{
+    text-align:center;
+    color:#0b1f3a;
+}
+label{
+    font-weight:bold;
+    display:block;
+    margin-top:12px;
+}
+input, select, textarea, button{
+    width:100%;
+    padding:10px;
+    margin-top:6px;
+    border-radius:6px;
+    border:1px solid #ccc;
+    font-size:14px;
+}
+input[readonly], input:disabled{
+    background:#eee;
+    cursor:not-allowed;
+}
+textarea{
+    resize:none;
+}
+button{
+    background:#2ecc71;
+    color:white;
+    border:none;
+    margin-top:20px;
+    font-size:16px;
+    cursor:pointer;
+}
+button:hover{
+    background:#27ae60;
+}
+.msg{
+    text-align:center;
+    margin-top:15px;
+    font-weight:bold;
+}
+.preview{
+    margin-top:10px;
+    text-align:center;
+}
+.preview img{
+    max-width:100%;
+    border-radius:6px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>📌 File Missing Complaint</h2>
+
+    <label>Enrollment Number</label>
+    <input type="text" id="enrollment" readonly>
+
+    <label>Name</label>
+    <input type="text" id="name" readonly>
+
+    <label>Class</label>
+    <input type="text" id="class" readonly>
+
+    <label>Category</label>
+    <select id="category" required>
+        <option value="">-- Select Category --</option>
+        <option>Electronic Item</option>
+        <option>Bag</option>
+        <option>Tiffin</option>
+        <option>Money</option>
+        <option>Books</option>
+        <option>ID Card</option>
+        <option>Other</option>
+    </select>
+
+    <label>Description</label>
+    <textarea id="description" rows="4" placeholder="Describe missing item clearly..."></textarea>
+
+    <label>Upload Photo</label>
+    <input type="file" id="photo" accept="image/*">
+
+    <div class="preview" id="preview"></div>
+
+    <button onclick="submitComplaint()">Submit Complaint</button>
+
+    <div class="msg" id="msg"></div>
+</div>
+
+<script>
+// ------------------------------
+// LOAD STUDENT DATA FROM STORAGE
+// ------------------------------
+document.getElementById("enrollment").value = localStorage.getItem("student_enrollment") || "";
+document.getElementById("name").value = localStorage.getItem("student_name") || "";
+document.getElementById("class").value = localStorage.getItem("student_class") || "";
+
+// ------------------------------
+// IMAGE TO BASE64
+// ------------------------------
+let base64Image = "";
+
+document.getElementById("photo").addEventListener("change", function(){
+    const file = this.files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(){
+        base64Image = reader.result;
+        document.getElementById("preview").innerHTML =
+            `<img src="${base64Image}">`;
+    };
+    reader.readAsDataURL(file);
+});
+
+// ------------------------------
+// SUBMIT COMPLAINT
+// ------------------------------
+function submitComplaint(){
+    const data = {
+        enrollment: document.getElementById("enrollment").value,
+        name: document.getElementById("name").value,
+        class: document.getElementById("class").value,
+        category: document.getElementById("category").value,
+        description: document.getElementById("description").value,
+        photo: base64Image
+    };
+
+    if(!data.category || !data.description || !data.photo){
+        showMsg("❌ Please fill all required fields", "red");
+        return;
+    }
+
+    fetch("/api/missing/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(res => {
+        if(res.success){
+            showMsg("✅ Complaint submitted for approval", "green");
+            document.getElementById("description").value = "";
+            document.getElementById("category").value = "";
+            document.getElementById("photo").value = "";
+            document.getElementById("preview").innerHTML = "";
+        } else {
+            showMsg("❌ " + res.message, "red");
+        }
+    })
+    .catch(() => {
+        showMsg("❌ Server error, try again later", "red");
+    });
+}
+
+function showMsg(text, color){
+    const msg = document.getElementById("msg");
+    msg.style.color = color;
+    msg.innerText = text;
+}
+</script>
+
+</body>
+</html>
