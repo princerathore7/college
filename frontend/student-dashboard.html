@@ -590,7 +590,13 @@ input:checked + .slider:before {
 <a href="fees.html">
   <i class="fa-solid fa-wallet"></i> Fees
 </a>
+<a href="file-complaint.html?enrollment=12345&name=Rahul&class=CSE-2">
+  <i class="fa-solid fa-triangle-exclamation"></i> File Complaint
+</a>
 
+<a id="complaintBtn">
+  <i class="fa-solid fa-triangle-exclamation"></i> File Complaint
+</a>
 <a href="about-dev.html">
   <i class="fa-solid fa-code"></i> About Dev
 </a>
@@ -1160,6 +1166,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
+  document.getElementById("complaintBtn").href =
+    `file-complaint.html?enrollment=${enrollment}&name=${name}&class=${studentClass}`;
 </script>
 </body>
 </html>

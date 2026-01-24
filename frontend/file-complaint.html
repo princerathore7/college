@@ -111,48 +111,56 @@ button:hover{
 </div>
 
 <script>
-// ------------------------------
-// LOAD STUDENT DATA FROM STORAGE
-// ------------------------------
-document.getElementById("enrollment").value = localStorage.getItem("student_enrollment") || "";
-document.getElementById("name").value = localStorage.getItem("student_name") || "";
-document.getElementById("class").value = localStorage.getItem("student_class") || "";
+/* ==============================
+   LOAD STUDENT DATA (Auto-Fill)
+================================ */
+const enrollmentEl = document.getElementById("enrollment");
+const nameEl = document.getElementById("name");
+const classEl = document.getElementById("class");
 
-// ------------------------------
-// IMAGE TO BASE64
-// ------------------------------
+enrollmentEl.value = localStorage.getItem("student_enrollment") || "";
+nameEl.value       = localStorage.getItem("student_name") || "";
+classEl.value      = localStorage.getItem("student_class") || "";
+
+/* ==============================
+   IMAGE → BASE64 + PREVIEW
+================================ */
 let base64Image = "";
 
-document.getElementById("photo").addEventListener("change", function(){
-    const file = this.files[0];
-    if(!file) return;
+const photoInput = document.getElementById("photo");
+const previewBox = document.getElementById("preview");
+
+photoInput.addEventListener("change", () => {
+    const file = photoInput.files[0];
+    if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = function(){
+    reader.onload = () => {
         base64Image = reader.result;
-        document.getElementById("preview").innerHTML =
-            `<img src="${base64Image}">`;
+        previewBox.innerHTML = `<img src="${base64Image}" alt="Preview">`;
     };
     reader.readAsDataURL(file);
 });
 
-// ------------------------------
-// SUBMIT COMPLAINT
-// ------------------------------
-function submitComplaint(){
+/* ==============================
+   SUBMIT COMPLAINT
+================================ */
+function submitComplaint() {
     const data = {
-        enrollment: document.getElementById("enrollment").value,
-        name: document.getElementById("name").value,
-        class: document.getElementById("class").value,
+        enrollment: enrollmentEl.value.trim(),
+        name: nameEl.value.trim(),
+        class: classEl.value.trim(),
         category: document.getElementById("category").value,
-        description: document.getElementById("description").value,
+        description: document.getElementById("description").value.trim(),
         photo: base64Image
     };
 
-    if(!data.category || !data.description || !data.photo){
+    if (!data.category || !data.description || !data.photo) {
         showMsg("❌ Please fill all required fields", "red");
         return;
     }
+
+    showMsg("⏳ Submitting complaint...", "orange");
 
     fetch("/api/missing/submit", {
         method: "POST",
@@ -161,27 +169,36 @@ function submitComplaint(){
     })
     .then(res => res.json())
     .then(res => {
-        if(res.success){
-            showMsg("✅ Complaint submitted for approval", "green");
-            document.getElementById("description").value = "";
-            document.getElementById("category").value = "";
-            document.getElementById("photo").value = "";
-            document.getElementById("preview").innerHTML = "";
+        if (res.success) {
+            showMsg("✅ Complaint submitted successfully", "green");
+            resetForm();
         } else {
-            showMsg("❌ " + res.message, "red");
+            showMsg("❌ " + (res.message || "Submission failed"), "red");
         }
     })
     .catch(() => {
-        showMsg("❌ Server error, try again later", "red");
+        showMsg("❌ Server error. Please try again later", "red");
     });
 }
 
-function showMsg(text, color){
+/* ==============================
+   HELPERS
+================================ */
+function resetForm() {
+    document.getElementById("description").value = "";
+    document.getElementById("category").value = "";
+    photoInput.value = "";
+    previewBox.innerHTML = "";
+    base64Image = "";
+}
+
+function showMsg(text, color) {
     const msg = document.getElementById("msg");
     msg.style.color = color;
     msg.innerText = text;
 }
 </script>
+
 
 </body>
 </html>
