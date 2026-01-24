@@ -120,25 +120,35 @@ function getQueryParam(key) {
 /* ==============================
    LOAD STUDENT DATA (Auto-Fill)
 ================================ */
-const enrollmentEl = document.getElementById("enrollment");
-const nameEl       = document.getElementById("name");
-const classEl      = document.getElementById("class");
+document.addEventListener("DOMContentLoaded", () => {
 
-// 🔹 URL se lo
-const enrollmentQP = getQueryParam("enrollment");
-const nameQP       = getQueryParam("name");
-const classQP      = getQueryParam("class");
+  function getQP(key) {
+    return new URLSearchParams(window.location.search).get(key);
+  }
 
-// 🔹 URL > localStorage priority
-const enrollment = enrollmentQP || localStorage.getItem("enrollment") || "";
-const name       = nameQP       || localStorage.getItem("name") || "";
-const studentClass = classQP    || localStorage.getItem("studentClass") || "";
+  const enrollmentEl = document.getElementById("enrollment");
+  const nameEl = document.getElementById("name");
+  const classEl = document.getElementById("class");
 
-// 🔹 Inputs fill
-enrollmentEl.value = enrollment;
-nameEl.value       = name;
-classEl.value      = studentClass;
+  // 🔥 SINGLE SOURCE OF TRUTH
+  const profileLS = JSON.parse(localStorage.getItem("studentProfile") || "{}");
 
+  // 🔹 URL > localStorage priority
+  const enrollment =
+    getQP("enrollment") || profileLS.enrollment || "";
+
+  const name =
+    getQP("name") || profileLS.name || "";
+
+  const studentClass =
+    getQP("class") || profileLS.class || "";
+
+  // 🔹 Fill inputs
+  enrollmentEl.value = enrollment;
+  nameEl.value = name;
+  classEl.value = studentClass;
+
+});
 // 🔹 future pages ke liye save
 localStorage.setItem("enrollment", enrollment);
 localStorage.setItem("name", name);
