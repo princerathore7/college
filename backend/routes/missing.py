@@ -3,6 +3,7 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 from datetime import datetime
 import os
+from flask_cors import cross_origin
 
 missing_bp = Blueprint("missing_bp", __name__, url_prefix="/api/missing")
 
@@ -16,7 +17,8 @@ missing_col = db["missing_items"]
 # -----------------------------
 # STUDENT: SUBMIT MISSING ITEM
 # -----------------------------
-@missing_bp.route("/submit", methods=["POST"])
+@missing_bp.route("/submit", methods=["POST", "OPTIONS"])
+@cross_origin(origin="https://acropoliss.netlify.app")
 def submit_missing():
     data = request.get_json()
 
