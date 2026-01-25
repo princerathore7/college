@@ -1,136 +1,209 @@
 from flask import Blueprint, request, jsonify
+from flask_cors import CORS, cross_origin
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from datetime import datetime
 import os
-from flask_cors import cross_origin
+import cloudinary
 import cloudinary.uploader
+
+# --------------------------------
+# Blueprint setup
+# --------------------------------
 missing_bp = Blueprint("missing_bp", __name__, url_prefix="/api/missing")
+CORS(missing_bp)
 
-# MongoDB connection
-MONGO_URI = os.environ.get("MONGO_URI")
-client = MongoClient(MONGO_URI)
-db = client["college_db"]
+# --------------------------------
+# MongoDB (SAFE: function-based)
+# --------------------------------
+MONGO_URI = os.getenv("MONGO_COLLEGE_DB_URI")
+if not MONGO_URI:
+    raise Exception("MONGO_COLLEGE_DB_URI not set")
 
-missing_col = db["missing_items"]
-# -----------------------------
-# STUDENT: SUBMIT MISSING ITEM
-# -----------------------------
+def get_collection():
+    client = MongoClient(
+        MONGO_URI,
+        serverSelectionTimeoutMS=5000
+    )
+    db = client["college_db"]
+    return db["missing_items"]
+
+# --------------------------------
+# Cloudinary setup
+# --------------------------------
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET")
+)
+
+# =================================
+# 1️⃣ STUDENT: SUBMIT MISSING ITEM
+# =================================
 @missing_bp.route("/submit", methods=["POST", "OPTIONS"])
 @cross_origin()
 def submit_missing():
 
-    # ✅ Handle preflight safely
     if request.method == "OPTIONS":
         return jsonify({"success": True}), 200
 
-    photo = request.files.get("photo")
-    if not photo:
-        return jsonify({"success": False, "message": "Photo required"}), 400
+    try:
+        missing_col = get_collection()
 
-    upload = cloudinary.uploader.upload(photo)
+        photo = request.files.get("photo")
+        if not photo:
+            return jsonify({"success": False, "message": "Photo required"}), 400
 
-    item = {
-        "photo": upload["secure_url"],
-        "category": request.form.get("category"),
-        "description": request.form.get("description"),
-        "enrollment": request.form.get("enrollment"),
-        "name": request.form.get("name"),
-        "class": request.form.get("class"),
-        "status": "pending",
-        "created_at": datetime.utcnow()
-    }
+        upload = cloudinary.uploader.upload(
+            photo,
+            folder="college_missing_items"
+        )
 
-    missing_col.insert_one(item)
+        item = {
+            "photo": upload["secure_url"],
+            "category": request.form.get("category"),
+            "description": request.form.get("description"),
+            "enrollment": request.form.get("enrollment"),
+            "name": request.form.get("name"),
+            "class": request.form.get("class"),
+            "status": "pending",
+            "created_at": datetime.utcnow()
+        }
 
-    return jsonify({
-        "success": True,
-        "message": "Missing item submitted, waiting for mentor approval"
-    })
+        if not all([item["category"], item["description"], item["enrollment"], item["name"], item["class"]]):
+            return jsonify({"success": False, "message": "All fields required"}), 400
+
+        missing_col.insert_one(item)
+
+        return jsonify({
+            "success": True,
+            "message": "Missing item submitted, waiting for mentor approval"
+        }), 201
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
 
 
-
-# --------------------------------
-# STUDENT: MY SUBMITTED COMPLAINTS
-# --------------------------------
+# =================================
+# 2️⃣ STUDENT: MY SUBMITTED ITEMS
+# =================================
 @missing_bp.route("/my/<enrollment>", methods=["GET"])
 def my_complaints(enrollment):
-    items = list(missing_col.find(
-        {"enrollment": enrollment},
-        {"photo": 1, "category": 1, "description": 1, "status": 1, "created_at": 1}
-    ))
+    try:
+        missing_col = get_collection()
 
-    for i in items:
-        i["_id"] = str(i["_id"])
+        items = list(missing_col.find(
+            {"enrollment": enrollment},
+            {"photo": 1, "category": 1, "description": 1, "status": 1, "created_at": 1}
+        ))
 
-    return jsonify({"success": True, "data": items})
+        for i in items:
+            i["_id"] = str(i["_id"])
+
+        return jsonify({"success": True, "data": items}), 200
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
 
 
-# -----------------------------
-# PUBLIC: APPROVED MISSING LIST
-# -----------------------------
+# =================================
+# 3️⃣ PUBLIC: APPROVED MISSING LIST
+# =================================
 @missing_bp.route("/public", methods=["GET"])
 def public_missing():
-    category = request.args.get("category")
-    search = request.args.get("search")
+    try:
+        missing_col = get_collection()
 
-    query = {"status": "approved"}
+        category = request.args.get("category")
+        search = request.args.get("search")
 
-    if category:
-        query["category"] = category
+        query = {"status": "approved"}
 
-    if search:
-        query["description"] = {"$regex": search, "$options": "i"}
+        if category:
+            query["category"] = category
 
-    items = list(missing_col.find(query))
+        if search:
+            query["description"] = {"$regex": search, "$options": "i"}
 
-    for i in items:
-        i["_id"] = str(i["_id"])
+        items = list(missing_col.find(query))
 
-    return jsonify({"success": True, "data": items})
+        for i in items:
+            i["_id"] = str(i["_id"])
+
+        return jsonify({"success": True, "data": items}), 200
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
 
 
-# -----------------------------
-# MENTOR: VIEW PENDING ITEMS
-# -----------------------------
+# =================================
+# 4️⃣ MENTOR: VIEW PENDING ITEMS
+# =================================
 @missing_bp.route("/pending", methods=["GET"])
 def pending_items():
-    items = list(missing_col.find({"status": "pending"}))
+    try:
+        missing_col = get_collection()
 
-    for i in items:
-        i["_id"] = str(i["_id"])
+        items = list(missing_col.find({"status": "pending"}))
 
-    return jsonify({"success": True, "data": items})
+        for i in items:
+            i["_id"] = str(i["_id"])
+
+        return jsonify({"success": True, "data": items}), 200
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
 
 
-# -----------------------------
-# MENTOR: APPROVE ITEM
-# -----------------------------
+# =================================
+# 5️⃣ MENTOR: APPROVE ITEM
+# =================================
 @missing_bp.route("/approve/<id>", methods=["PUT"])
 def approve_item(id):
-    missing_col.update_one(
-        {"_id": ObjectId(id)},
-        {"$set": {"status": "approved"}}
-    )
-    return jsonify({"success": True, "message": "Item approved"})
+    try:
+        missing_col = get_collection()
+
+        missing_col.update_one(
+            {"_id": ObjectId(id)},
+            {"$set": {"status": "approved"}}
+        )
+
+        return jsonify({"success": True, "message": "Item approved"}), 200
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
 
 
-# -----------------------------
-# MENTOR: DISAPPROVE ITEM
-# -----------------------------
+# =================================
+# 6️⃣ MENTOR: DISAPPROVE ITEM
+# =================================
 @missing_bp.route("/disapprove/<id>", methods=["PUT"])
 def disapprove_item(id):
-    missing_col.update_one(
-        {"_id": ObjectId(id)},
-        {"$set": {"status": "disapproved"}}
-    )
-    return jsonify({"success": True, "message": "Item disapproved"})
+    try:
+        missing_col = get_collection()
+
+        missing_col.update_one(
+            {"_id": ObjectId(id)},
+            {"$set": {"status": "disapproved"}}
+        )
+
+        return jsonify({"success": True, "message": "Item disapproved"}), 200
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
 
 
-# -----------------------------
-# MENTOR: DELETE ITEM (PERMANENT)
-# -----------------------------
+# =================================
+# 7️⃣ MENTOR: DELETE ITEM
+# =================================
 @missing_bp.route("/delete/<id>", methods=["DELETE"])
 def delete_item(id):
-    missing_col.delete_one({"_id": ObjectId(id)})
-    return jsonify({"success": True, "message": "Item deleted permanently"})
+    try:
+        missing_col = get_collection()
+
+        missing_col.delete_one({"_id": ObjectId(id)})
+
+        return jsonify({"success": True, "message": "Item deleted permanently"}), 200
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
