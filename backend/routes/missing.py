@@ -18,8 +18,12 @@ missing_col = db["missing_items"]
 # STUDENT: SUBMIT MISSING ITEM
 # -----------------------------
 @missing_bp.route("/submit", methods=["POST", "OPTIONS"])
-@cross_origin(origin="https://acropoliss.netlify.app")
+@cross_origin()
 def submit_missing():
+
+    # ✅ Handle preflight safely
+    if request.method == "OPTIONS":
+        return jsonify({"success": True}), 200
 
     photo = request.files.get("photo")
     if not photo:
@@ -28,12 +32,12 @@ def submit_missing():
     upload = cloudinary.uploader.upload(photo)
 
     item = {
-        "photo": upload["secure_url"],  # 🔥 URL only
-        "category": request.form["category"],
-        "description": request.form["description"],
-        "enrollment": request.form["enrollment"],
-        "name": request.form["name"],
-        "class": request.form["class"],
+        "photo": upload["secure_url"],
+        "category": request.form.get("category"),
+        "description": request.form.get("description"),
+        "enrollment": request.form.get("enrollment"),
+        "name": request.form.get("name"),
+        "class": request.form.get("class"),
         "status": "pending",
         "created_at": datetime.utcnow()
     }
@@ -44,6 +48,7 @@ def submit_missing():
         "success": True,
         "message": "Missing item submitted, waiting for mentor approval"
     })
+
 
 
 # --------------------------------
