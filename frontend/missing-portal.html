@@ -2,78 +2,178 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Missing Items Portal</title>
+<title>Campus Lost & Found | Acropolis Portal</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
-body{
-    margin:0;
-    font-family:Arial, sans-serif;
-    background:#f4f7fb;
+:root {
+    --primary: #0b1f3a;
+    --accent: #3498db;
+    --bg: #f8fbff;
+    --white: #ffffff;
 }
-header{
-    background:#0b1f3a;
-    color:#fff;
-    padding:15px;
-    text-align:center;
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg);
+    color: #333;
 }
-.container{
-    max-width:1100px;
-    margin:auto;
-    padding:20px;
+
+header {
+    background: var(--primary);
+    color: #fff;
+    padding: 40px 20px;
+    text-align: center;
+    border-radius: 0 0 30px 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    position: relative;
 }
-.controls{
-    display:flex;
-    gap:10px;
-    margin-bottom:20px;
+
+header h2 { margin: 0; font-size: 28px; letter-spacing: 1px; }
+header p { opacity: 0.8; font-weight: 300; margin-top: 10px; }
+
+.container {
+    max-width: 1200px;
+    margin: -30px auto 50px;
+    padding: 0 20px;
 }
-input, select{
-    padding:10px;
-    border-radius:6px;
-    border:1px solid #ccc;
-    flex:1;
+
+/* Search Controls */
+.search-box {
+    background: var(--white);
+    padding: 20px;
+    border-radius: 15px;
+    display: flex;
+    gap: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
 }
-.grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(250px,1fr));
-    gap:15px;
+
+.search-box input, .search-box select {
+    padding: 12px 15px;
+    border: 2px solid #edf2f7;
+    border-radius: 10px;
+    outline: none;
+    font-family: inherit;
+    transition: 0.3s;
 }
-.card{
-    background:#fff;
-    border-radius:10px;
-    box-shadow:0 6px 18px rgba(0,0,0,0.08);
-    overflow:hidden;
+
+.search-box input { flex: 3; }
+.search-box select { flex: 1; }
+.search-box input:focus { border-color: var(--accent); }
+
+/* Grid & Cards */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
 }
-.card img{
-    width:100%;
-    height:180px;
-    object-fit:cover;
+
+.card {
+    background: var(--white);
+    border-radius: 20px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid #eee;
+    cursor: pointer;
+    position: relative;
 }
-.card-body{
-    padding:12px;
+
+.card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
 }
-.tag{
-    display:inline-block;
-    background:#3498db;
-    color:#fff;
-    padding:4px 8px;
-    border-radius:4px;
-    font-size:12px;
-    margin-bottom:6px;
+
+.card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
 }
-.desc{
-    font-size:14px;
-    margin:6px 0;
+
+.card-content { padding: 15px; }
+
+.tag {
+    background: #e1f0ff;
+    color: var(--accent);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
 }
-.meta{
-    font-size:12px;
-    color:#666;
+
+.item-title {
+    margin: 10px 0 5px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--primary);
 }
-.empty{
-    text-align:center;
-    color:#888;
-    margin-top:50px;
+
+.item-sub {
+    font-size: 13px;
+    color: #777;
+    display: flex;
+    justify-content: space-between;
 }
+
+/* Modal System */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(5px);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-content {
+    background: white;
+    max-width: 500px;
+    width: 100%;
+    border-radius: 25px;
+    position: relative;
+    overflow: hidden;
+    animation: zoomIn 0.3s ease;
+}
+
+@keyframes zoomIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.modal-header img { width: 100%; height: 250px; object-fit: cover; }
+.modal-body { padding: 25px; }
+.close-btn {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    background: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 50px;
+    color: #999;
+}
+.empty-state span { font-size: 60px; display: block; margin-bottom: 10px; }
+
 </style>
 </head>
 
@@ -81,13 +181,12 @@ input, select{
 
 <header>
     <h2>🔍 Missing Items Portal</h2>
-    <p>Approved missing items found in campus</p>
+    <p>Help your fellow students! Found something? Report it immediately. 🎒✨</p>
 </header>
 
 <div class="container">
-
-    <div class="controls">
-        <input type="text" id="search" placeholder="Search missing item...">
+    <div class="search-box">
+        <input type="text" id="search" placeholder="Looking for a specific item? (e.g. Blue Bag)">
         <select id="category">
             <option value="">All Categories</option>
             <option>Electronic Item</option>
@@ -102,10 +201,30 @@ input, select{
 
     <div class="grid" id="grid"></div>
 
-    <div class="empty" id="empty" style="display:none;">
-        😕 No missing items found
+    <div class="empty-state" id="empty" style="display:none;">
+        <span>😟</span>
+        <p>No items match your search. Try a different keyword!</p>
     </div>
+</div>
 
+<div class="modal" id="itemModal">
+    <div class="modal-content">
+        <div class="close-btn" onclick="closeModal()">×</div>
+        <div class="modal-header">
+            <img id="modalImg" src="">
+        </div>
+        <div class="modal-body">
+            <span class="tag" id="modalTag">Category</span>
+            <h3 id="modalTitle" style="margin: 15px 0 10px; color: var(--primary);">Item Name</h3>
+            <p id="modalDesc" style="color: #555; line-height: 1.6; font-size: 14px;">Full description goes here...</p>
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+            <div style="font-size: 13px; color: #888;">
+                <p>📍 <strong>Owner's Class:</strong> <span id="modalClass">...</span></p>
+                <p>📅 <strong>Reported on:</strong> <span id="modalDate">...</span></p>
+            </div>
+            <button onclick="closeModal()" style="width:100%; padding:12px; border-radius:10px; border:none; background:var(--primary); color:white; font-weight:600; margin-top:10px; cursor:pointer;">Got it!</button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -113,48 +232,89 @@ const API = "https://college-hwbb.onrender.com/api/missing/public";
 const grid = document.getElementById("grid");
 const empty = document.getElementById("empty");
 
-function loadItems(){
-    const search = document.getElementById("search").value;
+// Modal Elements
+const modal = document.getElementById("itemModal");
+const modalImg = document.getElementById("modalImg");
+const modalTitle = document.getElementById("modalTitle");
+const modalTag = document.getElementById("modalTag");
+const modalDesc = document.getElementById("modalDesc");
+const modalClass = document.getElementById("modalClass");
+const modalDate = document.getElementById("modalDate");
+
+let allItems = [];
+
+async function loadItems(){
+    const search = document.getElementById("search").value.toLowerCase();
     const category = document.getElementById("category").value;
 
-    let url = API + "?";
-    if(search) url += `search=${encodeURIComponent(search)}&`;
-    if(category) url += `category=${encodeURIComponent(category)}`;
+    try {
+        const response = await fetch(API);
+        const res = await response.json();
+        allItems = res.data || [];
+        renderItems(allItems, search, category);
+    } catch (error) {
+        console.error("Error loading items:", error);
+    }
+}
 
-    fetch(url)
-    .then(res => res.json())
-    .then(res => {
-        grid.innerHTML = "";
-        const items = res.data || [];
+function renderItems(items, searchTerm, categoryTerm) {
+    grid.innerHTML = "";
+    
+    const filtered = items.filter(item => {
+        const matchesSearch = item.description.toLowerCase().includes(searchTerm) || item.name.toLowerCase().includes(searchTerm);
+        const matchesCategory = categoryTerm === "" || item.category === categoryTerm;
+        return matchesSearch && matchesCategory;
+    });
 
-        if(items.length === 0){
-            empty.style.display = "block";
-            return;
-        }
+    if(filtered.length === 0){
+        empty.style.display = "block";
+        return;
+    }
 
-        empty.style.display = "none";
+    empty.style.display = "none";
 
-        items.forEach(i => {
-            grid.innerHTML += `
-            <div class="card">
-                <img src="${i.photo}">
-                <div class="card-body">
-                    <span class="tag">${i.category}</span>
-                    <p class="desc">${i.description}</p>
-                    <div class="meta">
-                        🎓 Class: ${i.class}<br>
-                        🕒 ${new Date(i.created_at).toLocaleString()}
-                    </div>
+    filtered.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            <img src="${item.photo}" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+            <div class="card-content">
+                <span class="tag">${item.category}</span>
+                <div class="item-title">${item.name}</div>
+                <div class="item-sub">
+                    <span>👤 ${item.class}</span>
+                    <span>📍 Acropolis</span>
                 </div>
             </div>
-            `;
-        });
+        `;
+        card.onclick = () => openModal(item);
+        grid.appendChild(card);
     });
 }
 
-document.getElementById("search").addEventListener("input", loadItems);
-document.getElementById("category").addEventListener("change", loadItems);
+function openModal(item) {
+    modalImg.src = item.photo;
+    modalTag.innerText = item.category;
+    modalTitle.innerText = item.name;
+    modalDesc.innerText = item.description;
+    modalClass.innerText = item.class;
+    modalDate.innerText = new Date(item.created_at).toLocaleString();
+    modal.style.display = "flex";
+}
 
+function closeModal() {
+    modal.style.display = "none";
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    if (event.target == modal) closeModal();
+}
+
+document.getElementById("search").addEventListener("input", () => renderItems(allItems, document.getElementById("search").value.toLowerCase(), document.getElementById("category").value));
+document.getElementById("category").addEventListener("change", () => renderItems(allItems, document.getElementById("search").value.toLowerCase(), document.getElementById("category").value));
+
+// Initial Load
 loadItems();
 </script>
 
