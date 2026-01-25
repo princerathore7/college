@@ -114,12 +114,10 @@ button:hover{
    GLOBAL ELEMENT REFERENCES
 ================================ */
 const enrollmentEl = document.getElementById("enrollment");
-const nameEl = document.getElementById("name");
-const classEl = document.getElementById("class");
-const photoInput = document.getElementById("photo");
-const previewBox = document.getElementById("preview");
-
-let base64Image = "";
+const nameEl       = document.getElementById("name");
+const classEl      = document.getElementById("class");
+const photoInput   = document.getElementById("photo");
+const previewBox   = document.getElementById("preview");
 
 /* ==============================
    GET QUERY PARAM
@@ -137,66 +135,57 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.getItem("studentProfile") || "{}"
   );
 
-  const enrollment =
+  enrollmentEl.value =
     getQP("enrollment") || profile.enrollment || "";
 
-  const name =
+  nameEl.value =
     getQP("name") || profile.name || "";
 
-  const studentClass =
+  classEl.value =
     getQP("class") || profile.class || "";
-
-  enrollmentEl.value = enrollment;
-  nameEl.value = name;
-  classEl.value = studentClass;
 });
 
 /* ==============================
-   IMAGE → BASE64
+   IMAGE PREVIEW (NO BASE64)
 ================================ */
 photoInput.addEventListener("change", () => {
   const file = photoInput.files[0];
   if (!file) return;
 
-  const reader = new FileReader();
-  reader.onload = () => {
-    base64Image = reader.result;
-    previewBox.innerHTML = `<img src="${base64Image}" style="max-width:120px">`;
-  };
-  reader.readAsDataURL(file);
+  const url = URL.createObjectURL(file);
+  previewBox.innerHTML = `<img src="${url}" style="max-width:120px">`;
 });
 
 /* ==============================
    SUBMIT COMPLAINT
 ================================ */
 function submitComplaint() {
-  const data = {
-    enrollment: enrollmentEl.value.trim(),
-    name: nameEl.value.trim(),
-    class: classEl.value.trim(),
-    category: document.getElementById("category").value,
-    description: document.getElementById("description").value.trim(),
-    photo: base64Image
-  };
 
   if (
-    !data.enrollment ||
-    !data.name ||
-    !data.class ||
-    !data.category ||
-    !data.description ||
-    !data.photo
+    !enrollmentEl.value.trim() ||
+    !nameEl.value.trim() ||
+    !classEl.value.trim() ||
+    !photoInput.files[0] ||
+    !category.value ||
+    !description.value.trim()
   ) {
     showMsg("❌ Please fill all required fields", "red");
     return;
   }
 
+  const formData = new FormData();
+  formData.append("enrollment", enrollmentEl.value.trim());
+  formData.append("name", nameEl.value.trim());
+  formData.append("class", classEl.value.trim());
+  formData.append("category", category.value);
+  formData.append("description", description.value.trim());
+  formData.append("photo", photoInput.files[0]); // 🔥 FILE ONLY
+
   showMsg("⏳ Submitting complaint...", "orange");
 
   fetch("https://college-hwbb.onrender.com/api/missing/submit", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
+    body: formData   // ❌ no headers needed
   })
     .then(res => res.json())
     .then(res => {
@@ -207,7 +196,8 @@ function submitComplaint() {
         showMsg("❌ " + (res.message || "Submission failed"), "red");
       }
     })
-    .catch(() => {
+    .catch(err => {
+      console.error(err);
       showMsg("❌ Server error. Try again later", "red");
     });
 }
@@ -216,11 +206,10 @@ function submitComplaint() {
    HELPERS
 ================================ */
 function resetForm() {
-  document.getElementById("description").value = "";
-  document.getElementById("category").value = "";
+  description.value = "";
+  category.value = "";
   photoInput.value = "";
   previewBox.innerHTML = "";
-  base64Image = "";
 }
 
 function showMsg(text, color) {
