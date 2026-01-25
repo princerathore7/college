@@ -12,41 +12,77 @@ body{
     margin:0;
     padding:20px;
 }
-.container{max-width:1100px;margin:auto;}
-h2{text-align:center;margin-bottom:20px;}
-.controls{display:flex;gap:10px;margin-bottom:15px;}
+.container{
+    max-width:1100px;
+    margin:auto;
+}
+h2{
+    text-align:center;
+    margin-bottom:20px;
+}
+.controls{
+    display:flex;
+    gap:10px;
+    margin-bottom:15px;
+}
 input, select{
-    padding:10px;border-radius:6px;border:1px solid #ccc;flex:1;
+    padding:10px;
+    border-radius:6px;
+    border:1px solid #ccc;
+    flex:1;
 }
 table{
-    width:100%;border-collapse:collapse;background:#fff;
+    width:100%;
+    border-collapse:collapse;
+    background:#fff;
     box-shadow:0 8px 20px rgba(0,0,0,0.08);
 }
-th, td{padding:10px;border-bottom:1px solid #eee;text-align:center;}
-th{background:#0b1f3a;color:#fff;}
-
+th, td{
+    padding:10px;
+    border-bottom:1px solid #eee;
+    text-align:center;
+}
+th{
+    background:#0b1f3a;
+    color:#fff;
+}
 .btn{
-    padding:6px 10px;border:none;border-radius:4px;
-    cursor:pointer;font-size:13px;
+    padding:6px 10px;
+    border:none;
+    border-radius:4px;
+    cursor:pointer;
+    font-size:13px;
 }
 .approve{background:#2ecc71;color:#fff}
 .disapprove{background:#f39c12;color:#fff}
 .delete{background:#e74c3c;color:#fff}
 .view{background:#3498db;color:#fff}
-.disabled{opacity:0.4;pointer-events:none}
 
-/* MODAL */
+/* POPUP */
 .modal{
-    display:none;position:fixed;inset:0;
+    display:none;
+    position:fixed;
+    inset:0;
     background:rgba(0,0,0,0.6);
-    justify-content:center;align-items:center;
+    justify-content:center;
+    align-items:center;
 }
 .modal-content{
-    background:#fff;width:90%;max-width:500px;
-    padding:20px;border-radius:8px;
+    background:#fff;
+    width:90%;
+    max-width:500px;
+    padding:20px;
+    border-radius:8px;
 }
-.modal img{max-width:100%;border-radius:6px}
-.close{float:right;cursor:pointer;font-weight:bold}
+.modal img{
+    max-width:100%;
+    border-radius:6px;
+}
+.close{
+    float:right;
+    cursor:pointer;
+    font-weight:bold;
+}
 </style>
 </head>
 
@@ -83,7 +119,7 @@ th{background:#0b1f3a;color:#fff;}
     </table>
 </div>
 
-<!-- MODAL -->
+<!-- POPUP -->
 <div class="modal" id="modal">
     <div class="modal-content">
         <span class="close" onclick="closeModal()">✖</span>
@@ -96,7 +132,7 @@ const API = "https://college-hwbb.onrender.com/api/missing";
 let complaints = [];
 
 function loadComplaints(){
-    fetch(`${API}/all`)   // 🔥 pending + approved
+    fetch(`${API}/pending`)
     .then(res => res.json())
     .then(res => {
         complaints = res.data || [];
@@ -121,11 +157,6 @@ function renderTable(){
         )
     )
     .forEach(c => {
-        const approveBtn =
-            c.status === "approved"
-            ? `<button class="btn approve disabled">Approved</button>`
-            : `<button class="btn approve" onclick="approve('${c._id}')">Approve</button>`;
-
         tbody.innerHTML += `
         <tr>
             <td>${c.enrollment}</td>
@@ -134,7 +165,7 @@ function renderTable(){
             <td>${c.status}</td>
             <td>
                 <button class="btn view" onclick='viewMore(${JSON.stringify(c)})'>View</button>
-                ${approveBtn}
+                <button class="btn approve" onclick="approve('${c._id}')">Approve</button>
                 <button class="btn disapprove" onclick="disapprove('${c._id}')">Reject</button>
                 <button class="btn delete" onclick="removeItem('${c._id}')">Delete</button>
             </td>
