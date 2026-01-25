@@ -10,10 +10,9 @@ missing_bp = Blueprint("missing_bp", __name__, url_prefix="/api/missing")
 # MongoDB connection
 MONGO_URI = os.environ.get("MONGO_URI")
 client = MongoClient(MONGO_URI)
-db = client["college_portal"]
+db = client["college_db"]
 
-missing_col = db["missing_items"]
-
+missing_collection = db["missing_items"]
 # -----------------------------
 # STUDENT: SUBMIT MISSING ITEM
 # -----------------------------
