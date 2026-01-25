@@ -150,7 +150,8 @@ def admin_get_all_messages():
                 "description": msg["description"],
                 "enrollments": msg["enrollments"],
                 "attachments": msg.get("attachments", []),
-                "created_at": msg["created_at"]
+                "created_at": msg["created_at"],
+                "is_read": msg.get("is_read", {}) 
             })
         return jsonify({"success": True, "messages": result})
     except Exception as e:

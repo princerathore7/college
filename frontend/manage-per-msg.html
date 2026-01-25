@@ -233,7 +233,9 @@ function viewMsg(m){
 
 function closeModal(){
   document.getElementById("viewModal").style.display="none";
+  loadMessages(); // refresh seen status
 }
+
 
 document.getElementById("searchInput").addEventListener("input",(event)=>{
   const val = event.target.value.toLowerCase();
@@ -246,6 +248,9 @@ document.getElementById("searchInput").addEventListener("input",(event)=>{
 });
 
 loadMessages();
+setInterval(loadMessages, 5000); // refresh every 5 sec
+
 </script>
 </body>
 </html>
+
