@@ -4,7 +4,7 @@ from bson.objectid import ObjectId
 from datetime import datetime
 import os
 from flask_cors import cross_origin
-
+import cloudinary.uploader
 missing_bp = Blueprint("missing_bp", __name__, url_prefix="/api/missing")
 
 # MongoDB connection
@@ -20,20 +20,21 @@ missing_col = db["missing_items"]
 @missing_bp.route("/submit", methods=["POST", "OPTIONS"])
 @cross_origin(origin="https://acropoliss.netlify.app")
 def submit_missing():
-    data = request.get_json()
 
-    required = ["photo", "category", "description", "enrollment", "name", "class"]
-    if not all(k in data for k in required):
-        return jsonify({"success": False, "message": "Missing fields"}), 400
+    photo = request.files.get("photo")
+    if not photo:
+        return jsonify({"success": False, "message": "Photo required"}), 400
+
+    upload = cloudinary.uploader.upload(photo)
 
     item = {
-        "photo": data["photo"],  # base64 or image URL
-        "category": data["category"],
-        "description": data["description"],
-        "enrollment": data["enrollment"],
-        "name": data["name"],
-        "class": data["class"],
-        "status": "pending",   # pending | approved | disapproved
+        "photo": upload["secure_url"],  # 🔥 URL only
+        "category": request.form["category"],
+        "description": request.form["description"],
+        "enrollment": request.form["enrollment"],
+        "name": request.form["name"],
+        "class": request.form["class"],
+        "status": "pending",
         "created_at": datetime.utcnow()
     }
 
