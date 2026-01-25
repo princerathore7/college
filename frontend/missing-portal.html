@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Missing Items Portal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#f4f7fb;
+}
+header{
+    background:#0b1f3a;
+    color:#fff;
+    padding:15px;
+    text-align:center;
+}
+.container{
+    max-width:1100px;
+    margin:auto;
+    padding:20px;
+}
+.controls{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+}
+input, select{
+    padding:10px;
+    border-radius:6px;
+    border:1px solid #ccc;
+    flex:1;
+}
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(250px,1fr));
+    gap:15px;
+}
+.card{
+    background:#fff;
+    border-radius:10px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.08);
+    overflow:hidden;
+}
+.card img{
+    width:100%;
+    height:180px;
+    object-fit:cover;
+}
+.card-body{
+    padding:12px;
+}
+.tag{
+    display:inline-block;
+    background:#3498db;
+    color:#fff;
+    padding:4px 8px;
+    border-radius:4px;
+    font-size:12px;
+    margin-bottom:6px;
+}
+.desc{
+    font-size:14px;
+    margin:6px 0;
+}
+.meta{
+    font-size:12px;
+    color:#666;
+}
+.empty{
+    text-align:center;
+    color:#888;
+    margin-top:50px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h2>🔍 Missing Items Portal</h2>
+    <p>Approved missing items found in campus</p>
+</header>
+
+<div class="container">
+
+    <div class="controls">
+        <input type="text" id="search" placeholder="Search missing item...">
+        <select id="category">
+            <option value="">All Categories</option>
+            <option>Electronic Item</option>
+            <option>Bag</option>
+            <option>Tiffin</option>
+            <option>Money</option>
+            <option>Books</option>
+            <option>ID Card</option>
+            <option>Other</option>
+        </select>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <div class="empty" id="empty" style="display:none;">
+        😕 No missing items found
+    </div>
+
+</div>
+
+<script>
+const API = "https://college-hwbb.onrender.com/api/missing/public";
+const grid = document.getElementById("grid");
+const empty = document.getElementById("empty");
+
+function loadItems(){
+    const search = document.getElementById("search").value;
+    const category = document.getElementById("category").value;
+
+    let url = API + "?";
+    if(search) url += `search=${encodeURIComponent(search)}&`;
+    if(category) url += `category=${encodeURIComponent(category)}`;
+
+    fetch(url)
+    .then(res => res.json())
+    .then(res => {
+        grid.innerHTML = "";
+        const items = res.data || [];
+
+        if(items.length === 0){
+            empty.style.display = "block";
+            return;
+        }
+
+        empty.style.display = "none";
+
+        items.forEach(i => {
+            grid.innerHTML += `
+            <div class="card">
+                <img src="${i.photo}">
+                <div class="card-body">
+                    <span class="tag">${i.category}</span>
+                    <p class="desc">${i.description}</p>
+                    <div class="meta">
+                        🎓 Class: ${i.class}<br>
+                        🕒 ${new Date(i.created_at).toLocaleString()}
+                    </div>
+                </div>
+            </div>
+            `;
+        });
+    });
+}
+
+document.getElementById("search").addEventListener("input", loadItems);
+document.getElementById("category").addEventListener("change", loadItems);
+
+loadItems();
+</script>
+
+</body>
+</html>
