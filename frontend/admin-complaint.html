@@ -44,7 +44,6 @@ button{
 .disapprove{ background:#f39c12; color:#fff; }
 .delete{ background:#e74c3c; color:#fff; }
 .view{ background:#3498db; color:#fff; }
-
 button:hover{ opacity:0.85; }
 
 /* MODAL */
@@ -57,7 +56,7 @@ button:hover{ opacity:0.85; }
 }
 .modal-content{
     background:#fff;
-    max-width:450px;
+    max-width:500px;
     margin:80px auto;
     padding:20px;
     border-radius:8px;
@@ -71,12 +70,21 @@ button:hover{ opacity:0.85; }
     cursor:pointer;
     font-size:18px;
 }
+.status-badge{
+    padding:4px 8px;
+    border-radius:4px;
+    color:#fff;
+    font-weight:bold;
+}
+.status-pending{ background:#7f8c8d; }
+.status-approved{ background:#2ecc71; }
+.status-disapproved{ background:#f39c12; }
 </style>
 </head>
 
 <body>
 
-<h2>📋 Pending Missing Complaints</h2>
+<h2>📋 Missing Complaints – Admin</h2>
 
 <table>
 <thead>
@@ -84,6 +92,7 @@ button:hover{ opacity:0.85; }
     <th>Enrollment</th>
     <th>Name</th>
     <th>Category</th>
+    <th>Status</th>
     <th>Actions</th>
 </tr>
 </thead>
@@ -109,7 +118,7 @@ button:hover{ opacity:0.85; }
 const API = "https://college-hwbb.onrender.com/api/missing";
 
 /* =========================
-   LOAD PENDING COMPLAINTS
+   LOAD ALL COMPLAINTS
 ========================= */
 function loadComplaints(){
   fetch(`${API}/all`)
@@ -123,15 +132,25 @@ function loadComplaints(){
       res.data.forEach(item => {
         const tr = document.createElement("tr");
 
+        // Status badge
+        let statusClass = "status-pending";
+        if(item.status === "approved") statusClass = "status-approved";
+        else if(item.status === "disapproved") statusClass = "status-disapproved";
+
         tr.innerHTML = `
           <td>${item.enrollment}</td>
           <td>${item.name}</td>
           <td>${item.category}</td>
+          <td><span class="status-badge ${statusClass}">${item.status.toUpperCase()}</span></td>
           <td>
             <button class="view" onclick='viewMore(${JSON.stringify(item)})'>View</button>
-            <button class="approve" onclick="approve('${item._id}')">Approve</button>
-            <button class="disapprove" onclick="disapprove('${item._id}')">Disapprove</button>
-            <button class="delete" onclick="deleteItem('${item._id}')">Delete</button>
+            <button class="approve" onclick="confirmAction('approve','${item._id}')">
+                ${item.status==='approved' ? 'Approved' : 'Approve'}
+            </button>
+            <button class="disapprove" onclick="confirmAction('disapprove','${item._id}')">
+                ${item.status==='disapproved' ? 'Disapproved' : 'Disapprove'}
+            </button>
+            <button class="delete" onclick="confirmDelete('${item._id}')">Delete</button>
           </td>
         `;
         tbody.appendChild(tr);
@@ -140,22 +159,23 @@ function loadComplaints(){
 }
 
 /* =========================
-   ACTIONS
+   CONFIRMATIONS
 ========================= */
-function approve(id){
-  fetch(`${API}/approve/${id}`, { method:"PUT" })
-    .then(() => loadComplaints());
+function confirmAction(action,id){
+    let msg = action==='approve' ? "Approve this item?" : "Disapprove this item?";
+    if(!confirm(msg)) return;
+
+    fetch(`${API}/${action}/${id}`, { method:"PUT" })
+        .then(() => {
+            alert(`Item ${action==='approve' ? 'Approved' : 'Disapproved'} successfully!`);
+            loadComplaints();
+        });
 }
 
-function disapprove(id){
-  fetch(`${API}/disapprove/${id}`, { method:"PUT" })
-    .then(() => loadComplaints());
-}
-
-function deleteItem(id){
-  if(!confirm("Delete permanently?")) return;
-  fetch(`${API}/delete/${id}`, { method:"DELETE" })
-    .then(() => loadComplaints());
+function confirmDelete(id){
+    if(!confirm("Delete permanently?")) return;
+    fetch(`${API}/delete/${id}`, { method:"DELETE" })
+        .then(() => loadComplaints());
 }
 
 /* =========================
