@@ -12,7 +12,7 @@ MONGO_URI = os.environ.get("MONGO_URI")
 client = MongoClient(MONGO_URI)
 db = client["college_db"]
 
-missing_collection = db["missing_items"]
+missing_col = db["missing_items"]
 # -----------------------------
 # STUDENT: SUBMIT MISSING ITEM
 # -----------------------------
