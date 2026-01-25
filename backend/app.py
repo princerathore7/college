@@ -33,6 +33,8 @@ from routes.forms import forms_bp
 from routes.bus_track import bus_track_bp
 from routes.per_message import per_message_bp
 from routes.razorpay import razorpay_bp
+from routes.missing import missing_bp
+
 # ---------------------------------------------
 # FLASK APP SETUP
 # ---------------------------------------------
@@ -94,7 +96,8 @@ for bp in [
     events_bp, exams_bp, timetables_bp, marks_bp,
     bus_bp, management_bp, notes_bp, fine_bp,
     admin_students_bp, notifications_bp, attendance_pdf_bp,
-      forms_bp, bus_track_bp, per_message_bp, razorpay_bp
+      forms_bp, bus_track_bp, per_message_bp, razorpay_bp,
+    missing_bp
 ]:
     app.register_blueprint(bp)
 
