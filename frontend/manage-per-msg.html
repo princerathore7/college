@@ -8,11 +8,11 @@
 
     <style>
         :root {
-            --primary-navy: #1e293b; /* Deep Navy */
-            --accent-blue: #3b82f6;  /* Professional Blue */
-            --danger: #ef4444;       /* Modern Red */
-            --success: #10b981;      /* Modern Green */
-            --bg-light: #f8fafc;     /* Slate Gray Background */
+            --primary-navy: #1e293b;
+            --accent-blue: #3b82f6;
+            --danger: #ef4444;
+            --success: #10b981;
+            --bg-light: #f8fafc;
             --text-main: #1e293b;
             --text-muted: #64748b;
             --white: #ffffff;
@@ -26,7 +26,6 @@
             line-height: 1.6;
         }
 
-        /* --- HEADER --- */
         header {
             background: var(--primary-navy);
             padding: 0.75rem 2rem;
@@ -43,161 +42,41 @@
             gap: 12px;
         }
 
-        header img {
-            height: 35px;
-            filter: brightness(0) invert(1); /* Logo ko white karne ke liye */
-        }
+        header img { height: 35px; filter: brightness(0) invert(1); }
+        header h1 { font-size: 1.1rem; font-weight: 600; margin:0; }
 
-        header h1 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            margin: 0;
-        }
+        .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+        .card { background: var(--white); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06); padding: 24px; border: 1px solid #e2e8f0; }
 
-        /* --- CONTAINER --- */
-        .container {
-            max-width: 1100px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
+        .search-bar { display: flex; gap: 12px; margin-bottom: 24px; }
+        .search-bar select, .search-bar input { padding: 10px 14px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; transition: all 0.2s; }
+        .search-bar input { flex: 1; outline: none; }
+        .search-bar input:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
 
-        .card {
-            background: var(--white);
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
-            padding: 24px;
-            border: 1px solid #e2e8f0;
-        }
+        .bulk-box { display: none; background: #eff6ff; border: 1px solid #bfdbfe; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; align-items: center; justify-content: space-between; }
+        .bulk-box span { color: #1e40af; font-weight: 500; font-size: 14px; }
 
-        /* --- SEARCH & FILTERS --- */
-        .search-bar {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        th { background: #f1f5f9; color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 12px; padding: 12px 15px; text-align: left; border-bottom: 2px solid #e2e8f0; }
+        td { padding: 16px 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: var(--text-main); }
+        tr:hover td { background-color: #f8fafc; }
 
-        .search-bar select, 
-        .search-bar input {
-            padding: 10px 14px;
-            border-radius: 8px;
-            border: 1px solid #cbd5e1;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-
-        .search-bar input {
-            flex: 1;
-            outline: none;
-        }
-
-        .search-bar input:focus {
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        /* --- BULK ACTIONS --- */
-        .bulk-box {
-            display: none;
-            background: #eff6ff;
-            border: 1px solid #bfdbfe;
-            padding: 12px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .bulk-box span {
-            color: #1e40af;
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        /* --- TABLE STYLE --- */
-        .table-wrapper {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-        }
-
-        th {
-            background: #f1f5f9;
-            color: var(--text-muted);
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 12px;
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 2px solid #e2e8f0;
-        }
-
-        td {
-            padding: 16px 15px;
-            border-bottom: 1px solid #f1f5f9;
-            font-size: 14px;
-            color: var(--text-main);
-        }
-
-        tr:hover td {
-            background-color: #f8fafc;
-        }
-
-        /* --- BUTTONS --- */
-        .btn {
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 500;
-            border: none;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
+        .btn { padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; transition: opacity 0.2s; }
         .btn:hover { opacity: 0.85; }
-
         .viewBtn { background: var(--accent-blue); color: #fff; margin-right: 5px; }
         .deleteBtn { background: var(--danger); color: #fff; }
         .bulkDeleteBtn { background: var(--danger); color: #fff; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; }
 
-        /* --- MODAL --- */
-        .modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: #fff;
-            width: 550px;
-            border-radius: 16px;
-            padding: 30px;
-            position: relative;
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-        }
-
-        .close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 24px;
-            color: var(--text-muted);
-            cursor: pointer;
-        }
-
+        .modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: #fff; width: 550px; border-radius: 16px; padding: 30px; position: relative; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .close { position: absolute; top: 20px; right: 20px; font-size: 24px; color: var(--text-muted); cursor: pointer; }
         .modal-content h3 { margin-top: 0; color: var(--primary-navy); font-size: 1.5rem; }
         .modal-content p { color: var(--text-muted); margin: 15px 0; }
         .label { font-weight: 600; color: var(--text-main); margin-right: 5px; }
 
+        /* seen status */
+        .seen-icons { font-size: 14px; letter-spacing: 3px; }
     </style>
 </head>
 
@@ -237,22 +116,11 @@
                         <th>Description</th>
                         <th>Enrollments</th>
                         <th>Date</th>
+                        <th>Seen</th>
                         <th style="text-align: center;">Actions</th>
                     </tr>
                 </thead>
-                <tbody id="messageTable">
-                    <tr>
-                        <td><input type="checkbox"></td>
-                        <td style="font-weight: 600;">Fees Reminder</td>
-                        <td style="color: var(--text-muted);">Please submit your semester fees...</td>
-                        <td><span style="background: #e2e8f0; padding: 2px 8px; border-radius: 10px; font-size: 12px;">CS101, CS102</span></td>
-                        <td>Oct 24, 2023</td>
-                        <td style="text-align: center;">
-                            <button class="btn viewBtn">View</button>
-                            <button class="btn deleteBtn">Delete</button>
-                        </td>
-                    </tr>
-                </tbody>
+                <tbody id="messageTable"></tbody>
             </table>
         </div>
     </div>
@@ -272,24 +140,11 @@
 </div>
 
 <script>
-    // JS Logic remains same as your original functionality
-    function closeModal() {
-        document.getElementById('viewModal').style.display = 'none';
-    }
-</script>
-
-</body>
-</html>
-<script>
-      
 /* ===============================
    ACCESS CONTROL — ADMIN PAGES
 ================================ */
-
 const mentorId = localStorage.getItem("mentorId");
 const source   = sessionStorage.getItem("accessSource");
-
-// allowed sources
 const ALLOWED_SOURCES = ["ad", "admin"];
 
 if(!mentorId || !ALLOWED_SOURCES.includes(source)){
@@ -301,6 +156,7 @@ if(!mentorId || !ALLOWED_SOURCES.includes(source)){
   `;
   throw new Error("Unauthorized access");
 }
+
 const API = "https://college-hwbb.onrender.com/api";
 let messages = [];
 let selected = new Set();
@@ -322,6 +178,9 @@ function render(list){
   updateBulk();
 
   list.forEach(m=>{
+    // build seen icons
+    const seenIcons = m.enrollments.map(e => m.is_read?.[e] ? '✅' : '⏳').join(' ');
+    
     const tr=document.createElement("tr");
     tr.innerHTML=`
       <td><input type="checkbox" onchange="toggleSelect('${m.id}',this)"></td>
@@ -331,7 +190,10 @@ function render(list){
       </td>
       <td>${m.enrollments.join(", ")}</td>
       <td>${new Date(m.created_at).toLocaleString()}</td>
-      <td><button class="deleteBtn" onclick="deleteMsg('${m.id}')">Delete</button></td>
+      <td class="seen-icons" style="text-align:center">${seenIcons}</td>
+      <td style="text-align: center;">
+          <button class="deleteBtn" onclick="deleteMsg('${m.id}')">Delete</button>
+      </td>
     `;
     table.appendChild(tr);
   });
@@ -373,7 +235,7 @@ function closeModal(){
   document.getElementById("viewModal").style.display="none";
 }
 
-document.getElementById("searchInput").addEventListener("input",()=>{
+document.getElementById("searchInput").addEventListener("input",(event)=>{
   const val = event.target.value.toLowerCase();
   const type = document.getElementById("searchType").value;
   render(messages.filter(m =>
@@ -385,6 +247,5 @@ document.getElementById("searchInput").addEventListener("input",()=>{
 
 loadMessages();
 </script>
-
 </body>
 </html>
