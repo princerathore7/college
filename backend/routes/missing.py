@@ -207,3 +207,20 @@ def delete_item(id):
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+# =================================
+# 8️⃣ ADMIN: VIEW ALL ITEMS
+# =================================
+@missing_bp.route("/all", methods=["GET"])
+def all_items():
+    try:
+        missing_col = get_collection()
+
+        items = list(missing_col.find().sort("created_at", -1))
+
+        for i in items:
+            i["_id"] = str(i["_id"])
+
+        return jsonify({"success": True, "data": items}), 200
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
