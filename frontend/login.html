@@ -225,6 +225,7 @@ input:focus {
       <div class="role-container">
         <label><input type="radio" name="role" value="student" checked> Student</label>
         <label><input type="radio" name="role" value="mentor"> Mentor</label>
+         <label><input type="radio" name="role" value="bus"> Bus Driver</label>
       </div>
 
       <div class="form-group">
@@ -254,9 +255,10 @@ input:focus {
     </div>
   </div>
 </div>
-
 <script>
-/* --- Image Slider Logic --- */
+/* =====================================================
+   IMAGE SLIDER LOGIC
+===================================================== */
 const images = document.querySelectorAll('#slider img');
 let currentIndex = 0;
 
@@ -265,10 +267,33 @@ function nextImage() {
   currentIndex = (currentIndex + 1) % images.length;
   images[currentIndex].classList.add('active');
 }
-setInterval(nextImage, 5000); // 5 Seconds switch
+setInterval(nextImage, 5000);
 
 
-/* --- Existing Backend Functionality --- */
+/* =====================================================
+   DYNAMIC PLACEHOLDER BASED ON ROLE
+===================================================== */
+const roleRadios = document.querySelectorAll('input[name="role"]');
+const usernameInput = document.getElementById("username");
+
+roleRadios.forEach(radio => {
+  radio.addEventListener("change", () => {
+    if (radio.value === "student") {
+      usernameInput.placeholder = "Enrollment Number";
+    } 
+    else if (radio.value === "mentor") {
+      usernameInput.placeholder = "Mentor ID";
+    } 
+    else if (radio.value === "bus") {
+      usernameInput.placeholder = "Bus Pilot ID (e.g. BUS-101)";
+    }
+  });
+});
+
+
+/* =====================================================
+   LOGIN HANDLER
+===================================================== */
 const form = document.getElementById("loginForm");
 const btn = document.getElementById("loginBtn");
 
@@ -276,7 +301,7 @@ form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   btn.disabled = true;
-  btn.innerText = 'Processing...';
+  btn.innerText = "Processing...";
 
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
@@ -285,10 +310,18 @@ form.addEventListener("submit", async (e) => {
   let url = "";
   let bodyData = {};
 
-  if(role === "mentor"){
+  /* ---------- API SELECTION (NO CHANGE IN STUDENT / MENTOR) ---------- */
+  if (role === "mentor") {
     url = "https://college-hwbb.onrender.com/api/login/mentor";
     bodyData = { mentorId: username, password };
-  } else {
+
+  } 
+  else if (role === "bus") {
+    url = "https://college-hwbb.onrender.com/api/bus/login";
+    bodyData = { busId: username, password };
+
+  } 
+  else {
     url = "https://college-hwbb.onrender.com/api/students/login";
     bodyData = { enrollment: username, password };
   }
@@ -302,23 +335,36 @@ form.addEventListener("submit", async (e) => {
 
     const data = await res.json();
 
-    if(res.ok && data.success){
-      if(role === "student"){
+    /* ---------- SUCCESS HANDLING ---------- */
+    if (res.ok) {
+
+      /* STUDENT */
+      if (role === "student" && data.success) {
         localStorage.setItem("enrollment", data.enrollment);
         localStorage.setItem("role", "student");
         window.location.href = "ewhfihewlbewcbewstudent-dashboard45689";
         return;
       }
 
-      if(role === "mentor"){
+      /* MENTOR */
+      if (role === "mentor" && data.success) {
         localStorage.setItem("mentorId", data.mentor.mentorId);
         localStorage.setItem("mentorName", data.mentor.name || "Mentor");
         localStorage.setItem("role", "mentor");
         window.location.href = "uihfewibfasdvkfdbvkbkvbwifowjnfhbfebfuhiufbwfbuid";
         return;
       }
+
+      /* 🚌 BUS DRIVER */
+      if (role === "bus") {
+        localStorage.setItem("busId", username);
+        localStorage.setItem("role", "bus");
+        window.location.href = `bus-driver.html?busId=${username}`;
+        return;
+      }
+
     } else {
-      alert(data.message || "Invalid credentials");
+      alert(data.message || data.error || "Invalid credentials");
     }
 
   } catch (err) {
@@ -329,6 +375,7 @@ form.addEventListener("submit", async (e) => {
   }
 });
 </script>
+
 
 </body>
 </html>
