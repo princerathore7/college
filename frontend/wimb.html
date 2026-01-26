@@ -91,28 +91,30 @@ async function loadPDF() {
 }
 
 function parsePage(text) {
-  // 🚌 Bus numbers on page
+  // 1️⃣ Bus numbers on page
   const busMatches = [...text.matchAll(/Bus No.-\s*(G\d+)/g)];
   const buses = busMatches.map(b => b[1]);
 
   if (buses.length === 0) return;
 
-  const lines = text.split("\n");
+  // 2️⃣ Possible stop names
+  const stopMatches = text.match(
+    /\n\d+\s+([A-Za-z\s\(\)]+?)\s+\d{1,2}:\d{2}/g
+  );
 
-  lines.forEach(line => {
-    if (
-      /^\d+\s+/.test(line) &&
-      !line.includes("Shift") &&
-      !line.includes("Driver")
-    ) {
-      const stop = line.replace(/^\d+\s*/, "").trim();
+  if (!stopMatches) return;
 
-      if (!locationBusMap[stop]) {
-        locationBusMap[stop] = new Set();
-      }
+  stopMatches.forEach(line => {
+    const stop = line
+      .replace(/\n\d+\s+/, "")
+      .replace(/\d{1,2}:\d{2}.*/, "")
+      .trim();
 
-      buses.forEach(b => locationBusMap[stop].add(b));
+    if (!locationBusMap[stop]) {
+      locationBusMap[stop] = new Set();
     }
+
+    buses.forEach(b => locationBusMap[stop].add(b));
   });
 }
 
@@ -125,9 +127,11 @@ function findBus() {
     return;
   }
 
-  const match = Object.keys(locationBusMap).find(
-    stop => stop.toLowerCase().includes(input)
-  );
+ const match = Object.keys(locationBusMap).find(
+  stop =>
+    stop.toLowerCase().includes(input) ||
+    input.includes(stop.toLowerCase())
+);
 
   if (!match) {
     result.innerHTML = "❌ No bus found for this location";
