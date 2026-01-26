@@ -1,712 +1,486 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard — Acropolis</title>
   <link rel="icon" href="https://i.ibb.co/8tZSKKT/logo-with-bg.webp">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta property="og:image" content="https://i.ibb.co/Ld87p8x9/acropolis-logo.png">
-<title>Student Dashboard — Acropolis</title>
-
-<!-- Fonts & icons -->
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-<style>
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    font-family: 'Poppins', sans-serif;
-    background: #f6f8fb;
-    color: #222;
-    overflow-y: auto;
-}
-
-/* HEADER */
-header {
-    background: linear-gradient(135deg, #0a1931, #112d4e);
-    color: #fff;
-    padding: 14px 18px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 3px 12px rgba(10,25,49,0.35);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    width: 100%;
-}
-
-
-
-.logo-area {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.logo-area img {
-    height: 44px;
-    border-radius: 6px;
-}
-
-.logo-area h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.4rem;
-}
-
-.top-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.action-btn {
-    padding: 9px 14px;
-    border-radius: 8px;
-    border: none;
-    background: #fff;
-    color: #2b5d03;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.action-btn:hover {
-    transform: translateY(-2px);
-}
-
-
-/* SIDEBAR BASE */
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 260px;
-  height: 100vh; /* full viewport height */
-  background: #021355;
-  color: #fff;
-  padding-top: 70px;
-  transform: translateX(-260px);
-  transition: 0.3s ease;
-  z-index: 1500;
-  overflow-y: auto; /* ✅ make it scrollable */
-  overscroll-behavior: contain; /* optional: avoid page scroll when reaching top/bottom */
-}
-
-/* Sidebar visible */
-.sidebar-open {
-  transform: translateX(0);
-}
-
-/* Backdrop */
-.backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.4);
-  display: none;
-  z-index: 1400;
-}
-
-/* Sidebar links */
-.sidebar a {
-  display: block;
-  padding: 14px 18px;
-  color: white;
-  text-decoration: none;
-  font-size: 16px;
-}
-
-.sidebar a:hover {
-  background: rgba(255,255,255,0.1);
-}
-
-/* MAIN */
-main {
-    max-width: 1200px;
-    margin: 28px auto;
-    padding: 24px;
-}
-
-.grid {
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    gap: 18px;
-}
-
-.col-4 { grid-column: span 4; }
-.col-8 { grid-column: span 8; }
-
-/* SECTIONS */
-.section {
-    background: #fff;
-    padding: 18px;
-    border-radius: 12px;
-    box-shadow: 0 6px 14px rgba(0,0,0,0.06);
-}
-
-.profile-box {
-    text-align: center;
-    padding: 20px;
-    border-radius: 12px;
-}
-
-.profile-box h2 {
-    color: #004d40;
-    margin-bottom: 8px;
-}
-
-.profile-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    margin-top: 8px;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 8px;
-}
-
-table th,
-table td {
-    padding: 8px;
-    border-bottom: 1px solid #eee;
-    text-align: left;
-}
-
-h2.section-title {
-    font-family: 'Playfair Display', serif;
-    color: #004d40;
-    margin-bottom: 10px;
-}
-
-/* EVENT BANNER */
-#eventsBanner {
-    display: flex;
-    overflow-x: auto;
-    gap: 12px;
-    padding: 12px;
-    border-radius: 10px;
-    background: #e0f2f1;
-    border: 1px solid #b2dfdb;
-}
-
-#eventsBanner img {
-    width: 220px;
-    height: 130px;
-    object-fit: cover;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: transform .25s;
-}
-
-#eventsBanner img:hover {
-    transform: scale(1.04);
-}
-
-/* BADGES */
-.badge { 
-    display: inline-block;
-    padding: 5px 8px;
-    border-radius: 8px;
-    color: #fff;
-    font-weight: 700;
-}
-.badge.pending { background: #ff9800; }
-.badge.paid { background: #28a745; }
-
-/* MODAL */
-.modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0,0,0,0.45);
-    z-index: 1300;
-}
-
-.modal.show {
-    display: flex;
-}
-
-.modal-box {
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    width: 360px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-    position: relative;
-}
-
-.close-x {
-    position: absolute;
-    right: 14px;
-    top: 10px;
-    cursor: pointer;
-    font-size: 20px;
-}
-
-/* ----------------------------- */
-/*         RESPONSIVE            */
-/* ----------------------------- */
-
-/* Tablet + Small Laptops */
-@media (max-width: 900px) {
-    .logo-area h1 {
-        font-size: 1.1rem;
+  <style>
+    :root {
+      --primary: #0a1931;
+      --primary-light: #182b4a;
+      --accent: #4f46e5;
+      --accent-hover: #4338ca;
+      --bg: #f3f5f9;
+      --card-bg: #ffffff;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --danger: #ef4444;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --shadow: 0 10px 30px -10px rgba(0,0,0,0.08);
+      --border-radius: 16px;
     }
 
-    .col-4, .col-8 {
-        grid-column: span 12;
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      overflow-x: hidden;
     }
 
-    #eventsBanner img {
-        width: 160px;
-        height: 100px;
-    }
-}
-
-/* Phones */
-@media (max-width: 600px) {
+    /* --- HEADER --- */
     header {
-        padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.02);
     }
 
-    .logo-area img {
-        height: 36px;
-    }
-
+    .logo-area { display: flex; align-items: center; gap: 14px; }
+    .logo-area img { height: 40px; border-radius: 8px; }
     .logo-area h1 {
-        font-size: 1rem;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--primary);
+      letter-spacing: -0.5px;
+    }
+    #menuToggle { font-size: 24px; cursor: pointer; color: var(--primary); transition: 0.2s; }
+    #menuToggle:hover { color: var(--accent); }
+
+    /* Notification Button */
+    .notif-btn {
+      position: relative;
+      background: transparent;
+      border: 1px solid #e5e7eb;
+      color: var(--text-main);
+      padding: 10px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .notif-btn:hover { background: var(--bg); border-color: var(--accent); color: var(--accent); }
+    .notif-count {
+      background: var(--danger);
+      color: white;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 20px;
+      position: absolute;
+      top: -5px; right: -5px;
+      box-shadow: 0 2px 5px rgba(239, 68, 68, 0.4);
     }
 
-    .top-actions {
-        gap: 6px;
+    /* --- SIDEBAR --- */
+    .sidebar {
+      position: fixed; top: 0; left: 0;
+      width: 280px; height: 100vh;
+      background: var(--primary);
+      padding-top: 90px;
+      padding-bottom: 40px;
+      transform: translateX(-100%);
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1500;
+      overflow-y: auto;
+      box-shadow: 5px 0 25px rgba(0,0,0,0.1);
+    }
+    .sidebar-open { transform: translateX(0); }
+    
+    .sidebar h2 {
+      color: rgba(255,255,255,0.4);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 0 0 15px 25px;
     }
 
-    .action-btn {
-        padding: 7px 12px;
-        font-size: 0.85rem;
+    .sidebar a {
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px 25px;
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      font-size: 15px;
+      border-left: 4px solid transparent;
+      transition: all 0.2s;
+    }
+    .sidebar a:hover {
+      background: var(--primary-light);
+      color: #fff;
+      border-left-color: var(--accent);
+    }
+    .sidebar a i { width: 20px; text-align: center; }
+
+    .backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(3px);
+      display: none; z-index: 1400;
+      animation: fadeIn 0.3s;
+    }
+    @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+
+    /* --- MAIN LAYOUT --- */
+    main { max-width: 1400px; margin: 30px auto; padding: 0 20px; }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 24px;
+      align-items: start;
     }
 
-    main {
-        padding: 14px;
-    }
-
+    /* --- SECTIONS & CARDS --- */
     .section {
-        padding: 14px;
+      background: var(--card-bg);
+      padding: 24px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0,0,0,0.03);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      margin-bottom: 24px;
+    }
+    .section:hover { transform: translateY(-3px); box-shadow: 0 15px 35px -10px rgba(0,0,0,0.12); }
+
+    h2.section-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 20px;
+      display: flex; align-items: center; justify-content: space-between;
     }
 
-    table th, table td {
-        padding: 6px;
-        font-size: 0.85rem;
+    /* --- LEFT COLUMN: PROFILE & STATS --- */
+    .profile-box {
+      text-align: center;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    .profile-box::before {
+      content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .profile-box h2 { font-size: 1.5rem; margin-bottom: 5px; color: #fff; }
+    .profile-box p { font-size: 0.9rem; opacity: 0.8; margin-bottom: 4px; }
+    
+    .refresh-btn {
+      width: 100%;
+      margin-top: 15px;
+      justify-content: center;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+    }
+    .refresh-btn:hover { background: rgba(255,255,255,0.25); transform: none; box-shadow: none; }
+
+    /* Fine Card (Credit Card Style) */
+    .fine-card {
+      background: linear-gradient(135deg, #ef4444, #b91c1c);
+      color: white;
+      padding: 24px;
+      border-radius: var(--border-radius);
+      position: relative;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 20px rgba(239, 68, 68, 0.25);
+      overflow: hidden;
+    }
+    .fine-card h4 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; }
+    .fine-amount { font-size: 2.2rem; font-weight: 700; margin: 10px 0; display: block; }
+    .fine-subtext { font-size: 0.8rem; opacity: 0.7; }
+    .fine-card::after {
+      content: '\f155'; font-family: "Font Awesome 6 Free"; font-weight: 900;
+      position: absolute; right: -10px; bottom: -20px; font-size: 100px; opacity: 0.1;
     }
 
+    /* Attendance Visuals */
+    #attendanceSection p {
+      display: flex; justify-content: space-between;
+      margin-bottom: 12px; font-size: 0.95rem; color: var(--text-muted);
+    }
+    #attendanceSection span { font-weight: 600; color: var(--text-main); }
+    
+    /* Simple Progress Bar Hook */
+    .att-bar-bg { width: 100%; height: 8px; background: #e5e7eb; border-radius: 10px; margin-top: 15px; overflow: hidden; }
+    .att-bar-fill { height: 100%; background: var(--success); width: 0%; transition: width 1s ease; }
+    
+    /* Quick Actions Grid */
+    .quick-actions-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    }
+    .action-btn {
+      background: white; border: 1px solid #e5e7eb;
+      color: var(--primary); padding: 15px;
+      border-radius: 12px; font-weight: 600; font-size: 0.9rem;
+      cursor: pointer; transition: 0.2s;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    }
+    .action-btn:hover {
+      border-color: var(--accent); color: var(--accent);
+      background: rgba(79, 70, 229, 0.05); transform: translateY(-2px);
+    }
+    .action-btn i { font-size: 1.2rem; }
+
+    /* --- RIGHT COLUMN: EVENTS & TABLES --- */
+    
+    /* Events Banner */
+    #eventsBanner {
+      display: flex; gap: 16px; overflow-x: auto;
+      padding: 10px 0 20px 0;
+      scrollbar-width: thin; scrollbar-color: var(--accent) transparent;
+      white-space: nowrap;
+      border: none; background: transparent; box-shadow: none;
+    }
+    #eventsBanner::-webkit-scrollbar { height: 6px; }
+    #eventsBanner::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+    
     #eventsBanner img {
-        width: 140px;
-        height: 90px;
+      width: 260px; height: 150px; object-fit: cover;
+      border-radius: 12px; cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+      flex-shrink: 0;
     }
-}
+    #eventsBanner img:hover { transform: scale(1.03); }
 
+    /* Tables (Assignments & Exams) */
+    table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+    table th {
+      text-align: left; font-size: 0.85rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.5px; padding: 0 16px;
+    }
+    table tbody tr {
+      background: #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+      transition: 0.2s;
+    }
+    table tbody tr:hover { transform: translateX(5px); background: #f9fafb; }
+    table td {
+      padding: 16px;
+      font-size: 0.95rem;
+      border-top: 1px solid #f3f4f6;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    table td:first-child { border-left: 1px solid #f3f4f6; border-top-left-radius: 12px; border-bottom-left-radius: 12px; font-weight: 600; color: var(--primary); }
+    table td:last-child { border-right: 1px solid #f3f4f6; border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
 
-.refresh-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: linear-gradient(135deg, #4f46e5, #6366f1);
-  color: #fff;
-  border: none;
-  padding: 10px 18px;
-  font-size: 15px;
-  font-weight: 600;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: 0.25s ease;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-}
+    /* Badges */
+    .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+    .badge.pending { background: rgba(245, 158, 11, 0.15); color: #d97706; }
+    .badge.paid { background: rgba(16, 185, 129, 0.15); color: #059669; }
 
-.refresh-btn svg {
-  stroke: white;
-  transition: 0.25s ease;
-}
+    /* Modal */
+    .modal {
+      display: none; position: fixed; inset: 0;
+      background: rgba(10, 25, 49, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 2000; align-items: center; justify-content: center;
+    }
+    .modal.show { display: flex; animation: fadeUp 0.3s ease-out; }
+    @keyframes fadeUp { from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);} }
+    
+    .modal-box {
+      background: white; padding: 30px; border-radius: 20px;
+      width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+      position: relative;
+    }
+    .close-x { position: absolute; right: 20px; top: 20px; font-size: 24px; color: #999; cursor: pointer; }
+    .close-x:hover { color: var(--danger); }
 
-.refresh-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 18px rgba(79, 70, 229, 0.4);
-}
-
-.refresh-btn:active {
-  transform: scale(0.95);
-}
-
-.refresh-btn:hover svg {
-  rotate: 180deg;
-}
-.notification-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #fff;
-  padding: 14px 16px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  margin: 16px 0;
-  font-weight: 600;
-}
-
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 52px;
-  height: 28px;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  background-color: #ccc;
-  border-radius: 28px;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  transition: 0.3s;
-}
-
-.slider:before {
-  content: "";
-  position: absolute;
-  height: 22px;
-  width: 22px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  border-radius: 50%;
-  transition: 0.3s;
-}
-
-input:checked + .slider {
-  background-color: #4f46e5;
-}
-
-input:checked + .slider:before {
-  transform: translateX(24px);
-}
-/* Notifications button */
-.notif-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: linear-gradient(135deg, #4f46e5, #6366f1);
-  color: #fff;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
-  transition: 0.25s ease;
-  position: relative;
-}
-
-.notif-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 18px rgba(79, 70, 229, 0.4);
-}
-
-.notif-count {
-  background: #ff3b30;
-  color: white;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 12px;
-  position: absolute;
-  top: -6px;
-  right: -6px;
-}
-
-/* Responsive tweaks */
-@media (max-width: 600px) {
-  header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .header-actions {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .notif-btn {
-    padding: 8px 12px;
-    font-size: 13px;
-  }
-
-  .logo-img {
-    height: 40px;
-  }
-}
-/* ===== FINE TABLE (MATCHES ASSIGNMENTS SECTION) ===== */
-
-.fine-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 8px;
-    font-family: 'Poppins', sans-serif;
-}
-
-.fine-table th {
-    text-align: left;
-    font-size: 13px;
-    font-weight: 600;
-    color: #555;
-    padding: 10px 8px;
-    border-bottom: 2px solid #e6e6e6;
-}
-
-.fine-table td {
-    padding: 10px 8px;
-    font-size: 14px;
-    color: #333;
-    border-bottom: 1px solid #eee;
-}
-
-.fine-table tr:hover {
-    background: #f7f9fc;
-}
-
-/* Fine amount highlight */
-.fine-amount {
-    font-weight: 700;
-    color: #d32f2f;
-}
-
-/* Paid / Pending badge (already matching) */
-.badge.pending {
-    background: #ff9800;
-}
-
-.badge.paid {
-    background: #28a745;
-}
-
-</style>
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+      .sidebar { width: 260px; }
+    }
+    @media (max-width: 600px) {
+      header { padding: 12px 16px; }
+      .logo-area h1 { font-size: 1.2rem; }
+      .section { padding: 20px; }
+      #eventsBanner img { width: 200px; height: 120px; }
+      .modal-box { width: 90%; }
+      .fine-amount { font-size: 1.8rem; }
+    }
+  </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <header>
   <div class="logo-area">
-    <span style="font-size:22px;cursor:pointer;margin-right:6px" id="menuToggle">☰</span>
-    <img src="logo.jpg" alt="logo">
-    <h1>Acropolis — Student</h1>
+    <i class="fa-solid fa-bars-staggered" id="menuToggle"></i>
+    <img src="https://i.ibb.co/8tZSKKT/logo-with-bg.webp" alt="Acropolis Logo">
+    <h1>Acropolis</h1>
   </div>
-<!-- 🔔 Notifications Button -->
-<!-- <button id="openNotifications" class="notif-btn">
-  🔔 Notifications
-</button>
-  <div class="top-actions">
-    <div id="mentorIdDisplay" style="color:#fff;margin-right:8px">Student</div>
-    <!-- <button class="action-btn" id="logoutBtn">Logout</button> -->
-  </div> -->
   
   <div class="header-actions">
-    <!-- Notifications -->
     <button id="openNotifications" class="notif-btn">
-      🔔 Notifications <span id="notifCount" class="notif-count">0</span>
+      <i class="fa-regular fa-bell"></i>
+      <span class="desktop-text">Notifications</span>
+      <span id="notifCount" class="notif-count">0</span>
     </button>
+  </div>
 </header>
 
 
-<!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
-  <h2 style="text-align:center;margin:0 0 12px 0;font-family:'Playfair Display',serif">Menu</h2>
+  <h2>Main Menu</h2>
+  <a href="student-dashboard.html"><i class="fa-solid fa-grid-2"></i> Dashboard</a>
+  <a href="#" id="inboxBtn"><i class="fa-solid fa-inbox"></i> Messages</a>
+  <a href="notes-view.html"><i class="fa-solid fa-book-open"></i> Notes</a>
+  <a href="marks-view.html"><i class="fa-solid fa-trophy"></i> Results</a>
+  <a href="notice-read.html?userType=students"><i class="fa-solid fa-bullhorn"></i> Notices</a>
+  
+  <h2 style="margin-top:20px;">Academic</h2>
+  <a href="forms.html"><i class="fa-solid fa-file-signature"></i> Forms</a>
+  <a href="form-my-submissions.html"><i class="fa-solid fa-folder-open"></i> Submissions</a>
+  <a href="fees.html"><i class="fa-solid fa-wallet"></i> Fees</a>
+  <a href="#" id="finesBtn"><i class="fa-solid fa-circle-exclamation"></i> My Fines</a>
 
-  <a href="student-dashboard.html">
-  <i class="fa-solid fa-house"></i> Dashboard
-</a>
-<a href="#" id="inboxBtn">
-  <i class="fa-solid fa-inbox"></i> Messages
-</a>
-
-
-<a href="notes-view.html">
-  <i class="fa-solid fa-book-open"></i> Notes
-</a>
-
-<a href="marks-view.html">
-  <i class="fa-solid fa-trophy"></i> Results
-</a>
-
-<a href="notice-read.html?userType=students">
-  <i class="fa-solid fa-bullhorn"></i> Notices
-  <span class="notice-badge">0</span>
-</a>
-
-<a href="forms.html">
-  <i class="fa-solid fa-file-lines"></i> Forms
-</a>
-
-<a href="form-my-submissions.html">
-  <i class="fa-solid fa-folder-open"></i> My Submissions
-</a>
-
-<a href="https://aitr.ac.in/" target="_blank">
-  <i class="fa-solid fa-circle-question"></i> Enquiry
-</a>
-
-<a href="settings.html">
-  <i class="fa-solid fa-gear"></i> Settings
-</a>
-
-<a href="rules.html">
-  <i class="fa-solid fa-scale-balanced"></i> Rules
-</a>
-
-<a href="bus-view.html">
-  <i class="fa-solid fa-bus"></i> Bus
-</a>
-<a href="missing-portal.html">
-  <i class="fa-solid fa-circle-question"></i> Missing Portal
-</a>
-
-<a href="fees.html">
-  <i class="fa-solid fa-wallet"></i> Fees
-</a>
-<a href="file-complaint.html">
-  <i class="fa-solid fa-triangle-exclamation"></i> File Complaint 
-</a>
-
-
-<a href="about-dev.html">
-  <i class="fa-solid fa-code"></i> About Dev
-</a>
-
-  <!-- NEW FINES BUTTON -->
-  <a href="#" id="finesBtn">💳 Your Fines</a>
-
-  <a href="#" onclick="logout()">🚪 Logout</a>
+  <h2 style="margin-top:20px;">Support</h2>
+  <a href="settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
+  <a href="bus-view.html"><i class="fa-solid fa-bus"></i> Bus Routes</a>
+  <a href="file-complaint.html"><i class="fa-solid fa-headset"></i> Help & Support</a>
+  <a href="#" onclick="logout()" style="color:#ef4444;"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
 </div>
 
 <div class="backdrop" id="backdrop" onclick="closeSidebar()"></div>
 
-<!-- MAIN -->
 <main>
   <div class="grid">
-    <!-- left -->
-    <div class="col-4">
-      <div class="section profile-box">
-        <h2 id="studentName">Loading...</h2>
-        <p><strong>Enrollment:</strong> <span id="studentEnrollment">—</span></p>
-        <p><strong>Class:</strong> <span id="studentClass">—</span></p>
-      </div>
+    
+    <div class="left-col">
       
-
-<button id="refreshDashboard" class="refresh-btn">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-    <path d="M4 4v6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-      stroke-linejoin="round"/>
-    <path d="M20 20v-6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-      stroke-linejoin="round"/>
-    <path d="M5 19a9 9 0 0 1 0-14l5 5H4" stroke="currentColor" stroke-width="2"
-      stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M19 5a9 9 0 0 1 0 14l-5-5h6" stroke="currentColor" stroke-width="2"
-      stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
-  Refresh
-</button>
-<!-- STUDENT TOTAL FINE CARD -->
-<div class="fine-card" id="fineCard">
-    <h4>Total Pending Fine</h4>
-    <p class="fine-amount">₹ <span id="totalFine">0</span></p>
-    <p class="fine-subtext">Check the Reason of this in Quick actions</p>
-</div>
-      <div class="section" id="attendanceSection">
+      <div class="section profile-box">
+        <h2 id="studentName">Welcome Back</h2>
+        <p><i class="fa-solid fa-id-card"></i> <span id="studentEnrollment">...</span></p>
+        <p><i class="fa-solid fa-graduation-cap"></i> <span id="studentClass">...</span></p>
         
-        <h2 class="section-title">Attendance</h2>
-        <p><strong>Total:</strong> <span id="attTotal">0</span></p>
-        <p><strong>Present:</strong> <span id="attPresent">0</span></p>
-        <p><strong>Percent:</strong> <span id="attPercent">0%</span></p>
+        <button id="refreshDashboard" class="refresh-btn notif-btn">
+          <i class="fa-solid fa-rotate-right"></i> Refresh Data
+        </button>
+      </div>
+
+      <div class="fine-card" id="fineCard">
+        <h4>Outstanding Fine</h4>
+        <span class="fine-amount">₹ <span id="totalFine">0</span></span>
+        <span class="fine-subtext">Tap to view details & payment options</span>
+      </div>
+
+      <div class="section" id="attendanceSection">
+        <h2 class="section-title">Attendance <i class="fa-solid fa-chart-pie" style="color:var(--accent)"></i></h2>
+        
+        <div style="text-align:center; margin: 10px 0;">
+             <h1 id="attPercent" style="font-size: 2.5rem; color: var(--primary);">0%</h1>
+        </div>
+
+        <div class="att-bar-bg">
+            <div class="att-bar-fill" id="attBarVisual" style="width: 0%;"></div>
+        </div>
+
+        <div style="margin-top:15px; display:flex; justify-content:space-between; font-size:0.9rem;">
+            <span>Present: <b id="attPresent">0</b></span>
+            <span>Total: <b id="attTotal">0</b></span>
+        </div>
       </div>
 
       <div class="section">
         <h2 class="section-title">Quick Actions</h2>
-        <button class="action-btn" onclick="window.location.href='notes-view.html'">Notes</button>
-        <button class="action-btn" id="openFeesBtn">.</button>
-             <button class="action-btn" onclick="window.location.href='fees.html'">fees</button>
-        <button class="action-btn" onclick="window.location.href='fines.html'">Check fine on you</button>
+        <div class="quick-actions-grid">
+            <button class="action-btn" onclick="window.location.href='notes-view.html'">
+                <i class="fa-solid fa-book"></i> Notes
+            </button>
+            <button class="action-btn" onclick="window.location.href='fees.html'">
+                <i class="fa-solid fa-credit-card"></i> Pay Fees
+            </button>
+            <button class="action-btn" onclick="window.location.href='fines.html'">
+                <i class="fa-solid fa-gavel"></i> Fines
+            </button>
+            <button class="action-btn" id="openFeesBtn">
+                 <i class="fa-solid fa-magnifying-glass"></i> Check
+            </button>
+        </div>
       </div>
       
     </div>
 
-    <!-- right -->
-    <div class="col-8">
-      <h2 class="section-title">Events</h2>
-      <div id="eventsBanner" class="section"></div>
+    <div class="right-col">
       
-
-        <!-- Assignments Section -->
-  <div class="section" id="assignmentsSection">
-   <h2 class="section-title">Assignments</h2>
-   <table class="assignment-table">
-  <!-- <thead>
-    <tr>
-      <th>Title</th>
-      <th>Subject</th>
-      <th>Deadline</th>
-      <th>Status</th>
-    </tr>
-  </thead> -->
-     <button class="refresh-btn" onclick="openAssignments()">
-  📚 View Assignments
-</button>
-  <tbody id="assignmentBody"></tbody>
-</table>
-
-  </div>
-
+      <h2 class="section-title" style="margin-bottom:10px; margin-left:10px;">Campus Events</h2>
+      <div id="eventsBanner">
+         </div>
+      
+      <div class="section" id="assignmentsSection" style="margin-top:20px;">
+        <h2 class="section-title">
+            Pending Assignments
+            <button class="notif-btn" onclick="openAssignments()" style="font-size:0.8rem; padding: 6px 12px;">View All</button>
+        </h2>
+        <table class="assignment-table">
+          <tbody id="assignmentBody">
+              </tbody>
+        </table>
+      </div>
 
       <div class="section" id="examsSection">
         <h2 class="section-title">Upcoming Exams</h2>
         <table>
-          <thead><tr><th>Exam</th><th>Subject</th><th>Date</th><th>Info</th></tr></thead>
+          <thead>
+            <tr><th>Exam</th><th>Subject</th><th>Date</th><th>Info</th></tr>
+          </thead>
           <tbody id="examsBody">
-            <tr><td colspan="4" style="text-align:center;color:#888">Loading exams...</td></tr>
+            <tr><td colspan="4" style="text-align:center;color:#999; padding:30px;">Loading schedule...</td></tr>
           </tbody>
         </table>
       </div>
 
+    </div>
+  </div>
+</main>
+
 <div class="modal" id="feesModal" aria-hidden="true">
   <div class="modal-box">
     <span class="close-x" id="feesClose">&times;</span>
-    <h3>Check Pending Fees</h3>
-    <p>Enrollment</p>
-    <input id="feeEnrollment" type="text" placeholder="Enter Enrollment" style="width:100%;padding:8px;border-radius:6px;border:1px solid #ddd" />
-    <button style="margin-top:10px;padding:10px 12px;border-radius:8px;background:#007bff;color:#fff;border:none;width:100%" id="checkFeeBtn">Check</button>
-    <div id="feeResult" style="margin-top:12px"></div>
+    <h3 style="color:var(--primary); margin-bottom:15px;">Check Pending Fees</h3>
+    
+    <label style="font-size:0.9rem; color:#666; display:block; margin-bottom:8px;">Student Enrollment</label>
+    <input id="feeEnrollment" type="text" placeholder="0827..." 
+           style="width:100%; padding:12px; border-radius:10px; border:1px solid #ddd; outline:none; font-family:inherit;">
+    
+    <button id="checkFeeBtn" 
+            style="margin-top:15px; padding:12px; border-radius:10px; background:var(--accent); color:#fff; border:none; width:100%; font-weight:600; cursor:pointer;">
+        Search Records
+    </button>
+    
+    <div id="feeResult" style="margin-top:15px; font-size:0.95rem;"></div>
   </div>
 </div>
 
+<script>
+    // Just a small helper to make the Attendance Bar visual work with your existing JS logic
+    // You can add this line inside your existing fetchAttendance() function:
+    // document.getElementById('attBarVisual').style.width = percentage + '%';
+</script>
+
+</body>
+</html>
 <script>
 /* ------------------------------------------
       CONFIG
