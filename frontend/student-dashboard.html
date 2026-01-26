@@ -677,7 +677,7 @@ input:checked + .slider:before {
           <th>Status</th>
         </tr>
       </thead>
-      <tbody></tbody>
+      <tbody id="assignmentTable"></tbody>
     </table>
   </div>
 
@@ -801,16 +801,32 @@ function renderAttendance(a) {
       ASSIGNMENTS — API + SAVE
 ------------------------------------------- */
 async function loadAssignmentsAPI() {
-  const className = localStorage.getItem("studentClass") || "IT";
+  // EXACT class like "1IT1"
+  const className = localStorage.getItem("studentClass");
 
-  const res = await fetch(`${API_ROOT}/api/assignments/class/${className}`);
-  const data = await res.json();
+  if (!className) {
+    console.warn("studentClass not found in localStorage");
+    renderAssignments([]);
+    return;
+  }
 
-  console.log("Assignments fetched:", data);
+  try {
+    const res = await fetch(
+      `${API_ROOT}/api/assignments/class/${encodeURIComponent(className)}`
+    );
 
-  if (data.success) {
-    saveLS("studentAssignments", data.assignments);
-    renderAssignments(data.assignments);
+    const data = await res.json();
+    console.log("Assignments fetched:", data);
+
+    if (data.success && Array.isArray(data.assignments)) {
+      saveLS("studentAssignments", data.assignments);
+      renderAssignments(data.assignments);
+    } else {
+      renderAssignments([]);
+    }
+  } catch (err) {
+    console.error("Assignment fetch failed:", err);
+    renderAssignments([]);
   }
 }
 
@@ -819,8 +835,12 @@ function renderAssignments(list) {
   tbody.innerHTML = "";
 
   if (!list || list.length === 0) {
-    tbody.innerHTML =
-      `<tr><td colspan="4" style="text-align:center;color:gray;">No assignments</td></tr>`;
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align:center;color:gray;">
+          No assignments available
+        </td>
+      </tr>`;
     return;
   }
 
@@ -830,11 +850,12 @@ function renderAssignments(list) {
         <td>${a.title}</td>
         <td>${a.subject}</td>
         <td>${a.deadline}</td>
-        <td>Pending</td>
+        <td style="color:orange;font-weight:600;">Pending</td>
       </tr>
     `;
   });
 }
+
 
 /* ------------------------------------------
       EXAMS — API + SAVE
