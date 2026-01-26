@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Bus Routes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            font-family: Inter, Arial, sans-serif;
+            background: #f5f7fb;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .download {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .view {
+            background: #16a34a;
+            color: #fff;
+        }
+
+        .refresh {
+            background: #f59e0b;
+            color: #fff;
+        }
+
+        .track {
+            background: #7c3aed;
+            color: #fff;
+        }
+
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .note {
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🚌 Student Bus Route</h2>
+
+    <div class="btn-group">
+        <button class="download" onclick="downloadPDF()">⬇ Download Route PDF</button>
+        <button class="view" onclick="viewPDF()">👁 View Online</button>
+        <button class="refresh" onclick="refreshPDF()">🔄 Refresh</button>
+        <button class="track" onclick="goToTrack()">📍 Track Bus</button>
+    </div>
+
+    <iframe id="pdfViewer"></iframe>
+
+    <p class="note">
+        Latest bus route PDF will always be shown here.
+    </p>
+</div>
+
+<script>
+    const API_BASE = "/api/bus";
+    const iframe = document.getElementById("pdfViewer");
+
+    // 📥 Download PDF (REAL PDF download)
+    async function downloadPDF() {
+        try {
+            const res = await fetch(`${API_BASE}/direct`);
+            const data = await res.json();
+
+            if (!data.success) {
+                alert("Bus route PDF not available");
+                return;
+            }
+
+            window.open(data.url, "_blank");
+
+        } catch (err) {
+            alert("Failed to download PDF");
+        }
+    }
+
+    // 👀 View PDF online
+    async function viewPDF() {
+        try {
+            const res = await fetch(`${API_BASE}/view`);
+            const data = await res.json();
+
+            if (!data.success) {
+                alert("Bus route PDF not available");
+                return;
+            }
+
+            iframe.src = data.pdf_url;
+            iframe.style.display = "block";
+
+        } catch (err) {
+            alert("Failed to load PDF");
+        }
+    }
+
+    // 🔄 Refresh PDF
+    async function refreshPDF() {
+        iframe.style.display = "none";
+        iframe.src = "";
+
+        setTimeout(() => {
+            viewPDF();
+        }, 300);
+    }
+
+    // 🚌 Redirect to bus tracking
+    function goToTrack() {
+        window.location.href = "bus-track.html";
+    }
+</script>
+
+</body>
+</html>
