@@ -94,7 +94,7 @@ def get_assignments_by_class(class_name):
         "assignments": assignments
     }), 200
 
-# -----------------------------
+# ------------------------------
 # POST new assignment
 # -----------------------------
 @assignments_bp.route("", methods=["POST"])
@@ -189,6 +189,35 @@ def view_assignments_for_student(student_class):
 
         return jsonify({
             "success": True,
+            "assignments": assignments
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
+# -----------------------------
+# STUDENT ASSIGNMENTS VIEW
+# -----------------------------
+@assignments_bp.route("/student/<student_class>", methods=["GET"])
+def student_assignments(student_class):
+    try:
+        normalized_class = normalize_class_name(student_class)
+
+        assignments = list(
+            assignments_collection.find(
+                {
+                    "class_normalized": normalized_class,
+                    "active": True
+                },
+                {"_id": 0}
+            ).sort("createdAt", -1)
+        )
+
+        return jsonify({
+            "success": True,
+            "class": student_class,
             "assignments": assignments
         }), 200
 

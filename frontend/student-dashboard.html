@@ -838,11 +838,10 @@ function renderAssignments(list) {
 
   if (!list || list.length === 0) {
     tbody.innerHTML = `
-      <tr>
-        <td colspan="4" style="text-align:center;color:gray;">
-          No assignments available
-        </td>
-      </tr>`;
+    <button class="dashboard-btn" onclick="openAssignments()">
+  📚 View Assignments
+</button>
+`;
     return;
   }
 
@@ -858,6 +857,14 @@ function renderAssignments(list) {
   });
 }
 
+function openAssignments() {
+  const profile = JSON.parse(localStorage.getItem("studentProfile"));
+  if (!profile || !profile.class) {
+    alert("Student class not found");
+    return;
+  }
+  window.location.href = "assignments.html";
+}
 
 /* ------------------------------------------
       EXAMS — API + SAVE
