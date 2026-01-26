@@ -169,3 +169,31 @@ def delete_assignment(assignmentId):
         "success": True,
         "message": "Assignment deleted & reminders stopped"
     }), 200
+# -----------------------------
+# GET assignments for student dashboard
+# -----------------------------
+@assignments_bp.route("/view/<student_class>", methods=["GET"])
+def view_assignments_for_student(student_class):
+    try:
+        normalized_class = normalize_class_name(student_class)
+
+        assignments = list(
+            assignments_collection.find(
+                {
+                    "class_normalized": normalized_class,
+                    "active": True
+                },
+                {"_id": 0}
+            ).sort("createdAt", -1)
+        )
+
+        return jsonify({
+            "success": True,
+            "assignments": assignments
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500

@@ -802,18 +802,18 @@ function renderAttendance(a) {
       ASSIGNMENTS — API + SAVE
 ------------------------------------------- */
 async function loadAssignmentsAPI() {
-  // EXACT class like "1IT1"
-  const className = localStorage.getItem("studentClass");
+  // Single source of truth
+  const profile = JSON.parse(localStorage.getItem("studentProfile"));
 
-  if (!className) {
-    console.warn("studentClass not found in localStorage");
+  if (!profile || !profile.class) {
+    console.warn("Student class missing");
     renderAssignments([]);
     return;
   }
 
   try {
     const res = await fetch(
-      `${API_ROOT}/api/assignments/class/${encodeURIComponent(className)}`
+      `${API_ROOT}/api/assignments/view/${encodeURIComponent(profile.class)}`
     );
 
     const data = await res.json();
@@ -830,34 +830,6 @@ async function loadAssignmentsAPI() {
     renderAssignments([]);
   }
 }
-
-function renderAssignments(list) {
-  const tbody = document.getElementById("assignmentBody");
-  tbody.innerHTML = "";
-
-
-  if (!list || list.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="4" style="text-align:center;color:gray;">
-          No assignments available
-        </td>
-      </tr>`;
-    return;
-  }
-
-  list.forEach(a => {
-    tbody.innerHTML += `
-      <tr>
-        <td>${a.title}</td>
-        <td>${a.subject}</td>
-        <td>${a.deadline}</td>
-        <td style="color:orange;font-weight:600;">Pending</td>
-      </tr>
-    `;
-  });
-}
-
 
 /* ------------------------------------------
       EXAMS — API + SAVE
