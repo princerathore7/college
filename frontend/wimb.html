@@ -5,7 +5,6 @@
 <title>Where Is My Bus</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- PDF.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <style>
@@ -24,10 +23,11 @@ body {
 h2 {
   text-align: center;
 }
-select, button {
+input, button {
   width: 100%;
   padding: 12px;
   margin-top: 10px;
+  font-size: 16px;
 }
 .result {
   margin-top: 20px;
@@ -47,9 +47,11 @@ select, button {
 <div class="container">
   <h2>🚌 Where Is My Bus</h2>
 
-  <select id="locationSelect">
-    <option value="">Loading locations...</option>
-  </select>
+  <input
+    type="text"
+    id="locationInput"
+    placeholder="Enter your pickup location (eg: Maksi)"
+  />
 
   <button onclick="findBus()">Find Bus</button>
 
@@ -60,45 +62,50 @@ select, button {
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
-const PDF_URL = "https://college-hwbb.onrender.com/api/bus/direct"; // tumhara backend endpoint
+/* 🔴 CHANGE THIS */
+const PDF_DIRECT_URL =
+  "https://YOUR-BACKEND-DOMAIN/api/bus/direct";
 
-let locationBusMap = {}; // { location: [G64, G58] }
+let locationBusMap = {}; // { stop: Set(G64, G58) }
 
 async function loadPDF() {
-  const res = await fetch(PDF_URL);
-  const data = await res.json();
-  const pdfUrl = data.url;
+  try {
+    const res = await fetch(PDF_DIRECT_URL);
+    const json = await res.json();
+    const pdfUrl = json.url;
 
-  const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
+    const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
 
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const content = await page.getTextContent();
-    const text = content.items.map(i => i.str).join("\n");
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      const text = content.items.map(i => i.str).join("\n");
+      parsePage(text);
+    }
 
-    parsePage(text);
+  } catch (err) {
+    document.getElementById("result").innerHTML =
+      "❌ Failed to load bus routes";
+    console.error(err);
   }
-
-  populateDropdown();
 }
 
 function parsePage(text) {
-  // 🔍 Get all bus numbers on that page
+  // 🚌 Bus numbers on page
   const busMatches = [...text.matchAll(/Bus No.-\s*(G\d+)/g)];
   const buses = busMatches.map(b => b[1]);
 
   if (buses.length === 0) return;
 
-  // 📍 Read stop table lines
   const lines = text.split("\n");
 
   lines.forEach(line => {
     if (
-      line.match(/\d+\s+[A-Za-z]/) &&
+      /^\d+\s+/.test(line) &&
       !line.includes("Shift") &&
       !line.includes("Driver")
     ) {
-      const stop = line.replace(/\d+/, "").trim();
+      const stop = line.replace(/^\d+\s*/, "").trim();
 
       if (!locationBusMap[stop]) {
         locationBusMap[stop] = new Set();
@@ -109,31 +116,28 @@ function parsePage(text) {
   });
 }
 
-function populateDropdown() {
-  const select = document.getElementById("locationSelect");
-  select.innerHTML = `<option value="">Select your location</option>`;
-
-  Object.keys(locationBusMap).forEach(loc => {
-    const opt = document.createElement("option");
-    opt.value = loc;
-    opt.textContent = loc;
-    select.appendChild(opt);
-  });
-}
-
 function findBus() {
-  const loc = document.getElementById("locationSelect").value;
+  const input = document.getElementById("locationInput").value.trim().toLowerCase();
   const result = document.getElementById("result");
 
-  if (!loc) {
-    result.innerHTML = "❌ Please select a location";
+  if (!input) {
+    result.innerHTML = "❌ Please enter a location";
     return;
   }
 
-  const buses = [...locationBusMap[loc]];
+  const match = Object.keys(locationBusMap).find(
+    stop => stop.toLowerCase().includes(input)
+  );
+
+  if (!match) {
+    result.innerHTML = "❌ No bus found for this location";
+    return;
+  }
+
+  const buses = [...locationBusMap[match]];
 
   result.innerHTML = `
-    <div><b>📍 Location:</b> ${loc}</div>
+    <div><b>📍 Location:</b> ${match}</div>
     <div class="bus">🚌 Buses: ${buses.join(", ")}</div>
     <div><b>🎯 Destination:</b> Acropolis Institutes</div>
   `;
