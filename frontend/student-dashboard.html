@@ -669,14 +669,14 @@ input:checked + .slider:before {
   <div class="section" id="assignmentsSection">
    <h2 class="section-title">Assignments</h2>
    <table class="assignment-table">
-  <thead>
+  <!-- <thead>
     <tr>
       <th>Title</th>
       <th>Subject</th>
       <th>Deadline</th>
       <th>Status</th>
     </tr>
-  </thead>
+  </thead> -->
      <button class="refresh-btn" onclick="openAssignments()">
   📚 View Assignments
 </button>
@@ -841,9 +841,7 @@ function renderAssignments(list) {
 
   if (!list || list.length === 0) {
     tbody.innerHTML = `
-    <button class="dashboard-btn" onclick="openAssignments()">
-  📚 View Assignments
-</button>
+
 `;
     return;
   }
