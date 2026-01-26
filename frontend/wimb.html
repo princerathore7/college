@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Where Is My Bus</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- PDF.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f7fb;
+  padding: 20px;
+}
+.container {
+  max-width: 700px;
+  margin: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+}
+h2 {
+  text-align: center;
+}
+select, button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+}
+.result {
+  margin-top: 20px;
+  padding: 15px;
+  background: #eef3ff;
+  border-radius: 8px;
+}
+.bus {
+  font-size: 18px;
+  font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>🚌 Where Is My Bus</h2>
+
+  <select id="locationSelect">
+    <option value="">Loading locations...</option>
+  </select>
+
+  <button onclick="findBus()">Find Bus</button>
+
+  <div class="result" id="result"></div>
+</div>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+const PDF_URL = "/api/bus/direct"; // tumhara backend endpoint
+
+let locationBusMap = {}; // { location: [G64, G58] }
+
+async function loadPDF() {
+  const res = await fetch(PDF_URL);
+  const data = await res.json();
+  const pdfUrl = data.url;
+
+  const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    const text = content.items.map(i => i.str).join("\n");
+
+    parsePage(text);
+  }
+
+  populateDropdown();
+}
+
+function parsePage(text) {
+  // 🔍 Get all bus numbers on that page
+  const busMatches = [...text.matchAll(/Bus No.-\s*(G\d+)/g)];
+  const buses = busMatches.map(b => b[1]);
+
+  if (buses.length === 0) return;
+
+  // 📍 Read stop table lines
+  const lines = text.split("\n");
+
+  lines.forEach(line => {
+    if (
+      line.match(/\d+\s+[A-Za-z]/) &&
+      !line.includes("Shift") &&
+      !line.includes("Driver")
+    ) {
+      const stop = line.replace(/\d+/, "").trim();
+
+      if (!locationBusMap[stop]) {
+        locationBusMap[stop] = new Set();
+      }
+
+      buses.forEach(b => locationBusMap[stop].add(b));
+    }
+  });
+}
+
+function populateDropdown() {
+  const select = document.getElementById("locationSelect");
+  select.innerHTML = `<option value="">Select your location</option>`;
+
+  Object.keys(locationBusMap).forEach(loc => {
+    const opt = document.createElement("option");
+    opt.value = loc;
+    opt.textContent = loc;
+    select.appendChild(opt);
+  });
+}
+
+function findBus() {
+  const loc = document.getElementById("locationSelect").value;
+  const result = document.getElementById("result");
+
+  if (!loc) {
+    result.innerHTML = "❌ Please select a location";
+    return;
+  }
+
+  const buses = [...locationBusMap[loc]];
+
+  result.innerHTML = `
+    <div><b>📍 Location:</b> ${loc}</div>
+    <div class="bus">🚌 Buses: ${buses.join(", ")}</div>
+    <div><b>🎯 Destination:</b> Acropolis Institutes</div>
+  `;
+}
+
+loadPDF();
+</script>
+
+</body>
+</html>

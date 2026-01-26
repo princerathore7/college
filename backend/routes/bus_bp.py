@@ -3,11 +3,54 @@ from flask_cors import cross_origin
 import cloudinary
 import cloudinary.uploader
 from db import db
-
+import pdfplumber
+import re
 # 🔔 Notification helper
 from routes.notifications import notify_bus
 
 bus_bp = Blueprint("bus_bp", __name__, url_prefix="/api/bus")
+def find_buses_for_stop(text, stop_name):
+    lines = text.split("\n")
+    buses = set()
+
+    for line in lines:
+        if stop_name.lower() in line.lower():
+            # Look upward for Bus No lines
+            for l in lines:
+                match = re.search(r"Bus No.-\s*(G\d+)", l)
+                if match:
+                    buses.add(match.group(1))
+
+    return list(buses)
+def extract_pdf_text(pdf_path):
+    text = ""
+    with pdfplumber.open(pdf_path) as pdf:
+        for page in pdf.pages:
+            text += page.extract_text() + "\n"
+    return text
+db.bus_routes.insert_one({
+    "destination": "Acropolis Institutes",
+    "stop": "Maksi",
+    "buses": ["G64", "G58", "G52"]
+})
+@bus_bp.route("/search", methods=["GET"])
+def search_bus():
+    stop = request.args.get("stop")
+
+    rec = db.bus_routes.find_one(
+        {"stop": {"$regex": f"^{stop}$", "$options": "i"}},
+        {"_id": 0}
+    )
+
+    if not rec:
+        return jsonify({"success": False, "message": "No bus found"}), 404
+
+    return jsonify({
+        "success": True,
+        "stop": stop,
+        "destination": "Acropolis Institutes",
+        "buses": rec["buses"]
+    })
 
 
 # ----------------- UPLOAD BUS PDF -----------------
