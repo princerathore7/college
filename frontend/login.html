@@ -305,6 +305,15 @@ input:focus + .input-icon {
   .image-section { display: none; }
   .login-section { padding: 40px; width: 100%; }
 }
+.login-section img {
+    position: center;
+    width: 70px;        /* max width control */
+    height: auto;       /* ✅ aspect ratio safe */
+    border-radius: 0;   /* no circular border */
+    object-fit: contain;
+}
+
+
 </style>
 </head>
 <body>
@@ -321,7 +330,9 @@ input:focus + .input-icon {
 
   <div class="login-section">
     <div class="login-header">
-      <h1>Welcome Back</h1>
+      
+    <img src="logop.png" alt="Acropolis Logo">
+          <h1>ACROPOLIS ENLIGHTMENT WISDOME</h1>
       <p>Please enter your details to sign in.</p>
     </div>
 
