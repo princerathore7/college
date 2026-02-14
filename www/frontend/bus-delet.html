@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Delete Bus Pilot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6fb;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #1e2a38;
+      margin-bottom: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+
+    .bus-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .bus-id {
+      font-weight: bold;
+      color: #111827;
+    }
+
+    button {
+      background: #dc2626;
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button:hover {
+      background: #b91c1c;
+    }
+
+    .empty {
+      text-align: center;
+      color: #6b7280;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🗑️ Delete Bus Drivers</h2>
+
+  <div class="container" id="busList">
+    Loading buses...
+  </div>
+
+  <script>
+        const mentorIdVal = localStorage.getItem("mentorId");
+const source = sessionStorage.getItem("accessSource");
+const ALLOWED_SOURCES = ["ad", "admin"];
+
+if(!mentorIdVal || !ALLOWED_SOURCES.includes(source)){
+  document.body.innerHTML = `
+    <div class="denied-container">
+      <h1 style="color:#d32f2f; font-size: 3rem;">❌</h1>
+      <h2 style="color:#d32f2f">Access Denied</h2>
+      <p>Security protocol triggered. This incident will be reported.<br>Please login via the Official Administration Panel.</p>
+      <button onclick="location.href='/'" style="width:200px">Back to Login</button>
+    </div>
+  `;
+  throw new Error("Unauthorized access");
+}
+   const BASE_URL = "https://college-hwbb.onrender.com";
+
+async function loadBuses() {
+  const container = document.getElementById("busList");
+
+  try {
+    const res = await fetch(`${BASE_URL}/api/bus/list`);
+    const buses = await res.json();
+
+    if (!buses.length) {
+      container.innerHTML = '<div class="empty">No active buses found</div>';
+      return;
+    }
+
+    container.innerHTML = "";
+
+    buses.forEach(bus => {
+      const row = document.createElement("div");
+      row.className = "bus-row";
+
+      row.innerHTML = `
+        <span class="bus-id">${bus.busId}</span>
+        <button onclick="deleteBus('${bus.busId}')">Delete</button>
+      `;
+
+      container.appendChild(row);
+    });
+
+  } catch (err) {
+    container.innerHTML = '<div class="empty">Failed to load buses</div>';
+    console.error(err);
+  }
+}
+
+async function deleteBus(busId) {
+  if (!confirm(`Are you sure you want to delete ${busId}?`)) return;
+
+  try {
+    const res = await fetch(`${BASE_URL}/api/admin/bus/delete/${busId}`, {
+      method: "DELETE"
+    });
+
+    if (!res.ok) {
+      alert("Failed to delete bus");
+      return;
+    }
+
+    loadBuses(); // reload list
+  } catch (err) {
+    alert("Server error");
+    console.error(err);
+  }
+}
+
+loadBuses();
+
+  </script>
+
+</body>
+</html>

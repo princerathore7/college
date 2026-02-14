@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My Assignments</title>
+
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background:#0f172a;
+  color:#fff;
+  margin:0;
+}
+.container{
+  max-width:1000px;
+  margin:auto;
+  padding:20px;
+}
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.back-btn{
+  background:#1e40af;
+  border:none;
+  color:#fff;
+  padding:8px 14px;
+  cursor:pointer;
+  border-radius:6px;
+}
+.table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+  background:#020617;
+}
+.table th,.table td{
+  padding:12px;
+  border-bottom:1px solid #1e293b;
+}
+.table th{
+  background:#020617;
+  text-align:left;
+}
+.status-pending{color:orange;font-weight:bold;}
+.status-expired{color:red;font-weight:bold;}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+  <div class="header">
+    <div>
+      <h2>📚 My Assignments</h2>
+      <p>Class: <strong id="studentClass"></strong></p>
+    </div>
+    <button class="back-btn" onclick="goBack()">⬅ Dashboard</button>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Subject</th>
+        <th>Deadline</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="assignmentBody">
+      <tr><td colspan="4">Loading...</td></tr>
+    </tbody>
+  </table>
+
+</div>
+
+<script>
+const API_ROOT = "https://college-hwbb.onrender.com";
+
+function goBack(){
+  window.location.href = "student-dashboard.html";
+}
+
+async function loadAssignments(){
+  const profile = JSON.parse(localStorage.getItem("studentProfile"));
+  if(!profile || !profile.class){
+    alert("Session expired");
+    return;
+  }
+
+  document.getElementById("studentClass").textContent = profile.class;
+
+  const res = await fetch(
+    `${API_ROOT}/api/assignments/student/${encodeURIComponent(profile.class)}`
+  );
+  const data = await res.json();
+
+  const tbody = document.getElementById("assignmentBody");
+  tbody.innerHTML = "";
+
+  if(!data.success || data.assignments.length === 0){
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align:center;color:gray;">
+          No assignments posted
+        </td>
+      </tr>`;
+    return;
+  }
+
+  const today = new Date();
+
+  data.assignments.forEach(a=>{
+    const d = new Date(a.deadline);
+    const status = d < today ? "Expired" : "Pending";
+    const cls = d < today ? "status-expired" : "status-pending";
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${a.title}</td>
+        <td>${a.subject}</td>
+        <td>${d.toLocaleDateString("en-IN")}</td>
+        <td class="${cls}">${status}</td>
+      </tr>
+    `;
+  });
+}
+
+loadAssignments();
+</script>
+
+</body>
+</html>

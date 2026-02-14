@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mentor Enterprise Portal | Acropolis</title>
+  <link rel="icon" href="https://i.ibb.co/8tZSKKT/logo-with-bg.webp">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #1e40af;
+      --secondary: #2563eb;
+      --accent: #f59e0b;
+      --bg: #f4f7fa;
+      --card-bg: #ffffff;
+      --text-dark: #1e293b;
+      --text-light: #64748b;
+      --glass: rgba(255, 255, 255, 0.8);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text-dark);
+      line-height: 1.6;
+    }
+
+    /* --- SCROLLBAR & PROGRESS --- */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; }
+    ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+
+    .scroll-progress {
+      position: fixed;
+      top: 0; left: 0; height: 3px;
+      background: linear-gradient(to right, var(--primary), var(--accent));
+      z-index: 2000;
+      width: 0%;
+      transition: width 0.1s ease;
+    }
+
+    /* --- MODERN HEADER --- */
+    header {
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+      padding: 12px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .header-left { display: flex; align-items: center; gap: 20px; }
+    .menu-trigger { font-size: 1.4rem; cursor: pointer; color: var(--primary); transition: 0.3s; }
+    .menu-trigger:hover { transform: rotate(90deg); }
+    .brand-logo { height: 42px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+    .header-title h1 { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--primary); }
+
+    .header-right { display: flex; align-items: center; gap: 20px; }
+    .user-info { text-align: right; border-right: 1px solid #e2e8f0; padding-right: 15px; }
+    .user-info div:first-child { font-weight: 700; font-size: 0.9rem; color: var(--primary); }
+    .user-info div:last-child { font-size: 0.75rem; color: var(--text-light); }
+
+    /* --- SIDEBAR --- */
+    .sidebar {
+      position: fixed; top: 0; left: -300px; width: 280px; height: 100%;
+      background: var(--card-bg); z-index: 1501;
+      transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 20px 0 50px rgba(0,0,0,0.05);
+      padding-top: 30px;
+    }
+    .sidebar.active { left: 0; }
+    .sidebar-header { padding: 0 30px 20px; border-bottom: 1px solid #f1f5f9; }
+    .sidebar-menu { padding: 20px 0; }
+    .sidebar-menu a {
+      display: flex; align-items: center; padding: 12px 30px;
+      color: var(--text-light); text-decoration: none;
+      font-weight: 500; font-size: 0.95rem; transition: 0.3s;
+    }
+    .sidebar-menu a i { width: 35px; font-size: 1.1rem; }
+    .sidebar-menu a:hover, .sidebar-menu a.active {
+      background: #eff6ff; color: var(--primary); border-left: 5px solid var(--primary);
+    }
+    .backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+      display: none; z-index: 1500; backdrop-filter: blur(4px);
+    }
+    .backdrop.active { display: block; }
+
+    /* --- MAIN CONTENT --- */
+    main { max-width: 1200px; margin: 40px auto; padding: 0 25px; }
+
+    /* Events Section */
+    .section-header {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      margin-bottom: 25px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;
+    }
+    .section-header h2 { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--primary); }
+    
+    .banner-container {
+      background: #fff; padding: 15px; border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.03); margin-bottom: 45px;
+    }
+    #eventsBanner { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 10px; }
+    #eventsBanner img {
+      min-width: 300px; height: 170px; object-fit: cover;
+      border-radius: 15px; cursor: pointer; transition: 0.4s;
+    }
+    #eventsBanner img:hover { transform: scale(1.02); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+
+    /* --- GRID ALIGNMENT --- */
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+    }
+
+    .action-card {
+      background: var(--card-bg);
+      padding: 30px 20px;
+      border-radius: 20px;
+      text-align: center;
+      text-decoration: none;
+      color: var(--text-dark);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid rgba(226, 232, 240, 0.6);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .action-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 35px rgba(30, 64, 175, 0.1);
+      border-color: var(--secondary);
+    }
+
+    .action-card i {
+      font-size: 2.2rem;
+      color: var(--secondary);
+      margin-bottom: 18px;
+      background: #eff6ff;
+      width: 70px; height: 70px;
+      line-height: 70px;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+
+    .action-card:hover i { background: var(--primary); color: white; }
+    .action-card h3 { font-size: 1rem; font-weight: 600; letter-spacing: 0.3px; }
+
+    .badge-float {
+      position: absolute; top: 15px; right: 15px;
+      background: #ef4444; color: white; font-size: 10px;
+      padding: 3px 10px; border-radius: 20px; font-weight: 800;
+      box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+    }
+
+    /* --- FOOTER --- */
+    footer {
+      background: #fff; padding: 30px; text-align: center;
+      margin-top: 60px; border-top: 1px solid #e2e8f0;
+      color: var(--text-light); font-size: 0.9rem;
+    }
+
+    /* Modal Styling */
+    #weekendReminder {
+      display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7);
+      z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(8px);
+    }
+    .modal-box {
+      background: white; width: 90%; max-width: 440px; padding: 40px;
+      border-radius: 30px; text-align: center; border: 1px solid rgba(255,255,255,0.2);
+    }
+    .btn-primary {
+      background: var(--primary); color: white; padding: 14px;
+      border: none; border-radius: 12px; font-weight: 600; cursor: pointer;
+      width: 100%; margin-top: 25px; transition: 0.3s;
+    }
+    .btn-primary:hover { background: var(--secondary); box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2); }
+  </style>
+</head>
+
+<body>
+
+<div class="scroll-progress" id="progressBar"></div>
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h2 style="font-family:'Playfair Display'; color:var(--primary)">Portal Menu</h2>
+  </div>
+  <nav class="sidebar-menu">
+    <a href="/mentor-dashboard.html" class="active"><i class="fas fa-chart-pie"></i> Dashboard</a>
+    <a href="/sallary.html"><i class="fas fa-file-invoice-dollar"></i> Salary Statements</a>
+    <a href="/form-creator.html"><i class="fas fa-plus-square"></i> Form Builder</a>
+    <a href="/form-submissions.html"><i class="fas fa-server"></i> Submissions</a>
+    <a href="/fghlwegfuhbcdkbfrufckjbfufgewufdbcadministration-pannelxyzabc"><i class="fas fa-user-shield"></i> Administration</a>
+    <a href="/about-dev.html"><i class="fas fa-terminal"></i> System Credits</a>
+    <a href="bus-view.html">
+  <i class="fa-solid fa-bus"></i> Bus
+</a>
+    <hr style="border:0; border-top:1px solid #f1f5f9; margin:15px 0;">
+    <a href="#" onclick="logout()" style="color:#ef4444;"><i class="fas fa-power-off"></i> Terminate Session</a>
+  </nav>
+</div>
+<div class="backdrop" id="backdrop" onclick="toggleMenu()"></div>
+
+<header>
+  <div class="header-left">
+    <span class="menu-trigger" onclick="toggleMenu()"><i class="fas fa-bars"></i></span>
+    <img src="https://i.ibb.co/8tZSKKT/logo-with-bg.webp" class="brand-logo" alt="Logo">
+    <div class="header-title">
+      <h1>Aopolis institute</h1>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="user-info">
+      <div id="mentorNameDisplay">Authorized Mentor</div>
+      <div id="mentorIdDisplay">ID: ---</div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="section-header">
+    <h2>Campus Pulse</h2>
+    <span style="font-size:0.85rem; color:var(--text-light); font-weight:500;">Live Updates</span>
+  </div>
+  
+  <div class="banner-container">
+    <div id="eventsBanner">
+      <p style="padding:20px; color:var(--text-light)">Synchronizing campus events...</p>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <h2>Academic Control</h2>
+  </div>
+  
+  <div class="actions-grid">
+    <a href="sallary.html" class="action-card">
+      <i class="fas fa-wallet"></i>
+      <h3>Salary Details</h3>
+    </a>
+
+    <a href="post-assignments.html" class="action-card">
+     <i class="fas fa-upload"></i>
+      <h3>Post Assignments</h3>
+    </a>
+   <a href="attendance.html" class="action-card">
+      <i class="fas fa-file-upload"></i>
+      <h3>Attendace Engine (realtime)</h3>
+    </a>
+
+    <a href="exam-ring.html" class="action-card">
+      <i class="fas fa-graduation-cap"></i>
+      <h3>Exam Notifications</h3>
+    </a>
+
+    <a href="notice.html" class="action-card">
+      <div class="badge-float" id="unreadCount">0 New</div>
+      <i class="fas fa-envelope-open-text"></i>
+      <h3>Post Official Notices</h3>
+    </a>
+
+    <a href="fines.html" class="action-card">
+      <i class="fas fa-scale-balanced"></i>
+      <h3>Check students Fine</h3>
+    </a>
+
+    <a href="form-creator.html" class="action-card">
+      <i class="fas fa-object-group"></i>
+      <h3>Create Dynamic Forms</h3>
+    </a>
+
+    <a href="form-submissions.html" class="action-card">
+        <i class="fas fa-layer-group"></i>
+        <h3>Form submissions</h3>
+    </a>
+
+    <a href="/fghlwegfuhbcdkbfrufckjbfufgewufdbcadministration-pannelxyzabc" class="action-card" style="background: #f0f7ff; border-color: #bfdbfe;">
+        <i class="fas fa-fingerprint" style="color:var(--primary)"></i>
+        <h3 style="color:var(--primary)">Admin Panel</h3>
+    </a>
+  </div>
+</main>
+
+<div id="weekendReminder">
+  <div class="modal-box">
+    <div style="font-size:3.5rem; color:var(--accent); margin-bottom:20px;"><i class="fas fa-bell"></i></div>
+    <h3 style="margin-bottom:12px; color:var(--primary); font-family:'Playfair Display'; font-size:1.4rem;">Compliance Notice</h3>
+    <p style="color:var(--text-light); font-size:0.95rem;">
+      Professional Reminder: Please synchronize the <b>Student Attendance Registry (PDF)</b> before the weekend.
+      <br><br>
+      <i>System logs indicate end-of-week reporting is due.</i>
+    </p>
+    <button class="btn-primary" onclick="closeWeekendReminder()">I Confirm Compliance</button>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 Aopolis institute Indore • Secure Institutional Access</p>
+  <p style="font-size:0.7rem; margin-top:5px; opacity:0.6;">Encryption Protocol: AES-256 Active</p>
+</footer>
+
+
+<script>
+const API_ROOT = "https://college-hwbb.onrender.com";
+
+/* --- AUTHENTICATION CHECK --- */
+const mentorId = localStorage.getItem("mentorId");
+const mentorName = localStorage.getItem("mentorName");
+
+if(!mentorId){
+  window.location.href="/login.html";
+} else {
+  document.getElementById("mentorIdDisplay").textContent = `ID: ${mentorId}`;
+  document.getElementById("mentorNameDisplay").textContent = mentorName || "Authorized Mentor";
+}
+
+/* --- SIDEBAR & UI LOGIC --- */
+function toggleMenu() {
+  document.getElementById('sidebar').classList.toggle('active');
+  document.getElementById('backdrop').classList.toggle('active');
+}
+
+window.onscroll = function() {
+  let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+  let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  let scrolled = (winScroll / height) * 100;
+  document.getElementById("progressBar").style.width = scrolled + "%";
+};
+
+/* --- FETCH EVENTS --- */
+async function loadEvents() {
+  const b = document.getElementById("eventsBanner");
+  try {
+    const res = await fetch(`${API_ROOT}/api/events`);
+    const data = await res.json();
+
+    if (data.success && data.events.length > 0) {
+      b.innerHTML = "";
+      data.events.forEach(ev => {
+        const img = document.createElement("img");
+        img.src = ev.image;
+        img.alt = ev.title;
+        img.onclick = () => (location.href = `events.html?eventId=${ev.eventId}`);
+        b.appendChild(img);
+      });
+    } else {
+      b.innerHTML = `<p style="color:var(--text-light)">No active events found.</p>`;
+    }
+  } catch (err) { 
+    b.innerHTML = `<p style="color:#ef4444">Failed to sync events.</p>`;
+  }
+}
+
+/* --- FETCH NOTICES COUNT (Mentor specific) --- */
+async function loadNoticeCount() {
+  try {
+    const res = await fetch(`${API_ROOT}/api/notices?target=mentors`);
+    const data = await res.json();
+    if(data.success) {
+      const count = data.notices.length;
+      document.getElementById("unreadCount").textContent = `${count} New`;
+    }
+  } catch(err) { console.log("Notice count error"); }
+}
+
+/* --- WEEKEND LOGIC --- */
+function handleWeekendReminder(){
+  const today = new Date();
+  const day = today.getDay(); // 5=Fri, 6=Sat
+  const weekNum = Math.ceil(today.getDate() / 7);
+  const key = `remind_v2_${today.getMonth()}_${weekNum}`;
+
+  if((day === 5 || day === 6) && !localStorage.getItem(key)){
+    document.getElementById("weekendReminder").style.display = "flex";
+  }
+}
+
+function closeWeekendReminder(){
+  const today = new Date();
+  const weekNum = Math.ceil(today.getDate() / 7);
+  localStorage.setItem(`remind_v2_${today.getMonth()}_${weekNum}`, "true");
+  document.getElementById("weekendReminder").style.display = "none";
+}
+
+/* --- LOGOUT --- */
+function logout(){
+  if(confirm("Securely terminate your session?")){
+    localStorage.clear();
+    window.location.href="/login.html";
+  }
+}
+
+// Initialize
+window.onload = () => {
+  loadEvents();
+  loadNoticeCount();
+  handleWeekendReminder();
+};
+</script>
+
+</body>
+</html>

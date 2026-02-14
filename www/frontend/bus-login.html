@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bus Driver Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 420px;
+      padding: 30px;
+      border-radius: 14px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+      animation: slideUp 0.6s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(30px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .title {
+      text-align: center;
+      font-size: 26px;
+      font-weight: bold;
+      color: #1e293b;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 14px;
+      color: #64748b;
+      margin-top: 6px;
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 16px;
+      border-radius: 8px;
+      border: 1px solid #cbd5f5;
+      font-size: 15px;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+    }
+
+    button {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #1e40af;
+      transform: translateY(-1px);
+    }
+
+    .msg {
+      text-align: center;
+      margin-top: 15px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .error {
+      color: #dc2626;
+    }
+
+    .success {
+      color: #16a34a;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-card">
+    <div class="title">🚌 Bus Driver Login</div>
+    <div class="subtitle">Secure access for bus pilots</div>
+
+    <label for="busId">Bus Pilot ID</label>
+    <input type="text" id="busId" placeholder="e.g. BUS-101">
+
+    <label for="password">Password</label>
+    <input type="password" id="password" placeholder="Enter password">
+
+    <button onclick="loginBus()">Login</button>
+
+    <div id="msg" class="msg"></div>
+
+    <div class="footer">
+      Location will be tracked only after login
+    </div>
+  </div>
+
+  <script>
+    async function loginBus() {
+      const busId = document.getElementById("busId").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const msg = document.getElementById("msg");
+
+      msg.textContent = "";
+      msg.className = "msg";
+
+      if (!busId || !password) {
+        msg.textContent = "Bus ID and password required";
+        msg.classList.add("error");
+        return;
+      }
+
+      try {
+        const res = await fetch("https://college-hwbb.onrender.com/api/bus/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            busId: busId,
+            password: password
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          msg.textContent = data.error || "Login failed";
+          msg.classList.add("error");
+          return;
+        }
+
+        msg.textContent = "Login successful! Redirecting...";
+        msg.classList.add("success");
+
+        setTimeout(() => {
+          window.location.href = `bus-driver.html?busId=${busId}`;
+        }, 800);
+
+      } catch (err) {
+        msg.textContent = "Server error. Try again.";
+        msg.classList.add("error");
+      }
+    }
+  </script>
+
+</body>
+</html>

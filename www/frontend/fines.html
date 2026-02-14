@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="https://cdn.corenexis.com/view/6199335168">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Fines — Acropolis</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Poppins", sans-serif;
+            background: #f4f6f9;
+        }
+.topbar {
+    background: #6ca3d9;
+    color: white;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.topbar img {
+    width: 40px;        /* max width control */
+    height: auto;       /* ✅ aspect ratio safe */
+    border-radius: 0;   /* no circular border */
+    object-fit: contain;
+}
+
+        .container {
+            max-width: 700px;
+            margin: 25px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #003366;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            margin-top: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #0057ad;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background: #003366;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f2f6ff;
+        }
+
+        .total-box {
+            margin-top: 15px;
+            padding: 12px;
+            background: #eef3ff;
+            border-left: 5px solid #003366;
+            border-radius: 6px;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        #payBtn {
+            background: #009933;
+            margin-top: 15px;
+        }
+
+        .warning {
+            margin-top: 15px;
+            color: red;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .hidden {
+            display: none;
+        }
+        .back-btn {
+  background: #003366;          /* Navy Blue */
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: 0.2s ease;
+}
+
+.back-btn:hover {
+  background: #002244;
+}
+
+.back-btn:active {
+  transform: scale(0.96);
+}
+
+    </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+    <img src="logop.png" alt="Acropolis Logo">
+    <h2>Aopolis institute Indore — Fine Status</h2>
+</div>
+<button class="back-btn" onclick="goBack()">
+  ← Back
+</button>
+
+<div class="container">
+
+    <h3>Check Your Fine</h3>
+
+    <input type="text" id="searchEnrollment" placeholder="Enter Enrollment Number">
+
+    <button onclick="searchFine()">Check Fine</button>
+
+    <!-- FINES TABLE -->
+    <table id="fineTable" class="hidden">
+        <thead>
+            <tr>
+                <th>Enrollment</th>
+                <th>Amount (₹)</th>
+                <th>Reason</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="fineBody"></tbody>
+    </table>
+
+    <!-- TOTAL -->
+    <div id="totalBox" class="total-box hidden">
+        Total Fine: ₹ <span id="totalFine">0</span>
+    </div>
+
+    <button id="payBtn" class="hidden" onclick="goToPayment()">Pay Fine</button>
+
+    <p class="warning hidden" id="warningText">
+        If you do not clear your pending fines, your RGPV exam form will not be forwarded by the institution.
+    </p>
+
+</div>
+
+<script>
+const API_URL = "https://college-hwbb.onrender.com";
+
+async function searchFine() {
+    const enr = document.getElementById("searchEnrollment").value.trim();
+    if (!enr) return alert("Please enter enrollment number");
+
+    try {
+        const res = await fetch(`${API_URL}/api/fines/${enr}`);
+        const fines = await res.json();
+
+        if (!fines || fines.length === 0) {
+            alert("No fines found");
+            return;
+        }
+
+        const table = document.getElementById("fineTable");
+        const body = document.getElementById("fineBody");
+        const totalBox = document.getElementById("totalBox");
+        const totalFineSpan = document.getElementById("totalFine");
+        const payBtn = document.getElementById("payBtn");
+        const warning = document.getElementById("warningText");
+
+        body.innerHTML = "";
+        let total = 0;
+
+        fines.forEach(f => {
+            total += Number(f.fine);
+
+            body.innerHTML += `
+                <tr>
+                    <td>${f.enrollment}</td>
+                    <td>₹ ${f.fine}</td>
+                    <td>${f.reason}</td>
+                    <td>${f.status || "Pending"}</td>
+                </tr>
+            `;
+        });
+
+        table.classList.remove("hidden");
+        totalBox.classList.remove("hidden");
+        payBtn.classList.remove("hidden");
+        warning.classList.remove("hidden");
+
+        totalFineSpan.innerText = total;
+
+    } catch (err) {
+        console.error(err);
+        alert("Server error");
+    }
+}
+
+function goToPayment() {
+    const enr = document.getElementById("searchEnrollment").value.trim();
+    const amt = document.getElementById("totalFine").innerText;
+
+    window.location.href =
+        `payment.html?enrollment=${encodeURIComponent(enr)}&amount=${amt}`;
+}function goBack() {
+  window.history.back(); 
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin - Missing Complaints</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f7fb;
+    margin:0;
+    padding:20px;
+}
+h2{
+    text-align:center;
+    color:#0b1f3a;
+    margin-bottom:15px;
+}
+.controls{
+    display:flex;
+    gap:10px;
+    margin-bottom:15px;
+    flex-wrap:wrap;
+}
+input, select{
+    padding:10px;
+    border-radius:6px;
+    border:1px solid #ccc;
+    flex:1;
+    min-width:150px;
+}
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:#fff;
+    border-radius:8px;
+    overflow:hidden;
+    box-shadow:0 6px 16px rgba(0,0,0,0.08);
+}
+th, td{
+    padding:12px;
+    border-bottom:1px solid #eee;
+    text-align:center;
+}
+th{
+    background:#0b1f3a;
+    color:#fff;
+}
+button{
+    padding:6px 10px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    font-size:13px;
+}
+.approve{ background:#2ecc71; color:#fff; }
+.disapprove{ background:#f39c12; color:#fff; }
+.delete{ background:#e74c3c; color:#fff; }
+.view{ background:#3498db; color:#fff; }
+button:hover{ opacity:0.85; }
+
+/* STATUS BADGE */
+.status-badge{
+    padding:4px 8px;
+    border-radius:4px;
+    color:#fff;
+    font-weight:bold;
+}
+
+/* MODAL */
+.modal{
+    display:none;
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.5);
+    justify-content:center;
+    align-items:center;
+}
+.modal-content{
+    background:#fff;
+    max-width:500px;
+    width:90%;
+    padding:20px;
+    border-radius:8px;
+}
+.modal img{
+    max-width:100%;
+    border-radius:6px;
+}
+.close{
+    float:right;
+    cursor:pointer;
+    font-size:18px;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<h2>📋 Admin - Missing Complaints</h2>
+
+<div class="controls">
+    <input type="text" id="search" placeholder="Search enrollment, name, class...">
+    <select id="categoryFilter">
+        <option value="">All Categories</option>
+        <option>Electronic Item</option>
+        <option>Bag</option>
+        <option>Tiffin</option>
+        <option>Money</option>
+        <option>Books</option>
+        <option>ID Card</option>
+        <option>Other</option>
+    </select>
+</div>
+
+<table>
+<thead>
+<tr>
+    <th>Enrollment</th>
+    <th>Name</th>
+    <th>Category</th>
+    <th>Status</th>
+    <th>Actions</th>
+</tr>
+</thead>
+<tbody id="complaintsTable"></tbody>
+</table>
+
+<!-- VIEW MODAL -->
+<div class="modal" id="viewModal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">✖</span>
+    <h3>Complaint Details</h3>
+    <p><b>Enrollment:</b> <span id="mEnroll"></span></p>
+    <p><b>Name:</b> <span id="mName"></span></p>
+    <p><b>Class:</b> <span id="mClass"></span></p>
+    <p><b>Category:</b> <span id="mCategory"></span></p>
+    <p><b>Description:</b></p>
+    <p id="mDesc"></p>
+    <img id="mPhoto">
+  </div>
+</div>
+
+<script>
+    /* ===============================
+   ACCESS CONTROL — ADMIN PAGES
+================================ */
+
+const mentorId = localStorage.getItem("mentorId");
+const source   = sessionStorage.getItem("accessSource");
+
+// allowed sources
+const ALLOWED_SOURCES = ["ad", "admin"];
+
+if(!mentorId || !ALLOWED_SOURCES.includes(source)){
+  document.body.innerHTML = `
+    <h2 style="text-align:center;margin-top:20vh;color:black">
+      ❌ Access Denied <br>
+      Please open this page via Administration Panel
+    </h2>
+  `;
+  throw new Error("Unauthorized access");
+}
+const API = "https://college-hwbb.onrender.com/api/missing";
+let complaints = [];
+
+/* =========================
+   LOAD ALL COMPLAINTS
+========================= */
+function loadComplaints(){
+  fetch(`${API}/all`)
+    .then(res => res.json())
+    .then(res => {
+      if(!res.success) return alert("Failed to load");
+      complaints = res.data;
+      renderTable();
+    });
+}
+
+/* =========================
+   RENDER TABLE
+========================= */
+function renderTable(){
+  const tbody = document.getElementById("complaintsTable");
+  const search = document.getElementById("search").value.toLowerCase();
+  const category = document.getElementById("categoryFilter").value;
+
+  tbody.innerHTML = "";
+
+  complaints
+  .filter(c =>
+      (!category || c.category === category) &&
+      (
+        c.enrollment.toLowerCase().includes(search) ||
+        c.name.toLowerCase().includes(search) ||
+        c.class.toLowerCase().includes(search)
+      )
+  )
+  .forEach(c => {
+      const tr = document.createElement("tr");
+
+      let statusColor = "#7f8c8d";
+      let statusText = c.status;
+      if(c.status === "approved") statusColor="#2ecc71";
+      if(c.status === "disapproved") statusColor="#f39c12";
+
+      tr.innerHTML = `
+          <td>${c.enrollment}</td>
+          <td>${c.name}</td>
+          <td>${c.category}</td>
+          <td><span class="status-badge" style="background:${statusColor}">${statusText.toUpperCase()}</span></td>
+          <td>
+            <button class="view" onclick='viewMore(${JSON.stringify(c)})'>View</button>
+            <button class="approve" onclick="confirmAction('approve','${c._id}')">Approve</button>
+            <button class="disapprove" onclick="confirmAction('disapprove','${c._id}')">Disapprove</button>
+            <button class="delete" onclick="confirmAction('delete','${c._id}')">Delete</button>
+          </td>
+      `;
+      tbody.appendChild(tr);
+  });
+}
+
+/* =========================
+   CONFIRM POPUP
+========================= */
+function confirmAction(action, id){
+    let msg = "";
+    if(action==="approve") msg="Are you sure you want to APPROVE this item?";
+    if(action==="disapprove") msg="Are you sure you want to DISAPPROVE this item?";
+    if(action==="delete") msg="Are you sure you want to DELETE this item permanently?";
+    if(confirm(msg)){
+        if(action==="approve") doAction(`${API}/approve/${id}`, "PUT");
+        if(action==="disapprove") doAction(`${API}/disapprove/${id}`, "PUT");
+        if(action==="delete") doAction(`${API}/delete/${id}`, "DELETE");
+    }
+}
+
+function doAction(url, method){
+    fetch(url,{method})
+    .then(()=>loadComplaints());
+}
+
+/* =========================
+   VIEW MODAL
+========================= */
+function viewMore(item){
+  document.getElementById("mEnroll").innerText = item.enrollment;
+  document.getElementById("mName").innerText = item.name;
+  document.getElementById("mClass").innerText = item.class;
+  document.getElementById("mCategory").innerText = item.category;
+  document.getElementById("mDesc").innerText = item.description;
+  document.getElementById("mPhoto").src = item.photo;
+
+  document.getElementById("viewModal").style.display = "flex";
+}
+
+function closeModal(){
+  document.getElementById("viewModal").style.display = "none";
+}
+
+/* =========================
+   SEARCH & FILTER
+========================= */
+document.getElementById("search").addEventListener("input", renderTable);
+document.getElementById("categoryFilter").addEventListener("change", renderTable);
+
+/* INIT */
+loadComplaints();
+</script>
+
+</body>
+</html>

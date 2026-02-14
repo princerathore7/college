@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" href="https://i.ibb.co/8tZSKKT/logo-with-bg.webp">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Upload Attendance PDF</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+body { font-family: 'Inter', system-ui, sans-serif; margin:0; padding:20px; background:#f8fafc; color:#1e293b; display:flex; justify-content:center; align-items:flex-start; min-height:100vh; }
+.container { max-width:480px; width:100%; background:#fff; padding:30px; border-radius:16px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1),0 10px 10px -5px rgba(0,0,0,0.04); position:relative; overflow:hidden; margin-top:30px; }
+.loader-overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); display:none; flex-direction:column; justify-content:center; align-items:center; z-index:10; backdrop-filter: blur(2px); }
+.spinner { width:40px; height:40px; border:4px solid #f3f3f3; border-top:4px solid #2563eb; border-radius:50%; animation:spin 1s linear infinite; }
+@keyframes spin { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
+.topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; }
+h2 { margin:0; font-size:1.25rem; font-weight:700; }
+.back-btn, .my-pdfs-btn { background:#f1f5f9; color:#1e293b; padding:8px 14px; border-radius:8px; border:none; cursor:pointer; font-size:13px; margin-left:10px; }
+.back-btn:hover, .my-pdfs-btn:hover{background:#e2e8f0;}
+.form-group{margin-bottom:18px;}
+label{font-weight:600;margin-bottom:6px;display:block;font-size:14px;}
+input, select{width:100%; padding:12px; border-radius:8px; border:1px solid #cbd5e1; font-size:14px; outline:none; box-sizing:border-box; transition:border-color 0.2s, box-shadow 0.2s;}
+input:focus, select:focus{border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,0.1);}
+button.main-btn{width:100%; padding:14px; background:#2563eb; color:#fff; border:none; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer;}
+button.main-btn:hover{background:#1d4ed8;}
+button:disabled{opacity:0.6;cursor:not-allowed;}
+.note{margin-top:20px;font-size:12px;color:#64748b;padding:10px;background:#f8fafc;border-radius:8px;border-left:4px solid #fbbf24;}
+.status{margin-top:20px;text-align:center;font-size:14px;font-weight:600;min-height:20px;}
+.success{color:#16a34a;background:#f0fdf4;padding:10px;border-radius:8px;}
+.error{color:#dc2626;background:#fef2f2;padding:10px;border-radius:8px;}
+
+/* Modal Styles */
+.modal { display:none; position:fixed; z-index:50; left:0; top:0; width:100%; height:100%; overflow:auto; background:rgba(0,0,0,0.4); justify-content:center; align-items:center; }
+.modal-content { background:#fff; padding:20px; border-radius:12px; max-width:500px; width:90%; position:relative; }
+.modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; }
+.modal-header h3 { margin:0; font-size:1.1rem; }
+.modal-close { cursor:pointer; font-size:18px; font-weight:bold; }
+.pdf-list { max-height:300px; overflow-y:auto; margin-top:10px; }
+.pdf-item { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #e5e7eb; gap:5px; }
+.pdf-item span { font-size:14px; flex:1; }
+.pdf-item button { padding:4px 8px; font-size:12px; border:none; border-radius:6px; background:#2563eb; color:#fff; cursor:pointer; }
+.pdf-item button:hover { background:#1d4ed8; }
+.pdf-item .delete-btn { background:#dc2626; }
+.pdf-item .delete-btn:hover { background:#b91c1c; }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div id="loader" class="loader-overlay">
+        <div class="spinner"></div>
+        <p style="margin-top:10px;font-weight:600;font-size:14px;">Uploading PDF...</p>
+    </div>
+
+    <div class="topbar">
+        <h2>📄 Upload Attendance</h2>
+        <div>
+            <button class="back-btn" onclick="window.history.back()">⬅ Back</button>
+            <button class="my-pdfs-btn" onclick="showMyPDFs()">My Uploaded PDFs</button>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Subject Name</label>
+        <input type="text" id="subject" placeholder="Eg: Data Structures" required>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+        <div class="form-group">
+            <label>Year</label>
+            <select id="year">
+                <option value="">Select</option>
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4">4th Year</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Branch</label>
+            <select id="branch">
+                <option value="">Select</option>
+                <option value="CSE1">CSE1</option>
+                <option value="CSE2">CSE2</option>
+                <option value="CSE3">CSE3</option>
+                <option value="CSE4">CSE4</option>
+                <option value="IT1">IT1</option>
+                <option value="IT2">IT2</option>
+                <option value="IT3">IT3</option>
+                <option value="IT4">IT4</option>
+                  <option value="AIML1">AIML1</option>
+    <option value="AIML2">AIML2</option>
+    <option value="AIML3">AIML3</option>
+    <option value="AIML4">AIML4</option>
+    <option value="AIML5">AIML5</option>
+    
+    <option value="AIDS1">AIDS1</option>
+    <option value="AIDS2">AIDS2</option>
+    <option value="AIDS3">AIDS3</option>
+    <option value="AIDS4">AIDS4</option>
+    <option value="AIDS5">AIDS5</option>
+    
+    <option value="CSBS1">CSBS1</option>
+    <option value="CSBS2">CSBS2</option>
+    <option value="CSBS3">CSBS3</option>
+    <option value="CSBS4">CSBS4</option>
+    <option value="CSBS5">CSBS5</option>
+
+    <option value="IOT1">IOT1</option>
+    <option value="IOT2">IOT2</option>
+    <option value="IOT3">IOT3</option>
+    <option value="IOT4">IOT4</option>
+    <option value="IOT5">IOT5</option>
+    
+    <option value="ECE1">ECE1</option>
+    <option value="ECE2">ECE2</option>
+    <option value="ECE3">ECE3</option>
+    <option value="ECE4">ECE4</option>
+    <option value="ECE5">ECE5</option>
+
+    <option value="EEE1">EEE1</option>
+    <option value="EEE2">EEE2</option>
+    <option value="EEE3">EEE3</option>
+    <option value="EEE4">EEE4</option>
+    <option value="EEE5">EEE5</option>
+
+    <option value="EE1">EE1</option>
+    <option value="EE2">EE2</option>
+    <option value="EE3">EE3</option>
+    <option value="EE4">EE4</option>
+    <option value="EE5">EE5</option>
+
+    <option value="ME1">ME1</option>
+    <option value="ME2">ME2</option>
+    <option value="ME3">ME3</option>
+    <option value="ME4">ME4</option>
+    <option value="ME5">ME5</option>
+
+    <option value="AU1">AU1</option>
+    <option value="AU2">AU2</option>
+    <option value="AU3">AU3</option>
+    <option value="AU4">AU4</option>
+    <option value="AU5">AU5</option>
+
+    <option value="MT1">MT1</option>
+    <option value="MT2">MT2</option>
+    <option value="MT3">MT3</option>
+    <option value="MT4">MT4</option>
+    <option value="MT5">MT5</option>
+
+    <option value="CE1">CE1</option>
+    <option value="CE2">CE2</option>
+    <option value="CE3">CE3</option>
+    <option value="CE4">CE4</option>
+    <option value="CE5">CE5</option>
+
+    <option value="CHE1">CHE1</option>
+    <option value="CHE2">CHE2</option>
+    <option value="CHE3">CHE3</option>
+    <option value="CHE4">CHE4</option>
+    <option value="CHE5">CHE5</option>
+
+    <option value="MIN1">MIN1</option>
+    <option value="MIN2">MIN2</option>
+    <option value="MIN3">MIN3</option>
+    <option value="MIN4">MIN4</option>
+    <option value="MIN5">MIN5</option>
+
+    <option value="PET1">PET1</option>
+    <option value="PET2">PET2</option>
+    <option value="PET3">PET3</option>
+    <option value="PET4">PET4</option>
+    <option value="PET5">PET5</option>
+
+    <option value="BT1">BT1</option>
+    <option value="BT2">BT2</option>
+    <option value="BT3">BT3</option>
+    <option value="BT4">BT4</option>
+    <option value="BT5">BT5</option>
+
+    <option value="BME1">BME1</option>
+    <option value="BME2">BME2</option>
+    <option value="BME3">BME3</option>
+    <option value="BME4">BME4</option>
+    <option value="BME5">BME5</option>
+
+    <option value="FT1">FT1</option>
+    <option value="FT2">FT2</option>
+    <option value="FT3">FT3</option>
+    <option value="FT4">FT4</option>
+    <option value="FT5">FT5</option>
+
+    <option value="AG1">AG1</option>
+    <option value="AG2">AG2</option>
+    <option value="AG3">AG3</option>
+    <option value="AG4">AG4</option>
+    <option value="AG5">AG5</option>
+
+    <option value="ENV1">ENV1</option>
+    <option value="ENV2">ENV2</option>
+    <option value="ENV3">ENV3</option>
+    <option value="ENV4">ENV4</option>
+    <option value="ENV5">ENV5</option>
+
+    <option value="TX1">TX1</option>
+    <option value="TX2">TX2</option>
+    <option value="TX3">TX3</option>
+    <option value="TX4">TX4</option>
+    <option value="TX5">TX5</option>
+
+    <option value="PIE1">PIE1</option>
+    <option value="PIE2">PIE2</option>
+    <option value="PIE3">PIE3</option>
+    <option value="PIE4">PIE4</option>
+    <option value="PIE5">PIE5</option>
+
+    <option value="IM1">IM1</option>
+    <option value="IM2">IM2</option>
+    <option value="IM3">IM3</option>
+    <option value="IM4">IM4</option>
+    <option value="IM5">IM5</option>
+  
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Select Week</label>
+        <select id="week">
+            <option value="">Choose Week</option>
+            <option value="1">Week 1</option>
+            <option value="2">Week 2</option>
+            <option value="3">Week 3</option>
+            <option value="4">Week 4</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Attendance PDF</label>
+        <input type="file" id="pdfFile" accept="application/pdf">
+    </div>
+
+    <button id="uploadBtn" class="main-btn" onclick="uploadPDF()">Upload / Replace PDF</button>
+
+    <div class="note"><b>Note:</b> Only one PDF per subject per week is allowed. Uploading a new file will replace the previous one.</div>
+    <div id="status" class="status"></div>
+</div>
+
+<!-- Modal for uploaded PDFs -->
+<div id="pdfModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>My Uploaded PDFs</h3>
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+        </div>
+        <div class="pdf-list" id="pdfList">
+            <!-- PDF items will be inserted here dynamically -->
+        </div>
+    </div>
+</div>
+
+<script>
+const mentorId = localStorage.getItem("mentorId");
+const source = sessionStorage.getItem("accessSource");
+
+if (!mentorId || source !== "ad") {
+    document.body.innerHTML = `
+        <h2 style="text-align:center;margin-top:20vh;color:red">
+          ❌ Access Denied <br>
+          Please open this page from Administration Panel only
+        </h2>
+    `;
+    throw new Error("Unauthorized access");
+}
+/* ================= LOCAL STORAGE HELPERS ================= */
+// structure:
+// myAttendancePDFs = [
+//  { key, year, branch, subject, week, pdfUrl, _id }
+// ]
+
+function getMyPDFs(){
+  return JSON.parse(localStorage.getItem("myAttendancePDFs") || "[]");
+}
+
+function saveMyPDF(pdf){
+  const list = getMyPDFs();
+  const exists = list.find(p => p.key === pdf.key);
+  if(!exists){
+    list.push(pdf);
+    localStorage.setItem("myAttendancePDFs", JSON.stringify(list));
+  }
+}
+
+function removeMyPDF(key){
+  const updated = getMyPDFs().filter(p => p.key !== key);
+  localStorage.setItem("myAttendancePDFs", JSON.stringify(updated));
+}
+
+/* ================= UPLOAD PDF (UNCHANGED + SAVE LOCAL) ================= */
+async function uploadPDF(){
+  const subject = document.getElementById("subject").value.trim();
+  const year    = document.getElementById("year").value;
+  const branch  = document.getElementById("branch").value;
+  const week    = document.getElementById("week").value;
+  const file    = document.getElementById("pdfFile").files[0];
+
+  const status = document.getElementById("status");
+  const loader = document.getElementById("loader");
+
+  if(!subject || !year || !branch || !week || !file){
+    status.textContent = "❌ Please fill all fields";
+    status.className = "status error";
+    return;
+  }
+
+  loader.style.display = "flex";
+
+  const fd = new FormData();
+  fd.append("subject",subject);
+  fd.append("year",year);
+  fd.append("branch",branch);
+  fd.append("week",week);
+  fd.append("pdf",file);
+
+  try{
+    const res  = await fetch("https://college-hwbb.onrender.com/api/attendance-pdf/upload",{
+      method:"POST",
+      body:fd
+    });
+    const data = await res.json();
+
+    if(!data.success) throw new Error(data.message);
+
+    const key = `${year}_${branch}_${subject}_${week}`;
+
+    // 🔥 SAVE TO LOCAL STORAGE
+    saveMyPDF({
+      key,
+      year,
+      branch,
+      subject,
+      week,
+      pdfUrl : data.pdfUrl,
+      _id    : data.pdfId || null   // optional
+    });
+
+    status.textContent = "✅ Attendance PDF uploaded";
+    status.className = "status success";
+    document.getElementById("pdfFile").value = "";
+
+  }catch(err){
+    status.textContent = "❌ " + err.message;
+    status.className = "status error";
+  }finally{
+    loader.style.display = "none";
+  }
+}
+
+/* =============== Show Uploaded PDFs Modal ================= */
+/* ================= SHOW MY UPLOADED PDFs (LOCAL ONLY) ================= */
+function showMyPDFs(){
+  const modal   = document.getElementById("pdfModal");
+  const pdfList = document.getElementById("pdfList");
+  modal.style.display = "flex";
+
+  const list = getMyPDFs();
+  if(!list.length){
+    pdfList.innerHTML = `<p style="text-align:center;">No PDFs uploaded from this device</p>`;
+    return;
+  }
+
+  pdfList.innerHTML = "";
+  list.forEach(pdf=>{
+    pdfList.innerHTML += `
+      <div class="pdf-item">
+        <span>${pdf.year} ${pdf.branch} - ${pdf.subject} (Week ${pdf.week})</span>
+        <a href="${pdf.pdfUrl}" target="_blank">
+          <button>View</button>
+        </a>
+        <button class="update-btn"
+          onclick="updatePDF('${pdf._id}','${pdf.key}')">
+          Update
+        </button>
+        <button class="delete-btn"
+          onclick="deletePDF('${pdf._id}','${pdf.key}')">
+          Delete
+        </button>
+      </div>
+    `;
+  });
+}
+
+/* ================== Delete PDF ================== */
+async function deletePDF(pdfId, key){
+  if(!confirm("Are you sure you want to delete this PDF?")) return;
+  try{
+      const res = await fetch(`https://college-hwbb.onrender.com/api/attendance-pdf/delete/${pdfId}`, {
+          method: "DELETE"
+      });
+      const data = await res.json();
+      if(!data.success) throw new Error(data.message || "Delete failed");
+
+      // ✅ Remove from localStorage
+      removeMyPDF(key);
+
+      alert("PDF deleted successfully!");
+      showMyPDFs(); // Refresh the list
+  } catch(err){
+      alert("❌ Error: " + err.message);
+  }
+}
+async function updatePDF(pdfId, key){
+  const fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.accept = "application/pdf";
+
+  fileInput.onchange = async ()=>{
+    if(fileInput.files.length === 0) return;
+
+    const fd = new FormData();
+    fd.append("pdf", fileInput.files[0]);
+
+    try{
+      const res = await fetch(`https://college-hwbb.onrender.com/api/attendance-pdf/update/${pdfId}`, {
+        method: "POST",
+        body: fd
+      });
+      const data = await res.json();
+
+      if(!data.success) throw new Error(data.message || "Update failed");
+
+      // ✅ Update localStorage
+      const list = getMyPDFs();
+      const idx = list.findIndex(p => p.key === key);
+      if(idx >= 0){
+        list[idx].pdfUrl = data.pdfUrl;
+        list[idx].updated = false; // reset updated
+        localStorage.setItem("myAttendancePDFs", JSON.stringify(list));
+      }
+
+      alert("PDF updated successfully!");
+      showMyPDFs();   // refresh modal
+
+    }catch(err){
+      alert("❌ Error: " + err.message);
+    }
+  };
+
+  fileInput.click();
+}
+
+
+function closeModal(){
+    document.getElementById("pdfModal").style.display = "none";
+}
+</script>
+</body>
+</html>

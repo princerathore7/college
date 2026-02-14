@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" href="https://cdn.corenexis.com/view/6199335168">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create New Form</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+  .container { max-width: 800px; margin: 40px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 0 12px rgba(0,0,0,0.1); }
+  h1 { margin-bottom: 5px; }
+  .card { background: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 6px; }
+  input, textarea, select { width: 100%; padding: 8px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; }
+  .pdf-box { border: 2px dashed #ccc; padding: 20px; text-align: center; cursor: pointer; border-radius: 6px; }
+  .field-card { background: #fff; padding: 10px; margin: 10px 0; border-radius: 6px; border: 1px solid #ddd; position: relative; }
+  .remove-btn { position: absolute; top: 5px; right: 5px; background: red; color: #fff; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; }
+  .grid { display: grid; grid-template-columns: 1fr 150px 120px; gap: 10px; align-items: center; }
+  .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; }
+  .btn.yellow { background: #f4c430; color: #000; }
+  .btn.secondary { background: #ccc; color: #000; margin-right: 10px; }
+  .actions { text-align: right; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>Create New Form</h1>
+    <p>Design digital forms for students (No hard copies required)</p>
+  </div>
+
+  <!-- FORM DETAILS -->
+  <div class="card">
+    <label>Form Title *</label>
+    <input type="text" id="formTitle" placeholder="e.g. Scholarship Form 2025">
+    <br><br>
+    <label>Description</label>
+    <textarea id="formDesc" placeholder="Optional description"></textarea>
+  </div>
+
+  <!-- PDF UPLOAD -->
+  <div class="card">
+    <label>Attach PDF Instructions</label>
+    <div class="pdf-box">
+      <input type="file" id="pdfUpload" multiple accept="application/pdf">
+      <p>Upload circulars / guidelines (PDF)</p>
+    </div>
+  </div>
+
+  <!-- FIELDS -->
+  <div class="card">
+    <label>Form Fields</label>
+    <div id="fieldsContainer"></div>
+    <button class="btn secondary" onclick="addField()">+ Add New Field</button>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="actions">
+    <button class="btn secondary" onclick="history.back()">Cancel</button>
+    <button class="btn yellow" onclick="submitForm()">Create Form</button>
+  </div>
+
+</div>
+
+<script>
+/* ===============================
+   ACCESS CONTROL — FORM CREATOR
+   (ONLY SOURCE CHECK, NO AUTH)
+================================ */
+const source = sessionStorage.getItem("accessSource"); // set by admin.html
+if (source !== "ad") {
+  document.body.innerHTML = `
+    <h2 style="text-align:center;margin-top:20vh;color:red">
+      ❌ Access Denied <br>
+      Please open this page from Administration Panel only
+    </h2>
+  `;
+  throw new Error("Invalid access source");
+}
+
+/* ===============================
+   FORM BUILDER LOGIC
+================================ */
+function addField() {
+  const container = document.getElementById("fieldsContainer");
+  const div = document.createElement("div");
+  div.className = "field-card";
+  div.innerHTML = `
+    <button class="remove-btn" onclick="this.parentElement.remove()">✖</button>
+    <div class="grid">
+      <input type="text" placeholder="Field Label" class="field-label" required>
+      <select class="field-type">
+        <option value="text">Text</option>
+        <option value="number">Number</option>
+        <option value="date">Date</option>
+        <option value="file">File Upload</option>
+      </select>
+      <select class="field-required">
+        <option value="true">Required</option>
+        <option value="false">Optional</option>
+      </select>
+    </div>
+  `;
+  container.appendChild(div);
+}
+
+async function submitForm() {
+  const title = document.getElementById("formTitle").value.trim();
+  const description = document.getElementById("formDesc").value.trim();
+  const pdfs = document.getElementById("pdfUpload").files;
+
+  if (!title) { alert("Form title is required"); return; }
+
+  const fieldCards = document.querySelectorAll(".field-card");
+  if (fieldCards.length === 0) { alert("Add at least one field"); return; }
+
+  const fields = [];
+  for (const card of fieldCards) {
+    const label = card.querySelector(".field-label").value.trim();
+    if (!label) { alert("All fields must have a label"); return; }
+    fields.push({
+      label,
+      type: card.querySelector(".field-type").value,
+      required: card.querySelector(".field-required").value === "true"
+    });
+  }
+
+  const formData = new FormData();
+  formData.append("title", title);
+  formData.append("description", description);
+  formData.append("fields", JSON.stringify(fields));
+  for (const pdf of pdfs) formData.append("pdfs", pdf);
+
+  try {
+    // 🔹 Backend URL (production)
+    const res = await fetch("https://college-hwbb.onrender.com/api/forms", {
+      method: "POST",
+      body: formData
+    });
+
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } 
+    catch { 
+      console.error("Non-JSON response:", text); 
+      alert("❌ Server error or invalid response. Check backend logs."); 
+      return; 
+    }
+
+    if (!res.ok) {
+      alert(data.error || "Failed to create form");
+      return;
+    }
+
+    alert("✅ Form created successfully");
+    window.location.href = "/form-submissions.html";
+
+  } catch (err) {
+    console.error(err);
+    alert("❌ Server error. Please try again.");
+  }
+}
+</script>
+
+</body>
+</html>

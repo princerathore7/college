@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Acropolis Admin | Premium Dashboard</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #ca8a04;
+            --bg-light: #f8fafc;
+            --sidebar-width: 290px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            margin: 0; padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: #1e293b;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .wrapper { display: flex; height: 100vh; }
+
+        /* --- SIDEBAR --- */
+        aside {
+            width: var(--sidebar-width);
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .logo-box {
+            width: 40px; height: 40px;
+            background: var(--primary);
+            border-radius: 10px;
+            display: grid; place-items: center;
+            color: white;
+        }
+
+        .nav-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        /* Group / Shutter Styling */
+        .nav-group { margin-bottom: 10px; }
+
+        .group-title {
+            width: 100%;
+            padding: 12px 15px;
+            background: transparent;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            color: #64748b;
+            font-weight: 700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-radius: 8px;
+        }
+
+        .group-title:hover { background: #f1f5f9; }
+
+        .group-content {
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            padding-left: 10px;
+            margin-top: 5px;
+        }
+
+        .group-content.active { display: flex; }
+
+        .nav-item {
+            padding: 10px 15px;
+            border-radius: 8px;
+            color: #334155;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-item:hover { background: #f1f5f9; color: var(--accent); }
+        .nav-item.active { background: var(--primary); color: white; }
+
+        /* --- MAIN --- */
+        main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+        header {
+            height: 70px;
+            background: white;
+            padding: 0 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .header-actions { display: flex; gap: 10px; }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+
+        .btn-outline { background: white; border: 1px solid #e2e8f0; color: #475569; }
+        .btn-danger { background: #fee2e2; color: #ef4444; border: none; }
+
+        .content-area {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .welcome-card {
+            text-align: center;
+            max-width: 500px;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- OVERLAY --- */
+        .page-overlay {
+            position: fixed;
+            inset: 0;
+            background: white;
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+        }
+
+        .overlay-header {
+            padding: 12px 20px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .page-overlay iframe { flex: 1; border: none; }
+
+        .menu-toggle { display: none; background: none; border: none; cursor: pointer; padding: 10px; }
+
+        @media (max-width: 1024px) {
+            aside { position: fixed; left: -100%; height: 100%; }
+            aside.open { left: 0; }
+            .menu-toggle { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <aside id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-box"><i data-lucide="shield-check"></i></div>
+            <h2 style="font-size: 1.1rem; font-weight: 700;">Acropolis Group Administration Pannel</h2>
+        </div>
+
+        <div class="nav-container">
+            <div class="nav-group">
+                <button class="group-title" onclick="toggleGroup('core')">
+                    Student & Class <i data-lucide="chevron-down"></i>
+                </button>
+                <div class="group-content active" id="core">
+                    <button class="nav-item" data-page="/notes-post.html"><i data-lucide="book-open"></i> Study Notes</button>
+                    <button class="nav-item" data-page="/post-assignments.html"><i data-lucide="file-text"></i> Assignments</button>
+                    <button class="nav-item" data-page="/admin-students.html"><i data-lucide="users"></i> Student Management</button>
+                    <button class="nav-item" data-page="/admin.html"><i data-lucide="settings"></i> Class Control</button>
+                    <button class="nav-item" data-page="/admin-marks.html"><i data-lucide="bar-chart-3"></i> Marks & Results</button>
+                    <button class="nav-item" data-page="/exam-ring.html"><i data-lucide="pencil-ruler"></i> Examination Setup</button>
+         <button class="nav-item" data-page="/admin-message.html">
+  <i data-lucide="mail-plus"></i>
+  Send message To individuals
+</button>
+
+<button class="nav-item" data-page="/manage-per-msg.html">
+  <i data-lucide="messages-square"></i>
+  Manage Messages
+</button>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button class="group-title" onclick="toggleGroup('att')">
+                    Attendance Portal <i data-lucide="chevron-down"></i>
+                </button>
+                <div class="group-content" id="att">
+                     <button class="nav-item" data-page="/attendance.html"><i data-lucide="activity"></i> Real time attendance</button>
+                    <button class="nav-item" data-page="/class-attendace.html"><i data-lucide="clipboard-check"></i> Pdf Generator</button>
+                    <button class="nav-item" data-page="/attendace-pdf-upload.html"><i data-lucide="file-up"></i> Upload PDF</button>
+                    <button class="nav-item" data-page="/attendace-pdf-view.html"><i data-lucide="file-search"></i> View Data</button>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button class="group-title" onclick="toggleGroup('forms')">
+                    Form Engine <i data-lucide="chevron-down"></i>
+                </button>
+                <div class="group-content" id="forms">
+                    <button class="nav-item" data-page="/form-creator.html"><i data-lucide="plus-square"></i> Create Form</button>
+                    <button class="nav-item" data-page="/form-submissions.html"><i data-lucide="list-checks"></i> Submissions</button>
+                    <button class="nav-item" data-page="/form-management.html"><i data-lucide="trash-2"></i> Manage/Delete</button>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button class="group-title" onclick="toggleGroup('bus')">
+                    Transport <i data-lucide="chevron-down"></i>
+                </button>
+                <div class="group-content" id="bus">
+                    <button class="nav-item" data-page="/bus-route.html"><i data-lucide="map-pin"></i> Routes</button>
+                    <button class="nav-item" data-page="/bus-admin.html"><i data-lucide="user-plus"></i> Driver ID</button>
+                    <button class="nav-item" data-page="/bus-delet.html"><i data-lucide="truck"></i> Manage Bus IDs</button>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button class="group-title" onclick="toggleGroup('fin')">
+                    Finance & Comms <i data-lucide="chevron-down"></i>
+                </button>
+                <div class="group-content" id="fin">
+                    <button class="nav-item" data-page="/admin-salary.html"><i data-lucide="wallet"></i> Salary</button>
+                    <button class="nav-item" data-page="/pending.html"><i data-lucide="clock"></i> Pending Fees</button>
+                    <button class="nav-item" data-page="/ewuhewbbewubewbeadmin-fine"><i data-lucide="credit-card"></i> Fines</button>
+                    <button class="nav-item" data-page="/notice.html"><i data-lucide="megaphone"></i> Notice Board</button>
+                    <button class="nav-item" data-page="/manage-notice.html"><i data-lucide="edit-3"></i> Manage Notice</button>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button class="group-title" onclick="toggleGroup('other')">
+                    Others <i data-lucide="chevron-down"></i>
+                </button>
+                <div class="group-content" id="other">
+                    <button class="nav-item" data-page="/admin-complaint.html"><i data-lucide="police"></i> Missing Complaints</button>
+                    <button class="nav-item" data-page="/manage.html"><i data-lucide="calendar"></i> Events</button>
+                    <button class="nav-item" data-page="/design.html"><i data-lucide="sparkles"></i> Post Event</button>
+                    <button class="nav-item" data-page="/signup.html"><i data-lucide="user-plus-2"></i> Student ID</button>
+                    <button class="nav-item" data-page="/mentor-signup.html"><i data-lucide="user-cog"></i> Mentor ID</button>
+                     
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main>
+        <header>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <button class="menu-toggle" onclick="toggleSidebar()"><i data-lucide="menu"></i></button>
+                <h3 id="postedBy" style="font-size: 1rem; font-weight: 500;">Welcome</h3>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-outline" id="backToMentorBtn"><i data-lucide="layout-dashboard"></i> Dashboard</button>
+                <button class="btn btn-danger" id="logoutBtn"><i data-lucide="log-out"></i> Logout</button>
+
+            </div>
+        </header>
+
+        <div class="content-area">
+            <div class="welcome-card" id="welcomeScreen">
+                <div style="margin-bottom: 20px; color: var(--primary);"><i data-lucide="layout" size="48"></i></div>
+                <h2 style="margin-bottom: 10px;">Administrative Portal Acropolis Indore</h2>
+                <p style="color: #64748b;">Select a module from the sidebar to manage operations.</p>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div class="page-overlay" id="pageOverlay">
+    <div class="overlay-header">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <button class="btn btn-outline" style="border:none; padding: 5px 10px;" id="overlayBackBtn"><i data-lucide="arrow-left"></i> Close</button>
+            <strong id="pageTitle">Module Loading...</strong>
+        </div>
+    </div>
+    <iframe id="overlayFrame"></iframe>
+</div>
+
+<script>
+    lucide.createIcons();
+
+    // Shutter Toggle Logic
+    function toggleGroup(id) {
+        const content = document.getElementById(id);
+        const icon = content.previousElementSibling.querySelector('.lucide-chevron-down');
+        content.classList.toggle('active');
+        icon.style.transform = content.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
+    }
+
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    // --- Backend Same Flow ---
+    const mentorId = localStorage.getItem("mentorId");
+    if(!mentorId){
+        window.location.href = "/login.html";
+    }
+
+    const mentorName = localStorage.getItem("mentorName");
+    document.getElementById("postedBy").innerText = mentorName ? `Welcome To Administration: ${mentorName}` : "Admin Panel";
+
+    // Navigation Logic
+    const buttons = document.querySelectorAll(".nav-item");
+    const overlay = document.getElementById("pageOverlay");
+    const frame = document.getElementById("overlayFrame");
+    const titleEl = document.getElementById("pageTitle");
+
+    buttons.forEach(btn => {
+        btn.onclick = () => {
+            sessionStorage.setItem("accessSource", "ad");
+            buttons.forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+
+            titleEl.textContent = btn.innerText.trim();
+            frame.src = btn.dataset.page;
+            overlay.style.display = "flex";
+            
+            // Close sidebar on mobile after selection
+            document.getElementById('sidebar').classList.remove('open');
+        };
+    });
+
+    document.getElementById("overlayBackBtn").onclick = () => {
+        overlay.style.display = "none";
+        frame.src = "";
+    };
+
+    document.getElementById("backToMentorBtn").onclick = () => {
+        location.href = "/mentor-dashboard.html";
+    };
+
+    document.getElementById("logoutBtn").onclick = () => {
+        if(confirm("Are you sure you want to logout?")){
+            localStorage.clear();
+            sessionStorage.clear();
+            location.href = "/login.html";
+        }
+    };
+
+    // Zoom Prevention
+    document.addEventListener('wheel', (e) => { if (e.ctrlKey) e.preventDefault(); }, { passive: false });
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '0')) e.preventDefault();
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Acropolis Bus Route Finder</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  margin: 0;
+  padding: 20px;
+}
+h1 {
+  text-align: center;
+  color: #1e293b;
+}
+input {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  margin-bottom: 15px;
+}
+.card {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.1);
+}
+.bus {
+  font-weight: bold;
+  color: #0f172a;
+}
+.route {
+  font-size: 14px;
+  color: #475569;
+}
+.time {
+  margin-top: 5px;
+  font-size: 14px;
+}
+.note {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🚌 Acropolis Bus Route Finder</h1>
+
+<input
+  type="text"
+  id="search"
+  placeholder="Enter your stop / area name (eg. Mhow Naka, Bhawarkua...)"
+  oninput="searchStop()"
+/>
+
+<div id="results"></div>
+
+<div class="note">
+  Data updated: <b>01 Aug 2024</b> • Frontend-only hardcoded version
+</div>
+
+<script>
+/* ===========================
+   🔒 HARDCODED BUS DATABASE
+   =========================== */
+
+ const BUS_DATA = [
+
+  {
+    stop: "Mhow Naka",
+    buses: ["G54", "G4", "G5", "G76", "G55"],
+    time1: "7:02 am",
+    time2: "9:02 am"
+  },
+
+  {
+    stop: "Bhawarkua Chouraha",
+    buses: ["G54", "G5", "G76", "G72", "G17"],
+    time1: "7:03 am",
+    time2: "9:03 am"
+  },
+
+  {
+    stop: "Reti Mandi",
+    buses: ["G5", "G55"],
+    time1: "7:00 am",
+    time2: "9:00 am"
+  },
+
+  {
+    stop: "Rajiv Gandhi Chouraha",
+    buses: ["G72", "G55"],
+    time1: "7:23 am",
+    time2: "9:23 am"
+  },
+
+  {
+    stop: "Teen Imli / Teen Imli Square",
+    buses: ["G72", "G5", "G55"],
+    time1: "7:32 am",
+    time2: "9:32 am"
+  },
+
+  {
+    stop: "Musakhedi / Mushakhedi Square",
+    buses: ["G54", "G4", "G5"],
+    time1: "7:35 am",
+    time2: "9:35 am"
+  },
+
+  {
+    stop: "Navlakha Chouraha",
+    buses: ["G5", "G32"],
+    time1: "7:03 am",
+    time2: "9:03 am"
+  },
+
+  {
+    stop: "Palasia Chouraha / Palasia Thana",
+    buses: ["G39", "G41", "G7"],
+    time1: "7:30 am",
+    time2: "9:30 am"
+  },
+
+  {
+    stop: "Khajrana Chouraha",
+    buses: ["G39", "G41"],
+    time1: "7:41 am",
+    time2: "9:41 am"
+  },
+
+  {
+    stop: "Dewas Naka",
+    buses: ["G77", "G62", "G63"],
+    time1: "7:48 am",
+    time2: "9:48 am"
+  },
+
+  {
+    stop: "Silicon City",
+    buses: ["G72", "G8", "G51"],
+    time1: "7:15 am",
+    time2: "9:15 am"
+  },
+
+  {
+    stop: "Rajendra Nagar",
+    buses: ["G55", "G72"],
+    time1: "7:17 am",
+    time2: "9:17 am"
+  },
+
+  {
+    stop: "Choithram Mandi Chouraha",
+    buses: ["G72", "G55"],
+    time1: "7:21 am",
+    time2: "9:21 am"
+  },
+
+  {
+    stop: "Hatod",
+    buses: ["G78"],
+    time1: "6:55 am",
+    time2: "-"
+  },
+
+  {
+    stop: "Gandhi Nagar",
+    buses: ["G56", "G3"],
+    time1: "7:00 am",
+    time2: "9:00 am"
+  },
+
+  {
+    stop: "Aerodrum Thana",
+    buses: ["G78", "G56"],
+    time1: "7:10 am",
+    time2: "9:10 am"
+  },
+
+  {
+    stop: "Gangwal Bus Stand",
+    buses: ["G3"],
+    time1: "7:32 am",
+    time2: "9:32 am"
+  },
+
+  {
+    stop: "Aopolis institutes",
+    buses: [
+      "G54","G4","G5","G76",
+      "G9","G39","G47",
+      "G72","G17","G1","G30",
+      "G51","G8","G75","G34",
+      "G55","G57",
+      "G78","G56","G3"
+    ],
+    time1: "8:10 am",
+    time2: "10:10 am"
+  },
+ {
+    stop: "Paliya Station",
+    buses: ["G2", "G21", "G35", "G40", "G36"],
+    time1: "7:05 am",
+    time2: "9:05 am"
+  },
+
+  {
+    stop: "Aurobindo Hospital",
+    buses: ["G2", "G21", "G35"],
+    time1: "7:10 am",
+    time2: "9:10 am"
+  },
+
+  {
+    stop: "Lavkush Chouraha",
+    buses: ["G2", "G21"],
+    time1: "7:15 am",
+    time2: "9:15 am"
+  },
+
+  {
+    stop: "MR 10 Square",
+    buses: ["G2", "G21"],
+    time1: "7:20 am",
+    time2: "9:20 am"
+  },
+
+  {
+    stop: "Heera Nagar Chouraha",
+    buses: ["G2", "G21"],
+    time1: "7:22 am",
+    time2: "9:22 am"
+  },
+
+  {
+    stop: "Vijay Nagar Thana",
+    buses: ["G2", "G21", "G35"],
+    time1: "7:33 am",
+    time2: "9:33 am"
+  },
+
+  {
+    stop: "Hotel Radisson",
+    buses: ["G2", "G21", "G35"],
+    time1: "7:35 am",
+    time2: "9:35 am"
+  },
+
+  {
+    stop: "Omaxe City & Bypass",
+    buses: ["G2", "G21", "G35", "G70", "G42", "G73", "G46"],
+    time1: "7:55 am",
+    time2: "9:55 am"
+  },
+
+  {
+    stop: "Niranjanpur Chouraha",
+    buses: ["G77", "G6", "G74", "G50"],
+    time1: "7:20 am",
+    time2: "9:20 am"
+  },
+
+  {
+    stop: "Dewas Naka",
+    buses: ["G77", "G6", "G62", "G63", "G61"],
+    time1: "7:48 am",
+    time2: "9:48 am"
+  },
+
+  {
+    stop: "Navlakha Bus Stand",
+    buses: ["G32", "G71", "G7"],
+    time1: "7:15 am",
+    time2: "9:15 am"
+  },
+
+  {
+    stop: "Palasia Chouraha",
+    buses: ["G32", "G71", "G7", "G41", "G38", "G79"],
+    time1: "7:30 am",
+    time2: "9:30 am"
+  },
+
+  {
+    stop: "Khajrana Chouraha",
+    buses: ["G41", "G38", "G79"],
+    time1: "7:41 am",
+    time2: "9:41 am"
+  },
+
+  {
+    stop: "Kanadiya Bypass",
+    buses: ["G32", "G7", "G16", "G19"],
+    time1: "7:55 am",
+    time2: "9:55 am"
+  },
+
+  {
+    stop: "Aopolis institutes",
+    buses: [
+      "G2","G21","G35","G40","G36",
+      "G77","G6","G74","G50",
+      "G62","G63","G61",
+      "G70","G42","G73","G46",
+      "G32","G71","G7",
+      "G16","G19",
+      "G41","G38","G79"
+    ],
+    time1: "8:10 am",
+    time2: "10:10 am"
+  },
+  // G69, G33
+  {
+    stop: "Six Bunglow Sitla Mata Mandir",
+    buses: ["G69", "G33"],
+    time1: "7:15 am",
+    time2: "9:15 am"
+  },
+  {
+    stop: "Palsikar Chouraha",
+    buses: ["G69", "G33"],
+    time1: "7:20 am",
+    time2: "9:20 am"
+  },
+
+  // G31, G27 (Nagda side)
+  {
+    stop: "Bada Nagda",
+    buses: ["G31", "G27"],
+    time1: "6:30 am",
+    time2: "8:30 am"
+  },
+  {
+    stop: "Nagda",
+    buses: ["G31", "G27"],
+    time1: "7:00 am",
+    time2: "9:00 am"
+  },
+
+  // G45, G28 (Nagukhedi side)
+  {
+    stop: "Nagukhedi",
+    buses: ["G45", "G28"],
+    time1: "7:10 am",
+    time2: "9:10 am"
+  },
+  {
+    stop: "Kamla Nagar",
+    buses: ["G45", "G28"],
+    time1: "7:12 am",
+    time2: "9:12 am"
+  },
+
+  // G28 (Datana route)
+  {
+    stop: "Datana",
+    buses: ["G28"],
+    time1: "6:35 am",
+    time2: "8:35 am"
+  },
+  {
+    stop: "Nagukhedi Bypass",
+    buses: ["G28"],
+    time1: "7:10 am",
+    time2: "9:10 am"
+  },
+
+  // G49, G48
+  {
+    stop: "Barotha Village",
+    buses: ["G49", "G48"],
+    time1: "6:50 am",
+    time2: "8:50 am"
+  },
+  {
+    stop: "Bhopal Chouraha",
+    buses: ["G49", "G48"],
+    time1: "7:25 am",
+    time2: "9:25 am"
+  },
+
+  // G44, G37
+  {
+    stop: "Radhaganj",
+    buses: ["G44", "G37"],
+    time1: "7:20 am",
+    time2: "9:20 am"
+  },
+  {
+    stop: "Sayaji Dwar",
+    buses: ["G44", "G37"],
+    time1: "7:30 am",
+    time2: "9:30 am"
+  },
+
+  // G64, G58, G52 (Maksi)
+  {
+    stop: "Maksi",
+    buses: ["G64", "G58", "G52"],
+    time1: "6:00 am",
+    time2: "8:00 am"
+  },
+  {
+    stop: "Jalapura",
+    buses: ["G64", "G58", "G52"],
+    time1: "6:20 am",
+    time2: "8:20 am"
+  },
+
+  // G68, G67
+  {
+    stop: "Gandharwpuri",
+    buses: ["G68", "G67"],
+    time1: "6:10 am",
+    time2: "8:10 am"
+  },
+  {
+    stop: "Jamgod",
+    buses: ["G68", "G67"],
+    time1: "7:25 am",
+    time2: "9:25 am"
+  },
+
+  // COMMON DESTINATION
+  {
+    stop: "Aopolis institutes",
+    buses: [
+      "G69","G33","G31","G27","G45","G28",
+      "G49","G48","G44","G37",
+      "G64","G58","G52","G68","G67"
+    ],
+    time1: "8:10 am",
+    time2: "10:10 am"
+  },
+   {
+    stop: "Beema Hospital Agar Road Ujjain",
+    buses: ["G53","G15","G66","G59"],
+    time1: "6:20 am",
+    time2: "8:20 am"
+  },
+  {
+    stop: "Chamunda Mata Mandir (Indore Gate)",
+    buses: ["G53","G15","G66","G59"],
+    time1: "6:30 am",
+    time2: "8:30 am"
+  },
+  {
+    stop: "Ghantaghar (Tower Chouraha)",
+    buses: ["G53","G15","G66","G59"],
+    time1: "6:35 am",
+    time2: "8:35 am"
+  },
+  {
+    stop: "Teen Batti Chouraha",
+    buses: ["G53","G15","G66","G59"],
+    time1: "6:35 am",
+    time2: "8:35 am"
+  },
+  {
+    stop: "Taran Taal",
+    buses: ["G53","G15","G66","G59"],
+    time1: "6:40 am",
+    time2: "8:40 am"
+  },
+  {
+    stop: "Hrishi Nagar",
+    buses: ["G53","G15","G66","G59"],
+    time1: "6:45 am",
+    time2: "8:45 am"
+  },
+  {
+    stop: "Circuit House",
+    buses: ["G53","G15","G66","G59"],
+    time1: "6:48 am",
+    time2: "8:48 am"
+  },
+  {
+    stop: "Naag Jhiri",
+    buses: ["G53","G15","G66","G59"],
+    time1: "6:50 am",
+    time2: "8:50 am"
+  },
+  {
+    stop: "Malanvasa",
+    buses: ["G53","G15","G66","G59"],
+    time1: "7:00 am",
+    time2: "9:00 am"
+  },
+  {
+    stop: "Sanver Bypass",
+    buses: ["G53","G15","G66","G59"],
+    time1: "7:35 am",
+    time2: "9:35 am"
+  }
+
+];
+
+const BUS_DATA_CHAPRI = [
+
+  {
+    stop: "Chapri (Kshipra)",
+    buses: ["G25"],
+    time1: "7:10 am",
+    time2: "9:10 am"
+  },
+  {
+    stop: "Tigariya Chota",
+    buses: ["G25"],
+    time1: "7:20 am",
+    time2: "9:20 am"
+  },
+  {
+    stop: "Sumrakhedi",
+    buses: ["G25"],
+    time1: "7:25 am",
+    time2: "9:25 am"
+  },
+  {
+    stop: "Sukhliya",
+    buses: ["G25"],
+    time1: "7:30 am",
+    time2: "9:30 am"
+  },
+  {
+    stop: "Sunnani Mahakal",
+    buses: ["G25"],
+    time1: "7:35 am",
+    time2: "9:35 am"
+  },
+  {
+    stop: "Kshipra",
+    buses: ["G25"],
+    time1: "7:45 am",
+    time2: "9:45 am"
+  },
+  {
+    stop: "Peerkaradia",
+    buses: ["G25"],
+    time1: "7:50 am",
+    time2: "9:50 am"
+  }
+];
+const BUS_DATA_MAHUDIA = [
+
+  {
+    stop: "Mahudia",
+    buses: ["G43","G10","G26"],
+    time1: "7:15 am",
+    time2: "9:15 am"
+  },
+  {
+    stop: "Nariakhedi",
+    buses: ["G43","G10","G26"],
+    time1: "7:20 am",
+    time2: "9:20 am"
+  },
+  {
+    stop: "Khelod",
+    buses: ["G43","G10","G26"],
+    time1: "7:25 am",
+    time2: "9:25 am"
+  },
+  {
+    stop: "Vyas Khedi",
+    buses: ["G43","G10","G26"],
+    time1: "7:35 am",
+    time2: "9:35 am"
+  },
+  {
+    stop: "Kadwali",
+    buses: ["G43","G10","G26"],
+    time1: "7:50 am",
+    time2: "9:50 am"
+  },
+  {
+    stop: "Bhondwas",
+    buses: ["G43","G10","G26"],
+    time1: "8:00 am",
+    time2: "10:00 am"
+  },
+  {
+    stop: "Sulakhedi",
+    buses: ["G43","G10","G26"],
+    time1: "8:05 am",
+    time2: "10:05 am"
+  },
+  {
+  stop: "Aopolis institutes",
+  buses: [
+    "G53","G15","G66","G59",
+    "G25",
+    "G43","G10","G26",
+    "G69","G33","G31","G27","G45","G28",
+    "G49","G48","G44","G37",
+    "G64","G58","G52","G68","G67"
+  ],
+  time1: "8:10 am",
+  time2: "10:10 am"
+}
+
+];
+
+
+/* ===========================
+   🔍 SEARCH LOGIC
+   =========================== */
+
+function searchStop() {
+  const q = document.getElementById("search").value.toLowerCase();
+  const box = document.getElementById("results");
+  box.innerHTML = "";
+
+  if (!q) return;
+
+  const matches = BUS_DATA.filter(item =>
+    item.stop.toLowerCase().includes(q)
+  );
+
+  if (matches.length === 0) {
+    box.innerHTML = "<div class='card'>❌ No bus found for this stop</div>";
+    return;
+  }
+
+  matches.forEach(item => {
+    box.innerHTML += `
+      <div class="card">
+        <div class="bus">📍 ${item.stop}</div>
+        <div class="route">🚌 Buses: ${item.buses.join(", ")}</div>
+        <div class="time">
+          ⏰ 1st Shift: ${item.time1}<br/>
+          ⏰ 2nd Shift: ${item.time2}
+        </div>
+      </div>
+    `;
+  });
+}
+function renderResults(data) {
+  const box = document.getElementById("results");
+  box.innerHTML = "";
+
+  data.forEach(item => {
+    box.innerHTML += `
+      <div class="card">
+        <div class="bus">📍 ${item.stop}</div>
+        <div class="route">🚌 Buses: ${item.buses.join(", ")}</div>
+        <div class="time">
+          ⏰ 1st Shift: ${item.time1}<br/>
+          ⏰ 2nd Shift: ${item.time2}
+        </div>
+      </div>
+    `;
+  });
+}
+window.onload = () => {
+  renderResults(BUS_DATA);
+};
+
+</script>
+
+</body>
+</html>

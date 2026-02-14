@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Update Pending Fees — Acropolis College</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --blue:#2f80ed;
+    --blue-soft:#eaf3ff;
+    --blue-dark:#1c5fd4;
+    --text-dark:#1f2937;
+    --text-muted:#6b7280;
+    --border:#e5e7eb;
+    --card:#ffffff;
+    --bg:#f4f8ff;
+    --success:#16a34a;
+    --error:#dc2626;
+  }
+
+  *{
+    box-sizing:border-box;
+  }
+
+  body{
+    font-family: 'Inter', 'Poppins', system-ui, sans-serif;
+    margin:0;
+    min-height:100vh;
+    background:linear-gradient(180deg,#f8fbff,#eef4ff);
+    color:var(--text-dark);
+  }
+
+  header{
+    background:#ffffff;
+    padding:16px 24px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border-bottom:1px solid var(--border);
+    box-shadow:0 4px 14px rgba(47,128,237,0.08);
+  }
+
+  header h1{
+    margin:0;
+    font-size:1.6rem;
+    font-weight:700;
+    color:var(--blue);
+    letter-spacing:.3px;
+  }
+
+  nav button{
+    background:var(--blue);
+    color:#fff;
+    border:none;
+    padding:10px 18px;
+    border-radius:10px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.25s ease;
+  }
+
+  nav button:hover{
+    background:var(--blue-dark);
+    transform:translateY(-1px);
+    box-shadow:0 8px 18px rgba(47,128,237,.25);
+  }
+
+  main{
+    max-width:460px;
+    margin:48px auto;
+    background:var(--card);
+    padding:32px 28px;
+    border-radius:18px;
+    box-shadow:0 30px 60px rgba(47,128,237,.15);
+    border:1px solid var(--border);
+  }
+
+  h2{
+    margin:0;
+    text-align:center;
+    font-size:1.5rem;
+    font-weight:700;
+    color:#111827;
+  }
+
+  p.subtitle{
+    margin-top:8px;
+    text-align:center;
+    color:var(--text-muted);
+    font-size:14px;
+  }
+
+  form{
+    margin-top:26px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+
+  input[type="text"],
+  input[type="number"]{
+    padding:14px 16px;
+    border-radius:12px;
+    border:1.5px solid var(--border);
+    font-size:15px;
+    background:#fff;
+    transition:.25s ease;
+  }
+
+  input::placeholder{
+    color:#9ca3af;
+  }
+
+  input:focus{
+    outline:none;
+    border-color:var(--blue);
+    box-shadow:0 0 0 4px rgba(47,128,237,.15);
+  }
+
+  button.submit-btn{
+    margin-top:8px;
+    padding:14px;
+    border-radius:14px;
+    border:none;
+    background:linear-gradient(135deg,var(--blue),var(--blue-dark));
+    color:#fff;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+    letter-spacing:.4px;
+    transition:.3s ease;
+  }
+
+  button.submit-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 16px 32px rgba(47,128,237,.35);
+  }
+
+  .message{
+    margin-top:20px;
+    text-align:center;
+    font-weight:600;
+    font-size:15px;
+  }
+
+  .message.success{
+    color:var(--success);
+  }
+
+  .message.error{
+    color:var(--error);
+  }
+</style>
+
+</head>
+
+<body>
+
+<header>
+  <h1>Update Student Fees</h1>
+  <nav>
+    <button onclick="logout()">Logout</button>
+  </nav>
+</header>
+
+<main>
+  <h2>Pending Fees Update</h2>
+
+  <form id="updateForm">
+    <input type="text" id="enrollment" placeholder="Student Enrollment Number" required />
+    <input type="number" id="pendingFees" placeholder="Pending Fees Amount (₹)" required />
+    <button type="submit" class="submit-btn">Update Fees</button>
+  </form>
+
+  <div class="message" id="msg"></div>
+</main>
+
+<script>
+  /* ===============================
+   ACCESS CONTROL — ADMIN PAGES
+================================ */
+
+const mentorId = localStorage.getItem("mentorId");
+const source   = sessionStorage.getItem("accessSource");
+
+// allowed sources
+const ALLOWED_SOURCES = ["ad", "admin"];
+
+if(!mentorId || !ALLOWED_SOURCES.includes(source)){
+  document.body.innerHTML = `
+    <h2 style="text-align:center;margin-top:20vh;color:red">
+      ❌ Access Denied <br>
+      Please open this page via Administration Panel
+    </h2>
+  `;
+  throw new Error("Unauthorized access");
+}
+function logout(){
+  window.location.href = "login.html";
+}
+
+const form = document.getElementById("updateForm");
+const msgEl = document.getElementById("msg");
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  msgEl.textContent = "";
+  msgEl.className = "message";
+
+  const enrollment = document.getElementById("enrollment").value.trim();
+  const pendingFees = parseFloat(document.getElementById("pendingFees").value);
+
+  if(!enrollment || isNaN(pendingFees)){
+    msgEl.textContent = "Please enter valid details.";
+    msgEl.classList.add("error");
+    return;
+  }
+
+  try {
+    const res = await fetch(`https://college-hwbb.onrender.com/api/students/${enrollment}/pending-fees`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pending_fees: pendingFees })
+    });
+
+    const data = await res.json();
+
+    if(res.ok && data.success){
+      msgEl.textContent = `Pending fees updated successfully for ${enrollment}.`;
+      msgEl.classList.add("success");
+      form.reset();
+    } else {
+      msgEl.textContent = data.message || "Failed to update fees.";
+      msgEl.classList.add("error");
+    }
+  } catch(err){
+    console.error(err);
+    msgEl.textContent = "Error connecting to server.";
+    msgEl.classList.add("error");
+  }
+});
+
+/* ✅ AUTO ENROLLMENT FILL FROM ADMIN-STUDENTS */
+document.addEventListener("DOMContentLoaded", () => {
+  const selectedEnr = localStorage.getItem("selectedEnrollment");
+  if(selectedEnr){
+    document.getElementById("enrollment").value = selectedEnr;
+  }
+});
+</script>
+</body>
+</html>
+

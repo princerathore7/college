@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>🚌 View Bus Routes — Acropolis</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#003366;
+  --accent:#0b4da2;
+  --highlight:#ffcc00;
+  --text:#222;
+  --muted:#666;
+  --bg:#f4f6f8;
+  --card:#ffffff;
+}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body{
+  font-family:'Poppins',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+}
+
+/* ===== TOPBAR ===== */
+.topbar{
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  color:#fff;
+  padding:14px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  box-shadow:0 2px 12px rgba(0,0,0,0.15);
+}
+
+.topbar h1{
+  font-size:1.15rem;
+  font-weight:600;
+}
+
+.topbar .small{
+  font-size:0.85rem;
+  opacity:0.9;
+}
+
+/* ===== MAIN ===== */
+main{
+  max-width:1100px;
+  margin:28px auto;
+  padding:16px;
+  width:94%;
+}
+
+/* ===== CARD ===== */
+.card{
+  background:var(--card);
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.08);
+  overflow:hidden;
+  border-top:4px solid var(--highlight);
+}
+
+.card-head{
+  padding:18px 20px;
+  border-bottom:1px solid #eee;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  flex-wrap:wrap;
+}
+
+.card-head .title{
+  font-size:1.1rem;
+  font-weight:700;
+  color:var(--primary);
+}
+
+.status{
+  font-size:0.9rem;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+/* ===== BUTTONS ===== */
+.controls{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.btn{
+  background:var(--primary);
+  color:#fff;
+  padding:9px 16px;
+  border-radius:8px;
+  border:none;
+  cursor:pointer;
+  font-size:0.9rem;
+  font-weight:600;
+  transition:0.2s ease;
+}
+
+.btn:hover{
+  background:var(--accent);
+  transform:translateY(-1px);
+}
+
+.btn.ghost{
+  background:#fff;
+  color:var(--primary);
+  border:1px solid var(--primary);
+}
+
+.btn.ghost:hover{
+  background:#f0f4ff;
+}
+
+/* ===== VIEWER ===== */
+.viewer{
+  height:75vh;
+  margin:16px;
+  border-radius:10px;
+  overflow:hidden;
+  background:#fff;
+  box-shadow:0 6px 18px rgba(0,0,0,0.06);
+}
+
+.pdf-wrap{
+  width:100%;
+  height:100%;
+}
+
+iframe{
+  width:100%;
+  height:100%;
+  border:none;
+}
+
+/* ===== FALLBACK ===== */
+.fallback{
+  padding:40px 20px;
+  text-align:center;
+}
+
+.msg{
+  color:var(--primary);
+  font-weight:700;
+  font-size:1.1rem;
+  margin-bottom:10px;
+}
+
+.hint{
+  color:var(--muted);
+  font-size:0.9rem;
+}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:720px){
+  .card-head{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .controls{
+    width:100%;
+  }
+
+  .viewer{
+    height:65vh;
+    margin:12px;
+  }
+}
+</style>
+
+</head>
+<body>
+
+<header class="topbar">
+  <h1>🚌 Acropolis — Bus Routes</h1>
+  <div class="small">Student Panel</div>
+</header>
+
+<main>
+  <div class="card" id="card">
+    <div class="card-head">
+      <div>
+        <div class="title">Bus Routes PDF</div>
+        <div class="status" id="statusText">Checking availability…</div>
+      </div>
+      <div class="controls">
+        <button class="btn" id="refreshBtn">🔄 Refresh</button>
+        <button class="btn ghost" id="openNewBtn">🌐 Open in new tab</button>
+        <button class="btn ghost" id="backBtn">⬅ Back</button>
+        <button class="btn" id="trackBusBtn">🚍 Track Bus</button>
+        <button class="btn ghost" id="downloadBtn">💾 Download PDF</button>
+      </div>
+    </div>
+
+    <div class="viewer" id="viewer">
+      <div class="pdf-wrap" id="pdfWrap" style="display:none">
+        <iframe id="pdfFrame" src="" title="Bus Routes PDF"></iframe>
+      </div>
+      <div class="fallback" id="fallback" style="display:none">
+        <div class="msg" id="fallbackMsg">No Bus PDF uploaded yet.</div>
+        <div class="hint" id="fallbackHint">The bus routes PDF is not available right now. Contact admin or try again later.</div>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <button class="btn" id="retryBtn">🔁 Try Again</button>
+          <a id="openDirectLink" class="btn ghost" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center">🌐 Open direct link</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+const API_ROOT = "https://college-hwbb.onrender.com/api/bus";
+let currentPdfUrl = "";
+
+// DOM
+const statusText = document.getElementById('statusText');
+const pdfWrap = document.getElementById('pdfWrap');
+const pdfFrame = document.getElementById('pdfFrame');
+const fallback = document.getElementById('fallback');
+const fallbackMsg = document.getElementById('fallbackMsg');
+const fallbackHint = document.getElementById('fallbackHint');
+const downloadBtn = document.getElementById('downloadBtn');
+const openDirectLink = document.getElementById('openDirectLink');
+const trackBusBtn = document.getElementById('trackBusBtn');
+
+document.getElementById('refreshBtn').addEventListener('click', checkAndLoad);
+document.getElementById('retryBtn').addEventListener('click', checkAndLoad);
+document.getElementById('openNewBtn').addEventListener('click', ()=>{ if(currentPdfUrl) window.open(currentPdfUrl,'_blank'); });
+document.getElementById('backBtn').addEventListener('click', ()=> window.history.back());
+openDirectLink.addEventListener('click', ()=>{ if(currentPdfUrl) window.open(currentPdfUrl,'_blank'); });
+
+// 🚍 Track Bus button click
+trackBusBtn.addEventListener('click', ()=>{
+  if(!currentPdfUrl){
+    alert("Cannot track bus: PDF not loaded yet");
+    return;
+  }
+  const busId = "BUS123"; // optionally dynamic if needed
+  window.open(`bus-track.html?busId=${busId}`,'_blank');
+});
+
+// ✅ Download PDF like Notes system
+downloadBtn.addEventListener('click', async ()=> {
+    if (!currentPdfUrl) return;
+
+    try {
+        const res = await fetch(`${API_ROOT}/direct`);
+        const data = await res.json();
+
+        if (!data.success) {
+            alert("Bus PDF not found!");
+            return;
+        }
+
+        const fileUrl = data.url;
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", fileUrl, true);
+        xhr.responseType = "blob";
+
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                const blob = xhr.response;
+                const link = document.createElement("a");
+                link.href = window.URL.createObjectURL(blob);
+                link.download = "Bus_Routes.pdf";
+                link.click();
+            } else {
+                console.log("XHR status:", xhr.status);
+                alert("Download failed (server error)!");
+            }
+        };
+
+        xhr.onerror = () => {
+            alert("Download failed (network error)!");
+        };
+
+        xhr.send();
+
+    } catch (err) {
+        console.error(err);
+        alert("Download failed (JS error)!");
+    }
+});
+
+// Fetch & display PDF (no auto-download)
+async function checkAndLoad(){
+    statusText.textContent = 'Fetching Bus PDF…';
+    pdfWrap.style.display='none';
+    fallback.style.display='none';
+    try{
+        const res = await fetch(`${API_ROOT}/view`);
+        const data = await res.json();
+
+        if(data.success && data.pdf_url){
+            currentPdfUrl = data.pdf_url;
+            pdfFrame.src = currentPdfUrl;
+            pdfWrap.style.display='block';
+            fallback.style.display='none';
+            statusText.textContent = 'Bus PDF is available 🚌';
+            openDirectLink.href = currentPdfUrl;
+            downloadBtn.style.display='inline-block';
+            trackBusBtn.style.display='inline-block';
+        }else{
+            currentPdfUrl='';
+            statusText.textContent='Bus PDF not available ❌';
+            fallbackMsg.textContent='No Bus PDF uploaded yet.';
+            fallbackHint.textContent='Contact admin or try again later.';
+            fallback.style.display='block';
+            openDirectLink.href='#';
+            downloadBtn.style.display='none';
+            trackBusBtn.style.display='none';
+        }
+    }catch(err){
+        console.error(err);
+        currentPdfUrl='';
+        statusText.textContent='Unable to fetch PDF ⚠';
+        fallbackMsg.textContent='Cannot load Bus PDF.';
+        fallbackHint.textContent='Check your internet connection or try again later.';
+        fallback.style.display='block';
+        openDirectLink.href='#';
+        downloadBtn.style.display='none';
+        trackBusBtn.style.display='none';
+    }
+}
+
+// Auto-load PDF view (no auto-download)
+document.addEventListener('DOMContentLoaded', checkAndLoad);
+</script>
+
+</body>
+</html>
+

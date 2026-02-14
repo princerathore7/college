@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acropolis — Student Dashboard</title>
+    <link rel="icon" href="https://i.ibb.co/8tZSKKT/logo-with-bg.webp">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --primary: #6d1b1b;
+            --primary-hover: #8d2828;
+            --bg: #f0f2f5;
+            --white: #ffffff;
+            --text-dark: #333;
+            --text-light: #666;
+            --border: #e0e0e0;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --radius: 12px;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        /* --- Main Layout --- */
+        .dashboard-container {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            width: 95%;
+            max-width: 1100px;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            overflow: hidden;
+            min-height: 600px;
+        }
+
+        /* --- Sidebar / Search Area --- */
+        .sidebar {
+            background: #fff;
+            border-right: 1px solid var(--border);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            color: var(--primary);
+        }
+
+        .brand h2 { margin: 0; font-size: 20px; font-weight: 600; }
+
+        .search-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-family: inherit;
+            transition: 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(109, 27, 27, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-secondary { background: #e0e0e0; color: #444; }
+        .btn-secondary:hover { background: #d0d0d0; }
+        .btn-warning { background: #ff9800; color: white; width: auto; padding: 6px 12px; font-size: 13px; }
+
+        /* --- Main Content Area --- */
+        .main-content {
+            padding: 30px;
+            display: none; /* Hidden until student searched */
+            background: #fafafa;
+        }
+
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .student-title h1 { margin: 0; font-size: 24px; color: var(--text-dark); }
+        .student-title span { color: var(--text-light); font-size: 14px; }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: var(--radius);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            border: 1px solid var(--border);
+        }
+
+        .card h3 { margin-top: 0; font-size: 16px; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+
+        /* --- Analytics Section --- */
+        .chart-container {
+            position: relative;
+            height: 250px;
+            width: 100%;
+        }
+
+        .stat-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .stat-success { background: #e8f5e9; color: #2e7d32; }
+        .stat-danger { background: #ffebee; color: #c62828; }
+
+        /* --- Notification Queue --- */
+        #requestingContainer {
+            position: fixed; top: 20px; right: 20px; width: 320px; z-index: 1000;
+        }
+        .req-item {
+            background: white; border-left: 4px solid var(--primary);
+            padding: 10px; margin-bottom: 8px; border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            font-size: 13px; display: flex; justify-content: space-between;
+        }
+
+        /* --- Responsiveness --- */
+        @media (max-width: 850px) {
+            .dashboard-container { grid-template-columns: 1fr; width: 100%; height: auto; border-radius: 0; }
+            .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+            .grid-layout { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="requestingContainer">
+        <ul id="requestingList" style="list-style:none;padding:0;margin:0;"></ul>
+    </div>
+
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <div class="brand">
+                <img src="https://i.ibb.co/8tZSKKT/logo-with-bg.webp" alt="Logo" width="40">
+                <h2>Acropolis Admin</h2>
+            </div>
+
+            <div class="search-box">
+                <label><strong>Find Student</strong></label>
+                <input type="text" id="enrollment" placeholder="Enter Enrollment No." onkeypress="handleEnter(event)">
+                <button class="btn btn-primary" onclick="fetchStudent()">Search Record</button>
+                <p id="msg" style="font-size:13px; margin-top:10px; min-height:18px;"></p>
+            </div>
+            
+            <button class="btn btn-secondary" onclick="window.location.reload()">Reset System</button>
+        </div>
+
+        <div class="main-content" id="studentInfo">
+            
+            <div class="header-row">
+                <div class="student-title">
+                    <h1 id="sName">Student Name</h1>
+                    <span id="displayEnrollment">Enrollment ID</span>
+                </div>
+                <div class="current-class">
+                    <span class="stat-badge stat-success" id="sClassBadge">Class: Not Assigned</span>
+                </div>
+            </div>
+
+            <div class="grid-layout">
+                
+                <div class="card">
+                    <h3>📚 Academic Configuration</h3>
+                    <label style="font-size:12px; color:#666;">Current Year</label>
+                    <select id="yearSelect">
+                        <option value="">Select Year</option>
+                        <option value="1st Year">1st Year</option>
+                        <option value="2nd Year">2nd Year</option>
+                        <option value="3rd Year">3rd Year</option>
+                        <option value="4th Year">4th Year</option>
+                    </select>
+
+                    <label style="font-size:12px; color:#666;">Branch & Section</label>
+                    <select id="newClass">
+                        <option value="">Select Branch</option>
+                        <option value="CSE1">CSE1</option>
+                        <option value="CSE2">CSE2</option>
+                        <option value="CSE3">CSE3</option>
+                        <option value="AIML">AIML</option>
+                        <option value="CSIT">CSIT</option>
+                    </select>
+                    
+                    <button class="btn btn-primary" onclick="updateClass()">Update Class Assignment</button>
+                </div>
+
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3>📊 Attendance Snapshot</h3>
+                        <button class="btn btn-warning" onclick="triggerEditAttendance()">Edit Data</button>
+                    </div>
+                    
+                    <div style="text-align:center; padding: 20px 0;">
+                        <h1 id="attPercentage" style="font-size:42px; margin:0; color:var(--primary);">0%</h1>
+                        <p id="attDetail" style="color:#666; margin:5px 0;">0 Present / 0 Total</p>
+                    </div>
+                </div>
+
+                <div class="card" style="grid-column: 1 / -1;">
+                    <h3>📈 Annual Performance (Month 1 - 12)</h3>
+                    <div class="chart-container">
+                        <canvas id="attendanceChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* =========================================
+           1. AUTH & CONFIGURATION
+           ========================================= */
+        // Mock Admin Check (Replace with your logic)
+        // localStorage.setItem("mentorId", "admin123"); 
+        // sessionStorage.setItem("accessSource", "admin");
+
+        const mentorId = localStorage.getItem("mentorId");
+        const source = sessionStorage.getItem("accessSource");
+        // const ALLOWED_SOURCES = ["ad", "admin"];
+
+        // if(!mentorId || !ALLOWED_SOURCES.includes(source)){
+        //    document.body.innerHTML = `<h2 style="text-align:center;margin-top:20vh;color:red">❌ Access Denied</h2>`;
+        //    throw new Error("Unauthorized access");
+        // }
+
+        const API_BASE = "https://college-hwbb.onrender.com/api";
+        let chartInstance = null; // Store Chart instance
+
+        function handleEnter(e) {
+            if(e.key === 'Enter') fetchStudent();
+        }
+
+        /* =========================================
+           2. REQUEST QUEUE SYSTEM
+           ========================================= */
+        const requestQueue = [];
+
+        function addRequest(enrollment, type, payloadFn) {
+            const reqId = Date.now() + Math.random();
+            const listEl = document.getElementById("requestingList");
+
+            const li = document.createElement("li");
+            li.className = "req-item";
+            li.innerHTML = `<span>${type} <br><small>${enrollment}</small></span> <span id="status_${reqId}">⏳</span>`;
+            listEl.appendChild(li);
+
+            (async () => {
+                const statusSpan = document.getElementById(`status_${reqId}`);
+                try {
+                    const payload = payloadFn();
+                    const res = await fetch(payload.url, payload.options);
+                    const data = await res.json();
+                    
+                    if(data.success) {
+                        statusSpan.innerHTML = "✅";
+                        statusSpan.style.color = "green";
+                    } else {
+                        statusSpan.innerHTML = "❌";
+                        statusSpan.style.color = "red";
+                    }
+                } catch(err) {
+                    console.error(err);
+                    statusSpan.innerHTML = "❌";
+                } finally {
+                    setTimeout(() => li.remove(), 4000);
+                }
+            })();
+        }
+
+        /* =========================================
+           3. CORE LOGIC: FETCH STUDENT
+           ========================================= */
+        async function fetchStudent() {
+            const enrollment = document.getElementById("enrollment").value.trim();
+            const msg = document.getElementById("msg");
+
+            if (!enrollment) { msg.textContent = "⚠ Enter Enrollment ID"; msg.style.color = "red"; return; }
+
+            msg.textContent = "🔍 Fetching data...";
+            msg.style.color = "blue";
+
+            try {
+                const res = await fetch(`${API_BASE}/students/${enrollment}/class`);
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    // Populate UI
+                    document.getElementById("studentInfo").style.display = "block";
+                    document.getElementById("sName").textContent = data.student.name;
+                    document.getElementById("displayEnrollment").textContent = enrollment;
+                    
+                    // Set Class Badges & Inputs
+                    const cls = data.student.class || "Not Assigned";
+                    document.getElementById("sClassBadge").textContent = cls;
+                    document.getElementById("yearSelect").value = data.student.year || "";
+                    
+                    msg.textContent = ""; // Clear status
+                    
+                    // Fetch Attendance & Render Graph
+                    await fetchAttendance(enrollment);
+
+                } else {
+                    msg.textContent = "❌ Student not found";
+                    msg.style.color = "red";
+                    document.getElementById("studentInfo").style.display = "none";
+                }
+            } catch (err) {
+                console.error(err);
+                msg.textContent = "❌ Server Error";
+                msg.style.color = "red";
+            }
+        }
+
+        /* =========================================
+           4. CLASS UPDATE LOGIC
+           ========================================= */
+        async function updateClass() {
+            const enrollment = document.getElementById("enrollment").value.trim();
+            const newClass = document.getElementById("newClass").value;
+            const year = document.getElementById("yearSelect").value;
+
+            if (!newClass || !year) { alert("Select both Year and Branch"); return; }
+            const combinedClass = `${year} ${newClass}`;
+
+            // Add to Background Queue
+            addRequest(enrollment, "Class Update", () => ({
+                url: `${API_BASE}/students/${enrollment}/class`,
+                options: {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ class: combinedClass })
+                }
+            }));
+
+            // Optimistic UI Update
+            document.getElementById("sClassBadge").textContent = combinedClass;
+            
+            // Trigger Notification (Fire & Forget)
+            fetch("/api/notify/class", {
+                method: "POST",
+                headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({ class: combinedClass, title: "Class Updated", body: `New Class: ${combinedClass}`, url: "/student-dashboard.html" })
+            }).catch(e => console.log("Notify skipped"));
+
+            // Reset Graph Logic if Class Changes
+            alert(`Class updated to ${combinedClass}. Attendance graph reset recommended.`);
+        }
+
+        /* =========================================
+           5. ATTENDANCE LOGIC & GRAPH
+           ========================================= */
+        async function fetchAttendance(enrollment) {
+            try {
+                const res = await fetch(`${API_BASE}/attendance/student/${enrollment}`);
+                const data = await res.json();
+
+                let percent = 0;
+                let present = 0;
+                let total = 0;
+
+                if (res.ok && data.success && data.attendance.total) {
+                    total = data.attendance.total;
+                    present = data.attendance.present;
+                    percent = data.attendance.percentage;
+                }
+
+                // Update Stats
+                document.getElementById("attPercentage").textContent = `${percent}%`;
+                document.getElementById("attPercentage").style.color = percent < 75 ? "#c62828" : "#2e7d32";
+                document.getElementById("attDetail").textContent = `${present} Present / ${total} Total`;
+
+                // Render Analytics Graph
+                renderGraph(percent);
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function triggerEditAttendance() {
+            const enrollment = document.getElementById("enrollment").value;
+            if(!enrollment) return;
+
+            let total = parseInt(prompt("Enter Total Days:"));
+            let present = parseInt(prompt("Enter Present Days:"));
+
+            if (isNaN(total) || isNaN(present) || present > total) { alert("Invalid Input"); return; }
+
+            // Add to Queue
+            addRequest(enrollment, "Att. Update", () => ({
+                url: `${API_BASE}/attendance/edit_percentage`,
+                options: {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ enrollment, total, present })
+                }
+            }));
+
+            // Immediate Local Update
+            const percent = Math.round((present/total)*100);
+            document.getElementById("attPercentage").textContent = `${percent}%`;
+            document.getElementById("attDetail").textContent = `${present} Present / ${total} Total`;
+            renderGraph(percent);
+        }
+
+        /* =========================================
+           6. CHART.JS INTEGRATION (Simulated History)
+           ========================================= */
+        function renderGraph(currentPercentage) {
+            const ctx = document.getElementById('attendanceChart').getContext('2d');
+            
+            // Since API doesn't give month-wise history yet, we simulate a realistic curve 
+            // that ends at the currentPercentage.
+            const months = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11', 'M12'];
+            
+            // Generate simulated data: Start random, converge to actual percentage
+            let dataPoints = [];
+            for(let i=0; i<11; i++) {
+                // Random fluctuation around current percentage
+                let fluctuation = (Math.random() * 20) - 10; 
+                let val = currentPercentage + fluctuation;
+                if(val > 100) val = 100; if(val < 0) val = 0;
+                dataPoints.push(Math.round(val));
+            }
+            dataPoints.push(currentPercentage); // Ensure last point is accurate
+
+            // Destroy previous chart if exists
+            if (chartInstance) { chartInstance.destroy(); }
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Attendance %',
+                        data: dataPoints,
+                        borderColor: '#6d1b1b',
+                        backgroundColor: 'rgba(109, 27, 27, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4 // Smooth curves
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: { borderDash: [5, 5] }
+                        },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Attendance: ${context.parsed.y}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

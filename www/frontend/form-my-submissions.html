@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My Submitted Forms | Student Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="https://cdn.corenexis.com/view/6199335168">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --navy:#0b1c2d;
+  --bg:#f4f6f9;
+  --card:#ffffff;
+  --border:#e1e5ec;
+  --accent:#1e90ff;
+  --green:#28a745;
+  --red:#ff4d4f;
+  --orange:#ff9900;
+}
+
+*{
+  box-sizing:border-box;
+  font-family:'Inter',sans-serif;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  padding:28px;
+}
+
+.container{
+  max-width:1100px;
+  margin:auto;
+}
+
+.header{
+  margin-bottom:22px;
+}
+
+.header h1{
+  margin:0;
+  font-size:26px;
+  color:var(--navy);
+}
+
+.header p{
+  margin-top:6px;
+  font-size:13px;
+  color:#555;
+}
+
+/* Table */
+.table-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:3px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,td{
+  padding:14px;
+  font-size:13px;
+  border-bottom:1px solid var(--border);
+  text-align:left;
+}
+
+th{
+  background:#f1f4f8;
+  color:#333;
+}
+
+tbody tr:hover{
+  background:#fafcff;
+}
+
+.status{
+  padding:4px 10px;
+  border-radius:3px;
+  font-size:11px;
+  font-weight:600;
+  color:#fff;
+  text-transform:capitalize;
+}
+
+.status.pending{background:var(--orange);}
+.status.approved{background:var(--green);}
+.status.disapproved{background:var(--red);}
+
+/* Buttons */
+.btn{
+  padding:6px 12px;
+  border:none;
+  font-size:12px;
+  font-weight:600;
+  cursor:pointer;
+  border-radius:3px;
+}
+
+.btn.primary{
+  background:var(--accent);
+  color:#fff;
+}
+
+.btn.secondary{
+  background:#e9edf3;
+  color:var(--navy);
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>My Submitted Forms</h1>
+    <p>View status of your submitted forms and resubmit if needed</p>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Form Title</th>
+          <th>Submitted On</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr><td colspan="4" class="loading">Loading submissions...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+const tableBody = document.getElementById("tableBody");
+
+// 🔹 Load student submissions
+async function loadSubmissions(){
+  try{
+    const enrollment = localStorage.getItem("enrollment");
+
+    if(!enrollment){
+      throw new Error("Enrollment not found in localStorage");
+    }
+
+    const res = await fetch(
+      `https://college-hwbb.onrender.com/api/student/my-submissions?enrollment=${encodeURIComponent(enrollment)}`
+    );
+
+    if(!res.ok) throw new Error("Failed to load submissions");
+
+    const data = await res.json();
+    renderTable(data);
+
+  }catch(err){
+    console.error(err);
+    tableBody.innerHTML =
+      `<tr><td colspan="4" class="loading">Unable to load submissions</td></tr>`;
+  }
+}
+
+// 🔹 Render table
+function renderTable(submissions){
+  tableBody.innerHTML = "";
+
+  if(submissions.length === 0){
+    tableBody.innerHTML =
+      `<tr><td colspan="4" class="loading">No submissions found</td></tr>`;
+    return;
+  }
+
+  submissions.forEach(s => {
+    const status = s.status || "pending";
+
+    let actionBtn = "—";
+    if(status === "disapproved"){
+      actionBtn = `
+        <button class="btn primary" onclick="alertReason('${s.reason || "No reason"}')">
+          View Reason
+        </button>
+        <button class="btn secondary" onclick="resubmitForm('${s.submission_id}')">
+          Resubmit
+        </button>`;
+    }else if(status === "pending"){
+      actionBtn = `
+        <button class="btn secondary"
+          onclick="resubmitForm('${s.submission_id}')">
+          Edit / Resubmit
+        </button>`;
+    }
+
+    tableBody.innerHTML += `
+      <tr>
+        <td>${s.form_title}</td>
+        <td>${new Date(s.submitted_at).toLocaleString()}</td>
+        <td><span class="status ${status}">${status}</span></td>
+        <td>${actionBtn}</td>
+      </tr>
+    `;
+  });
+}
+
+function alertReason(reason){
+  alert("Disapproved Reason:\n\n" + reason);
+}
+
+function resubmitForm(submissionId){
+  window.location.href =
+    `forms.html?submissionId=${submissionId}&resubmit=true`;
+}
+
+// INIT
+loadSubmissions();
+</script>
+
+</body>
+</html>

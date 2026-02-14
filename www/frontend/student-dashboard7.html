@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" href="https://i.ibb.co/8tZSKKT/logo-with-bg.webp">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:image" content="https://i.ibb.co/Ld87p8x9/acropolis-logo.png">
+<title>Student Dashboard — Acropolis</title>
+
+<!-- Fonts & icons -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #f6f8fb;
+    color: #222;
+    overflow-y: auto;
+}
+
+/* HEADER */
+header {
+    background: linear-gradient(135deg, #0a1931, #112d4e);
+    color: #fff;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 3px 12px rgba(10,25,49,0.35);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+}
+
+
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-area img {
+    height: 44px;
+    border-radius: 6px;
+}
+
+.logo-area h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+}
+
+.top-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.action-btn {
+    padding: 9px 14px;
+    border-radius: 8px;
+    border: none;
+    background: #fff;
+    color: #2b5d03;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+}
+
+
+/* SIDEBAR BASE */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 260px;
+  height: 100vh; /* full viewport height */
+  background: #021355;
+  color: #fff;
+  padding-top: 70px;
+  transform: translateX(-260px);
+  transition: 0.3s ease;
+  z-index: 1500;
+  overflow-y: auto; /* ✅ make it scrollable */
+  overscroll-behavior: contain; /* optional: avoid page scroll when reaching top/bottom */
+}
+
+/* Sidebar visible */
+.sidebar-open {
+  transform: translateX(0);
+}
+
+/* Backdrop */
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  z-index: 1400;
+}
+
+/* Sidebar links */
+.sidebar a {
+  display: block;
+  padding: 14px 18px;
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.sidebar a:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+/* MAIN */
+main {
+    max-width: 1200px;
+    margin: 28px auto;
+    padding: 24px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 18px;
+}
+
+.col-4 { grid-column: span 4; }
+.col-8 { grid-column: span 8; }
+
+/* SECTIONS */
+.section {
+    background: #fff;
+    padding: 18px;
+    border-radius: 12px;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+}
+
+.profile-box {
+    text-align: center;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.profile-box h2 {
+    color: #004d40;
+    margin-bottom: 8px;
+}
+
+.profile-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+}
+
+table th,
+table td {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+}
+
+h2.section-title {
+    font-family: 'Playfair Display', serif;
+    color: #004d40;
+    margin-bottom: 10px;
+}
+
+/* EVENT BANNER */
+#eventsBanner {
+    display: flex;
+    overflow-x: auto;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 10px;
+    background: #e0f2f1;
+    border: 1px solid #b2dfdb;
+}
+
+#eventsBanner img {
+    width: 220px;
+    height: 130px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform .25s;
+}
+
+#eventsBanner img:hover {
+    transform: scale(1.04);
+}
+
+/* BADGES */
+.badge { 
+    display: inline-block;
+    padding: 5px 8px;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 700;
+}
+.badge.pending { background: #ff9800; }
+.badge.paid { background: #28a745; }
+
+/* MODAL */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.45);
+    z-index: 1300;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-box {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    width: 360px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    position: relative;
+}
+
+.close-x {
+    position: absolute;
+    right: 14px;
+    top: 10px;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+/* ----------------------------- */
+/*         RESPONSIVE            */
+/* ----------------------------- */
+
+/* Tablet + Small Laptops */
+@media (max-width: 900px) {
+    .logo-area h1 {
+        font-size: 1.1rem;
+    }
+
+    .col-4, .col-8 {
+        grid-column: span 12;
+    }
+
+    #eventsBanner img {
+        width: 160px;
+        height: 100px;
+    }
+}
+
+/* Phones */
+@media (max-width: 600px) {
+    header {
+        padding: 10px 14px;
+    }
+
+    .logo-area img {
+        height: 36px;
+    }
+
+    .logo-area h1 {
+        font-size: 1rem;
+    }
+
+    .top-actions {
+        gap: 6px;
+    }
+
+    .action-btn {
+        padding: 7px 12px;
+        font-size: 0.85rem;
+    }
+
+    main {
+        padding: 14px;
+    }
+
+    .section {
+        padding: 14px;
+    }
+
+    table th, table td {
+        padding: 6px;
+        font-size: 0.85rem;
+    }
+
+    #eventsBanner img {
+        width: 140px;
+        height: 90px;
+    }
+}
+
+
+.refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.25s ease;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.refresh-btn svg {
+  stroke: white;
+  transition: 0.25s ease;
+}
+
+.refresh-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(79, 70, 229, 0.4);
+}
+
+.refresh-btn:active {
+  transform: scale(0.95);
+}
+
+.refresh-btn:hover svg {
+  rotate: 180deg;
+}
+.notification-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  padding: 14px 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin: 16px 0;
+  font-weight: 600;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 28px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  background-color: #ccc;
+  border-radius: 28px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transition: 0.3s;
+}
+
+.slider:before {
+  content: "";
+  position: absolute;
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+input:checked + .slider {
+  background-color: #4f46e5;
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+/* Notifications button */
+.notif-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: 0.25s ease;
+  position: relative;
+}
+
+.notif-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(79, 70, 229, 0.4);
+}
+
+.notif-count {
+  background: #ff3b30;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 12px;
+  position: absolute;
+  top: -6px;
+  right: -6px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 600px) {
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .notif-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .logo-img {
+    height: 40px;
+  }
+}
+/* ===== FINE TABLE (MATCHES ASSIGNMENTS SECTION) ===== */
+
+.fine-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.fine-table th {
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    padding: 10px 8px;
+    border-bottom: 2px solid #e6e6e6;
+}
+
+.fine-table td {
+    padding: 10px 8px;
+    font-size: 14px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+}
+
+.fine-table tr:hover {
+    background: #f7f9fc;
+}
+
+/* Fine amount highlight */
+.fine-amount {
+    font-weight: 700;
+    color: #d32f2f;
+}
+
+/* Paid / Pending badge (already matching) */
+.badge.pending {
+    background: #ff9800;
+}
+
+.badge.paid {
+    background: #28a745;
+}
+
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo-area">
+    <span style="font-size:22px;cursor:pointer;margin-right:6px" id="menuToggle">☰</span>
+    <img src="logo.jpg" alt="logo">
+    <h1>Acropolis — Student</h1>
+  </div>
+<!-- 🔔 Notifications Button -->
+<!-- <button id="openNotifications" class="notif-btn">
+  🔔 Notifications
+</button>
+  <div class="top-actions">
+    <div id="mentorIdDisplay" style="color:#fff;margin-right:8px">Student</div>
+    <!-- <button class="action-btn" id="logoutBtn">Logout</button> -->
+  </div> -->
+  
+  <div class="header-actions">
+    <!-- Notifications -->
+    <button id="openNotifications" class="notif-btn">
+      🔔 Notifications <span id="notifCount" class="notif-count">0</span>
+    </button>
+</header>
+
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <h2 style="text-align:center;margin:0 0 12px 0;font-family:'Playfair Display',serif">Menu</h2>
+
+  <a href="student-dashboard.html">
+  <i class="fa-solid fa-house"></i> Dashboard
+</a>
+<a href="#" id="inboxBtn">
+  <i class="fa-solid fa-inbox"></i> Messages
+</a>
+
+
+<a href="notes-view.html">
+  <i class="fa-solid fa-book-open"></i> Notes
+</a>
+
+<a href="marks-view.html">
+  <i class="fa-solid fa-trophy"></i> Results
+</a>
+
+<a href="notice-read.html?userType=students">
+  <i class="fa-solid fa-bullhorn"></i> Notices
+  <span class="notice-badge">0</span>
+</a>
+
+<a href="forms.html">
+  <i class="fa-solid fa-file-lines"></i> Forms
+</a>
+
+<a href="form-my-submissions.html">
+  <i class="fa-solid fa-folder-open"></i> My Submissions
+</a>
+
+<a href="https://aitr.ac.in/" target="_blank">
+  <i class="fa-solid fa-circle-question"></i> Enquiry
+</a>
+
+<a href="settings.html">
+  <i class="fa-solid fa-gear"></i> Settings
+</a>
+
+<a href="rules.html">
+  <i class="fa-solid fa-scale-balanced"></i> Rules
+</a>
+
+<a href="bus-view.html">
+  <i class="fa-solid fa-bus"></i> Bus
+</a>
+<a href="missing-portal.html">
+  <i class="fa-solid fa-circle-question"></i> Missing Portal
+</a>
+
+<a href="fees.html">
+  <i class="fa-solid fa-wallet"></i> Fees
+</a>
+<a href="file-complaint.html">
+  <i class="fa-solid fa-triangle-exclamation"></i> File Complaint 
+</a>
+
+
+<a href="about-dev.html">
+  <i class="fa-solid fa-code"></i> About Dev
+</a>
+
+  <!-- NEW FINES BUTTON -->
+  <a href="#" id="finesBtn">💳 Your Fines</a>
+
+  <a href="#" onclick="logout()">🚪 Logout</a>
+</div>
+
+<div class="backdrop" id="backdrop" onclick="closeSidebar()"></div>
+
+<!-- MAIN -->
+<main>
+  <div class="grid">
+    <!-- left -->
+    <div class="col-4">
+      <div class="section profile-box">
+        <h2 id="studentName">Loading...</h2>
+        <p><strong>Enrollment:</strong> <span id="studentEnrollment">—</span></p>
+        <p><strong>Class:</strong> <span id="studentClass">—</span></p>
+      </div>
+      
+
+<button id="refreshDashboard" class="refresh-btn">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <path d="M4 4v6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+      stroke-linejoin="round"/>
+    <path d="M20 20v-6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+      stroke-linejoin="round"/>
+    <path d="M5 19a9 9 0 0 1 0-14l5 5H4" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M19 5a9 9 0 0 1 0 14l-5-5h6" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  Refresh
+</button>
+<!-- STUDENT TOTAL FINE CARD -->
+<div class="fine-card" id="fineCard">
+    <h4>Total Pending Fine</h4>
+    <p class="fine-amount">₹ <span id="totalFine">0</span></p>
+    <p class="fine-subtext">Check the Reason of this in Quick actions</p>
+</div>
+      <div class="section" id="attendanceSection">
+        
+        <h2 class="section-title">Attendance</h2>
+        <p><strong>Total:</strong> <span id="attTotal">0</span></p>
+        <p><strong>Present:</strong> <span id="attPresent">0</span></p>
+        <p><strong>Percent:</strong> <span id="attPercent">0%</span></p>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title">Quick Actions</h2>
+        <button class="action-btn" onclick="window.location.href='notes-view.html'">Notes</button>
+        <button class="action-btn" id="openFeesBtn">.</button>
+             <button class="action-btn" onclick="window.location.href='fees.html'">fees</button>
+        <button class="action-btn" onclick="window.location.href='fines.html'">Check fine on you</button>
+      </div>
+      
+    </div>
+
+    <!-- right -->
+    <div class="col-8">
+      <h2 class="section-title">Events</h2>
+      <div id="eventsBanner" class="section"></div>
+      
+
+        <!-- Assignments Section -->
+  <div class="section" id="assignmentsSection">
+   <h2 class="section-title">Assignments</h2>
+   <table class="assignment-table">
+  <!-- <thead>
+    <tr>
+      <th>Title</th>
+      <th>Subject</th>
+      <th>Deadline</th>
+      <th>Status</th>
+    </tr>
+  </thead> -->
+     <button class="refresh-btn" onclick="openAssignments()">
+  📚 View Assignments
+</button>
+  <tbody id="assignmentBody"></tbody>
+</table>
+
+  </div>
+
+
+      <div class="section" id="examsSection">
+        <h2 class="section-title">Upcoming Exams</h2>
+        <table>
+          <thead><tr><th>Exam</th><th>Subject</th><th>Date</th><th>Info</th></tr></thead>
+          <tbody id="examsBody">
+            <tr><td colspan="4" style="text-align:center;color:#888">Loading exams...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+<div class="modal" id="feesModal" aria-hidden="true">
+  <div class="modal-box">
+    <span class="close-x" id="feesClose">&times;</span>
+    <h3>Check Pending Fees</h3>
+    <p>Enrollment</p>
+    <input id="feeEnrollment" type="text" placeholder="Enter Enrollment" style="width:100%;padding:8px;border-radius:6px;border:1px solid #ddd" />
+    <button style="margin-top:10px;padding:10px 12px;border-radius:8px;background:#007bff;color:#fff;border:none;width:100%" id="checkFeeBtn">Check</button>
+    <div id="feeResult" style="margin-top:12px"></div>
+  </div>
+</div>
+rewriter this in a way  wihh is in vs code by removing taht  verticle horizontal trianmgles

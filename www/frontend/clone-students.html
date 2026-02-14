@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin — Students Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+body{font-family:Inter,system-ui,sans-serif;background:#f5f6fc;margin:0;padding:20px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+select,button{padding:9px 14px;border-radius:8px;border:1px solid #cbd5e1;font-size:14px}
+button{background:#003366;color:#fff;cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+.controls{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden}
+thead{position:sticky;top:0;z-index:2}
+th{background:#eef3ff;padding:12px;font-size:14px}
+td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:center}
+.mark-btn{padding:6px 14px;border:none;border-radius:20px;cursor:pointer;font-weight:600;transition:all 0.2s;margin:2px}
+.present{background:#16a34a;color:#fff}
+.absent{background:#dc2626;color:#fff}
+.selected{outline:3px solid #000000}
+.no-data{color:#666}
+#submitMsg{padding:10px;margin-bottom:10px;border-radius:8px;text-align:center;font-weight:600;}
+#submitting{display:none;background:#fef3c7;color:#78350f;padding:6px 12px;border-radius:6px;margin-right:5px;}
+#successSubmit{display:none;background:#dcfce7;color:#166534;padding:6px 12px;border-radius:6px;}
+</style>
+</head>
+<body>
+
+<header>
+<h2>Admin — Students</h2>
+<button onclick="logout()">Logout</button>
+</header>
+
+<main style="padding:20px;max-width:1400px;margin:auto">
+
+<div class="controls">
+  <select id="year">
+    <option value="">All Years</option>
+    <option value="1">1st Year</option>
+    <option value="2">2nd Year</option>
+    <option value="3">3rd Year</option>
+    <option value="4">4th Year</option>
+  </select>
+
+  <select id="branch">
+    <option value="">All Branches</option>
+    <option value="CSE1">CSE1</option>
+    <option value="CSE2">CSE2</option>
+    <option value="CSE3">CSE3</option>
+    <option value="CSE4">CSE4</option>
+    <option value="CSE5">CSE5</option>
+    <option value="IT1">IT1</option>
+    <option value="IT2">IT2</option>
+    <option value="IT3">IT3</option>
+    <option value="IT4">IT4</option>
+    <option value="IT5">IT5</option>
+        
+
+  </select>
+  </select>
+
+  <button id="refreshBtn">Refresh</button>
+</div>
+
+<input type="text" id="searchEnrollment" placeholder="Search by Enrollment Number" style="padding:8px 12px;border-radius:8px;border:1px solid #d1d5db;font-size:14px;min-width:220px;outline:none">
+
+<div id="submitMsg">
+  <span id="submitting" style="display:none">Submitting, please wait...</span>
+  <span id="successSubmit" style="display:none;font-weight:600;color:green"></span>
+</div>
+
+<button onclick="submitAttendance()" style="margin-bottom:10px">Submit Attendance</button>
+<button onclick="clearDeviceAttendance()" 
+        style="margin-bottom:10px;background:#7c2d12">
+  Clear Device Attendance Count
+</button>
+
+<table>
+<thead>
+<tr>
+<th>Enrollment</th>
+<th>Name</th>
+<th>Year</th>
+<th>Branch</th>
+<th>Attendance</th>
+</tr>
+</thead>
+<tbody id="studentsBody"><tr><td colspan="5" class="no-data">Loading...</td></tr></tbody>
+</table>
+
+</main>
+
+<script>
+const mentorId = localStorage.getItem("mentorId");
+const source = sessionStorage.getItem("accessSource");
+const ALLOWED_SOURCES = ["ad","admin"];
+if(!mentorId||!ALLOWED_SOURCES.includes(source)){
+  document.body.innerHTML="<h2 style='text-align:center;margin-top:20vh;color:red'>❌ Access Denied<br>Please open via Administration Panel</h2>";
+  throw new Error("Unauthorized access");
+}
+
+const API_STUDENTS="https://college-hwbb.onrender.com/api/admin/students";
+const API_MARK_ATT="https://college-hwbb.onrender.com/api/attendance/mark";
+
+const DRAFT_KEY="attendance_draft";
+function loadDraft(){const d=localStorage.getItem(DRAFT_KEY);return d?JSON.parse(d):{}}
+function saveDraft(d){localStorage.setItem(DRAFT_KEY,JSON.stringify(d))}
+function clearDraft(){localStorage.removeItem(DRAFT_KEY)}
+let marked=loadDraft();
+
+// local storage for device tracking
+const DEVICE_KEY="attendance_device_count";
+function loadDeviceData(){const d=localStorage.getItem(DEVICE_KEY);return d?JSON.parse(d):{}}
+function saveDeviceData(d){localStorage.setItem(DEVICE_KEY,JSON.stringify(d))}
+let deviceData=loadDeviceData();
+
+function logout(){localStorage.clear();location.href="login.html";}
+
+async function fetchStudents(force=false){
+  if(!force){ const cached=localStorage.getItem("admin_students"); if(cached) return JSON.parse(cached);}
+  const res=await fetch(API_STUDENTS); const data=await res.json();
+  if(data.success){ localStorage.setItem("admin_students",JSON.stringify(data.students)); return data.students; }
+  return [];
+}
+
+// MARK ATTENDANCE
+function markAttendance(enr,status){
+  marked[enr]=status;
+  saveDraft(marked);
+
+  // local device counter
+  if(!deviceData[enr]) deviceData[enr]={P:0,A:0};
+  deviceData[enr][status]+=1;
+  saveDeviceData(deviceData);
+
+  render(false);
+}
+
+// SUBMIT ATTENDANCE
+function submitAttendance() {
+  if (!Object.keys(marked).length) {
+    alert("No attendance marked");
+    return;
+  }
+
+  const subMsg = document.getElementById("submitting");
+  const successMsg = document.getElementById("successSubmit");
+
+  subMsg.style.display = "inline";
+  successMsg.style.display = "none";
+
+  fetch(API_MARK_ATT, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      lectureId: "IT2-DSA-3", // unique per lecture
+      records: marked
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    subMsg.style.display = "none";
+
+    if (!data.success) {
+      alert(data.message || "Submission failed");
+      return;
+    }
+
+    const count = Object.keys(marked).length;
+
+    // show success
+    successMsg.innerText = `${count} student(s) attendance registered ✅`;
+    successMsg.style.display = "inline";
+
+    // reset after 3.5s
+    setTimeout(() => {
+      successMsg.style.display = "none";
+      clearDraft();
+      marked = {};
+      render(false);
+    }, 3500);
+  })
+  .catch(err => {
+    subMsg.style.display = "none";
+    console.error("Attendance error:", err);
+    alert("Server error");
+  });
+}
+
+// RENDER
+async function render(refresh=false){
+  const body=document.getElementById("studentsBody");
+  const yearVal=document.getElementById("year").value;
+  const branchVal=document.getElementById("branch").value;
+  const searchEnr=document.getElementById("searchEnrollment").value.trim().toLowerCase();
+
+  const students=await fetchStudents(refresh);
+
+  let filtered=students.filter(s=>{
+    let ok=true;
+    if(yearVal) ok=ok && String(s.year)===yearVal;
+    if(branchVal){
+      const enrBranch = (s.enrollment.match(/[A-Z]+/g)||[]).join("");
+      ok = ok && (s.branch===branchVal || enrBranch.startsWith(branchVal));
+    }
+    if(searchEnr) ok=ok && s.enrollment.toLowerCase().includes(searchEnr);
+    return ok;
+  });
+
+  filtered.sort((a,b)=>{
+    const numA=a.enrollment.replace(/\D/g,"");
+    const numB=b.enrollment.replace(/\D/g,"");
+    if(Number(numA)!==Number(numB)) return Number(numA)-Number(numB);
+    return 0;
+  });
+
+  body.innerHTML="";
+  if(!filtered.length){ body.innerHTML=`<tr><td colspan="5" class="no-data">No students found</td></tr>`; return; }
+
+  for(const s of filtered){
+    const att=marked[s.enrollment]??null;
+    const deviceCount = deviceData[s.enrollment] || {P:0,A:0};
+    body.innerHTML+=`
+      <tr class="${att==="P"?"present-row":att==="A"?"absent-row":""}">
+        <td>${s.enrollment}</td>
+        <td>${s.name}</td>
+        <td>${s.year}</td>
+        <td>${s.branch}</td>
+        <td>
+          <button class="mark-btn present ${att==="P"?"selected":""}" onclick="markAttendance('${s.enrollment}','P')">P (${deviceCount.P})</button>
+          <button class="mark-btn absent ${att==="A"?"selected":""}" onclick="markAttendance('${s.enrollment}','A')">A (${deviceCount.A})</button>
+        </td>
+      </tr>
+    `;
+  }
+}
+function clearDeviceAttendance(){
+  if(!confirm("Clear all local device attendance counts?")) return;
+
+  localStorage.removeItem("attendance_device_count");
+  deviceData = {}; // reset in-memory object
+
+  alert("Device attendance count cleared ✅");
+  render(false);
+}
+
+// EVENTS
+["year","branch"].forEach(id=>{document.getElementById(id).addEventListener("change",()=>render(false));});
+document.getElementById("refreshBtn").onclick=()=>render(true);
+document.getElementById("searchEnrollment").addEventListener("input",()=>render(false));
+document.addEventListener("DOMContentLoaded",()=>render(false));
+</script>
+
+</body>
+</html>

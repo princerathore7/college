@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mentor ID Creator - Acropolis Campus</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<style>
+:root {
+  --primary-color: #001f3f; /* Mentor theme: Navy Blue */
+  --accent-color: #31c2cf;
+  --text-gray: #777;
+  --input-bg: #e8f0fe;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Poppins', sans-serif;
+  height: 100vh;
+  display: flex;
+  overflow: hidden;
+}
+
+.main-wrapper { display: flex; width: 100%; height: 100%; }
+
+/* --- Left Side: Slider --- */
+.image-section {
+  flex: 1.2;
+  position: relative;
+  background-color: #000;
+}
+
+.image-section img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  position: absolute;
+  transition: opacity 1s ease-in-out;
+  opacity: 0;
+}
+
+.image-section img.active { opacity: 1; }
+
+.logo-overlay {
+  position: absolute; top: 30px; left: 30px; z-index: 10;
+  color: white; font-weight: bold; font-size: 24px; letter-spacing: 2px;
+}
+
+/* --- Right Side: Form --- */
+.form-section {
+  flex: 1;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 6%;
+  overflow-y: auto;
+}
+
+.form-header h1 { font-size: 1.8rem; font-weight: 300; color: var(--primary-color); text-transform: uppercase; }
+.form-header p { color: var(--text-gray); font-size: 0.85rem; margin-bottom: 20px; }
+
+/* Grid for Mentor Fields */
+.mentor-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.full-col { grid-column: span 2; }
+
+input, select {
+  width: 100%; padding: 11px; margin-bottom: 5px;
+  border: none; background-color: var(--input-bg);
+  border-bottom: 2px solid transparent; outline: none; transition: 0.3s;
+  font-size: 0.9rem;
+}
+
+input:focus, select:focus { border-bottom-color: var(--accent-color); }
+
+.btn-create {
+  background-color: var(--primary-color);
+  color: white; border: none; padding: 12px 40px;
+  font-size: 1rem; cursor: pointer; float: right; margin-top: 15px;
+  transition: 0.3s;
+}
+
+.btn-create:hover { background-color: #003366; }
+
+/* --- Popup Modal --- */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8); display: none;
+  justify-content: center; align-items: center; z-index: 1000;
+}
+
+.id-card-popup {
+  background: white; padding: 25px; border-radius: 15px;
+  width: 380px; text-align: center;
+}
+
+.id-card-content { 
+    padding: 20px; 
+    border: 2px solid var(--primary-color); 
+    border-radius: 10px; 
+    margin-bottom: 15px; 
+    background: #fff;
+    text-align: left;
+}
+
+.id-card-content h2 { 
+    color: var(--primary-color); 
+    font-size: 1.1rem; 
+    text-align: center; 
+    margin-bottom: 15px;
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 5px;
+}
+
+.id-card-content p { font-size: 0.85rem; margin: 6px 0; border-bottom: 1px solid #f0f0f0; }
+.id-card-content b { color: #555; width: 100px; display: inline-block; }
+
+.modal-btns { display: flex; gap: 10px; justify-content: center; }
+.btn-ss { background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+.btn-close { background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+
+@media (max-width: 900px) { .image-section { display: none; } }
+</style>
+</head>
+<body>
+
+<div class="main-wrapper">
+  <div class="image-section" id="slider">
+    <div class="logo-overlay">ACROPOLIS</div>
+    <img src="model1.png" class="active">
+    <img src="model2.png">
+    <img src="model3.png">
+  </div>
+
+  <div class="form-section">
+    <div class="form-header">
+      <h1>Mentor ID Creator</h1>
+      <p>Register a new faculty member to the portal</p>
+    </div>
+
+    <form id="mentorSignupForm">
+      <div class="mentor-grid">
+        <input type="text" id="mentorId" placeholder="Mentor ID" required class="full-col">
+        <input type="text" id="name" placeholder="Full Name" required class="full-col">
+        <input type="email" id="email" placeholder="Email Address" required>
+        <input type="tel" id="phone" placeholder="Phone Number" required>
+        
+        <select id="subject" required>
+          <option value="" disabled selected>Subject</option>
+          <option value="DBMS">DBMS</option>
+          <option value="Mathematics">Mathematics</option>
+          <option value="Programming">Programming</option>
+          <option value="Cloud Computing">Cloud Computing</option>
+        </select>
+        
+        <select id="branch" required>
+          <option value="" disabled selected>Branch</option>
+          <option value="CSE">CSE</option>
+          <option value="ECE">ECE</option>
+          <option value="ME">ME</option>
+          <option value="IT">IT</option>
+        </select>
+
+        <select id="classAssigned" required class="full-col">
+          <option value="" disabled selected>Class Assigned</option>
+          <option value="1st Year - A">1st Year - A</option>
+          <option value="2nd Year - A">2nd Year - A</option>
+          <option value="3rd Year - A">3rd Year - A</option>
+          <option value="4th Year - A">4th Year - A</option>
+        </select>
+
+        <input type="password" id="password" placeholder="Password" required>
+        <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+      </div>
+
+      <button type="submit" id="submitBtn" class="btn-create">Generate Mentor ID</button>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="id-card-popup">
+    <div id="captureArea" class="id-card-content">
+      <div style="text-align: center;"><img src="logo.jpg" style="width: 50px;"></div>
+      <h2>MENTOR CREDENTIALS</h2>
+      <p><b>ID:</b> <span id="resId"></span></p>
+      <p><b>Name:</b> <span id="resName"></span></p>
+      <p><b>Password:</b> <span id="resPass"></span></p>
+      <p><b>Subject:</b> <span id="resSub"></span></p>
+      <p><b>Branch:</b> <span id="resBranch"></span></p>
+      <p><b>Class:</b> <span id="resClass"></span></p>
+      <p style="font-size: 10px; color: gray; margin-top: 10px; border: none; text-align: center;">Official Mentor Access Card - Acropolis</p>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-ss" onclick="takeScreenshot()">Save Screenshot</button>
+      <button class="btn-close" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* --- Slider Logic --- */
+const images = document.querySelectorAll('#slider img');
+let idx = 0;
+setInterval(() => {
+  images[idx].classList.remove('active');
+  idx = (idx + 1) % images.length;
+  images[idx].classList.add('active');
+}, 5000);
+
+/* --- Access Control --- */
+const mentorIdStorage = localStorage.getItem("mentorId");
+const source = sessionStorage.getItem("accessSource");
+if(!mentorIdStorage || !["ad", "admin"].includes(source)){
+  document.body.innerHTML = `<div style="color:black;text-align:center;padding:100px;"><h2>🚫 Access Denied</h2></div>`;
+}
+
+/* --- Form Submission & Popup Logic --- */
+const form = document.getElementById('mentorSignupForm');
+const modal = document.getElementById('modalOverlay');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const password = document.getElementById('password').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+
+  if(password !== confirmPassword){
+    alert("❌ Passwords do not match!");
+    return;
+  }
+
+  const btn = document.getElementById("submitBtn");
+  btn.innerText = "Processing...";
+  btn.disabled = true;
+
+  const formData = {
+    mentorId: document.getElementById('mentorId').value,
+    name: document.getElementById('name').value,
+    email: document.getElementById('email').value,
+    phone: document.getElementById('phone').value,
+    subject: document.getElementById('subject').value,
+    branch: document.getElementById('branch').value,
+    classAssigned: document.getElementById('classAssigned').value,
+    password: password
+  };
+
+  try {
+    const res = await fetch("https://college-hwbb.onrender.com/api/signup/mentor", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData)
+    });
+
+    const data = await res.json();
+    if(res.ok){
+        // Populate Popup
+        document.getElementById("resId").innerText = formData.mentorId;
+        document.getElementById("resName").innerText = formData.name;
+        document.getElementById("resPass").innerText = formData.password;
+        document.getElementById("resSub").innerText = formData.subject;
+        document.getElementById("resBranch").innerText = formData.branch;
+        document.getElementById("resClass").innerText = formData.classAssigned;
+
+        modal.style.display = "flex";
+        form.reset();
+    } else {
+      alert("⚠️ " + (data.message || "Signup failed"));
+    }
+  } catch(err){
+    alert("❌ Server connection error");
+  } finally {
+    btn.innerText = "Generate Mentor ID";
+    btn.disabled = false;
+  }
+});
+
+function closeModal() { modal.style.display = "none"; }
+
+function takeScreenshot() {
+  const element = document.getElementById("captureArea");
+  html2canvas(element).then(canvas => {
+    const link = document.createElement('a');
+    link.download = `Mentor_${document.getElementById("resId").innerText}.png`;
+    link.href = canvas.toDataURL();
+    link.click();
+  });
+}
+</script>
+
+</body>
+</html>

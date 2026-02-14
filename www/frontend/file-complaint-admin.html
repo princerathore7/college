@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .pencil {
+            display: block;
+            height: 10em;
+            animation: pencilStroke 3s infinite;
+        }
+
+        @keyframes pencilStroke {
+            from {
+                stroke-dashoffset: 439.82;
+                transform: translate(100px, 100px) rotate(-113deg);
+            }
+            50% {
+                stroke-dashoffset: 164.93;
+                transform: translate(100px, 100px) rotate(-113deg);
+            }
+            75% {
+                stroke-dashoffset: 439.82;
+                transform: translate(100px, 100px) rotate(112deg);
+            }
+            to {
+                stroke-dashoffset: 439.82;
+                transform: translate(100px, 100px) rotate(112deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="pencil">✏️</div>
+</body>
+</html>
