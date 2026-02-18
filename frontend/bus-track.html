@@ -5,226 +5,244 @@
 <title>Track Bus</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Leaflet -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <style>
 body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: #f1f5f9;
-  height: 100vh;
-  overflow: hidden;
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:#f1f5f9;
+  height:100vh;
+  overflow:hidden;
 }
 
-/* Toggle Button */
-.toggle-btn {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  z-index: 1500;
-  background: #2563eb;
-  color: #fff;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 18px;
-  cursor: pointer;
+#map { height:100vh; width:100vw; }
+
+.top-controls{
+  position:absolute;
+  top:10px;
+  left:10px;
+  z-index:1500;
+  display:flex;
+  gap:6px;
 }
 
-/* Sidebar */
-.sidebar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100vh;
-  width: 260px;
-  background: #0f172a;
-  color: #fff;
-  padding: 15px;
-  overflow-y: auto;
-  transition: transform 0.3s ease;
-  z-index: 1200;
+button,input{
+  padding:8px;
+  border:none;
+  border-radius:6px;
+  font-size:14px;
 }
 
-.sidebar.closed {
-  transform: translateX(-100%);
+button{ cursor:pointer; background:#2563eb; color:white; }
+
+.sidebar{
+  position:absolute;
+  top:0;
+  left:0;
+  width:250px;
+  height:100%;
+  background:#0f172a;
+  color:white;
+  padding:10px;
+  overflow:auto;
+  z-index:1400;
 }
 
-.sidebar h2 {
-  font-size: 18px;
-  margin-bottom: 15px;
-  text-align: center;
+.bus-item{
+  background:#1e293b;
+  padding:8px;
+  margin:6px 0;
+  border-radius:6px;
+  cursor:pointer;
 }
 
-.bus-item {
-  padding: 10px 14px;
-  background: #1e293b;
-  margin-bottom: 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: 0.2s;
-}
+.bus-item.active{ background:#2563eb; }
 
-.bus-item:hover {
-  background: #334155;
-}
-
-.bus-item.active {
-  background: #2563eb;
-}
-
-/* Map */
-#map {
-  height: 100vh;
-  width: 100vw;
-}
-
-/* Info badge */
-.info {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: rgba(0,0,0,0.75);
-  color: #fff;
-  padding: 8px 14px;
-  border-radius: 20px;
-  font-size: 14px;
-  z-index: 1400;
-  display: none;
+.info{
+  position:absolute;
+  bottom:15px;
+  left:50%;
+  transform:translateX(-50%);
+  background:rgba(0,0,0,0.8);
+  color:white;
+  padding:8px 14px;
+  border-radius:20px;
+  z-index:1500;
 }
 </style>
 </head>
 
 <body>
 
-<button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+<div class="top-controls">
+  <button onclick="refreshNow()">🔄 Refresh</button>
+  <button onclick="getMyLocation()">📍 My Location</button>
+  <input id="searchBox" placeholder="Search location">
+  <button onclick="searchLocation()">🔍</button>
+</div>
 
-<div class="sidebar" id="sidebar">
-  <h2>🚌 Active Buses</h2>
-  <div id="busList">Loading...</div>
+<div class="sidebar">
+<h3>🚌 Buses</h3>
+<div id="busList">Loading...</div>
 </div>
 
 <div id="map"></div>
-<div class="info" id="infoText"></div>
+<div class="info" id="info">Ready</div>
 
 <script>
-const BASE_URL = "https://college-hwbb.onrender.com";
-let selectedBusId = null;
-let intervalId = null;
-let sidebarOpen = true;
+const BASE_URL="https://college-hwbb.onrender.com";
+let selectedBus=null;
+let prevPos=null;
+let prevTime=null;
+let interval;
+let studentMarker=null;
+let searchMarker=null;
 
-/* Sidebar toggle */
-function toggleSidebar() {
-  const sidebar = document.getElementById("sidebar");
-  sidebarOpen = !sidebarOpen;
+const map=L.map("map").setView([23.2599,77.4126],13);
 
-  if (!sidebarOpen) {
-    sidebar.classList.add("closed");
-  } else {
-    sidebar.classList.remove("closed");
-  }
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
 
-  // Leaflet resize fix
-  setTimeout(() => {
-    map.invalidateSize();
-  }, 320);
+const busMarker=L.marker([0,0]).addTo(map);
+
+function showInfo(t){
+ document.getElementById("info").innerText=t;
 }
 
-/* Init map */
-const map = L.map("map").setView([23.2599, 77.4126], 13);
-
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: "© OpenStreetMap"
-}).addTo(map);
-
-const busIcon = L.divIcon({
-  html: `
-    <svg width="36" height="36" viewBox="0 0 24 24" fill="#0f172a">
-      <path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7z"/>
-      <text x="12" y="13" text-anchor="middle" font-size="10" fill="#fff">🚌</text>
-    </svg>
-  `,
-  iconSize: [36, 36],
-  iconAnchor: [18, 36],
-  className: ""
-});
-
-
-let marker = L.marker([0, 0], { icon: busIcon }).addTo(map);
-const infoText = document.getElementById("infoText");
-
-function showInfo(text) {
-  infoText.textContent = text;
-  infoText.style.display = "block";
-  setTimeout(() => infoText.style.display = "none", 2000);
+/* -------- Distance helper -------- */
+function distance(a,b,c,d){
+ const R=6371;
+ const dLat=(c-a)*Math.PI/180;
+ const dLon=(d-b)*Math.PI/180;
+ const x=Math.sin(dLat/2)**2+
+ Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*
+ Math.sin(dLon/2)**2;
+ return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
 }
 
-/* Load buses */
-async function loadBuses() {
-  const list = document.getElementById("busList");
+/* -------- Smooth animation -------- */
+function smoothMove(from,to){
+ let steps=20;
+ let i=0;
+ const latStep=(to[0]-from[0])/steps;
+ const lngStep=(to[1]-from[1])/steps;
 
-  try {
-    const res = await fetch(`${BASE_URL}/api/bus/list`);
-    const buses = await res.json();
-
-    if (!buses.length) {
-      list.innerHTML = "No active buses";
-      return;
-    }
-
-    list.innerHTML = "";
-    buses.forEach(bus => {
-      const div = document.createElement("div");
-      div.className = "bus-item";
-      div.textContent = bus.busId;
-      div.onclick = () => selectBus(bus.busId, div);
-      list.appendChild(div);
-    });
-  } catch (err) {
-    list.innerHTML = "Failed to load buses";
-  }
+ const anim=setInterval(()=>{
+   i++;
+   busMarker.setLatLng([
+     from[0]+latStep*i,
+     from[1]+lngStep*i
+   ]);
+   if(i>=steps) clearInterval(anim);
+ },50);
 }
 
-/* Select bus */
-function selectBus(busId, element) {
-  selectedBusId = busId;
+/* -------- Load buses -------- */
+async function loadBuses(){
+ const res=await fetch(`${BASE_URL}/api/bus/list`);
+ const buses=await res.json();
+ const box=document.getElementById("busList");
+ box.innerHTML="";
 
-  document.querySelectorAll(".bus-item").forEach(el =>
-    el.classList.remove("active")
-  );
-  element.classList.add("active");
-
-  if (intervalId) clearInterval(intervalId);
-
-  fetchLocation();
-  intervalId = setInterval(fetchLocation, 3000);
-
-  showInfo("Tracking " + busId);
-
-  // auto close sidebar on mobile
-  if (window.innerWidth < 768) {
-    toggleSidebar();
-  }
+ buses.forEach(b=>{
+   const d=document.createElement("div");
+   d.className="bus-item";
+   d.innerText=b.busId;
+   d.onclick=()=>selectBus(b.busId,d);
+   box.appendChild(d);
+ });
 }
 
-/* Fetch location */
-async function fetchLocation() {
-  if (!selectedBusId) return;
+/* -------- Select bus -------- */
+function selectBus(id,el){
+ selectedBus=id;
+ document.querySelectorAll(".bus-item").forEach(x=>x.classList.remove("active"));
+ el.classList.add("active");
 
-  try {
-    const res = await fetch(`${BASE_URL}/api/bus/location/${selectedBusId}`);
-    if (!res.ok) return;
+ fetchLocation();
+ clearInterval(interval);
+ interval=setInterval(fetchLocation,5000);
+}
 
-    const data = await res.json();
-    if (data.lat && data.lng) {
-      marker.setLatLng([data.lat, data.lng]);
-      map.setView([data.lat, data.lng], 15);
-    }
-  } catch (err) {
-    console.error(err);
-  }
+/* -------- Fetch bus -------- */
+async function fetchLocation(){
+ if(!selectedBus) return;
+
+ const r=await fetch(`${BASE_URL}/api/bus/location/${selectedBus}`);
+ const d=await r.json();
+
+ if(!d.lat) return;
+
+ const newPos=[d.lat,d.lng];
+
+ if(prevPos) smoothMove(prevPos,newPos);
+ else busMarker.setLatLng(newPos);
+
+ map.panTo(newPos);
+
+ /* speed calc */
+ if(prevPos){
+   const dist=distance(prevPos[0],prevPos[1],newPos[0],newPos[1]);
+   const now=Date.now();
+   const speed=(dist/((now-prevTime)/3600000));
+   showInfo(`Speed: ${speed.toFixed(1)} km/h`);
+
+   if(searchMarker){
+     const s=searchMarker.getLatLng();
+     const d2=distance(newPos[0],newPos[1],s.lat,s.lng);
+     const eta=(d2/speed)*60;
+     showInfo(`ETA: ${eta.toFixed(1)} min`);
+   }
+
+   if(studentMarker){
+     const st=studentMarker.getLatLng();
+     const d3=distance(newPos[0],newPos[1],st.lat,st.lng);
+     showInfo(`Distance to bus: ${d3.toFixed(2)} km`);
+   }
+ }
+
+ prevPos=newPos;
+ prevTime=Date.now();
+}
+
+/* -------- Refresh -------- */
+function refreshNow(){
+ fetchLocation();
+ showInfo("Live location refreshed");
+}
+
+/* -------- My location -------- */
+function getMyLocation(){
+ navigator.geolocation.getCurrentPosition(pos=>{
+   const lat=pos.coords.latitude;
+   const lng=pos.coords.longitude;
+
+   if(studentMarker) map.removeLayer(studentMarker);
+   studentMarker=L.marker([lat,lng]).addTo(map);
+
+   showInfo("Student location detected");
+ });
+}
+
+/* -------- Search -------- */
+async function searchLocation(){
+ const q=document.getElementById("searchBox").value;
+ if(!q) return;
+
+ const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}`);
+ const d=await r.json();
+
+ if(!d.length) return;
+
+ const lat=parseFloat(d[0].lat);
+ const lng=parseFloat(d[0].lon);
+
+ if(searchMarker) map.removeLayer(searchMarker);
+ searchMarker=L.marker([lat,lng]).addTo(map);
+
+ map.setView([lat,lng],14);
+ showInfo("Location selected");
 }
 
 loadBuses();
