@@ -214,6 +214,12 @@ h2.section-title {
 #eventsBanner img:hover {
     transform: scale(1.04);
 }
+.assignment-title {
+  max-width: 250px;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
 
 /* BADGES */
 .badge { 
@@ -849,7 +855,10 @@ function renderAssignments(list) {
   list.forEach(a => {
     tbody.innerHTML += `
       <tr>
-        <td>${a.title}</td>
+      <td class="assignment-title" title="${a.title}">
+  ${a.title}
+</td>
+
         <td>${a.subject}</td>
         <td>${a.deadline}</td>
         <td style="color:orange;font-weight:600;">Pending</td>
@@ -978,7 +987,7 @@ document.getElementById("finesBtn").addEventListener("click", function () {
 document.addEventListener("DOMContentLoaded", () => {
   const enrollment = localStorage.getItem("enrollment");
   if (!enrollment) {
-    window.location.href = "student-login.html";
+    window.location.href = "login.html";
     return;
   }
 

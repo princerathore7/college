@@ -155,7 +155,7 @@ function closeSidebar(){ sidebar.classList.remove('active'); backdrop.classList.
 
 // Logout
 document.getElementById('logoutBtn').addEventListener('click', logout);
-function logout(){ localStorage.clear(); window.location.href='student-login.html'; }
+function logout(){ localStorage.clear(); window.location.href='login.html'; }
 
 // Modal (fees)
 const feesModal = document.getElementById('feesModal');
@@ -215,7 +215,7 @@ async function loadUnreadCount(userType, enrollment){
 // INIT
 document.addEventListener('DOMContentLoaded', async ()=>{
   const enrollment = localStorage.getItem('enrollment') || prompt('Enter enrollment:');
-  if(!enrollment){ alert('Enrollment required'); window.location.href='student-login.html'; return; }
+  if(!enrollment){ alert('Enrollment required'); window.location.href='login.html'; return; }
   localStorage.setItem('enrollment', enrollment);
 
   loadUnreadCount('students', enrollment);

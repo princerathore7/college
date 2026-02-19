@@ -576,7 +576,7 @@ h1 {
   function logout() {
     localStorage.removeItem("enrollment");
     localStorage.removeItem("studentClass");
-    window.location.href = "student-login.html";
+    window.location.href = "login.html";
   }
 
   // 🔹 Branch-wise total fees map
@@ -596,7 +596,7 @@ h1 {
     const enrollment = localStorage.getItem("enrollment");
     if (!enrollment) {
       alert("Login required!");
-      window.location.href = "student-login.html";
+      window.location.href = "login.html";
       return;
     }
 function useStored(){
