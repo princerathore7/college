@@ -186,6 +186,25 @@ button{padding:6px 12px;border:none;border-radius:5px;cursor:pointer}
 </div>
 
 <script>
+      /* ===============================
+   ACCESS CONTROL — ADMIN PAGES
+================================ */
+
+const mentorId = localStorage.getItem("mentorId");
+const source   = sessionStorage.getItem("accessSource");
+
+// allowed sources
+const ALLOWED_SOURCES = ["ad", "admin"];
+
+if(!mentorId || !ALLOWED_SOURCES.includes(source)){
+  document.body.innerHTML = `
+    <h2 style="text-align:center;margin-top:20vh;color:black">
+      ❌ Access Denied <br>
+      Please open this page via Administration Panel
+    </h2>
+  `;
+  throw new Error("Unauthorized access");
+}
 const API_STUDENTS = "https://college-hwbb.onrender.com/api/admin/students";
 const API_ROBOT = "https://college-hwbb.onrender.com/api/attendance/robot_update";
 
