@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Lecture Attendance Details</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+body{
+    margin:0;
+    font-family:Inter,sans-serif;
+    background:#0f172a;
+    color:white;
+}
+
+.container{
+    max-width:1100px;
+    margin:auto;
+    padding:20px;
+}
+
+.header{
+    font-size:24px;
+    font-weight:700;
+    margin-bottom:10px;
+}
+
+.sub{
+    color:#94a3b8;
+    margin-bottom:20px;
+}
+
+.filters{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+}
+
+select,input{
+    padding:8px;
+    border-radius:6px;
+    border:1px solid #334155;
+    background:#1e293b;
+    color:white;
+}
+
+button{
+    padding:8px 16px;
+    border:none;
+    border-radius:6px;
+    background:#22c55e;
+    color:white;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#16a34a;
+}
+
+.stats{
+    margin-bottom:15px;
+}
+
+.table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.table th,
+.table td{
+    padding:10px;
+    border-bottom:1px solid #334155;
+}
+
+.present{
+    color:#22c55e;
+    font-weight:600;
+}
+
+.absent{
+    color:#ef4444;
+    font-weight:600;
+}
+
+.loading{
+    padding:20px;
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<div class="header">
+Lecture Attendance Details
+</div>
+
+<div class="sub" id="lectureIdText">
+Loading...
+</div>
+
+<div class="filters">
+
+<select id="yearFilter">
+<option value="">All Years</option>
+<option value="21">2021</option>
+<option value="22">2022</option>
+<option value="23">2023</option>
+<option value="24">2024</option>
+<option value="25">2025</option>
+</select>
+
+<select id="branchFilter">
+<option value="">All Branch</option>
+<option value="IT">IT</option>
+<option value="CSE">CSE</option>
+<option value="ECE">ECE</option>
+<option value="EEE">EEE</option>
+<option value="ME">ME</option>
+<option value="CE">CE</option>
+</select>
+
+<input type="text"
+id="enrollmentSearch"
+placeholder="Search enrollment...">
+
+<button onclick="loadAttendance()">
+Apply Filter
+</button>
+
+</div>
+
+<div class="stats" id="stats"></div>
+
+<table class="table">
+
+<thead>
+<tr>
+<th>Enrollment</th>
+<th>Status</th>
+</tr>
+</thead>
+
+<tbody id="tableBody">
+
+<tr>
+<td colspan="2" class="loading">
+Loading...
+</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<script>
+
+
+const API_BASE =
+"https://college-hwbb.onrender.com/api/attendance/robot/lecture";
+
+
+
+const params =
+new URLSearchParams(window.location.search);
+
+const lectureId =
+params.get("lectureId");
+
+
+
+document.getElementById("lectureIdText").innerText =
+"Lecture ID: " + lectureId;
+
+
+
+async function loadAttendance(){
+
+    if(!lectureId)return;
+
+    const year =
+    document.getElementById("yearFilter").value;
+
+    const branch =
+    document.getElementById("branchFilter").value;
+
+    const search =
+    document.getElementById("enrollmentSearch").value.toUpperCase();
+
+
+    let url =
+    `${API_BASE}/${lectureId}?`;
+
+
+    if(year)
+    url += `year=${year}&`;
+
+    if(branch)
+    url += `branch=${branch}&`;
+
+
+    const tbody =
+    document.getElementById("tableBody");
+
+    tbody.innerHTML =
+    `<tr><td colspan="2">Loading...</td></tr>`;
+
+
+    try{
+
+        const res =
+        await fetch(url);
+
+        const data =
+        await res.json();
+
+
+        let records =
+        data.records || [];
+
+
+        if(search){
+
+            records =
+            records.filter(r =>
+            r.enrollment.includes(search));
+
+        }
+
+
+        renderTable(records);
+
+    }
+
+    catch(err){
+
+        tbody.innerHTML =
+        `<tr><td colspan="2">Failed to load</td></tr>`;
+
+    }
+
+}
+
+
+
+function renderTable(records){
+
+    const tbody =
+    document.getElementById("tableBody");
+
+    tbody.innerHTML = "";
+
+
+    if(!records.length){
+
+        tbody.innerHTML =
+        `<tr><td colspan="2">No records found</td></tr>`;
+
+        return;
+
+    }
+
+
+    let present = 0;
+    let absent = 0;
+
+
+    records.forEach(r=>{
+
+        if(r.status=="P")present++;
+        else absent++;
+
+        const tr =
+        document.createElement("tr");
+
+        tr.innerHTML =
+
+        `
+        <td>${r.enrollment}</td>
+
+        <td class="${
+            r.status=="P"?
+            "present":"absent"
+        }">
+
+        ${
+            r.status=="P"?
+            "Present":"Absent"
+        }
+
+        </td>
+        `;
+
+        tbody.appendChild(tr);
+
+    });
+
+
+    document.getElementById("stats").innerHTML =
+    `
+    Total: ${records.length}
+    &nbsp;&nbsp;
+    Present: ${present}
+    &nbsp;&nbsp;
+    Absent: ${absent}
+    `;
+
+}
+
+
+
+loadAttendance();
+
+
+</script>
+
+</body>
+</html>
