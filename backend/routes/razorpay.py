@@ -9,6 +9,8 @@ razorpay_bp = Blueprint("razorpay_bp", __name__)
 # 🔐 Load Razorpay keys ONLY from production environment
 KEY_ID = os.environ.get("RAZORPAY_KEY_ID")
 KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET")
+print("DEBUG Razorpay KEY_ID:", KEY_ID)
+print("DEBUG Razorpay KEY_SECRET exists:", bool(KEY_SECRET))
 
 # ❌ If keys are missing → crash early (best practice)
 if not KEY_ID or not KEY_SECRET:
@@ -56,7 +58,6 @@ def create_order():
             "success": False,
             "error": str(e)
         }), 500
-
 
 # 🔹 VERIFY PAYMENT (MANDATORY SECURITY)
 @razorpay_bp.route("/api/fines/verify-payment", methods=["POST"])
