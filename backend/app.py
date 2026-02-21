@@ -34,7 +34,8 @@ from routes.bus_track import bus_track_bp
 from routes.per_message import per_message_bp
 from routes.razorpay import razorpay_bp
 from routes.missing import missing_bp
-
+from dotenv import load_dotenv
+load_dotenv()
 # ---------------------------------------------
 # FLASK APP SETUP
 # ---------------------------------------------
