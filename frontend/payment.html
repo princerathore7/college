@@ -120,14 +120,17 @@ async function startPayment() {
     });
 
     const data = await res.json();
+
+    console.log("Backend response:", data); // DEBUG
+
     if (!data.success) {
       alert("Unable to start payment");
       return;
     }
 
     const options = {
-      key: "RAZORPAY_KEY_ID_HERE",
-      amount: data.amount * 100,
+      key: data.key,   // ✅ FIXED HERE
+      amount: data.amount,   // ❌ remove *100
       currency: "INR",
       name: "Aopolis institute Indore",
       description: "Fine Payment",
