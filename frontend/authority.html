@@ -9,11 +9,54 @@
 body{
 font-family: Arial;
 background:#f4f6f9;
-padding:20px;
+margin:0;
+padding:0;
 }
 
-h2{
-margin-bottom:20px;
+/* Header */
+.header{
+background:white;
+padding:15px 20px;
+display:flex;
+align-items:center;
+gap:15px;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+.logo{
+height:50px;
+width:auto;
+object-fit:contain; /* no crop */
+}
+
+.title{
+font-size:22px;
+font-weight:bold;
+}
+
+
+/* Search */
+.search-box{
+padding:15px;
+background:white;
+margin:15px;
+border-radius:8px;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+.search-box input{
+width:100%;
+padding:10px;
+font-size:16px;
+border-radius:5px;
+border:1px solid #ccc;
+}
+
+
+/* Mentor card */
+
+#mentorList{
+padding:15px;
 }
 
 .mentor-card{
@@ -42,6 +85,7 @@ background:green;
 background:red;
 }
 
+
 /* Popup */
 
 .popup{
@@ -62,6 +106,9 @@ padding:20px;
 width:400px;
 border-radius:10px;
 }
+
+
+/* Buttons */
 
 button{
 margin:5px;
@@ -91,13 +138,109 @@ background:gray;
 color:white;
 }
 
+
+/* Password screen */
+
+.password-screen{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:#f4f6f9;
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+.password-box{
+background:white;
+padding:30px;
+border-radius:10px;
+box-shadow:0 2px 10px rgba(0,0,0,0.2);
+text-align:center;
+}
+
+.password-box input{
+padding:10px;
+width:250px;
+margin-top:10px;
+}
+
+.password-box button{
+background:#007bff;
+color:white;
+margin-top:10px;
+}
+.back-btn{
+background:#007bff;
+color:white;
+border:none;
+padding:8px 15px;
+border-radius:6px;
+cursor:pointer;
+font-size:14px;
+}
 </style>
 </head>
 <body>
 
-<h2>Authority Panel - Mentor Management</h2>
+
+<!-- PASSWORD SCREEN -->
+<div id="passwordScreen" class="password-screen">
+
+<div class="password-box">
+
+<img src="logo.jpg" class="logo">
+
+<h3>Enter Authority Password</h3>
+
+<input type="password" id="passwordInput">
+
+<br>
+
+<button onclick="verifyPassword()">Access Panel</button>
+
+<p id="passwordError" style="color:red"></p>
+
+</div>
+
+</div>
+
+
+
+<!-- MAIN CONTENT -->
+<div id="mainContent" style="display:none">
+
+<div class="header">
+
+<button onclick="goBack()" class="back-btn">
+← Back
+</button>
+<img src="logo.jpg" class="logo">
+
+<div class="title">Authority Panel - Mentor Management</div>
+
+</div>
+
+
+<div class="search-box">
+
+<input
+type="text"
+id="searchInput"
+placeholder="Search by Mentor ID or Name"
+onkeyup="searchMentor()"
+/>
+
+</div>
+
 
 <div id="mentorList"></div>
+
+
+</div>
+
 
 
 <!-- Popup -->
@@ -109,41 +252,139 @@ color:white;
 
 <div id="mentorDetails"></div>
 
-<button class="suspend" onclick="changeStatus('suspended')">Suspend</button>
+<button class="suspend" onclick="changeStatus('suspended')">
+Suspend
+</button>
 
-<button class="activate" onclick="changeStatus('active')">Activate</button>
+<button class="activate" onclick="changeStatus('active')">
+Activate
+</button>
 
-<button class="delete" onclick="deleteMentor()">Delete</button>
+<button class="delete" onclick="deleteMentor()">
+Delete
+</button>
 
-<button class="close" onclick="closePopup()">Close</button>
+<button class="close" onclick="closePopup()">
+Close
+</button>
 
 </div>
 
 </div>
+
 
 
 <script>
 
+/* ===============================
+ACCESS CONTROL — ADMIN PAGES
+================================ */
+
+const mentorId = localStorage.getItem("mentorId");
+const source   = sessionStorage.getItem("accessSource");
+
+const ALLOWED_SOURCES = ["ad", "admin"];
+
+if(!mentorId || !ALLOWED_SOURCES.includes(source)){
+
+document.body.innerHTML = `
+<h2 style="text-align:center;margin-top:20vh;color:red">
+❌ Access Denied <br>Please open via Administration Panel
+</h2>`;
+
+throw new Error("Unauthorized access");
+
+}
+
+
+/* ===============================
+CONFIG
+================================ */
+
 const API="https://college-hwbb.onrender.com/api"
 
+let allMentors=[]
 let selectedMentor=null
+function goBack(){
+
+window.history.back()
+
+}
+
+/* ===============================
+PASSWORD VERIFY
+================================ */
+
+async function verifyPassword(){
+
+const password=document.getElementById("passwordInput").value
+
+const res=await fetch(API+"/authority/verify-password",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({password})
+
+})
+
+const data=await res.json()
+
+if(data.success){
+
+document.getElementById("passwordScreen").style.display="none"
+
+document.getElementById("mainContent").style.display="block"
+
+loadMentors()
+
+}else{
+
+document.getElementById("passwordError").innerText="Wrong password"
+
+}
+
+}
 
 
-// Load all mentors
+/* ===============================
+LOAD MENTORS
+================================ */
+
 async function loadMentors(){
 
 const res=await fetch(API+"/mentors")
+
 const data=await res.json()
 
+allMentors=data.mentors
+
+renderMentors(allMentors)
+
+}
+
+
+/* ===============================
+RENDER
+================================ */
+
+function renderMentors(list){
+
 const container=document.getElementById("mentorList")
+
 container.innerHTML=""
 
-data.mentors.forEach(m=>{
+list.forEach(m=>{
 
 const div=document.createElement("div")
+
 div.className="mentor-card"
 
 div.innerHTML=`
+
 <div>
 <b>${m.mentorId}</b> - ${m.name}
 </div>
@@ -151,6 +392,7 @@ div.innerHTML=`
 <div class="status ${m.status}">
 ${m.status}
 </div>
+
 `
 
 div.onclick=()=>openPopup(m)
@@ -162,7 +404,34 @@ container.appendChild(div)
 }
 
 
-// Open popup
+/* ===============================
+SEARCH
+================================ */
+
+function searchMentor(){
+
+const text=document
+.getElementById("searchInput")
+.value
+.toLowerCase()
+
+const filtered=allMentors.filter(m=>
+
+m.mentorId.toLowerCase().includes(text)
+||
+m.name.toLowerCase().includes(text)
+
+)
+
+renderMentors(filtered)
+
+}
+
+
+/* ===============================
+POPUP
+================================ */
+
 function openPopup(mentor){
 
 selectedMentor=mentor
@@ -172,12 +441,19 @@ document.getElementById("popup").style.display="flex"
 document.getElementById("mentorDetails").innerHTML=`
 
 <p><b>ID:</b> ${mentor.mentorId}</p>
+
 <p><b>Name:</b> ${mentor.name}</p>
+
 <p><b>Email:</b> ${mentor.email}</p>
+
 <p><b>Phone:</b> ${mentor.phone}</p>
+
 <p><b>Subject:</b> ${mentor.subject}</p>
+
 <p><b>Branch:</b> ${mentor.branch}</p>
+
 <p><b>Class:</b> ${mentor.classAssigned}</p>
+
 <p><b>Status:</b> ${mentor.status}</p>
 
 `
@@ -185,23 +461,27 @@ document.getElementById("mentorDetails").innerHTML=`
 }
 
 
-// Close popup
 function closePopup(){
+
 document.getElementById("popup").style.display="none"
+
 }
 
 
-// Suspend / Activate
-async function changeStatus(status){
+/* ===============================
+STATUS CHANGE
+================================ */
 
-if(!selectedMentor) return
+async function changeStatus(status){
 
 await fetch(API+"/mentor/status",{
 
 method:"PUT",
+
 headers:{
 "Content-Type":"application/json"
 },
+
 body:JSON.stringify({
 
 mentorId:selectedMentor.mentorId,
@@ -220,10 +500,11 @@ loadMentors()
 }
 
 
-// Delete mentor
-async function deleteMentor(){
+/* ===============================
+DELETE
+================================ */
 
-if(!selectedMentor) return
+async function deleteMentor(){
 
 if(!confirm("Delete mentor?")) return
 
@@ -240,10 +521,6 @@ closePopup()
 loadMentors()
 
 }
-
-
-// Load on start
-loadMentors()
 
 </script>
 

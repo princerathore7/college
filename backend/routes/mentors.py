@@ -3,7 +3,7 @@ from db import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from bson import ObjectId
 import datetime
-
+import os
 mentors_bp = Blueprint("mentors_bp", __name__, url_prefix="/api")
 
 # ------------------------------------
@@ -208,3 +208,13 @@ def get_all_mentors():
         "success": True,
         "mentors": mentors
     }), 200
+
+@mentors_bp.route("/authority/verify-password", methods=["POST"])
+def verify_authority_password():
+
+    data=request.json
+
+    if data.get("password")==os.getenv("AUTHORITY_PASSWORD"):
+        return jsonify({"success":True})
+
+    return jsonify({"success":False}),401
