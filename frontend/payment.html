@@ -58,6 +58,17 @@ button {
   color: white;
 }
 
+.back-btn{
+  margin:20px auto;
+  display:block;
+  padding:10px 15px;
+  background:#666;
+  color:white;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
 .note {
   margin-top: 15px;
   font-size: 13px;
@@ -82,97 +93,185 @@ button {
     <p><b>Status:</b> Pending</p>
   </div>
 
-  <button id="upiBtn" onclick="startPayment()">Pay via UPI (GPay / PhonePe / Paytm)</button>
-<button id="qrBtn" onclick="openQRPage()">Pay via QR Code</button>
+  <button id="upiBtn" onclick="startPayment()">
+    Pay via UPI (GPay / PhonePe / Paytm)
+  </button>
 
+  <button id="qrBtn" onclick="openQRPage()">
+    Pay via QR Code
+  </button>
 
   <p class="note">
-    Please complete the payment. Partial payments are supported.
+    Please complete the payment securely.
   </p>
+
 </div>
-   <button class="back-btn" onclick="goBack()">
-  ← Back
-</button>
+
+<button class="back-btn" onclick="goBack()">← Back</button>
+
 <script>
+
 const API_BASE = "https://college-hwbb.onrender.com";
 
+// Get URL params
 const params = new URLSearchParams(window.location.search);
 const enrollment = params.get("enrollment");
 const amount = params.get("amount");
 const reason = params.get("reason");
 
+// Show data
 document.getElementById("enrollment").innerText = enrollment;
 document.getElementById("amount").innerText = amount;
 document.getElementById("reason").innerText = reason;
 
+
 /************************************************
-  UPI DIRECT PAYMENT (NO QR PAGE)
+  START PAYMENT
 ************************************************/
 async function startPayment() {
+
   try {
+
+    // Create order from backend
     const res = await fetch(`${API_BASE}/api/fines/create-order`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({
         enrollment: enrollment,
-        amount: amount
+        amount: amount,
+        reason: reason
       })
     });
 
     const data = await res.json();
 
-    console.log("Backend response:", data); // DEBUG
+    console.log("Order response:", data);
 
     if (!data.success) {
-      alert("Unable to start payment");
+      alert("Failed to create order");
       return;
     }
 
+
+    // Razorpay options
     const options = {
-      key: data.key,   // ✅ FIXED HERE
-      amount: data.amount,   // ❌ remove *100
+
+      key: data.key,
+
+      amount: data.amount,
+
       currency: "INR",
-      name: "Aopolis institute Indore",
+
+      name: "Acropolis Institute Indore",
+
       description: "Fine Payment",
+
       order_id: data.order_id,
 
-      handler: function () {
-        alert("Payment received. Verification in progress...");
-        window.location.href = "fine.html";
+
+      handler: async function (response) {
+
+        try {
+
+          // VERIFY PAYMENT
+          const verifyRes = await fetch(`${API_BASE}/api/fines/verify-payment`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            })
+          });
+
+          const verifyData = await verifyRes.json();
+
+          if (verifyData.success) {
+
+            alert("✅ Payment successful!");
+
+            window.location.href = "fine.html";
+
+          } else {
+
+            alert("❌ Payment verification failed");
+
+          }
+
+        } catch (err) {
+
+          console.error(err);
+
+          alert("Verification error");
+
+        }
+
       },
 
+
       notes: {
-        enrollment: enrollment
+        enrollment: enrollment,
+        reason: reason
       },
+
 
       method: {
         upi: true
       },
 
+
       theme: {
         color: "#003366"
       }
+
     };
 
+
     const rzp = new Razorpay(options);
+
     rzp.open();
 
-  } catch (err) {
-    console.error(err);
+
+  } catch (error) {
+
+    console.error(error);
+
     alert("Server error. Please try again.");
+
   }
+
 }
 
+
+
 /************************************************
-  QR PAYMENT → REDIRECT TO LOCKED QR PAGE
+  OPEN QR PAGE
 ************************************************/
 function openQRPage() {
-  const qrUrl = `qr.html?enrollment=${encodeURIComponent(enrollment)}&amount=${encodeURIComponent(amount)}&reason=${encodeURIComponent(reason)}`;
+
+  const qrUrl =
+    `qr.html?enrollment=${encodeURIComponent(enrollment)}
+    &amount=${encodeURIComponent(amount)}
+    &reason=${encodeURIComponent(reason)}`;
+
   window.location.href = qrUrl;
+
 }
+
+
+/************************************************
+  BACK BUTTON
+************************************************/
 function goBack() {
-  window.history.back(); 
+
+  window.history.back();
+
 }
+
 </script>
 
 </body>
