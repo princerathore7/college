@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
 from mongoengine import connect
@@ -34,8 +36,7 @@ from routes.bus_track import bus_track_bp
 from routes.per_message import per_message_bp
 from routes.razorpay import razorpay_bp
 from routes.missing import missing_bp
-from dotenv import load_dotenv
-load_dotenv()
+
 # ---------------------------------------------
 # FLASK APP SETUP
 # ---------------------------------------------
