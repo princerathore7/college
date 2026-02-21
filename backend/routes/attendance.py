@@ -317,6 +317,7 @@ def robot_update_attendance():
     except Exception as e:
         print("❌ ROBOT ERROR:", e)
         return jsonify({"success": False}), 500
+    
         # ===============================
 # RESET ATTENDANCE (ON CLASS CHANGE)
 # ===============================
@@ -357,3 +358,48 @@ def reset_attendance():
     except Exception as e:
         print("❌ reset_attendance error:", e)
         return jsonify({"success": False}), 500
+@attendance_bp.route("/robot/lectures", methods=["GET"])
+def get_lectures():
+    lectures = robot_log_collection.distinct("lectureId")
+
+    return jsonify({
+        "success": True,
+        "lectures": lectures
+    })
+@attendance_bp.route("/robot/lecture/<lecture_id>", methods=["GET"])
+def get_lecture_attendance(lecture_id):
+
+    year = request.args.get("year")
+    branch = request.args.get("branch")
+    section = request.args.get("section")
+
+    query = {
+        "lectureId": lecture_id
+    }
+
+    records = list(robot_log_collection.find(query, {"_id": 0}))
+
+    filtered = []
+
+    for r in records:
+
+        enrollment = r["enrollment"]
+
+        e_branch = enrollment[4:6]
+        e_year = enrollment[6:8]
+
+        if branch and branch != e_branch:
+            continue
+
+        if year and year != e_year:
+            continue
+
+        filtered.append({
+            "enrollment": enrollment,
+            "status": r["status"]
+        })
+
+    return jsonify({
+        "success": True,
+        "records": filtered
+    })
