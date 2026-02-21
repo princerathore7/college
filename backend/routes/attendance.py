@@ -358,14 +358,37 @@ def reset_attendance():
     except Exception as e:
         print("❌ reset_attendance error:", e)
         return jsonify({"success": False}), 500
-@attendance_bp.route("/robot/lectures", methods=["GET"])
-def get_lectures():
-    lectures = robot_log_collection.distinct("lectureId")
 
-    return jsonify({
-        "success": True,
-        "lectures": lectures
-    })
+# ✅ GET ALL LECTURES (WITH CORS FIX)
+@attendance_bp.route("/robot/lectures", methods=["GET", "OPTIONS"])
+@cross_origin(origin="*", headers=["Content-Type", "Authorization"])
+def get_lectures():
+
+    try:
+
+        lectures = robot_log_collection.distinct("lectureId")
+
+        # remove None or empty values
+        lectures = [l for l in lectures if l]
+
+        # optional sorting
+        lectures.sort(reverse=True)
+
+        return jsonify({
+            "success": True,
+            "count": len(lectures),
+            "lectures": lectures
+        }), 200
+
+
+    except Exception as e:
+
+        print("❌ ERROR fetching lectures:", e)
+
+        return jsonify({
+            "success": False,
+            "message": "Failed to fetch lectures"
+        }), 500
 @attendance_bp.route("/robot/lecture/<lecture_id>", methods=["GET"])
 def get_lecture_attendance(lecture_id):
 
