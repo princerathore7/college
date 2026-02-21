@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Authority Panel - Mentors</title>
+
+<style>
+
+body{
+font-family: Arial;
+background:#f4f6f9;
+padding:20px;
+}
+
+h2{
+margin-bottom:20px;
+}
+
+.mentor-card{
+background:white;
+padding:15px;
+margin-bottom:10px;
+border-radius:8px;
+cursor:pointer;
+display:flex;
+justify-content:space-between;
+align-items:center;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+.status{
+padding:5px 10px;
+border-radius:5px;
+color:white;
+}
+
+.active{
+background:green;
+}
+
+.suspended{
+background:red;
+}
+
+/* Popup */
+
+.popup{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.5);
+justify-content:center;
+align-items:center;
+}
+
+.popup-content{
+background:white;
+padding:20px;
+width:400px;
+border-radius:10px;
+}
+
+button{
+margin:5px;
+padding:8px 12px;
+border:none;
+border-radius:5px;
+cursor:pointer;
+}
+
+.suspend{
+background:orange;
+color:white;
+}
+
+.activate{
+background:green;
+color:white;
+}
+
+.delete{
+background:red;
+color:white;
+}
+
+.close{
+background:gray;
+color:white;
+}
+
+</style>
+</head>
+<body>
+
+<h2>Authority Panel - Mentor Management</h2>
+
+<div id="mentorList"></div>
+
+
+<!-- Popup -->
+<div class="popup" id="popup">
+
+<div class="popup-content">
+
+<h3>Mentor Details</h3>
+
+<div id="mentorDetails"></div>
+
+<button class="suspend" onclick="changeStatus('suspended')">Suspend</button>
+
+<button class="activate" onclick="changeStatus('active')">Activate</button>
+
+<button class="delete" onclick="deleteMentor()">Delete</button>
+
+<button class="close" onclick="closePopup()">Close</button>
+
+</div>
+
+</div>
+
+
+<script>
+
+const API="/api"
+
+let selectedMentor=null
+
+
+// Load all mentors
+async function loadMentors(){
+
+const res=await fetch(API+"/mentors")
+const data=await res.json()
+
+const container=document.getElementById("mentorList")
+container.innerHTML=""
+
+data.mentors.forEach(m=>{
+
+const div=document.createElement("div")
+div.className="mentor-card"
+
+div.innerHTML=`
+<div>
+<b>${m.mentorId}</b> - ${m.name}
+</div>
+
+<div class="status ${m.status}">
+${m.status}
+</div>
+`
+
+div.onclick=()=>openPopup(m)
+
+container.appendChild(div)
+
+})
+
+}
+
+
+// Open popup
+function openPopup(mentor){
+
+selectedMentor=mentor
+
+document.getElementById("popup").style.display="flex"
+
+document.getElementById("mentorDetails").innerHTML=`
+
+<p><b>ID:</b> ${mentor.mentorId}</p>
+<p><b>Name:</b> ${mentor.name}</p>
+<p><b>Email:</b> ${mentor.email}</p>
+<p><b>Phone:</b> ${mentor.phone}</p>
+<p><b>Subject:</b> ${mentor.subject}</p>
+<p><b>Branch:</b> ${mentor.branch}</p>
+<p><b>Class:</b> ${mentor.classAssigned}</p>
+<p><b>Status:</b> ${mentor.status}</p>
+
+`
+
+}
+
+
+// Close popup
+function closePopup(){
+document.getElementById("popup").style.display="none"
+}
+
+
+// Suspend / Activate
+async function changeStatus(status){
+
+if(!selectedMentor) return
+
+await fetch(API+"/mentor/status",{
+
+method:"PUT",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+
+mentorId:selectedMentor.mentorId,
+status:status
+
+})
+
+})
+
+alert("Status updated")
+
+closePopup()
+
+loadMentors()
+
+}
+
+
+// Delete mentor
+async function deleteMentor(){
+
+if(!selectedMentor) return
+
+if(!confirm("Delete mentor?")) return
+
+await fetch(API+"/mentor/"+selectedMentor.mentorId,{
+
+method:"DELETE"
+
+})
+
+alert("Mentor deleted")
+
+closePopup()
+
+loadMentors()
+
+}
+
+
+// Load on start
+loadMentors()
+
+</script>
+
+</body>
+</html>

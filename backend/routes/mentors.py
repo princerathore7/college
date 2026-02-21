@@ -47,6 +47,7 @@ def mentor_signup():
         "branch": data["branch"],
         "classAssigned": data["classAssigned"],
         "password": hashed_password,
+        "status": "active",
         "createdAt": datetime.datetime.utcnow()
     }
 
@@ -56,24 +57,29 @@ def mentor_signup():
 
 
 
-# ============================================================
-# 2️⃣  MENTOR LOGIN — PASSWORD HASH SAFE
-# ============================================================
 @mentors_bp.route("/login/mentor", methods=["POST"])
 def mentor_login():
     data = request.json
     print("LOGIN DATA RECEIVED:", data)
 
     mentor = db.mentors.find_one({"mentorId": data.get("mentorId")})
-
     print("MENTOR FOUND:", mentor)
 
     if not mentor:
         return jsonify({"success": False, "message": "Mentor not found"}), 401
 
+    # Password check
     if not check_password_hash(mentor["password"], data.get("password")):
         return jsonify({"success": False, "message": "Incorrect password"}), 401
 
+    # 🚫 Suspend check (PASSWORD ke baad karna best practice hai)
+    if mentor.get("status") == "suspended":
+        return jsonify({
+            "success": False,
+            "message": "Your account is suspended. Contact admin."
+        }), 403
+
+    # ✅ Login success
     return jsonify({
         "success": True,
         "message": "Login successful",
@@ -83,7 +89,6 @@ def mentor_login():
             "classAssigned": mentor.get("classAssigned")
         }
     }), 200
-
 
 # ============================================================
 # 3️⃣  SALARY STORAGE IN MONGODB — MATCHES FRONTEND EXACTLY
@@ -134,3 +139,72 @@ def post_salary():
     )
 
     return jsonify({"success": True, "message": "Salary info saved successfully"}), 201
+@mentors_bp.route("/mentor/status", methods=["PUT"])
+def update_mentor_status():
+    data = request.get_json()
+
+    mentor_id = data.get("mentorId")
+    new_status = data.get("status")  # "active" or "suspended"
+
+    if not mentor_id or new_status not in ["active", "suspended"]:
+        return jsonify({
+            "success": False,
+            "message": "mentorId and valid status required"
+        }), 400
+
+    result = db.mentors.update_one(
+        {"mentorId": mentor_id},
+        {"$set": {
+            "status": new_status,
+            "updatedAt": datetime.datetime.utcnow()
+        }}
+    )
+
+    if result.matched_count == 0:
+        return jsonify({
+            "success": False,
+            "message": "Mentor not found"
+        }), 404
+
+    return jsonify({
+        "success": True,
+        "message": f"Mentor {new_status} successfully"
+    }), 200
+@mentors_bp.route("/mentor/<mentor_id>", methods=["DELETE"])
+def delete_mentor(mentor_id):
+
+    result = db.mentors.delete_one({"mentorId": mentor_id})
+
+    if result.deleted_count == 0:
+        return jsonify({
+            "success": False,
+            "message": "Mentor not found"
+        }), 404
+
+    return jsonify({
+        "success": True,
+        "message": "Mentor deleted successfully"
+    }), 200
+# ============================================================
+# 6️⃣  GET ALL MENTORS (Authority Panel)
+# ============================================================
+@mentors_bp.route("/mentors", methods=["GET"])
+def get_all_mentors():
+
+    mentors = list(db.mentors.find({}, {
+        "_id": 0,
+        "mentorId": 1,
+        "name": 1,
+        "email": 1,
+        "phone": 1,
+        "subject": 1,
+        "branch": 1,
+        "classAssigned": 1,
+        "status": 1,
+        "createdAt": 1
+    }))
+
+    return jsonify({
+        "success": True,
+        "mentors": mentors
+    }), 200
