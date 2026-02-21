@@ -426,3 +426,49 @@ def get_lecture_attendance(lecture_id):
         "success": True,
         "records": filtered
     })
+
+# DELETE LECTURE API
+@attendance_bp.route("/delete-lecture", methods=["POST"])
+def delete_lecture():
+
+    try:
+
+        data = request.json or {}
+
+        lecture_id = data.get("lectureId")
+
+        if not lecture_id:
+
+            return jsonify({
+                "success": False,
+                "message": "lectureId required"
+            }), 400
+
+
+        # delete all robot logs of this lecture
+        result = robot_log_collection.delete_many({
+            "lectureId": lecture_id
+        })
+
+
+        return jsonify({
+
+            "success": True,
+
+            "deleted_count": result.deleted_count,
+
+            "lectureId": lecture_id,
+
+            "deletedAt": datetime.utcnow()
+
+        }), 200
+
+
+    except Exception as e:
+
+        print("❌ DELETE LECTURE ERROR:", e)
+
+        return jsonify({
+            "success": False,
+            "message": "Server error"
+        }), 500

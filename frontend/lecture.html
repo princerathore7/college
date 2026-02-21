@@ -1,72 +1,154 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>All Robot Lectures</title>
+<title>Robot Lectures • Admin</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 
+:root{
+    --navy:#0a192f;
+    --navy-light:#112240;
+    --navy-lighter:#1d3557;
+    --white:#ffffff;
+    --gray:#94a3b8;
+    --border:#233554;
+    --green:#22c55e;
+    --red:#ef4444;
+}
+
 body{
     margin:0;
     font-family:Inter, sans-serif;
-    background:#0f172a;
-    color:white;
+    background:var(--navy);
+    color:var(--white);
 }
+
+/* container */
 
 .container{
     max-width:900px;
     margin:auto;
-    padding:20px;
+    padding:30px 20px;
 }
 
+/* header */
+
 .header{
-    font-size:26px;
-    font-weight:700;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
     margin-bottom:20px;
 }
 
-.lecture{
-    background:#1e293b;
-    padding:15px;
-    margin-bottom:10px;
-    border-radius:8px;
-    cursor:pointer;
-    border:1px solid #334155;
-    transition:.2s;
+.title{
+    font-size:26px;
+    font-weight:700;
 }
 
-.lecture:hover{
-    background:#334155;
+.controls{
+    display:flex;
+    gap:10px;
 }
 
-.loading{
-    padding:20px;
-    text-align:center;
-}
+/* buttons */
 
-.empty{
-    padding:20px;
-    text-align:center;
-    color:#94a3b8;
-}
-
-.refresh{
-    background:#22c55e;
+button{
     border:none;
     padding:8px 16px;
     border-radius:6px;
-    color:white;
     cursor:pointer;
-    margin-bottom:15px;
+    font-weight:500;
+}
+
+.refresh{
+    background:var(--green);
+    color:white;
 }
 
 .refresh:hover{
     background:#16a34a;
+}
+
+/* search */
+
+.search-box{
+    width:100%;
+    margin-bottom:20px;
+}
+
+.search-box input{
+    width:100%;
+    padding:10px;
+    border-radius:6px;
+    border:1px solid var(--border);
+    background:var(--navy-light);
+    color:white;
+    font-size:14px;
+}
+
+.search-box input::placeholder{
+    color:var(--gray);
+}
+
+/* lecture list */
+
+.lecture{
+    background:var(--navy-light);
+    padding:14px 16px;
+    margin-bottom:10px;
+    border-radius:8px;
+    border:1px solid var(--border);
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    transition:.2s;
+}
+
+.lecture:hover{
+    background:var(--navy-lighter);
+}
+
+/* lecture info */
+
+.lecture-info{
+    cursor:pointer;
+}
+
+/* delete button */
+
+.delete-btn{
+    background:transparent;
+    border:1px solid var(--red);
+    color:var(--red);
+}
+
+.delete-btn:hover{
+    background:var(--red);
+    color:white;
+}
+
+/* loading / empty */
+
+.loading,
+.empty{
+    text-align:center;
+    padding:30px;
+    color:var(--gray);
+}
+
+/* footer stats */
+
+.footer{
+    margin-top:15px;
+    color:var(--gray);
+    font-size:14px;
 }
 
 </style>
@@ -76,27 +158,55 @@ body{
 
 <div class="container">
 
-<div class="header">
-All Lecture IDs
+    <div class="header">
+
+        <div class="title">
+            Robot Lecture Management
+        </div>
+
+        <div class="controls">
+            <button class="refresh" onclick="loadLectures()">
+                Refresh
+            </button>
+        </div>
+
+    </div>
+
+    <div class="search-box">
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Search lecture ID..."
+            oninput="renderLectures()"
+        >
+    </div>
+
+    <div id="lectureList" class="loading">
+        Loading lectures...
+    </div>
+
+    <div class="footer" id="lectureCount"></div>
+
 </div>
 
-<button class="refresh" onclick="loadLectures()">
-Refresh
-</button>
-
-<div id="lectureList" class="loading">
-Loading lectures...
-</div>
-
-</div>
 
 <script>
 
+/* API endpoints */
 
-/* IMPORTANT: change if needed */
-
-const API_URL =
+const FETCH_API =
 "https://college-hwbb.onrender.com/api/attendance/robot/lectures";
+
+const DELETE_API =
+"https://college-hwbb.onrender.com/api/attendance/delete-lecture";
+
+
+/* store lectures */
+
+let allLectures = [];
+
+
+/* load lectures */
 
 async function loadLectures(){
 
@@ -109,50 +219,21 @@ async function loadLectures(){
     try{
 
         const res =
-        await fetch(API_URL);
+        await fetch(FETCH_API);
 
         const data =
         await res.json();
 
+        if(!data.success){
 
-        if(!data.success || !data.lectures.length){
+            throw new Error("API failed");
 
-            container.innerHTML =
-            "<div class='empty'>No lectures found</div>";
-
-            return;
         }
 
+        allLectures =
+        data.lectures || [];
 
-        container.innerHTML = "";
-
-
-        data.lectures.forEach(lecture=>{
-
-            const div =
-            document.createElement("div");
-
-            div.className =
-            "lecture";
-
-            div.innerHTML =
-            `<strong>${lecture}</strong>`;
-
-
-            div.onclick = ()=>{
-
-                /* redirect to lecture detail page */
-
-                window.location.href =
-                `lecture-details.html?lectureId=${lecture}`;
-
-            };
-
-
-            container.appendChild(div);
-
-        });
-
+        renderLectures();
 
     }
 
@@ -166,11 +247,139 @@ async function loadLectures(){
 }
 
 
+/* render lectures with search */
+
+function renderLectures(){
+
+    const container =
+    document.getElementById("lectureList");
+
+    const search =
+    document.getElementById("searchInput")
+    .value
+    .toLowerCase();
+
+    const filtered =
+    allLectures.filter(l =>
+        l.toLowerCase().includes(search)
+    );
+
+    if(filtered.length === 0){
+
+        container.innerHTML =
+        "<div class='empty'>No lectures found</div>";
+
+        document.getElementById("lectureCount").innerText =
+        "0 lectures";
+
+        return;
+    }
+
+    container.innerHTML = "";
+
+    filtered.forEach(lecture=>{
+
+        const div =
+        document.createElement("div");
+
+        div.className =
+        "lecture";
+
+        div.innerHTML = `
+
+            <div class="lecture-info"
+            onclick="openLecture('${lecture}')">
+
+                <strong>${lecture}</strong>
+
+            </div>
+
+            <button
+            class="delete-btn"
+            onclick="deleteLecture('${lecture}', event)">
+
+                Delete
+
+            </button>
+
+        `;
+
+        container.appendChild(div);
+
+    });
+
+    document.getElementById("lectureCount").innerText =
+    `${filtered.length} lectures`;
+
+}
+
+
+/* open lecture */
+
+function openLecture(lecture){
+
+    window.location.href =
+    `lecture-details.html?lectureId=${lecture}`;
+
+}
+
+
+/* delete lecture */
+
+async function deleteLecture(lecture, event){
+
+    event.stopPropagation();
+
+    if(!confirm(`Delete lecture ${lecture}?`))
+        return;
+
+    try{
+
+        const res =
+        await fetch(DELETE_API,{
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify({
+                lectureId:lecture
+            })
+
+        });
+
+        const data =
+        await res.json();
+
+        if(data.success){
+
+            alert("Deleted successfully");
+
+            loadLectures();
+
+        }
+        else{
+
+            alert("Delete failed");
+
+        }
+
+    }
+
+    catch{
+
+        alert("Server error");
+
+    }
+
+}
+
 
 /* auto load */
 
 loadLectures();
-
 
 </script>
 
