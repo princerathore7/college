@@ -33,23 +33,74 @@
     <div class="filters">
         <select id="yearFilter">
             <option value="">All Years</option>
-            <option value="21">2021</option>
-            <option value="22">2022</option>
-            <option value="23">2023</option>
-            <option value="24">2024</option>
-            <option value="25">2025</option>
+            <option value="1">1st Year</option>
+            <option value="2">2nd Year</option>
+            <option value="3">3rd Year</option>
+            <option value="4">4th Year</option>
+            <option value="5">5th Year</option>
         </select>
 
         <select id="branchFilter">
             <option value="">All Branch</option>
-            <option value="IT">IT</option>
-            <option value="CSE">CSE</option>
-            <option value="ECE">ECE</option>
-            <option value="EEE">EEE</option>
-            <option value="ME">ME</option>
-            <option value="CE">CE</option>
+           
+  <!-- (Your full RGPV branch list here) -->
+  <option value="CSE">CSE - Computer Science Engineering</option>
+  <option value="IT">IT - Information Technology</option>
+  <option value="AIML">AIML - Artificial Intelligence & Machine Learning</option>
+  <option value="AIDS">AIDS - Artificial Intelligence & Data Science</option>
+  <option value="CSBS">CSBS - Computer Science & Business Systems</option>
+  <option value="IOT">IoT - Internet of Things</option>
+  <option value="ECE">ECE - Electronics & Communication</option>
+  <option value="EEE">EEE - Electrical & Electronics</option>
+  <option value="EE">EE - Electrical Engineering</option>
+  <option value="ME">ME - Mechanical Engineering</option>
+  <option value="AU">AU - Automobile Engineering</option>
+  <option value="MT">MT - Mechatronics</option>
+  <option value="CE">CE - Civil Engineering</option>
+  <option value="CHE">CHE - Chemical Engineering</option>
+  <option value="MIN">MIN - Mining Engineering</option>
+  <option value="PET">PET - Petroleum Engineering</option>
+  <option value="BT">BT - Biotechnology</option>
+  <option value="BME">BME - Biomedical Engineering</option>
+  <option value="FT">FT - Food Technology</option>
+  <option value="AG">AG - Agriculture Engineering</option>
+  <option value="ENV">ENV - Environmental Engineering</option>
+  <option value="TX">TX - Textile Engineering</option>
+  <option value="PIE">PIE - Production & Industrial Engineering</option>
+  <option value="IM">IM - Industrial Management</option>
+
+  <!-- Diploma -->
+  <option value="DCSE">Diploma - Computer Science</option>
+  <option value="DIT">Diploma - IT</option>
+  <option value="DCYBER">Diploma - Cyber Security</option>
+  <option value="DECE">Diploma - ECE</option>
+  <option value="DEEE">Diploma - EEE</option>
+  <option value="DEE">Diploma - Electrical</option>
+  <option value="DME">Diploma - Mechanical</option>
+  <option value="DCE">Diploma - Civil</option>
+  <option value="DMIN">Diploma - Mining</option>
+  <option value="DCHE">Diploma - Chemical</option>
+  <option value="DAG">Diploma - Agriculture</option>
+  <option value="DTX">Diploma - Textile</option>
+  <option value="DPLASTIC">Diploma - Plastic</option>
+  <option value="DPOLY">Diploma - Polymer</option>
+
+  <!-- Pharmacy -->
+  <option value="DPHARMA">D.Pharmacy</option>
+  <option value="BPHARMA">B.Pharmacy</option>
+  <option value="MPHARMA">M.Pharmacy</option>
+
         </select>
 
+<label>Select Section</label>
+<select id="section">
+  <option value="">-- Select --</option>
+  <option value="1">1</option>
+  <option value="2">2</option>
+  <option value="3">3</option>
+  <option value="4">4</option>
+  <option value="5">5</option>
+</select>
         <input type="text" id="enrollmentSearch" placeholder="Search enrollment...">
         <button onclick="loadAttendance()">Apply Filter</button>
     </div>
