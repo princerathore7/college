@@ -360,8 +360,8 @@ def reset_attendance():
         return jsonify({"success": False}), 500
 
 # ✅ GET ALL LECTURES (WITH CORS FIX)
-@attendance_bp.route("api/robot/lectures", methods=["GET", "OPTIONS"])
-@cross_origin(origin="*", headers=["Content-Type", "Authorization"])
+@attendance_bp.route("/robot/lectures", methods=["GET"])
+@cross_origin(origin="*")
 def get_lectures():
 
     try:
