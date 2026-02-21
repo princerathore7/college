@@ -5,163 +5,68 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Robot Lecture Attendance</title>
+<title>All Robot Lectures</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 
-*{
-    box-sizing:border-box;
-}
-
 body{
-
     margin:0;
     font-family:Inter, sans-serif;
-    background:linear-gradient(135deg,#0f172a,#020617);
+    background:#0f172a;
     color:white;
-    min-height:100vh;
 }
 
 .container{
-
-    max-width:1100px;
+    max-width:900px;
     margin:auto;
     padding:20px;
 }
 
 .header{
-
-    font-size:28px;
+    font-size:26px;
     font-weight:700;
     margin-bottom:20px;
 }
 
-
-/* lecture cards */
-
-.lecture-card{
-
+.lecture{
     background:#1e293b;
-    padding:16px;
+    padding:15px;
     margin-bottom:10px;
-    border-radius:10px;
+    border-radius:8px;
     cursor:pointer;
     border:1px solid #334155;
     transition:.2s;
 }
 
-.lecture-card:hover{
-
+.lecture:hover{
     background:#334155;
-    transform:translateX(5px);
 }
 
-
-/* details section */
-
-.details{
-
-    display:none;
+.loading{
+    padding:20px;
+    text-align:center;
 }
 
-.back-btn{
+.empty{
+    padding:20px;
+    text-align:center;
+    color:#94a3b8;
+}
 
-    background:#3b82f6;
+.refresh{
+    background:#22c55e;
     border:none;
-    padding:8px 14px;
+    padding:8px 16px;
     border-radius:6px;
     color:white;
     cursor:pointer;
     margin-bottom:15px;
 }
 
-.back-btn:hover{
-
-    background:#2563eb;
-}
-
-
-/* filters */
-
-.filters{
-
-    display:flex;
-    gap:10px;
-    margin-bottom:20px;
-    flex-wrap:wrap;
-}
-
-select{
-
-    padding:8px;
-    border-radius:6px;
-    border:none;
-}
-
-.search-btn{
-
-    padding:8px 16px;
-    border:none;
-    border-radius:6px;
-    background:#22c55e;
-    color:white;
-    cursor:pointer;
-}
-
-.search-btn:hover{
-
+.refresh:hover{
     background:#16a34a;
-}
-
-
-/* table */
-
-table{
-
-    width:100%;
-    border-collapse:collapse;
-    background:#020617;
-}
-
-th{
-
-    background:#1e293b;
-    padding:12px;
-    text-align:left;
-}
-
-td{
-
-    padding:12px;
-    border-bottom:1px solid #1e293b;
-}
-
-.present{
-
-    color:#22c55e;
-    font-weight:600;
-}
-
-.absent{
-
-    color:#ef4444;
-    font-weight:600;
-}
-
-
-.empty{
-
-    padding:20px;
-    text-align:center;
-    color:#94a3b8;
-}
-
-.loading{
-
-    padding:20px;
-    text-align:center;
 }
 
 </style>
@@ -172,131 +77,15 @@ td{
 <div class="container">
 
 <div class="header">
-Lecture wise attendance System
+All Lecture IDs
 </div>
 
-<!-- Lecture List -->
-
-<div id="lectureList"></div>
-
-<!-- Lecture Details -->
-
-<div id="details" class="details">
-
-<button class="back-btn" onclick="goBack()">
-← Back to Lectures
+<button class="refresh" onclick="loadLectures()">
+Refresh
 </button>
 
-<h2 id="lectureTitle"></h2>
-
-<div class="filters">
-
-<select id="year">
-
-<option value="">All Years</option>
-<option value="1">1st year</option>
-<option value="2">2</option>
-<option value="3">3</option>
-<option value="4">4</option>
-
-</select>
-
-
-  <select id="branch">
-    <option value="">All Branches</option>
-     <option value="CSE">CSE - Computer Science Engineering</option>
-    <option value="IT">IT - Information Technology</option>
-    <option value="AIML">AIML - Artificial Intelligence & Machine Learning</option>
-      <option value="AIDS">AIDS - Artificial Intelligence & Data Science</option>
-    <option value="CSBS">CSBS - Computer Science & Business Systems</option>
-    <option value="IOT">IoT - Internet of Things</option>
-
-    <!-- Electrical / Electronics -->
-    <option value="ECE">ECE - Electronics & Communication</option>
-    <option value="EEE">EEE - Electrical & Electronics</option>
-    <option value="EE">EE - Electrical Engineering</option>
-
-    <!-- Mechanical / Automobile -->
-    <option value="ME">ME - Mechanical Engineering</option>
-    <option value="AU">AU - Automobile Engineering</option>
-    <option value="MT">MT - Mechatronics</option>
-
-    <!-- Civil / Core -->
-    <option value="CE">CE - Civil Engineering</option>
-    <option value="CHE">CHE - Chemical Engineering</option>
-    <option value="MIN">MIN - Mining Engineering</option>
-    <option value="PET">PET - Petroleum Engineering</option>
-
-    <!-- Bio / Agri -->
-    <option value="BT">BT - Biotechnology</option>
-    <option value="BME">BME - Biomedical Engineering</option>
-    <option value="AG">AG - Agriculture Engineering</option>
-    <option value="FT">FT - Food Technology</option>
-    <option value="ENV">ENV - Environmental Engineering</option>
-    <option value="TX">TX - Textile Engineering</option>
-
-    <!-- Management / Pharma -->
-    <option value="PIE">PIE - Production & Industrial Engineering</option>
-    <option value="IM">IM - Industrial Management</option>
-    <option value="DPHARMA">D.Pharmacy</option>
-    <option value="BPHARMA">B.Pharmacy</option>
-    <option value="MPHARMA">M.Pharmacy</option>
-    <option value="PHARMA-CHEM">Pharmaceutical Chemistry</option>
-    <option value="PHARMA-ANALYTICAL">Pharmaceutical Analysis</option>
-    <option value="PHARMA-QUALITY">Quality Assurance</option>
-    <option value="PHARMA-PHARMACO">Pharmacology</option>
-    <option value="PHARMA-PHARMACEUTICS">Pharmaceutics</option>
-    <option value="PHARMA-BIOTECH">Pharmaceutical Biotechnology</option>
-    <option value="PHARMA-REGULATORY">Regulatory Affairs</option>
-
-    <!-- Diploma -->
-    <option value="DCSE">Diploma - Computer Science Engineering</option>
-    <option value="DIT">Diploma - Information Technology</option>
-    <option value="DCYBER">Diploma - Cyber Security</option>
-    <option value="DECE">Diploma - Electronics & Communication</option>
-    <option value="DEEE">Diploma - Electrical & Electronics</option>
-    <option value="DEE">Diploma - Electrical Engineering</option>
-    <option value="DME">Diploma - Mechanical Engineering</option>
-    <option value="DCE">Diploma - Civil Engineering</option>
-    <option value="DMIN">Diploma - Mining Engineering</option>
-    <option value="DCHE">Diploma - Chemical Engineering</option>
-    <option value="DAG">Diploma - Agriculture Engineering</option>
-    <option value="DTX">Diploma - Textile Technology</option>
-    <option value="DPLASTIC">Diploma - Plastic Engineering</option>
-    <option value="DPOLY">Diploma - Polymer Engineering</option>
-  </select>
-
-  <select id="section">
-    <option value="">All Sections</option>
-    <option value="1">Section 1</option>
-    <option value="2">Section 2</option>
-    <option value="3">Section 3</option>
-    <option value="4">Section 4</option>
-    <option value="5">Section 5</option>
-  </select>
-
-
-<button class="search-btn" onclick="loadAttendance()">
-Search
-</button>
-
-</div>
-
-<table>
-
-<thead>
-
-<tr>
-<th>Enrollment</th>
-<th>Status</th>
-</tr>
-
-</thead>
-
-<tbody id="attendanceBody"></tbody>
-
-</table>
-
+<div id="lectureList" class="loading">
+Loading lectures...
 </div>
 
 </div>
@@ -304,44 +93,40 @@ Search
 <script>
 
 
-/* CHANGE THIS IF YOUR API PREFIX DIFFERENT */
+/* IMPORTANT: change if needed */
 
-const API_BASE = "https://college-hwbb.onrender.com";
-
-
-let selectedLecture = null;
+const API_URL =
+"https://college-hwbb.onrender.com/api/robot/lectures";
 
 
-
-/* load lectures */
 
 async function loadLectures(){
 
-    const list = document.getElementById("lectureList");
+    const container =
+    document.getElementById("lectureList");
 
-    list.innerHTML =
-        "<div class='loading'>Loading lectures...</div>";
+    container.innerHTML =
+    "<div class='loading'>Loading lectures...</div>";
 
     try{
 
         const res =
-        await fetch(`${API_BASE}/robot/lectures`);
+        await fetch(API_URL);
 
         const data =
         await res.json();
 
 
-        list.innerHTML = "";
+        if(!data.success || !data.lectures.length){
 
-
-        if(!data.lectures || data.lectures.length===0){
-
-            list.innerHTML =
+            container.innerHTML =
             "<div class='empty'>No lectures found</div>";
 
             return;
-
         }
+
+
+        container.innerHTML = "";
 
 
         data.lectures.forEach(lecture=>{
@@ -350,27 +135,32 @@ async function loadLectures(){
             document.createElement("div");
 
             div.className =
-            "lecture-card";
+            "lecture";
 
             div.innerHTML =
             `<strong>${lecture}</strong>`;
 
+
             div.onclick = ()=>{
 
-                openLecture(lecture);
+                /* redirect to lecture detail page */
+
+                window.location.href =
+                `lecture-details.html?lectureId=${lecture}`;
 
             };
 
 
-            list.appendChild(div);
+            container.appendChild(div);
 
         });
+
 
     }
 
     catch(err){
 
-        list.innerHTML =
+        container.innerHTML =
         "<div class='empty'>Failed to load lectures</div>";
 
     }
@@ -379,142 +169,9 @@ async function loadLectures(){
 
 
 
-/* open lecture */
-
-function openLecture(id){
-
-    selectedLecture = id;
-
-    document.getElementById("lectureList")
-    .style.display="none";
-
-
-    document.getElementById("details")
-    .style.display="block";
-
-
-    document.getElementById("lectureTitle")
-    .innerText = "Lecture ID: " + id;
-
-
-    loadAttendance();
-
-}
-
-
-
-/* go back */
-
-function goBack(){
-
-    document.getElementById("details")
-    .style.display="none";
-
-
-    document.getElementById("lectureList")
-    .style.display="block";
-
-}
-
-
-
-/* load attendance */
-
-async function loadAttendance(){
-
-    const body =
-    document.getElementById("attendanceBody");
-
-    body.innerHTML =
-    "<tr><td colspan='2' class='loading'>Loading...</td></tr>";
-
-
-    const year =
-    document.getElementById("year").value;
-
-    const branch =
-    document.getElementById("branch").value;
-
-    const section =
-    document.getElementById("section").value;
-
-
-    try{
-
-        const url =
-        `${API_BASE}/lecture/${selectedLecture}?year=${year}&branch=${branch}&section=${section}`;
-
-
-        const res =
-        await fetch(url);
-
-        const data =
-        await res.json();
-
-
-        body.innerHTML = "";
-
-
-        if(!data.records || data.records.length===0){
-
-            body.innerHTML =
-            "<tr><td colspan='2' class='empty'>No records found</td></tr>";
-
-            return;
-
-        }
-
-
-
-        data.records.forEach(r=>{
-
-
-            const tr =
-            document.createElement("tr");
-
-
-            const statusText =
-            r.status==="P" ? "Present" : "Absent";
-
-
-            const statusClass =
-            r.status==="P" ? "present" : "absent";
-
-
-            tr.innerHTML =
-
-            `
-            <td>${r.enrollment}</td>
-
-            <td class="${statusClass}">
-            ${statusText}
-            </td>
-            `;
-
-
-            body.appendChild(tr);
-
-
-        });
-
-
-    }
-
-    catch(err){
-
-        body.innerHTML =
-        "<tr><td colspan='2' class='empty'>Failed to load attendance</td></tr>";
-
-    }
-
-}
-
-
-
-/* start */
+/* auto load */
 
 loadLectures();
-
 
 
 </script>
