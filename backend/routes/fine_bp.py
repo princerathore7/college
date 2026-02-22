@@ -165,34 +165,34 @@ def all_fines():
 #     )
 
 #     return jsonify({"success": True, "message": "Payment verified"}), 200
-@fine_bp.route("/create-order", methods=["POST"])
-@cross_origin()
-def create_order():
-    data = request.json
-    enrollment = data.get("enrollment")
-    amount = int(data.get("amount"))  # rupees
+# @fine_bp.route("/create-order", methods=["POST"])
+# @cross_origin()
+# def create_order():
+#     data = request.json
+#     enrollment = data.get("enrollment")
+#     amount = int(data.get("amount"))  # rupees
 
-    if amount <= 0:
-        return jsonify({"success": False, "message": "Invalid amount"}), 400
+#     if amount <= 0:
+#         return jsonify({"success": False, "message": "Invalid amount"}), 400
 
-    # Razorpay client (credentials later env me dalna)
-    client = razorpay.Client(auth=(
-        os.getenv("RAZORPAY_KEY_ID"),
-        os.getenv("RAZORPAY_KEY_SECRET")
-    ))
+#     # Razorpay client (credentials later env me dalna)
+#     client = razorpay.Client(auth=(
+#         os.getenv("RAZORPAY_KEY_ID"),
+#         os.getenv("RAZORPAY_KEY_SECRET")
+#     ))
 
-    order = client.order.create({
-        "amount": amount * 100,
-        "currency": "INR",
-        "payment_capture": 1
-    })
+#     order = client.order.create({
+#         "amount": amount * 100,
+#         "currency": "INR",
+#         "payment_capture": 1
+#     })
 
-    return jsonify({
-        "success": True,
-        "order_id": order["id"],
-        "amount": amount,
-        "currency": "INR"
-    }), 200
+#     return jsonify({
+#         "success": True,
+#         "order_id": order["id"],
+#         "amount": amount,
+#         "currency": "INR"
+#     }), 200
 @fine_bp.route("/razorpay-webhook", methods=["POST"])
 def razorpay_webhook():
     payload = request.data
