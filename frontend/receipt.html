@@ -208,7 +208,20 @@ Back
 
 
 <script>
+function saveReceiptToLocal(receiptData) {
 
+    let receipts = JSON.parse(localStorage.getItem("studentReceipts")) || [];
+
+    receipts.push({
+        id: "RCPT_" + Date.now(),
+        enrollment: receiptData.enrollment,
+        amount: receiptData.amount,
+        reason: receiptData.reason,
+        date: new Date().toLocaleString()
+    });
+
+    localStorage.setItem("studentReceipts", JSON.stringify(receipts));
+}
 /**********************
 GET DATA FROM URL
 ***********************/

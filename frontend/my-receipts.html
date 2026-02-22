@@ -3,293 +3,122 @@
 <head>
 <meta charset="UTF-8">
 <title>My Receipts</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
 
 body{
-    font-family: Arial;
-    background:#f4f7fb;
-    margin:0;
-    padding:20px;
+font-family: Arial;
+background:#f4f6f9;
+padding:20px;
 }
 
 .container{
-    max-width:900px;
-    margin:auto;
+max-width:800px;
+margin:auto;
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
 
-.header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:20px;
+h2{
+margin-bottom:20px;
 }
 
-.title{
-    font-size:24px;
-    font-weight:bold;
-    color:#003366;
+.receipt{
+border:1px solid #ddd;
+padding:15px;
+margin-bottom:10px;
+border-radius:8px;
 }
 
-.back-btn{
-    background:#777;
-    color:#fff;
-    border:none;
-    padding:10px 15px;
-    border-radius:6px;
-    cursor:pointer;
+button{
+background:#007bff;
+color:white;
+border:none;
+padding:8px 15px;
+border-radius:5px;
+cursor:pointer;
 }
 
-.refresh-btn{
-    background:#003366;
-    color:#fff;
-    border:none;
-    padding:10px 15px;
-    border-radius:6px;
-    cursor:pointer;
-}
-
-.card{
-    background:#fff;
-    padding:15px;
-    border-radius:8px;
-    box-shadow:0 5px 15px rgba(0,0,0,.1);
-    margin-bottom:12px;
-}
-
-.row{
-    display:flex;
-    justify-content:space-between;
-    margin:6px 0;
-}
-
-.amount{
-    font-weight:bold;
-    color:#003366;
-    font-size:18px;
-}
-
-.view-btn{
-    background:#003366;
-    color:#fff;
-    border:none;
-    padding:8px 14px;
-    border-radius:6px;
-    cursor:pointer;
+button:hover{
+background:#0056b3;
 }
 
 .empty{
-    text-align:center;
-    color:#777;
-    margin-top:40px;
-    font-size:18px;
-}
-
-.loading{
-    text-align:center;
-    font-size:18px;
+color:gray;
 }
 
 </style>
-
 </head>
 <body>
 
 <div class="container">
 
-<div class="header">
+<h2><i class="fa-solid fa-receipt"></i> My Receipts</h2>
 
-<div class="title">My Receipts</div>
-
-<div>
-<button class="refresh-btn" onclick="loadReceipts()">
-Refresh
-</button>
-
-<button class="back-btn" onclick="goBack()">
-Back
-</button>
-</div>
-
-</div>
-
-<div id="receiptsList" class="loading">
-Loading receipts...
-</div>
+<div id="receiptList"></div>
 
 </div>
 
 <script>
 
-const API_BASE = "https://college-hwbb.onrender.com";
+function loadReceipts(){
 
+    const receipts = JSON.parse(localStorage.getItem("studentReceipts")) || [];
 
-/*********************************
-GET ENROLLMENT FROM studentProfile
-**********************************/
-function getEnrollment(){
+    const container = document.getElementById("receiptList");
 
-    const profile = JSON.parse(
-        localStorage.getItem("studentProfile")
-    );
-
-    if(profile && profile.enrollment){
-
-        return profile.enrollment;
-
-    }
-
-    return null;
-}
-
-
-/*********************************
-LOAD RECEIPTS FROM BACKEND
-**********************************/
-async function loadReceipts(){
-
-    const enrollment = getEnrollment();
-
-    console.log("Enrollment:", enrollment);
-
-    if(!enrollment){
-
-        document.getElementById("receiptsList").innerHTML =
-        "<div class='empty'>Enrollment not found. Please login again.</div>";
-
+    if(receipts.length === 0){
+        container.innerHTML = "<p class='empty'>No receipts found</p>";
         return;
     }
 
-    try{
-
-        const res = await fetch(
-        `${API_BASE}/api/receipts/finestudent/${enrollment}`
-        );
-
-        const data = await res.json();
-
-        if(!data.success || data.receipts.length === 0){
-
-            document.getElementById("receiptsList").innerHTML =
-            "<div class='empty'>No receipts found</div>";
-
-            return;
-        }
-
-        renderReceipts(data.receipts);
-
-    }
-    catch(err){
-
-        console.error(err);
-
-        document.getElementById("receiptsList").innerHTML =
-        "<div class='empty'>Error loading receipts</div>";
-    }
-
-}
-
-
-/*********************************
-RENDER RECEIPTS
-**********************************/
-function renderReceipts(receipts){
-
-    const container =
-    document.getElementById("receiptsList");
-
     container.innerHTML = "";
 
-    receipts.forEach(r => {
+    receipts.reverse().forEach(receipt => {
 
-        const div = document.createElement("div");
+        container.innerHTML += `
+        <div class="receipt">
+            <b>Receipt ID:</b> ${receipt.id} <br>
+            <b>Enrollment:</b> ${receipt.enrollment} <br>
+            <b>Amount:</b> ₹${receipt.amount} <br>
+            <b>Reason:</b> ${receipt.reason} <br>
+            <b>Date:</b> ${receipt.date} <br><br>
 
-        div.className = "card";
-
-        div.innerHTML = `
-
-        <div class="row">
-            <div>
-            <b>Receipt ID:</b> ${r._id}
-            </div>
-
-            <div class="amount">
-            ₹${r.amount_paid}
-            </div>
-        </div>
-
-        <div class="row">
-            <div>
-            <b>Reason:</b> ${r.reason}
-            </div>
-
-            <div>
-            ${formatDate(r.createdAt)}
-            </div>
-        </div>
-
-        <div class="row">
-            <div>
-            <b>Payment ID:</b>
-            ${r.payment_id}
-            </div>
-
-            <button class="view-btn"
-            onclick="viewReceipt('${r._id}')">
-
-            View / Download
-
+            <button onclick='viewReceipt("${receipt.id}")'>
+                View Receipt
             </button>
         </div>
-
         `;
-
-        container.appendChild(div);
 
     });
 
 }
 
+function viewReceipt(id){
 
-/*********************************
-VIEW RECEIPT PAGE
-**********************************/
-function viewReceipt(receiptId){
+    const receipts = JSON.parse(localStorage.getItem("studentReceipts")) || [];
 
-    window.location.href =
-    `receipt.html?receipt_id=${receiptId}`;
+    const receipt = receipts.find(r => r.id === id);
 
-}
+    if(!receipt){
+        alert("Receipt not found");
+        return;
+    }
 
-
-/*********************************
-DATE FORMAT
-**********************************/
-function formatDate(dateStr){
-
-    const d = new Date(dateStr);
-
-    return d.toLocaleDateString() + " " +
-           d.toLocaleTimeString();
+    alert(
+        "Receipt ID: " + receipt.id + "\n" +
+        "Enrollment: " + receipt.enrollment + "\n" +
+        "Amount: ₹" + receipt.amount + "\n" +
+        "Reason: " + receipt.reason + "\n" +
+        "Date: " + receipt.date
+    );
 
 }
 
-
-/*********************************
-BACK BUTTON
-**********************************/
-function goBack(){
-
-    window.location.href =
-    "student-dashboard.html";
-
-}
-
-
-/*********************************
-LOAD ON PAGE OPEN
-**********************************/
 loadReceipts();
 
 </script>
