@@ -1,74 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="3;url=/whiuhfuiewhfhehfehuifhewfebfeibfewfui/login.html">
-    <title>Acropolis | Redirecting...</title>
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #f4f7f6; /* Light professional background */
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acropolis Logo Animation</title>
 
-        .container {
-            text-align: center;
-            animation: fadeIn 1.5s ease-in-out;
-        }
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;800&display=swap" rel="stylesheet">
 
-        .logo {
-            max-width: 400px; /* Logo size control */
-            height: auto;
-            margin-bottom: 20px;
-        }
+<style>
+:root{
+  --dark-blue:#2E3192;
+  --light-blue:#00AEEF;
+  --red:#ED1C24;
+}
 
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #2c3e50; /* Matches the logo blue */
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            vertical-align: middle;
-            margin-right: 10px;
-        }
+body{
+  margin:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  background:#fff;
+  font-family:'Open Sans',sans-serif;
+  overflow:hidden;
+}
 
-        .message {
-            color: #333;
-            font-size: 1.1rem;
-            margin-top: 15px;
-        }
+.container{
+  position:relative;
+  width:300px;
+  text-align:center;
+}
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+#acropolis-logo{
+  width:300px;
+  display:block;
+}
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
+.path-hidden{
+  stroke-dasharray:1000;
+  stroke-dashoffset:1000;
+  opacity:0;
+  transition:opacity 0.8s ease;
+}
+
+/* fade out ellipses */
+.fade-out{
+  opacity:0 !important;
+}
+
+/* LOGO IMAGE */
+#final-logo{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%) scale(0.9);
+  width:140px;
+  opacity:0;
+  transition:opacity 1s ease, transform 1s ease;
+  pointer-events:none;
+}
+
+#final-logo.show{
+  opacity:1;
+  transform:translate(-50%,-50%) scale(1);
+}
+
+/* Text */
+.text-container{
+  margin-top:20px;
+  opacity:0;
+  transform:translateY(20px);
+  transition:all 1s ease;
+}
+
+.text-container.visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+.title{
+  font-size:48px;
+  font-weight:800;
+  color:var(--dark-blue);
+  margin:0;
+}
+
+.subtitle{
+  font-size:22px;
+  font-weight:300;
+  color:#777;
+  margin-top:-5px;
+}
+</style>
 </head>
+
 <body>
 
-    <div class="container">
-        <img src="logo.jpg" alt="Acropolis Logo" class="logo">
-        
-        <div class="message">
-            <div class="loader"></div>
-            Please wait, redirecting to login....
-        </div>
-    </div>
+<div class="container">
 
-    <script>
+<img src="logop.png" id="final-logo" alt="Acropolis Logo">
+
+<svg id="acropolis-logo" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
+
+  <ellipse id="orbit-1" cx="250" cy="200" rx="220" ry="100"
+    fill="none" stroke="var(--dark-blue)" stroke-width="8"
+    transform="rotate(-20 250 200)" class="path-hidden"/>
+
+  <ellipse id="orbit-2" cx="250" cy="200" rx="200" ry="90"
+    fill="none" stroke="var(--red)" stroke-width="8"
+    transform="rotate(20 250 200)" class="path-hidden"/>
+
+  <ellipse id="orbit-3" cx="250" cy="200" rx="180" ry="110"
+    fill="none" stroke="var(--light-blue)" stroke-width="8"
+    transform="rotate(70 250 200)" class="path-hidden"/>
+
+</svg>
+
+<div class="text-container" id="brand-text">
+  <h1 class="title">ACROPOLIS</h1>
+  <p class="subtitle">Enlightening Wisdom</p>
+</div>
+
+</div>
+
+<script>
+const animationData=[
+ {id:'orbit-1',delay:200,duration:1200},
+ {id:'orbit-2',delay:500,duration:1200},
+ {id:'orbit-3',delay:800,duration:1200}
+];
+
+function startAnimation(){
+ animationData.forEach(item=>{
+  setTimeout(()=>{
+   const el=document.getElementById(item.id);
+   el.style.opacity='1';
+   el.style.transition=`stroke-dashoffset ${item.duration}ms ease`;
+   el.style.strokeDashoffset='0';
+
+   if(item.id==='orbit-3'){
+     setTimeout(()=>{
+       // fade out ellipses
+       document.querySelectorAll('ellipse').forEach(e=>{
+         e.classList.add('fade-out');
+       });
+
+       // fade in logo
+       document.getElementById('final-logo').classList.add('show');
+
+       // show text
+       document.getElementById('brand-text').classList.add('visible');
+
+     },item.duration);
+   }
+  },item.delay);
+ });
+}
+
+window.onload=startAnimation;
+</script>
+  <script>
         // Backup JavaScript redirection
         setTimeout(function() {
             window.location.href = "/hdsuinidndsdjodbidhciebichsdcbsdcdsbcdbsvdsbvbdsbvf";
