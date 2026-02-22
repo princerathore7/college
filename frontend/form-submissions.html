@@ -24,28 +24,6 @@ body{margin:0;background:#f4f6f9;font-family:Inter;padding:30px}
   font-size:13px;font-weight:600;cursor:pointer
 }
 .empty{text-align:center;color:#777;padding:40px}
-   .back-btn {
-  background: #003366;          /* Navy Blue */
-  color: #fff;
-  border: none;
-  padding: 6px 12px;
-  font-size: 13px;
-  font-weight: 500;
-  border-radius: 6px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: 0.2s ease;
-}
-
-.back-btn:hover {
-  background: #002244;
-}
-
-.back-btn:active {
-  transform: scale(0.96);
-}
 </style>
 </head>
 
@@ -96,7 +74,7 @@ if(!mentorIdVal || !ALLOWED_SOURCES.includes(source)){
   throw new Error("Unauthorized access");
 }
 const grid = document.getElementById("formsGrid");
-let allForms = []; // store all forms
+
 async function loadForms(){
   try{
     const res = await fetch(
@@ -105,8 +83,7 @@ async function loadForms(){
 
     if(!res.ok) throw new Error("Server error");
 
-  allForms = await res.json();
-renderForms(allForms);
+    const forms = await res.json();
     grid.innerHTML = "";
 
     if(forms.length === 0){
@@ -133,43 +110,7 @@ renderForms(allForms);
     grid.innerHTML = `<div class="empty">Server error / API not reachable</div>`;
   }
 }
-function renderForms(forms){
-  grid.innerHTML = "";
 
-  if(forms.length === 0){
-    grid.innerHTML = `<div class="empty">No forms found</div>`;
-    return;
-  }
-
-  forms.forEach(f=>{
-    const div = document.createElement("div");
-    div.className="card";
-    div.innerHTML=`
-      <h3>${f.name}</h3>
-      <p>Total Submissions: <b>${f.submissions}</b></p>
-      <button class="btn"
-        onclick="openForm('${f.id}','${f.name}')">
-        View Submissions →
-      </button>
-    `;
-    grid.appendChild(div);
-  });
-}
-
-function filterForms(){
-  const search = document
-    .getElementById("searchInput")
-    .value.toLowerCase();
-
-  const filtered = allForms.filter(f =>
-    f.name.toLowerCase().includes(search)
-  );
-
-  renderForms(filtered);
-}
-function goback(){
-window.history.back();
-}
 function openForm(id,name){
   location.href=`form-data-details.html?formId=${id}&formName=${encodeURIComponent(name)}`;
 }
