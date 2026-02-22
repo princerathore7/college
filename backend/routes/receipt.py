@@ -67,20 +67,20 @@ def get_receipt_by_payment(payment_id):
 # 3️⃣ GET ALL RECEIPTS OF STUDENT
 # Used for payment history page
 # ---------------------------------------------------------
-@receipt_bp.route("/student/<enrollment>", methods=["GET"])
-@cross_origin()
-def get_student_receipts(enrollment):
+# @receipt_bp.route("/student/<enrollment>", methods=["GET"])
+# @cross_origin()
+# def get_student_receipts(enrollment):
 
-    receipts = list(db.receipts.find({
-        "enrollment": enrollment
-    }).sort("createdAt", -1))
+#     receipts = list(db.receipts.find({
+#         "enrollment": enrollment
+#     }).sort("createdAt", -1))
 
-    receipts = [serialize(r) for r in receipts]
+#     receipts = [serialize(r) for r in receipts]
 
-    return jsonify({
-        "success": True,
-        "receipts": receipts
-    }), 200
+#     return jsonify({
+#         "success": True,
+#         "receipts": receipts
+#     }), 200
 
 
 # ---------------------------------------------------------
@@ -121,7 +121,7 @@ def get_receipt(receipt_id):
         "success": True,
         "receipt": serialize(receipt)
     }), 200
-@receipt_bp.route("/student/<enrollment>", methods=["GET"])
+@receipt_bp.route("/finestudent/<enrollment>", methods=["GET"])
 @cross_origin()
 def get_student_receipts(enrollment):
 
