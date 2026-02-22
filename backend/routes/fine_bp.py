@@ -263,30 +263,76 @@ def razorpay_webhook():
     except Exception as e:
         print("❌ Razorpay webhook error:", e)
         return "Server Error", 500
-    # ---------------------------------------------------------
-# 🔹 AUTO CLEAR ALL FINES FOR A STUDENT
+   # ---------------------------------------------------------
+# 🤖 ROBOT API — AUTO CLEAR FINES WHEN RECEIPT CREATED
 # ---------------------------------------------------------
-@fine_bp.route("/clear-fines/<enrollment>", methods=["POST"])
-def clear_fines(enrollment):
+@fine_bp.route("/robot-clear-fines/<enrollment>", methods=["POST"])
+def robot_clear_fines(enrollment):
+
     try:
-        # Fetch all unpaid/partial fines
+
+        if not enrollment:
+            return jsonify({
+                "success": False,
+                "message": "Enrollment required"
+            }), 400
+
+
         fines = list(db.fine.find({
             "enrollment": enrollment,
             "status": {"$in": ["Unpaid", "Partial"]}
         }))
 
+
         if not fines:
-            return jsonify({"success": True, "message": "No fines to clear"}), 200
 
-        # Update all fines to zero
-        for f in fines:
-            db.fine.update_one(
-                {"_id": f["_id"]},
-                {"$set": {"fine": 0, "status": "Paid", "updatedAt": datetime.now()}}
-            )
+            return jsonify({
+                "success": True,
+                "message": "No fines found",
+                "updated": 0
+            }), 200
 
-        return jsonify({"success": True, "message": f"All fines for {enrollment} cleared successfully"}), 200
+
+        result = db.fine.update_many(
+
+            {
+                "enrollment": enrollment,
+                "status": {"$in": ["Unpaid", "Partial"]}
+            },
+
+            {
+                "$set": {
+                    "fine": 0,
+                    "status": "Paid",
+                    "updatedAt": datetime.utcnow()
+                }
+            }
+
+        )
+
+
+        print(f" cleared fines for {enrollment}, updated: {result.modified_count}")
+
+
+        return jsonify({
+
+            "success": True,
+
+            "message": "Robot cleared fines successfully",
+
+            "updated": result.modified_count
+
+        }), 200
+
 
     except Exception as e:
-        print("❌ Clear fines error:", e)
-        return jsonify({"success": False, "message": "Server error"}), 500
+
+        print("❌ Robot clear error:", e)
+
+        return jsonify({
+
+            "success": False,
+
+            "message": "Server error"
+
+        }), 500

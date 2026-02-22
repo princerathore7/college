@@ -3,7 +3,8 @@ from flask_cors import cross_origin
 from db import db
 from datetime import datetime
 from bson.objectid import ObjectId
-
+import requests
+import os
 
 receipt_bp = Blueprint("receipt_bp", __name__, url_prefix="/api/receipts")
 
@@ -123,25 +124,59 @@ def create_receipt(data):
         print(f"✅ Receipt created for {enrollment}")
 
 
-        # -------------------------------------------------
-        # AUTO CLEAR FINES AFTER RECEIPT
-        # -------------------------------------------------
-        clear_student_fines(enrollment)
+# ---------------------------------------------------------
+# 🤖 HELPER — CLEAR ALL FINES OF STUDENT
+# ---------------------------------------------------------
+def clear_student_fines(enrollment):
+
+    try:
+
+        if not enrollment:
+            print("❌ Enrollment missing in clear_student_fines")
+            return False
 
 
-        print(f"✅ Fine cleared for {enrollment}")
+        # Find unpaid or partial fines
+        fines = list(db.fine.find({
+            "enrollment": enrollment,
+            "status": {"$in": ["Unpaid", "Partial"]}
+        }))
 
 
-        return str(result.inserted_id)
+        if not fines:
+            print(f"ℹ️ No fines found for {enrollment}")
+            return True
+
+
+        # Update ALL fines to Paid and fine = 0
+        result = db.fine.update_many(
+
+            {
+                "enrollment": enrollment,
+                "status": {"$in": ["Unpaid", "Partial"]}
+            },
+
+            {
+                "$set": {
+                    "fine": 0,
+                    "status": "Paid",
+                    "updatedAt": datetime.utcnow()
+                }
+            }
+
+        )
+
+
+        print(f"✅ Cleared fines for {enrollment}, Modified: {result.modified_count}")
+
+        return True
 
 
     except Exception as e:
 
-        print("❌ CREATE RECEIPT ERROR:", str(e))
+        print("❌ clear_student_fines ERROR:", str(e))
 
-        return None
-
-
+        return False
 # ---------------------------------------------------------
 # GET RECEIPT BY PAYMENT ID
 # ---------------------------------------------------------
