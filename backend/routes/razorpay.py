@@ -2,6 +2,8 @@ import os
 import hmac
 import hashlib
 import razorpay
+from flask_cors import cross_origin
+
 from flask import Blueprint, request, jsonify
 from routes.receipt import create_receipt
 razorpay_bp = Blueprint("razorpay_bp", __name__)
