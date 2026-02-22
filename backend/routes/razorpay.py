@@ -75,8 +75,11 @@ def create_order():
         }), 500
 # 🔹 VERIFY PAYMENT (MANDATORY SECURITY)
 @razorpay_bp.route("/api/fines/verify-payment", methods=["POST"])
+@cross_origin()
 def verify_payment():
+
     try:
+
         data = request.get_json(force=True)
 
         razorpay_order_id = data.get("razorpay_order_id")
@@ -84,11 +87,16 @@ def verify_payment():
         razorpay_signature = data.get("razorpay_signature")
 
         if not all([razorpay_order_id, razorpay_payment_id, razorpay_signature]):
+
             return jsonify({
                 "success": False,
-                "message": "Missing payment verification fields"
+                "message": "Missing fields"
             }), 400
 
+
+        # ---------------------------------------------------------
+        # VERIFY SIGNATURE
+        # ---------------------------------------------------------
         body = f"{razorpay_order_id}|{razorpay_payment_id}"
 
         expected_signature = hmac.new(
@@ -97,15 +105,64 @@ def verify_payment():
             hashlib.sha256
         ).hexdigest()
 
-        if hmac.compare_digest(expected_signature, razorpay_signature):
-            return jsonify({"success": True})
+
+        if not hmac.compare_digest(expected_signature, razorpay_signature):
+
+            return jsonify({
+                "success": False,
+                "message": "Invalid signature"
+            }), 400
+
+
+        # ---------------------------------------------------------
+        # FETCH ORDER DETAILS FROM RAZORPAY
+        # ---------------------------------------------------------
+        order = client.order.fetch(razorpay_order_id)
+
+        enrollment = order["notes"].get("enrollment")
+
+        reason = order["notes"].get("reason", "College Fine")
+
+        student_class = order["notes"].get("class", "")
+
+        amount_paid = order["amount"] // 100
+
+
+        # ---------------------------------------------------------
+        # CREATE RECEIPT
+        # ---------------------------------------------------------
+        create_receipt({
+
+            "enrollment": enrollment,
+
+            "payment_id": razorpay_payment_id,
+
+            "order_id": razorpay_order_id,
+
+            "amount_paid": amount_paid,
+
+            "reason": reason,
+
+            "class": student_class,
+
+            "method": "UPI"
+
+        })
+
+
+        print(f"✅ Payment verified and receipt created for {enrollment}")
+
 
         return jsonify({
-            "success": False,
-            "message": "Invalid payment signature"
-        }), 400
+            "success": True,
+            "message": "Payment verified successfully"
+        })
+
 
     except Exception as e:
+
+        print("VERIFY ERROR:", e)
+
         return jsonify({
             "success": False,
             "error": str(e)
