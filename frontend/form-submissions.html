@@ -155,6 +155,7 @@ function renderForms(forms){
     grid.appendChild(div);
   });
 }
+
 function filterForms(){
   const search = document
     .getElementById("searchInput")
@@ -166,12 +167,13 @@ function filterForms(){
 
   renderForms(filtered);
 }
-function openForm(id,name){
-  location.href=`form-data-details.html?formId=${id}&formName=${encodeURIComponent(name)}`;
-}
 function goback(){
 window.history.back();
 }
+function openForm(id,name){
+  location.href=`form-data-details.html?formId=${id}&formName=${encodeURIComponent(name)}`;
+}
+
 loadForms();
 </script>
 
