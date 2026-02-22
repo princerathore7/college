@@ -149,99 +149,72 @@ def all_fines():
 
     return jsonify({"success": True, "fines": all_rec}), 200
 
-
-# ---------------------------------------------------------
-# 8️⃣ FUTURE — PAYMENT GATEWAY WEBHOOK
-# ---------------------------------------------------------
-# @fine_bp.route("/payment-success", methods=["POST"])
-# @cross_origin()
-# def payment_success():
-#     data = request.json
-#     enrollment = data.get("enrollment")
-
-#     db.fine.update_many(
-#         {"enrollment": enrollment},
-#         {"$set": {"status": "Paid", "updatedAt": datetime.now()}}
-#     )
-
-#     return jsonify({"success": True, "message": "Payment verified"}), 200
-# @fine_bp.route("/create-order", methods=["POST"])
-# @cross_origin()
-# def create_order():
-#     data = request.json
-#     enrollment = data.get("enrollment")
-#     amount = int(data.get("amount"))  # rupees
-
-#     if amount <= 0:
-#         return jsonify({"success": False, "message": "Invalid amount"}), 400
-
-#     # Razorpay client (credentials later env me dalna)
-#     client = razorpay.Client(auth=(
-#         os.getenv("RAZORPAY_KEY_ID"),
-#         os.getenv("RAZORPAY_KEY_SECRET")
-#     ))
-
-#     order = client.order.create({
-#         "amount": amount * 100,
-#         "currency": "INR",
-#         "payment_capture": 1
-#     })
-
-#     return jsonify({
-#         "success": True,
-#         "order_id": order["id"],
-#         "amount": amount,
-#         "currency": "INR"
-#     }), 200
 @fine_bp.route("/razorpay-webhook", methods=["POST"])
 def razorpay_webhook():
-    payload = request.data
-    signature = request.headers.get("X-Razorpay-Signature")
+    try:
+        payload = request.data
+        signature = request.headers.get("X-Razorpay-Signature")
 
-    webhook_secret = os.getenv("RAZORPAY_WEBHOOK_SECRET")
+        webhook_secret = os.getenv("RAZORPAY_WEBHOOK_SECRET")
+        expected_signature = hmac.new(
+            webhook_secret.encode(),
+            payload,
+            hashlib.sha256
+        ).hexdigest()
 
-    expected_signature = hmac.new(
-        webhook_secret.encode(),
-        payload,
-        hashlib.sha256
-    ).hexdigest()
+        if not hmac.compare_digest(expected_signature, signature):
+            return "Invalid signature", 400
 
-    if not hmac.compare_digest(expected_signature, signature):
-        return "Invalid signature", 400
+        event = json.loads(payload)
 
-    event = json.loads(payload)
+        # 🔹 Handle payment captured event
+        if event.get("event") == "payment.captured":
+            payment = event["payload"]["payment"]["entity"]
 
-    if event["event"] == "payment.captured":
-        payment = event["payload"]["payment"]["entity"]
+            enrollment = payment["notes"].get("enrollment")
+            amount_paid = payment["amount"] // 100  # paisa to rupees
 
-        enrollment = payment["notes"].get("enrollment")
-        amount_paid = payment["amount"] // 100
+            # 🔹 Insert transaction
+            db.payment_transactions.insert_one({
+                "enrollment": enrollment,
+                "amount_paid": amount_paid,
+                "razorpay_payment_id": payment["id"],
+                "razorpay_order_id": payment["order_id"],
+                "status": "success",
+                "createdAt": datetime.now()
+            })
 
-        # 🔹 Insert transaction
-        db.payment_transactions.insert_one({
-            "enrollment": enrollment,
-            "amount_paid": amount_paid,
-            "razorpay_payment_id": payment["id"],
-            "razorpay_order_id": payment["order_id"],
-            "status": "success",
-            "createdAt": datetime.now()
-        })
+            # 🔹 Fetch all unpaid/partial fines for this student
+            fines = list(db.fine.find({
+                "enrollment": enrollment,
+                "status": {"$in": ["Unpaid", "Partial"]}
+            }))
 
-        # 🔹 Recalculate fine
-        fine = db.fine.find_one({"enrollment": enrollment})
+            remaining_payment = amount_paid
 
-        total = fine["fine"]
-        paid = sum(t["amount_paid"] for t in db.payment_transactions.find({"enrollment": enrollment}))
-        pending = total - paid
+            for f in fines:
+                if remaining_payment <= 0:
+                    break
 
-        status = "Paid" if pending <= 0 else "Partial"
+                fine_amount = f["fine"]
 
-        db.fine.update_many(
-            {"enrollment": enrollment},
-            {"$set": {
-                "status": status,
-                "updatedAt": datetime.now()
-            }}
-        )
+                if remaining_payment >= fine_amount:
+                    # Full payment for this fine
+                    db.fine.update_one(
+                        {"_id": f["_id"]},
+                        {"$set": {"fine": 0, "status": "Paid", "updatedAt": datetime.now()}}
+                    )
+                    remaining_payment -= fine_amount
+                else:
+                    # Partial payment
+                    db.fine.update_one(
+                        {"_id": f["_id"]},
+                        {"$set": {"fine": fine_amount - remaining_payment, "status": "Partial", "updatedAt": datetime.now()}}
+                    )
+                    remaining_payment = 0
 
-    return "OK", 200
+        return "OK", 200
+
+    except Exception as e:
+        print("❌ Razorpay webhook error:", e)
+        return "Server Error", 500
