@@ -6,116 +6,223 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <link rel="icon" href="https://cdn.corenexis.com/view/6199335168">
+
 <style>
 body{margin:0;background:#f4f6f9;font-family:Inter;padding:30px}
 .container{max-width:1100px;margin:auto}
 .header{margin-bottom:20px}
 .header h1{margin:0}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:18px
+}
+
 .card{
-  background:#fff;border:1px solid #e1e5ec;
-  padding:18px;border-radius:4px
+  background:#fff;
+  border:1px solid #e1e5ec;
+  padding:18px;
+  border-radius:4px
 }
+
 .card h3{margin:0;font-size:18px}
-.card p{font-size:13px;color:#555}
-.btn{
-  margin-top:14px;padding:10px 14px;
-  border:none;background:#1e90ff;color:#fff;
-  font-size:13px;font-weight:600;cursor:pointer
+
+.card p{
+  font-size:13px;
+  color:#555
 }
-.empty{text-align:center;color:#777;padding:40px}
+
+.btn{
+  margin-top:14px;
+  padding:10px 14px;
+  border:none;
+  background:#1e90ff;
+  color:#fff;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer
+}
+
+.empty{
+  text-align:center;
+  color:#777;
+  padding:40px
+}
+
+.search-box{
+  margin-top:12px;
+  padding:10px;
+  width:100%;
+  max-width:350px;
+  border:1px solid #ccc;
+  border-radius:4px;
+  font-size:14px;
+}
+
+.back-btn{
+  margin-bottom:15px;
+  padding:6px 12px;
+  background:#003366;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
 </style>
 </head>
 
 <body>
-<button class="back-btn" onclick="goBack()">
-  ← Back
-</button>
+
+<button class="back-btn" onclick="goBack()">← Back</button>
+
 <div class="container">
+
   <div class="header">
     <h1>Forms</h1>
     <p>Click a form to view submissions</p>
+
+    <!-- WORKING SEARCH FIELD -->
+    <input
+      type="text"
+      id="searchInput"
+      class="search-box"
+      placeholder="Search forms..."
+      oninput="filterForms()"
+    >
   </div>
 
-  <!-- SEARCH FIELD -->
-  <input
-    type="text"
-    id="searchInput"
-    placeholder="Search forms..."
-    oninput="filterForms()"
-    style="
-      margin-top:10px;
-      padding:10px;
-      width:100%;
-      max-width:350px;
-      border:1px solid #ccc;
-      border-radius:4px;
-      font-size:14px;
-    "
-  >
-</div>
   <div class="grid" id="formsGrid"></div>
+
 </div>
 
 <script>
-          const mentorIdVal = localStorage.getItem("mentorId");
+
+const mentorIdVal = localStorage.getItem("mentorId");
 const source = sessionStorage.getItem("accessSource");
 const ALLOWED_SOURCES = ["ad", "admin"];
 
 if(!mentorIdVal || !ALLOWED_SOURCES.includes(source)){
   document.body.innerHTML = `
     <div class="denied-container">
-      <h1 style="color:#d32f2f; font-size: 3rem;">❌</h1>
+      <h1 style="color:#d32f2f;font-size:3rem;">❌</h1>
       <h2 style="color:#d32f2f">Access Denied</h2>
-      <p>Security protocol triggered. This incident will be reported.<br>Please login via the Official Administration Panel.</p>
-      <button onclick="location.href='/login.html'" style="width:200px">Back to Login</button>
+      <p>Please login via the Official Administration Panel.</p>
+      <button onclick="location.href='/login.html'">Back to Login</button>
     </div>
   `;
   throw new Error("Unauthorized access");
 }
+
 const grid = document.getElementById("formsGrid");
 
+let allForms = []; // store forms globally for search
+
+
+// LOAD FORMS FROM API
 async function loadForms(){
+
   try{
+
     const res = await fetch(
       "https://college-hwbb.onrender.com/api/admin/forms"
     );
 
-    if(!res.ok) throw new Error("Server error");
+    if(!res.ok)
+      throw new Error("Server error");
 
     const forms = await res.json();
-    grid.innerHTML = "";
 
-    if(forms.length === 0){
-      grid.innerHTML = `<div class="empty">No forms found</div>`;
-      return;
-    }
+    allForms = forms; // save globally
 
-    forms.forEach(f=>{
-      const div = document.createElement("div");
-      div.className="card";
-      div.innerHTML=`
-        <h3>${f.name}</h3>
-        <p>Total Submissions: <b>${f.submissions}</b></p>
-        <button class="btn"
-          onclick="openForm('${f.id}','${f.name}')">
-          View Submissions →
-        </button>
-      `;
-      grid.appendChild(div);
-    });
+    renderForms(forms);
 
-  }catch(err){
-    console.error(err);
-    grid.innerHTML = `<div class="empty">Server error / API not reachable</div>`;
   }
+  catch(err){
+
+    console.error(err);
+
+    grid.innerHTML =
+      `<div class="empty">Server error / API not reachable</div>`;
+
+  }
+
 }
 
+
+// RENDER FORMS FUNCTION
+function renderForms(forms){
+
+  grid.innerHTML = "";
+
+  if(forms.length === 0){
+
+    grid.innerHTML =
+      `<div class="empty">No forms found</div>`;
+
+    return;
+  }
+
+  forms.forEach(f=>{
+
+    const div = document.createElement("div");
+
+    div.className="card";
+
+    div.innerHTML=`
+      <h3>${f.name}</h3>
+      <p>Total Submissions: <b>${f.submissions}</b></p>
+      <button class="btn"
+        onclick="openForm('${f.id}','${f.name}')">
+        View Submissions →
+      </button>
+    `;
+
+    grid.appendChild(div);
+
+  });
+
+}
+
+
+// SEARCH FUNCTION
+function filterForms(){
+
+  const search =
+    document.getElementById("searchInput")
+    .value
+    .toLowerCase();
+
+  const filtered =
+    allForms.filter(form =>
+      form.name.toLowerCase().includes(search)
+    );
+
+  renderForms(filtered);
+
+}
+
+
+// OPEN FORM PAGE
 function openForm(id,name){
-  location.href=`form-data-details.html?formId=${id}&formName=${encodeURIComponent(name)}`;
+
+  location.href =
+    `form-data-details.html?formId=${id}&formName=${encodeURIComponent(name)}`;
+
 }
 
+
+// BACK BUTTON
+function goBack(){
+
+  window.history.back();
+
+}
+
+
+// INITIAL LOAD
 loadForms();
+
 </script>
 
 </body>
