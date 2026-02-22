@@ -1,3 +1,4 @@
+import os
 # Load .env ONLY in local development (NOT in Render)
 if os.environ.get("RENDER") is None:
     from dotenv import load_dotenv
@@ -7,7 +8,7 @@ from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
 from mongoengine import connect
 from pymongo import MongoClient, WriteConcern
-import os
+
 import cloudinary
 import cloudinary.uploader
 import firebase_init
