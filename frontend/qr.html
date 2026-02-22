@@ -47,6 +47,7 @@ button{
 <body>
 
 <div class="box">
+
   <h2>Scan & Pay</h2>
 
   <p><b>Enrollment:</b> <span id="enr"></span></p>
@@ -55,6 +56,7 @@ button{
   <button onclick="startPayment()">Generate QR Code</button>
 
   <div id="timer"></div>
+
 </div>
 
 <script>
@@ -62,8 +64,11 @@ button{
 const API_BASE = "https://college-hwbb.onrender.com";
 
 const params = new URLSearchParams(window.location.search);
+
 const enrollment = params.get("enrollment");
 const amount = params.get("amount");
+const reason = params.get("reason") || "College Fine";
+const studentClass = params.get("class") || "";
 
 document.getElementById("enr").innerText = enrollment || "-";
 document.getElementById("amt").innerText = amount || "-";
@@ -100,9 +105,11 @@ function startTimer(){
       if(rzp){
         rzp.close();
       }
+
     }
 
   },1000);
+
 }
 
 
@@ -124,17 +131,16 @@ async function startPayment(){
       body: JSON.stringify({
 
         enrollment: enrollment,
-        amount: amount
+        amount: amount,
+        reason: reason
 
       })
 
     });
 
-
     const data = await res.json();
 
     console.log("Order response:", data);
-
 
     if(!data.success){
 
@@ -155,66 +161,83 @@ async function startPayment(){
 
       name: "Acropolis Institute",
 
-      description: "Fine Payment QR",
+      description: "Fine Payment",
 
       order_id: data.order_id,
 
 
-  handler: async function (response){
+      /**********************
+       PAYMENT SUCCESS HANDLER
+      ***********************/
+      handler: async function (response){
 
-  clearInterval(timerInterval);
+        clearInterval(timerInterval);
 
-  try {
+        try {
 
-    // STEP 1: verify payment
-    const verifyRes = await fetch(`${API_BASE}/api/fines/verify-payment`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
+          // STEP 1: VERIFY PAYMENT
+          const verifyRes = await fetch(`${API_BASE}/api/fines/verify-payment`, {
+
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+
+              razorpay_order_id: response.razorpay_order_id,
+
+              razorpay_payment_id: response.razorpay_payment_id,
+
+              razorpay_signature: response.razorpay_signature
+
+            })
+
+          });
+
+          const verifyData = await verifyRes.json();
+
+          if(!verifyData.success){
+
+            alert("Payment verification failed");
+
+            return;
+
+          }
+
+          // STEP 2: REDIRECT TO RECEIPT PAGE
+          window.location.href =
+            `receipt.html?` +
+            `payment_id=${encodeURIComponent(response.razorpay_payment_id)}` +
+            `&order_id=${encodeURIComponent(response.razorpay_order_id)}` +
+            `&enrollment=${encodeURIComponent(enrollment)}` +
+            `&amount=${encodeURIComponent(amount)}` +
+            `&reason=${encodeURIComponent(reason)}` +
+            `&class=${encodeURIComponent(studentClass)}` +
+            `&method=UPI`;
+
+        }
+        catch(err){
+
+          console.error(err);
+
+          alert("Error verifying payment");
+
+        }
+
       },
-      body: JSON.stringify({
-        razorpay_order_id: response.razorpay_order_id,
-        razorpay_payment_id: response.razorpay_payment_id,
-        razorpay_signature: response.razorpay_signature
-      })
-    });
-
-    const verifyData = await verifyRes.json();
-
-    if(!verifyData.success){
-      alert("Payment verification failed");
-      return;
-    }
-
-    // STEP 2: CLEAR FINES DIRECTLY
-    const clearRes = await fetch(`${API_BASE}/api/fines/clear-fines/${enrollment}`,{
-      method:"POST"
-    });
-
-    const clearData = await clearRes.json();
-
-    console.log(clearData);
-
-    alert("Payment successful and fine cleared");
-
-    window.location.href = "fines.html";
-
-  }
-  catch(err){
-    console.error(err);
-    alert("Error updating fine");
-  }
-
-},
 
 
       notes: {
-        enrollment: enrollment
+
+        enrollment: enrollment,
+        reason: reason
+
       },
 
 
       /******** FORCE QR DISPLAY ********/
-
       config: {
 
         display: {

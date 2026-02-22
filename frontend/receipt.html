@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Fine Payment Receipt</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f7fb;
+    margin:0;
+    padding:20px;
+}
+
+.container{
+    max-width:650px;
+    margin:auto;
+}
+
+.receipt-box{
+    background:#fff;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 10px 25px rgba(0,0,0,.1);
+}
+
+.header{
+    text-align:center;
+    border-bottom:2px solid #003366;
+    padding-bottom:10px;
+    margin-bottom:20px;
+}
+
+.logo{
+    width:70px;
+    margin-bottom:10px;
+}
+
+.title{
+    font-size:22px;
+    font-weight:bold;
+    color:#003366;
+}
+
+.subtitle{
+    font-size:14px;
+    color:#666;
+}
+
+.row{
+    display:flex;
+    justify-content:space-between;
+    margin:8px 0;
+}
+
+.label{
+    font-weight:bold;
+}
+
+.value{
+    color:#333;
+}
+
+.amount-box{
+    background:#f0f6ff;
+    padding:15px;
+    border-radius:8px;
+    margin-top:15px;
+    text-align:center;
+}
+
+.amount{
+    font-size:28px;
+    font-weight:bold;
+    color:#003366;
+}
+
+.status{
+    color:green;
+    font-weight:bold;
+    margin-top:5px;
+}
+
+.footer{
+    text-align:center;
+    margin-top:20px;
+    font-size:13px;
+    color:#777;
+}
+
+.buttons{
+    margin-top:20px;
+    display:flex;
+    gap:10px;
+}
+
+button{
+    flex:1;
+    padding:12px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:15px;
+}
+
+.print-btn{
+    background:#003366;
+    color:#fff;
+}
+
+.back-btn{
+    background:#777;
+    color:#fff;
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<div class="receipt-box" id="receipt">
+
+<div class="header">
+
+<img src="logo.png" class="logo">
+
+<div class="title">Fine Payment Receipt</div>
+
+<div class="subtitle">
+Acropolis Institute of Technology & Research
+</div>
+
+</div>
+
+
+<div class="row">
+<div class="label">Enrollment:</div>
+<div class="value" id="enrollment"></div>
+</div>
+
+<div class="row">
+<div class="label">Class:</div>
+<div class="value" id="class"></div>
+</div>
+
+<div class="row">
+<div class="label">Reason:</div>
+<div class="value" id="reason"></div>
+</div>
+
+<div class="row">
+<div class="label">Payment ID:</div>
+<div class="value" id="payment_id"></div>
+</div>
+
+<div class="row">
+<div class="label">Date:</div>
+<div class="value" id="date"></div>
+</div>
+
+<div class="row">
+<div class="label">Time:</div>
+<div class="value" id="time"></div>
+</div>
+
+
+<div class="amount-box">
+
+<div>Total Paid</div>
+
+<div class="amount">
+₹<span id="amount"></span>
+</div>
+
+<div class="status">
+Payment Successful
+</div>
+
+</div>
+
+
+<div class="footer">
+This is a computer generated receipt.<br>
+No signature required.
+</div>
+
+</div>
+
+
+<div class="buttons">
+
+<button class="print-btn" onclick="printReceipt()">
+Print / Download
+</button>
+
+<button class="back-btn" onclick="goBack()">
+Back
+</button>
+
+</div>
+
+
+</div>
+
+
+<script>
+
+/**********************
+GET DATA FROM URL
+***********************/
+
+const params = new URLSearchParams(window.location.search);
+
+const enrollment = params.get("enrollment") || "-";
+const amount = params.get("amount") || "-";
+const reason = params.get("reason") || "-";
+const className = params.get("class") || "-";
+const paymentId = params.get("payment_id") || "-";
+
+
+/**********************
+SET VALUES
+***********************/
+
+document.getElementById("enrollment").innerText = enrollment;
+document.getElementById("amount").innerText = amount;
+document.getElementById("reason").innerText = reason;
+document.getElementById("class").innerText = className;
+document.getElementById("payment_id").innerText = paymentId;
+
+
+/**********************
+DATE TIME
+***********************/
+
+const now = new Date();
+
+document.getElementById("date").innerText =
+now.toLocaleDateString();
+
+document.getElementById("time").innerText =
+now.toLocaleTimeString();
+
+
+/**********************
+PRINT
+***********************/
+
+function printReceipt(){
+
+    window.print();
+
+}
+
+
+/**********************
+BACK
+***********************/
+
+function goBack(){
+
+    window.location.href = "student-dashboard.html";
+
+}
+
+</script>
+
+</body>
+</html>

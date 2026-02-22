@@ -8,7 +8,7 @@ import os
 import hmac
 import hashlib
 import json
-
+from routes.receipt import create_receipt
 # 🔔 Notification helper
 from routes.notifications import notify_fine
 
@@ -148,16 +148,25 @@ def all_fines():
     all_rec = [serialize(r) for r in all_rec]
 
     return jsonify({"success": True, "fines": all_rec}), 200
+# ---------------------------------------------------------
+# 🔹 RAZORPAY WEBHOOK — HANDLE PAYMENT SUCCESS
+# ---------------------------------------------------------
+from routes.receipt import create_receipt   # ADD THIS IMPORT AT TOP
 
 @fine_bp.route("/razorpay-webhook", methods=["POST"])
 def razorpay_webhook():
     try:
-        # 🔹 Read payload and signature
+        # 🔐 Get raw payload and signature
         payload = request.data
         signature = request.headers.get("X-Razorpay-Signature")
+
         webhook_secret = os.getenv("RAZORPAY_WEBHOOK_SECRET")
 
-        # 🔹 Validate webhook signature
+        if not webhook_secret:
+            print("❌ Webhook secret missing")
+            return "Webhook secret not configured", 500
+
+        # 🔐 Verify webhook signature
         expected_signature = hmac.new(
             webhook_secret.encode(),
             payload,
@@ -165,27 +174,43 @@ def razorpay_webhook():
         ).hexdigest()
 
         if not hmac.compare_digest(expected_signature, signature):
+            print("❌ Invalid Razorpay signature")
             return "Invalid signature", 400
 
+        # 🔹 Parse event
         event = json.loads(payload)
 
-        # 🔹 Process payment captured
+        # 🔹 Only handle successful captured payments
         if event.get("event") == "payment.captured":
-            payment = event["payload"]["payment"]["entity"]
-            enrollment = payment["notes"].get("enrollment")
-            amount_paid = payment["amount"] // 100  # paisa → rupees
 
-            # 🔹 Insert transaction
+            payment = event["payload"]["payment"]["entity"]
+
+            enrollment = payment["notes"].get("enrollment")
+            reason = payment["notes"].get("reason", "College Fine")
+
+            amount_paid = payment["amount"] // 100   # convert paisa → rupees
+
+            razorpay_payment_id = payment["id"]
+            razorpay_order_id = payment["order_id"]
+            payment_method = payment.get("method", "UPI")
+
+            print(f"✅ Payment captured for {enrollment}, Amount: ₹{amount_paid}")
+
+            # ---------------------------------------------------------
+            # 1️⃣ SAVE TRANSACTION
+            # ---------------------------------------------------------
             db.payment_transactions.insert_one({
                 "enrollment": enrollment,
                 "amount_paid": amount_paid,
-                "razorpay_payment_id": payment["id"],
-                "razorpay_order_id": payment["order_id"],
+                "razorpay_payment_id": razorpay_payment_id,
+                "razorpay_order_id": razorpay_order_id,
                 "status": "success",
                 "createdAt": datetime.now()
             })
 
-            # 🔹 Fetch all unpaid/partial fines
+            # ---------------------------------------------------------
+            # 2️⃣ CLEAR FINES AUTOMATICALLY
+            # ---------------------------------------------------------
             fines = list(db.fine.find({
                 "enrollment": enrollment,
                 "status": {"$in": ["Unpaid", "Partial"]}
@@ -193,29 +218,59 @@ def razorpay_webhook():
 
             remaining_payment = amount_paid
 
-            # 🔹 Automatically clear fines
             for f in fines:
+
                 if remaining_payment <= 0:
                     break
 
-                fine_amount = f["fine"]
+                fine_amount = int(f.get("fine", 0))
 
                 if remaining_payment >= fine_amount:
-                    # Full payment → fine = 0
+
+                    # FULL CLEAR
                     db.fine.update_one(
                         {"_id": f["_id"]},
-                        {"$set": {"fine": 0, "status": "Paid", "updatedAt": datetime.now()}}
+                        {"$set": {
+                            "fine": 0,
+                            "status": "Paid",
+                            "updatedAt": datetime.now()
+                        }}
                     )
+
                     remaining_payment -= fine_amount
+
                 else:
-                    # Partial payment
+
+                    # PARTIAL CLEAR
                     db.fine.update_one(
                         {"_id": f["_id"]},
-                        {"$set": {"fine": fine_amount - remaining_payment, "status": "Partial", "updatedAt": datetime.now()}}
+                        {"$set": {
+                            "fine": fine_amount - remaining_payment,
+                            "status": "Partial",
+                            "updatedAt": datetime.now()
+                        }}
                     )
+
                     remaining_payment = 0
 
+
+            # ---------------------------------------------------------
+            # 3️⃣ CREATE RECEIPT  ⭐ IMPORTANT
+            # ---------------------------------------------------------
+            create_receipt({
+                "enrollment": enrollment,
+                "payment_id": razorpay_payment_id,
+                "order_id": razorpay_order_id,
+                "amount_paid": amount_paid,
+                "reason": reason,
+                "method": payment_method
+            })
+
+            print("🧾 Receipt created successfully")
+
+
         return "OK", 200
+
 
     except Exception as e:
         print("❌ Razorpay webhook error:", e)

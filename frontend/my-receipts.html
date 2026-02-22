@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My Receipts</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body{
+    font-family: Arial;
+    background:#f4f7fb;
+    margin:0;
+    padding:20px;
+}
+
+.container{
+    max-width:900px;
+    margin:auto;
+}
+
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.title{
+    font-size:24px;
+    font-weight:bold;
+    color:#003366;
+}
+
+.back-btn{
+    background:#777;
+    color:#fff;
+    border:none;
+    padding:10px 15px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.card{
+    background:#fff;
+    padding:15px;
+    border-radius:8px;
+    box-shadow:0 5px 15px rgba(0,0,0,.1);
+    margin-bottom:12px;
+}
+
+.row{
+    display:flex;
+    justify-content:space-between;
+    margin:5px 0;
+}
+
+.amount{
+    font-weight:bold;
+    color:#003366;
+}
+
+button.view-btn{
+    background:#003366;
+    color:#fff;
+    border:none;
+    padding:8px 12px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.empty{
+    text-align:center;
+    color:#777;
+    margin-top:40px;
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<div class="header">
+
+<div class="title">My Receipts</div>
+
+<button class="back-btn" onclick="goBack()">
+Back
+</button>
+
+</div>
+
+<div id="receiptsList">
+
+Loading receipts...
+
+</div>
+
+</div>
+
+<script>
+
+const API_BASE = "https://college-hwbb.onrender.com";
+
+/***********************
+GET ENROLLMENT
+***********************/
+const enrollment = localStorage.getItem("studentEnrollment");
+
+if(!enrollment){
+
+    document.getElementById("receiptsList").innerHTML =
+    "<div class='empty'>Enrollment not found</div>";
+
+}
+
+
+/***********************
+LOAD RECEIPTS
+***********************/
+async function loadReceipts(){
+
+    try{
+
+        const res = await fetch(
+        `${API_BASE}/api/receipts/student/${enrollment}`);
+
+        const data = await res.json();
+
+        if(!data.success || data.receipts.length === 0){
+
+            document.getElementById("receiptsList").innerHTML =
+            "<div class='empty'>No receipts found</div>";
+
+            return;
+
+        }
+
+        renderReceipts(data.receipts);
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+        document.getElementById("receiptsList").innerHTML =
+        "<div class='empty'>Error loading receipts</div>";
+
+    }
+
+}
+
+
+/***********************
+RENDER RECEIPTS
+***********************/
+function renderReceipts(receipts){
+
+    const container =
+    document.getElementById("receiptsList");
+
+    container.innerHTML = "";
+
+    receipts.reverse().forEach(r => {
+
+        const div = document.createElement("div");
+
+        div.className = "card";
+
+        div.innerHTML = `
+
+        <div class="row">
+            <div><b>Receipt ID:</b> ${r._id}</div>
+            <div class="amount">₹${r.amount}</div>
+        </div>
+
+        <div class="row">
+            <div><b>Reason:</b> ${r.reason}</div>
+            <div>${formatDate(r.createdAt)}</div>
+        </div>
+
+        <div class="row">
+            <div><b>Payment ID:</b> ${r.payment_id}</div>
+
+            <button class="view-btn"
+            onclick="viewReceipt('${r._id}')">
+            View / Download
+            </button>
+
+        </div>
+
+        `;
+
+        container.appendChild(div);
+
+    });
+
+}
+
+
+/***********************
+VIEW RECEIPT
+***********************/
+function viewReceipt(receiptId){
+
+    window.location.href =
+    `receipt.html?receipt_id=${receiptId}`;
+
+}
+
+
+/***********************
+DATE FORMAT
+***********************/
+function formatDate(dateStr){
+
+    const d = new Date(dateStr);
+
+    return d.toLocaleDateString() + " " +
+           d.toLocaleTimeString();
+
+}
+
+
+/***********************
+BACK
+***********************/
+function goBack(){
+
+    window.location.href =
+    "student-dashboard.html";
+
+}
+
+
+/***********************
+LOAD ON START
+***********************/
+loadReceipts();
+
+</script>
+
+</body>
+</html>
