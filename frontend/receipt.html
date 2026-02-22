@@ -206,26 +206,38 @@ Back
 
 </div>
 
-
 <script>
+
+/**********************
+SAVE RECEIPT FUNCTION
+***********************/
 function saveReceiptToLocal(receiptData) {
 
     let receipts = JSON.parse(localStorage.getItem("studentReceipts")) || [];
+
+    // prevent duplicate save
+    const alreadyExists = receipts.find(r => r.paymentId === receiptData.paymentId);
+
+    if(alreadyExists){
+        return;
+    }
 
     receipts.push({
         id: "RCPT_" + Date.now(),
         enrollment: receiptData.enrollment,
         amount: receiptData.amount,
         reason: receiptData.reason,
+        paymentId: receiptData.paymentId,
         date: new Date().toLocaleString()
     });
 
     localStorage.setItem("studentReceipts", JSON.stringify(receipts));
 }
+
+
 /**********************
 GET DATA FROM URL
 ***********************/
-
 const params = new URLSearchParams(window.location.search);
 
 const enrollment = params.get("enrollment") || "-";
@@ -236,9 +248,8 @@ const paymentId = params.get("payment_id") || "-";
 
 
 /**********************
-SET VALUES
+SET VALUES UI
 ***********************/
-
 document.getElementById("enrollment").innerText = enrollment;
 document.getElementById("amount").innerText = amount;
 document.getElementById("reason").innerText = reason;
@@ -247,9 +258,23 @@ document.getElementById("payment_id").innerText = paymentId;
 
 
 /**********************
+SAVE RECEIPT HERE ✅ IMPORTANT
+***********************/
+if(enrollment !== "-" && paymentId !== "-"){
+
+    saveReceiptToLocal({
+        enrollment: enrollment,
+        amount: amount,
+        reason: reason,
+        paymentId: paymentId
+    });
+
+}
+
+
+/**********************
 DATE TIME
 ***********************/
-
 const now = new Date();
 
 document.getElementById("date").innerText =
@@ -262,25 +287,18 @@ now.toLocaleTimeString();
 /**********************
 PRINT
 ***********************/
-
 function printReceipt(){
-
     window.print();
-
 }
 
 
 /**********************
 BACK
 ***********************/
-
 function goBack(){
-
     window.location.href = "student-dashboard.html";
-
 }
 
 </script>
-
 </body>
 </html>
