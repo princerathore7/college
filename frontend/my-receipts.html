@@ -41,6 +41,15 @@ body{
     cursor:pointer;
 }
 
+.refresh-btn{
+    background:#003366;
+    color:#fff;
+    border:none;
+    padding:10px 15px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
 .card{
     background:#fff;
     padding:15px;
@@ -52,19 +61,20 @@ body{
 .row{
     display:flex;
     justify-content:space-between;
-    margin:5px 0;
+    margin:6px 0;
 }
 
 .amount{
     font-weight:bold;
     color:#003366;
+    font-size:18px;
 }
 
-button.view-btn{
+.view-btn{
     background:#003366;
     color:#fff;
     border:none;
-    padding:8px 12px;
+    padding:8px 14px;
     border-radius:6px;
     cursor:pointer;
 }
@@ -73,6 +83,12 @@ button.view-btn{
     text-align:center;
     color:#777;
     margin-top:40px;
+    font-size:18px;
+}
+
+.loading{
+    text-align:center;
+    font-size:18px;
 }
 
 </style>
@@ -86,16 +102,20 @@ button.view-btn{
 
 <div class="title">My Receipts</div>
 
+<div>
+<button class="refresh-btn" onclick="loadReceipts()">
+Refresh
+</button>
+
 <button class="back-btn" onclick="goBack()">
 Back
 </button>
+</div>
 
 </div>
 
-<div id="receiptsList">
-
+<div id="receiptsList" class="loading">
 Loading receipts...
-
 </div>
 
 </div>
@@ -104,28 +124,48 @@ Loading receipts...
 
 const API_BASE = "https://college-hwbb.onrender.com";
 
-/***********************
-GET ENROLLMENT
-***********************/
-const enrollment = localStorage.getItem("enrollment");
 
-if(!enrollment){
+/*********************************
+GET ENROLLMENT FROM studentProfile
+**********************************/
+function getEnrollment(){
 
-    document.getElementById("receiptsList").innerHTML =
-    "<div class='empty'>Enrollment not found</div>";
+    const profile = JSON.parse(
+        localStorage.getItem("studentProfile")
+    );
 
+    if(profile && profile.enrollment){
+
+        return profile.enrollment;
+
+    }
+
+    return null;
 }
 
 
-/***********************
-LOAD RECEIPTS
-***********************/
+/*********************************
+LOAD RECEIPTS FROM BACKEND
+**********************************/
 async function loadReceipts(){
+
+    const enrollment = getEnrollment();
+
+    console.log("Enrollment:", enrollment);
+
+    if(!enrollment){
+
+        document.getElementById("receiptsList").innerHTML =
+        "<div class='empty'>Enrollment not found. Please login again.</div>";
+
+        return;
+    }
 
     try{
 
         const res = await fetch(
-        `${API_BASE}/api/receipts/student/${enrollment}`);
+        `${API_BASE}/api/receipts/finestudent/${enrollment}`
+        );
 
         const data = await res.json();
 
@@ -135,28 +175,25 @@ async function loadReceipts(){
             "<div class='empty'>No receipts found</div>";
 
             return;
-
         }
 
         renderReceipts(data.receipts);
 
     }
-
     catch(err){
 
         console.error(err);
 
         document.getElementById("receiptsList").innerHTML =
         "<div class='empty'>Error loading receipts</div>";
-
     }
 
 }
 
 
-/***********************
+/*********************************
 RENDER RECEIPTS
-***********************/
+**********************************/
 function renderReceipts(receipts){
 
     const container =
@@ -164,7 +201,7 @@ function renderReceipts(receipts){
 
     container.innerHTML = "";
 
-    receipts.reverse().forEach(r => {
+    receipts.forEach(r => {
 
         const div = document.createElement("div");
 
@@ -173,23 +210,37 @@ function renderReceipts(receipts){
         div.innerHTML = `
 
         <div class="row">
-            <div><b>Receipt ID:</b> ${r._id}</div>
-            <div class="amount">₹${r.amount}</div>
+            <div>
+            <b>Receipt ID:</b> ${r._id}
+            </div>
+
+            <div class="amount">
+            ₹${r.amount_paid}
+            </div>
         </div>
 
         <div class="row">
-            <div><b>Reason:</b> ${r.reason}</div>
-            <div>${formatDate(r.createdAt)}</div>
+            <div>
+            <b>Reason:</b> ${r.reason}
+            </div>
+
+            <div>
+            ${formatDate(r.createdAt)}
+            </div>
         </div>
 
         <div class="row">
-            <div><b>Payment ID:</b> ${r.payment_id}</div>
+            <div>
+            <b>Payment ID:</b>
+            ${r.payment_id}
+            </div>
 
             <button class="view-btn"
             onclick="viewReceipt('${r._id}')">
-            View / Download
-            </button>
 
+            View / Download
+
+            </button>
         </div>
 
         `;
@@ -201,9 +252,9 @@ function renderReceipts(receipts){
 }
 
 
-/***********************
-VIEW RECEIPT
-***********************/
+/*********************************
+VIEW RECEIPT PAGE
+**********************************/
 function viewReceipt(receiptId){
 
     window.location.href =
@@ -212,9 +263,9 @@ function viewReceipt(receiptId){
 }
 
 
-/***********************
+/*********************************
 DATE FORMAT
-***********************/
+**********************************/
 function formatDate(dateStr){
 
     const d = new Date(dateStr);
@@ -225,9 +276,9 @@ function formatDate(dateStr){
 }
 
 
-/***********************
-BACK
-***********************/
+/*********************************
+BACK BUTTON
+**********************************/
 function goBack(){
 
     window.location.href =
@@ -236,9 +287,9 @@ function goBack(){
 }
 
 
-/***********************
-LOAD ON START
-***********************/
+/*********************************
+LOAD ON PAGE OPEN
+**********************************/
 loadReceipts();
 
 </script>
