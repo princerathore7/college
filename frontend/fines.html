@@ -154,7 +154,9 @@
 </button>
 
 <div class="container">
-
+<button onclick="refreshPage()" style="background:#3498db;">
+    Refresh
+</button>
     <h3>Check Your Fine</h3>
 
     <input type="text" id="searchEnrollment" placeholder="Enter Enrollment Number">
@@ -213,18 +215,32 @@ async function searchFine() {
         body.innerHTML = "";
         let total = 0;
 
-        fines.forEach(f => {
-            total += Number(f.fine);
+       fines.forEach(f => {
 
-            body.innerHTML += `
-                <tr>
-                    <td>${f.enrollment}</td>
-                    <td>₹ ${f.fine}</td>
-                    <td>${f.reason}</td>
-                    <td>${f.status || "Pending"}</td>
-                </tr>
-            `;
-        });
+    const status = f.status || "Pending";
+
+    const color =
+        status.toLowerCase() === "paid"
+        ? "green"
+        : status.toLowerCase() === "partial"
+        ? "orange"
+        : "red";
+
+    if(status.toLowerCase() !== "paid"){
+        total += Number(f.fine);
+    }
+
+    body.innerHTML += `
+        <tr>
+            <td>${f.enrollment}</td>
+            <td>₹ ${f.fine}</td>
+            <td>${f.reason}</td>
+            <td style="color:${color}; font-weight:bold;">
+                ${status}
+            </td>
+        </tr>
+    `;
+});
 
         table.classList.remove("hidden");
         totalBox.classList.remove("hidden");
@@ -238,7 +254,9 @@ async function searchFine() {
         alert("Server error");
     }
 }
-
+function refreshPage(){
+    location.reload();
+}
 function goToPayment() {
     const enr = document.getElementById("searchEnrollment").value.trim();
     const amt = document.getElementById("totalFine").innerText;
