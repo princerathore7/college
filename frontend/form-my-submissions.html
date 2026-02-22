@@ -111,36 +111,13 @@ tbody tr:hover{
   background:#e9edf3;
   color:var(--navy);
 }
- .back-btn {
-  background: #003366;          /* Navy Blue */
-  color: #fff;
-  border: none;
-  padding: 6px 12px;
-  font-size: 13px;
-  font-weight: 500;
-  border-radius: 6px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: 0.2s ease;
-}
-
-.back-btn:hover {
-  background: #002244;
-}
-
-.back-btn:active {
-  transform: scale(0.96);
-}
+ 
 </style>
 </head>
 
 <body>
 <div class="container">
-<button class="back-btn" onclick="goBack()">
-  ← Back
-</button>
+
   <!-- HEADER -->
   <div class="header">
     <h1>My Submitted Forms</h1>
@@ -234,9 +211,7 @@ function renderTable(submissions){
     `;
   });
 }
-function goback(){
-window.history.back();
-}
+
 function alertReason(reason){
   alert("Disapproved Reason:\n\n" + reason);
 }
