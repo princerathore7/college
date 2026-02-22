@@ -3,40 +3,55 @@ from flask_cors import cross_origin
 from db import db
 from datetime import datetime
 from bson.objectid import ObjectId
+from utils.serializer import serialize_list
 
 receipt_bp = Blueprint("receipt_bp", __name__, url_prefix="/api/receipts")
 
 
 # ---------------------------------------------------------
-# Helper — serialize Mongo Object
+# Helper — serialize single receipt
 # ---------------------------------------------------------
 def serialize(receipt):
-    receipt["_id"] = str(receipt["_id"])
-    return receipt
 
-
-# ---------------------------------------------------------
-# 1️⃣ CREATE RECEIPT (called internally after payment success)
-# ---------------------------------------------------------
-def create_receipt(data):
-    """
-    This function will be called from razorpay webhook
-    """
-
-    receipt = {
-        "enrollment": data.get("enrollment"),
-        "payment_id": data.get("payment_id"),
-        "order_id": data.get("order_id"),
-        "amount_paid": data.get("amount_paid"),
-        "reason": data.get("reason", "College Fine"),
-        "payment_method": data.get("method", "UPI"),
-        "status": "Paid",
-        "createdAt": datetime.now()
+    return {
+        "_id": str(receipt.get("_id")),
+        "enrollment": receipt.get("enrollment"),
+        "payment_id": receipt.get("payment_id"),
+        "order_id": receipt.get("order_id"),
+        "amount_paid": receipt.get("amount_paid"),
+        "reason": receipt.get("reason"),
+        "payment_method": receipt.get("payment_method"),
+        "status": receipt.get("status"),
+        "createdAt": receipt.get("createdAt").isoformat() if receipt.get("createdAt") else None
     }
 
-    result = db.receipts.insert_one(receipt)
 
-    return str(result.inserted_id)
+# ---------------------------------------------------------
+# 1️⃣ CREATE RECEIPT
+# Called from razorpay_bp after payment success
+# ---------------------------------------------------------
+def create_receipt(data):
+
+    try:
+
+        receipt = {
+            "enrollment": data.get("enrollment"),
+            "payment_id": data.get("payment_id"),
+            "order_id": data.get("order_id"),
+            "amount_paid": data.get("amount_paid"),
+            "reason": data.get("reason", "College Fine"),
+            "payment_method": data.get("method", "UPI"),
+            "status": "Paid",
+            "createdAt": datetime.utcnow()
+        }
+
+        result = db.receipts.insert_one(receipt)
+
+        return str(result.inserted_id)
+
+    except Exception as e:
+        print("CREATE RECEIPT ERROR:", str(e))
+        return None
 
 
 # ---------------------------------------------------------
@@ -47,40 +62,62 @@ def create_receipt(data):
 @cross_origin()
 def get_receipt_by_payment(payment_id):
 
-    receipt = db.receipts.find_one({
-        "payment_id": payment_id
-    })
+    try:
 
-    if not receipt:
+        receipt = db.receipts.find_one({
+            "payment_id": payment_id
+        })
+
+        if not receipt:
+            return jsonify({
+                "success": False,
+                "message": "Receipt not found"
+            }), 404
+
+        return jsonify({
+            "success": True,
+            "receipt": serialize(receipt)
+        }), 200
+
+    except Exception as e:
+
+        print("GET RECEIPT ERROR:", str(e))
+
         return jsonify({
             "success": False,
-            "message": "Receipt not found"
-        }), 404
-
-    return jsonify({
-        "success": True,
-        "receipt": serialize(receipt)
-    }), 200
+            "message": "Server error"
+        }), 500
 
 
 # ---------------------------------------------------------
 # 3️⃣ GET ALL RECEIPTS OF STUDENT
 # Used for payment history page
 # ---------------------------------------------------------
-# @receipt_bp.route("/student/<enrollment>", methods=["GET"])
-# @cross_origin()
-# def get_student_receipts(enrollment):
+@receipt_bp.route("/finestudent/<enrollment>", methods=["GET"])
+@cross_origin()
+def get_student_receipts(enrollment):
 
-#     receipts = list(db.receipts.find({
-#         "enrollment": enrollment
-#     }).sort("createdAt", -1))
+    try:
 
-#     receipts = [serialize(r) for r in receipts]
+        receipts = list(
+            db.receipts
+            .find({"enrollment": enrollment})
+            .sort("createdAt", -1)
+        )
 
-#     return jsonify({
-#         "success": True,
-#         "receipts": receipts
-#     }), 200
+        return jsonify({
+            "success": True,
+            "receipts": serialize_list(receipts)
+        }), 200
+
+    except Exception as e:
+
+        print("GET STUDENT RECEIPTS ERROR:", str(e))
+
+        return jsonify({
+            "success": False,
+            "message": "Server error"
+        }), 500
 
 
 # ---------------------------------------------------------
@@ -90,14 +127,27 @@ def get_receipt_by_payment(payment_id):
 @cross_origin()
 def get_all_receipts():
 
-    receipts = list(db.receipts.find().sort("createdAt", -1))
+    try:
 
-    receipts = [serialize(r) for r in receipts]
+        receipts = list(
+            db.receipts
+            .find()
+            .sort("createdAt", -1)
+        )
 
-    return jsonify({
-        "success": True,
-        "receipts": receipts
-    }), 200
+        return jsonify({
+            "success": True,
+            "receipts": serialize_list(receipts)
+        }), 200
+
+    except Exception as e:
+
+        print("GET ALL RECEIPTS ERROR:", str(e))
+
+        return jsonify({
+            "success": False,
+            "message": "Server error"
+        }), 500
 
 
 # ---------------------------------------------------------
@@ -107,29 +157,28 @@ def get_all_receipts():
 @cross_origin()
 def get_receipt(receipt_id):
 
-    receipt = db.receipts.find_one({
-        "_id": ObjectId(receipt_id)
-    })
+    try:
 
-    if not receipt:
+        receipt = db.receipts.find_one({
+            "_id": ObjectId(receipt_id)
+        })
+
+        if not receipt:
+            return jsonify({
+                "success": False,
+                "message": "Receipt not found"
+            }), 404
+
+        return jsonify({
+            "success": True,
+            "receipt": serialize(receipt)
+        }), 200
+
+    except Exception as e:
+
+        print("GET RECEIPT BY ID ERROR:", str(e))
+
         return jsonify({
             "success": False,
-            "message": "Receipt not found"
-        }), 404
-
-    return jsonify({
-        "success": True,
-        "receipt": serialize(receipt)
-    }), 200
-@receipt_bp.route("/finestudent/<enrollment>", methods=["GET"])
-@cross_origin()
-def get_student_receipts(enrollment):
-
-    receipts = list(db.receipts.find({
-        "enrollment": enrollment
-    }).sort("createdAt", -1))
-
-    return jsonify({
-        "success": True,
-        "receipts": serialize_list(receipts)
-    }), 200
+            "message": "Invalid receipt ID"
+        }), 400
