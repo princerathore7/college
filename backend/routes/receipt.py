@@ -3,8 +3,6 @@ from flask_cors import cross_origin
 from db import db
 from datetime import datetime
 from bson.objectid import ObjectId
-import requests
-import os
 
 receipt_bp = Blueprint("receipt_bp", __name__, url_prefix="/api/receipts")
 
@@ -32,12 +30,11 @@ def serialize(receipt):
 # SERIALIZE LIST
 # ---------------------------------------------------------
 def serialize_list(receipts):
-
     return [serialize(r) for r in receipts]
 
 
 # ---------------------------------------------------------
-# HELPER — GET FINE REASON FROM DB IF NOT PROVIDED
+# GET LATEST FINE REASON FROM DB
 # ---------------------------------------------------------
 def get_reason_from_fine(enrollment):
 
@@ -53,27 +50,48 @@ def get_reason_from_fine(enrollment):
 
 
 # ---------------------------------------------------------
-# HELPER — CLEAR ALL FINES AFTER RECEIPT CREATED
+# 🤖 CLEAR ALL FINES OF STUDENT
 # ---------------------------------------------------------
 def clear_student_fines(enrollment):
 
-    db.fine.update_many(
-        {
-            "enrollment": enrollment,
-            "status": {"$in": ["Unpaid", "Partial"]}
-        },
-        {
-            "$set": {
-                "fine": 0,
-                "status": "Paid",
-                "updatedAt": datetime.utcnow()
+    try:
+
+        if not enrollment:
+            print("❌ Enrollment missing in clear_student_fines")
+            return False
+
+
+        result = db.fine.update_many(
+
+            {
+                "enrollment": enrollment,
+                "status": {"$in": ["Unpaid", "Partial"]}
+            },
+
+            {
+                "$set": {
+                    "fine": 0,
+                    "status": "Paid",
+                    "updatedAt": datetime.utcnow()
+                }
             }
-        }
-    )
+
+        )
+
+
+        print(f"✅ Cleared fines for {enrollment}, Modified: {result.modified_count}")
+
+        return True
+
+
+    except Exception as e:
+
+        print("❌ clear_student_fines ERROR:", str(e))
+        return False
 
 
 # ---------------------------------------------------------
-# CREATE RECEIPT  ⭐ MAIN FUNCTION USED BY WEBHOOK
+# CREATE RECEIPT  ⭐ MAIN FUNCTION
 # ---------------------------------------------------------
 def create_receipt(data):
 
@@ -86,9 +104,7 @@ def create_receipt(data):
             return None
 
 
-        # -------------------------------------------------
-        # GET REASON (Priority: webhook → db → default)
-        # -------------------------------------------------
+        # Priority: webhook → db → default
         reason = data.get("reason")
 
         if not reason:
@@ -118,65 +134,28 @@ def create_receipt(data):
         }
 
 
+        # INSERT RECEIPT
         result = db.receipts.insert_one(receipt)
-
 
         print(f"✅ Receipt created for {enrollment}")
 
 
-# ---------------------------------------------------------
-# 🤖 HELPER — CLEAR ALL FINES OF STUDENT
-# ---------------------------------------------------------
-def clear_student_fines(enrollment):
-
-    try:
-
-        if not enrollment:
-            print("❌ Enrollment missing in clear_student_fines")
-            return False
+        # 🤖 AUTO CLEAR FINES
+        clear_student_fines(enrollment)
 
 
-        # Find unpaid or partial fines
-        fines = list(db.fine.find({
-            "enrollment": enrollment,
-            "status": {"$in": ["Unpaid", "Partial"]}
-        }))
+        print(f"✅ Fine cleared for {enrollment}")
 
 
-        if not fines:
-            print(f"ℹ️ No fines found for {enrollment}")
-            return True
-
-
-        # Update ALL fines to Paid and fine = 0
-        result = db.fine.update_many(
-
-            {
-                "enrollment": enrollment,
-                "status": {"$in": ["Unpaid", "Partial"]}
-            },
-
-            {
-                "$set": {
-                    "fine": 0,
-                    "status": "Paid",
-                    "updatedAt": datetime.utcnow()
-                }
-            }
-
-        )
-
-
-        print(f"✅ Cleared fines for {enrollment}, Modified: {result.modified_count}")
-
-        return True
+        return str(result.inserted_id)
 
 
     except Exception as e:
 
-        print("❌ clear_student_fines ERROR:", str(e))
+        print("❌ CREATE RECEIPT ERROR:", str(e))
+        return None
 
-        return False
+
 # ---------------------------------------------------------
 # GET RECEIPT BY PAYMENT ID
 # ---------------------------------------------------------
@@ -229,7 +208,6 @@ def get_student_receipts(enrollment):
             .sort("createdAt", -1)
         )
 
-
         return jsonify({
             "success": True,
             "receipts": serialize_list(receipts)
@@ -247,7 +225,7 @@ def get_student_receipts(enrollment):
 
 
 # ---------------------------------------------------------
-# GET ALL RECEIPTS ADMIN
+# GET ALL RECEIPTS
 # ---------------------------------------------------------
 @receipt_bp.route("/all", methods=["GET"])
 @cross_origin()
@@ -260,7 +238,6 @@ def get_all_receipts():
             .find()
             .sort("createdAt", -1)
         )
-
 
         return jsonify({
             "success": True,
@@ -291,7 +268,6 @@ def get_receipt(receipt_id):
             "_id": ObjectId(receipt_id)
         })
 
-
         if not receipt:
 
             return jsonify({
@@ -308,7 +284,7 @@ def get_receipt(receipt_id):
 
     except Exception as e:
 
-        print("GET RECEIPT BY ID ERROR:", str(e))
+        print("GET RECEIPT ERROR:", str(e))
 
         return jsonify({
             "success": False,
