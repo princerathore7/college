@@ -181,6 +181,28 @@
             .navbar { flex-direction: column; gap: 15px; text-align: center; }
             .student-pill { text-align: center; }
         }
+           .back-btn {
+  background: #003366;          /* Navy Blue */
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: 0.2s ease;
+}
+
+.back-btn:hover {
+  background: #002244;
+}
+
+.back-btn:active {
+  transform: scale(0.96);
+}
     </style>
 </head>
 <body>
@@ -190,6 +212,9 @@
         <img src="logo.jpg" alt="University Logo" onerror="this.src='https://via.placeholder.com/40'">
         <h2>Student Portal</h2>
     </div>
+    <button class="back-btn" onclick="goBack()">
+  ← Back
+</button>
     <div class="student-pill">
         <span class="name" id="studentName">Loading...</span>
         <span class="enroll" id="studentEnrollment">Please wait</span>
@@ -295,7 +320,9 @@ function loadStudentInfo() {
 function openForm(formId) {
     window.location.href = `form-fill.html?formId=${formId}`;
 }
-
+function goback(){
+window.history.back();
+}
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
     loadStudentInfo();

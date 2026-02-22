@@ -150,6 +150,28 @@ body{
   padding:20px;
   color:#666;
 }
+ .back-btn {
+  background: #003366;          /* Navy Blue */
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: 0.2s ease;
+}
+
+.back-btn:hover {
+  background: #002244;
+}
+
+.back-btn:active {
+  transform: scale(0.96);
+}
 </style>
 </head>
 
@@ -162,7 +184,9 @@ body{
     <img src="logo.jpg" alt="Logo">
     <h1 id="formName">Form Details</h1>
   </div>
-
+<button class="back-btn" onclick="goBack()">
+  ← Back
+</button>
   <!-- STUDENT INFO -->
   <div class="card">
     <h3>Student Information</h3>
@@ -295,7 +319,9 @@ function appendField(container, label, value, type=null){
 
   container.appendChild(div);
 }
-
+function goback(){
+window.history.back();
+}
 // 🔹 Approve / Disapprove
 async function updateStatus(status, reason=""){
   try{

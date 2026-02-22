@@ -128,13 +128,37 @@ tr:hover{ background:#f9fbff; }
   padding:30px;
   color:#777;
 }
+ .back-btn {
+  background: #003366;          /* Navy Blue */
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: 0.2s ease;
+}
+
+.back-btn:hover {
+  background: #002244;
+}
+
+.back-btn:active {
+  transform: scale(0.96);
+}
 </style>
 </head>
 
 <body>
 
 <div class="container">
-
+<button class="back-btn" onclick="goBack()">
+  ← Back
+</button>
   <!-- HEADER -->
   <div class="header">
     <h1 id="formTitle">Form Name</h1>
@@ -246,7 +270,9 @@ function renderTable(){
     `;
   });
 }
-
+function goback(){
+window.history.back();
+}
 function applyFilter(status){
   currentFilter = status;
   renderTable();

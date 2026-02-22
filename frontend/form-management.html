@@ -13,11 +13,36 @@
   th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
   button { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; }
   .btn-delete { background: red; color: #fff; }
+   .back-btn {
+  background: #003366;          /* Navy Blue */
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: 0.2s ease;
+}
+
+.back-btn:hover {
+  background: #002244;
+}
+
+.back-btn:active {
+  transform: scale(0.96);
+}
 </style>
 </head>
 <body>
 
 <div class="container">
+  <button class="back-btn" onclick="goBack()">
+  ← Back
+</button>
   <h1>Manage Forms</h1>
   <input type="text" id="searchInput" placeholder="Search forms by title...">
   <table>
@@ -102,7 +127,9 @@ async function deleteForm(formId) {
     alert("❌ Server error");
   }
 }
-
+function goback(){
+window.history.back();
+}
 // search functionality
 document.getElementById("searchInput").addEventListener("input", e => {
   fetchForms(e.target.value);

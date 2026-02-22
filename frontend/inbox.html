@@ -18,13 +18,37 @@
   .modal-content h3 { margin-top:0; }
   .modal-content .attachments a { display:block; margin-top:5px; text-decoration:none; color:#007bff; }
   .modal-content .close { position:absolute; top:10px; right:10px; cursor:pointer; font-size:18px; }
+   .back-btn {
+  background: #003366;          /* Navy Blue */
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: 0.2s ease;
+}
+
+.back-btn:hover {
+  background: #002244;
+}
+
+.back-btn:active {
+  transform: scale(0.96);
+}
 </style>
 </head>
 <body>
 
 <h2>📥 My Personal Messages</h2>
 <div id="messageList">Loading messages...</div>
-
+<button class="back-btn" onclick="goBack()">
+  ← Back
+</button>
 <!-- POPUP MODAL -->
 <div class="modal" id="messageModal">
   <div class="modal-content">
@@ -70,7 +94,9 @@ async function loadMessages(){
     console.error(err);
   }
 }
-
+function goback(){
+window.history.back();
+}
 async function openMessage(msg){
   document.getElementById("mTitle").innerText = msg.title;
   document.getElementById("mDesc").innerText = msg.description;
