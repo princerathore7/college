@@ -152,10 +152,12 @@ def all_fines():
 @fine_bp.route("/razorpay-webhook", methods=["POST"])
 def razorpay_webhook():
     try:
+        # 🔹 Read payload and signature
         payload = request.data
         signature = request.headers.get("X-Razorpay-Signature")
-
         webhook_secret = os.getenv("RAZORPAY_WEBHOOK_SECRET")
+
+        # 🔹 Validate webhook signature
         expected_signature = hmac.new(
             webhook_secret.encode(),
             payload,
@@ -167,12 +169,11 @@ def razorpay_webhook():
 
         event = json.loads(payload)
 
-        # 🔹 Handle payment captured event
+        # 🔹 Process payment captured
         if event.get("event") == "payment.captured":
             payment = event["payload"]["payment"]["entity"]
-
             enrollment = payment["notes"].get("enrollment")
-            amount_paid = payment["amount"] // 100  # paisa to rupees
+            amount_paid = payment["amount"] // 100  # paisa → rupees
 
             # 🔹 Insert transaction
             db.payment_transactions.insert_one({
@@ -184,7 +185,7 @@ def razorpay_webhook():
                 "createdAt": datetime.now()
             })
 
-            # 🔹 Fetch all unpaid/partial fines for this student
+            # 🔹 Fetch all unpaid/partial fines
             fines = list(db.fine.find({
                 "enrollment": enrollment,
                 "status": {"$in": ["Unpaid", "Partial"]}
@@ -192,6 +193,7 @@ def razorpay_webhook():
 
             remaining_payment = amount_paid
 
+            # 🔹 Automatically clear fines
             for f in fines:
                 if remaining_payment <= 0:
                     break
@@ -199,7 +201,7 @@ def razorpay_webhook():
                 fine_amount = f["fine"]
 
                 if remaining_payment >= fine_amount:
-                    # Full payment for this fine
+                    # Full payment → fine = 0
                     db.fine.update_one(
                         {"_id": f["_id"]},
                         {"$set": {"fine": 0, "status": "Paid", "updatedAt": datetime.now()}}
@@ -218,3 +220,30 @@ def razorpay_webhook():
     except Exception as e:
         print("❌ Razorpay webhook error:", e)
         return "Server Error", 500
+    # ---------------------------------------------------------
+# 🔹 AUTO CLEAR ALL FINES FOR A STUDENT
+# ---------------------------------------------------------
+@fine_bp.route("/clear-fines/<enrollment>", methods=["POST"])
+def clear_fines(enrollment):
+    try:
+        # Fetch all unpaid/partial fines
+        fines = list(db.fine.find({
+            "enrollment": enrollment,
+            "status": {"$in": ["Unpaid", "Partial"]}
+        }))
+
+        if not fines:
+            return jsonify({"success": True, "message": "No fines to clear"}), 200
+
+        # Update all fines to zero
+        for f in fines:
+            db.fine.update_one(
+                {"_id": f["_id"]},
+                {"$set": {"fine": 0, "status": "Paid", "updatedAt": datetime.now()}}
+            )
+
+        return jsonify({"success": True, "message": f"All fines for {enrollment} cleared successfully"}), 200
+
+    except Exception as e:
+        print("❌ Clear fines error:", e)
+        return jsonify({"success": False, "message": "Server error"}), 500
