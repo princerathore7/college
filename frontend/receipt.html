@@ -8,39 +8,47 @@
 <style>
 
 body{
-    font-family: Arial, sans-serif;
-    background:#f4f7fb;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background:#eef2f7;
     margin:0;
     padding:20px;
 }
 
 .container{
-    max-width:650px;
+    max-width:750px;
     margin:auto;
 }
 
 .receipt-box{
-    background:#fff;
-    padding:25px;
-    border-radius:10px;
-    box-shadow:0 10px 25px rgba(0,0,0,.1);
+    background:#ffffff;
+    padding:30px;
+    border-radius:12px;
+    box-shadow:0 15px 40px rgba(0,0,0,.08);
+    border-top:6px solid #003366;
 }
 
+/* HEADER */
+
 .header{
-    text-align:center;
+    display:flex;
+    align-items:center;
+    gap:15px;
     border-bottom:2px solid #003366;
-    padding-bottom:10px;
+    padding-bottom:15px;
     margin-bottom:20px;
 }
 
 .logo{
     width:70px;
-    margin-bottom:10px;
+}
+
+.header-text{
+    flex:1;
 }
 
 .title{
     font-size:22px;
-    font-weight:bold;
+    font-weight:700;
     color:#003366;
 }
 
@@ -49,46 +57,75 @@ body{
     color:#666;
 }
 
-.row{
-    display:flex;
-    justify-content:space-between;
-    margin:8px 0;
+.receipt-meta{
+    text-align:right;
+    font-size:13px;
+    color:#444;
 }
 
-.label{
-    font-weight:bold;
-}
+/* BODY */
 
-.value{
-    color:#333;
-}
-
-.amount-box{
-    background:#f0f6ff;
-    padding:15px;
-    border-radius:8px;
-    margin-top:15px;
-    text-align:center;
-}
-
-.amount{
-    font-size:28px;
-    font-weight:bold;
+.section-title{
+    font-size:16px;
+    font-weight:600;
+    margin-bottom:10px;
     color:#003366;
 }
 
-.status{
-    color:green;
-    font-weight:bold;
+.row{
+    display:flex;
+    justify-content:space-between;
+    padding:6px 0;
+    border-bottom:1px dashed #ddd;
+}
+
+.label{
+    font-weight:600;
+    color:#444;
+}
+
+.value{
+    color:#111;
+}
+
+/* AMOUNT BOX */
+
+.amount-box{
+    background:#f4f8ff;
+    padding:20px;
+    border-radius:10px;
+    margin-top:20px;
+    text-align:center;
+}
+
+.amount-label{
+    font-size:14px;
+    color:#555;
+}
+
+.amount{
+    font-size:32px;
+    font-weight:700;
+    color:#003366;
     margin-top:5px;
 }
 
-.footer{
-    text-align:center;
-    margin-top:20px;
-    font-size:13px;
-    color:#777;
+.status{
+    color:#16a34a;
+    font-weight:600;
+    margin-top:5px;
 }
+
+/* FOOTER */
+
+.footer{
+    margin-top:25px;
+    text-align:center;
+    font-size:13px;
+    color:#666;
+}
+
+/* BUTTONS */
 
 .buttons{
     margin-top:20px;
@@ -100,19 +137,49 @@ button{
     flex:1;
     padding:12px;
     border:none;
-    border-radius:6px;
+    border-radius:8px;
     cursor:pointer;
     font-size:15px;
+    font-weight:600;
 }
 
 .print-btn{
     background:#003366;
-    color:#fff;
+    color:white;
+}
+
+.download-btn{
+    background:#16a34a;
+    color:white;
 }
 
 .back-btn{
-    background:#777;
-    color:#fff;
+    background:#555;
+    color:white;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+/* PRINT MODE */
+
+@media print{
+
+    body{
+        background:white;
+        padding:0;
+    }
+
+    .buttons{
+        display:none;
+    }
+
+    .receipt-box{
+        box-shadow:none;
+        border:none;
+    }
+
 }
 
 </style>
@@ -124,181 +191,221 @@ button{
 
 <div class="receipt-box" id="receipt">
 
+<!-- HEADER -->
+
 <div class="header">
 
 <img src="logop.png" class="logo">
 
+<div class="header-text">
 <div class="title">Acropolis Institute of Technology & Research</div>
+<div class="subtitle">Official Fine Payment Receipt</div>
+</div>
 
-<div class="subtitle">
-Fine Payment Receipt
+<div class="receipt-meta">
+Receipt No:<br>
+<b id="receipt_no"></b>
 </div>
 
 </div>
 
+<!-- DETAILS -->
+
+<div class="section-title">Student Details</div>
 
 <div class="row">
-<div class="label">Enrollment:</div>
+<div class="label">Enrollment</div>
 <div class="value" id="enrollment"></div>
 </div>
 
 <div class="row">
-<div class="label">Class:</div>
+<div class="label">Class</div>
 <div class="value" id="class"></div>
 </div>
 
 <div class="row">
-<div class="label">Reason:</div>
+<div class="label">Reason</div>
 <div class="value" id="reason"></div>
 </div>
 
 <div class="row">
-<div class="label">Payment ID:</div>
+<div class="label">Payment ID</div>
 <div class="value" id="payment_id"></div>
 </div>
 
 <div class="row">
-<div class="label">Date:</div>
+<div class="label">Date</div>
 <div class="value" id="date"></div>
 </div>
 
 <div class="row">
-<div class="label">Time:</div>
+<div class="label">Time</div>
 <div class="value" id="time"></div>
 </div>
 
 
+<!-- AMOUNT -->
+
 <div class="amount-box">
 
-<div>Total Paid</div>
+<div class="amount-label">Total Amount Paid</div>
 
 <div class="amount">
 ₹<span id="amount"></span>
 </div>
 
 <div class="status">
-Payment Successful
+✔ Payment Successful
 </div>
 
 </div>
 
+
+<!-- FOOTER -->
 
 <div class="footer">
 This is a computer generated receipt.<br>
-No signature required.
+Acropolis Institute of Technology & Research
 </div>
 
 </div>
 
+
+<!-- BUTTONS -->
 
 <div class="buttons">
 
 <button class="print-btn" onclick="printReceipt()">
-Print / Download
+🖨 Print Receipt
+</button>
+
+<button class="download-btn" onclick="downloadReceipt()">
+⬇ Download PDF
 </button>
 
 <button class="back-btn" onclick="goBack()">
-Back
+← Back to Dashboard
 </button>
 
 </div>
 
-
 </div>
+
 
 <script>
 
 /**********************
 SAVE RECEIPT FUNCTION
 ***********************/
-function saveReceiptToLocal(receiptData) {
+function saveReceiptToLocal(receiptData){
 
-    let receipts = JSON.parse(localStorage.getItem("studentReceipts")) || [];
+let receipts = JSON.parse(localStorage.getItem("studentReceipts")) || [];
 
-    // prevent duplicate save
-    const alreadyExists = receipts.find(r => r.paymentId === receiptData.paymentId);
+const exists = receipts.find(r => r.paymentId === receiptData.paymentId);
 
-    if(alreadyExists){
-        return;
-    }
+if(exists) return;
 
-    receipts.push({
-        id: "RCPT_" + Date.now(),
-        enrollment: receiptData.enrollment,
-        amount: receiptData.amount,
-        reason: receiptData.reason,
-        paymentId: receiptData.paymentId,
-        date: new Date().toLocaleString()
-    });
+receipts.push({
+id:"RCPT"+Date.now(),
+enrollment:receiptData.enrollment,
+amount:receiptData.amount,
+reason:receiptData.reason,
+paymentId:receiptData.paymentId,
+date:new Date().toLocaleString()
+});
 
-    localStorage.setItem("studentReceipts", JSON.stringify(receipts));
+localStorage.setItem("studentReceipts",JSON.stringify(receipts));
+
 }
 
 
 /**********************
-GET DATA FROM URL
+GET URL DATA
 ***********************/
-const params = new URLSearchParams(window.location.search);
 
-const enrollment = params.get("enrollment") || "-";
-const amount = params.get("amount") || "-";
-const reason = params.get("reason") || "-";
-const className = params.get("class") || "-";
-const paymentId = params.get("payment_id") || "-";
+const params=new URLSearchParams(window.location.search);
+
+const enrollment=params.get("enrollment")||"-";
+const amount=params.get("amount")||"-";
+const reason=params.get("reason")||"-";
+const className=params.get("class")||"-";
+const paymentId=params.get("payment_id")||"-";
 
 
 /**********************
-SET VALUES UI
+SET VALUES
 ***********************/
-document.getElementById("enrollment").innerText = enrollment;
-document.getElementById("amount").innerText = amount;
-document.getElementById("reason").innerText = reason;
-document.getElementById("class").innerText = className;
-document.getElementById("payment_id").innerText = paymentId;
+
+document.getElementById("enrollment").innerText=enrollment;
+document.getElementById("amount").innerText=amount;
+document.getElementById("reason").innerText=reason;
+document.getElementById("class").innerText=className;
+document.getElementById("payment_id").innerText=paymentId;
+
+const receiptNo="ACR"+Date.now();
+document.getElementById("receipt_no").innerText=receiptNo;
 
 
 /**********************
-SAVE RECEIPT HERE ✅ IMPORTANT
+SAVE RECEIPT
 ***********************/
-if(enrollment !== "-" && paymentId !== "-"){
 
-    saveReceiptToLocal({
-        enrollment: enrollment,
-        amount: amount,
-        reason: reason,
-        paymentId: paymentId
-    });
-
+if(enrollment!=="-" && paymentId!==""){
+saveReceiptToLocal({
+enrollment,
+amount,
+reason,
+paymentId
+});
 }
 
 
 /**********************
 DATE TIME
 ***********************/
-const now = new Date();
 
-document.getElementById("date").innerText =
-now.toLocaleDateString();
+const now=new Date();
 
-document.getElementById("time").innerText =
-now.toLocaleTimeString();
+document.getElementById("date").innerText=now.toLocaleDateString();
+
+document.getElementById("time").innerText=now.toLocaleTimeString();
 
 
 /**********************
 PRINT
 ***********************/
+
 function printReceipt(){
-    window.print();
+window.print();
+}
+
+
+/**********************
+DOWNLOAD PDF
+***********************/
+
+function downloadReceipt(){
+
+const originalTitle=document.title;
+
+document.title="Receipt_"+enrollment;
+
+window.print();
+
+document.title=originalTitle;
+
 }
 
 
 /**********************
 BACK
 ***********************/
+
 function goBack(){
-    window.location.href = "student-dashboard.html";
+window.location.href="student-dashboard.html";
 }
 
 </script>
+
 </body>
 </html>
