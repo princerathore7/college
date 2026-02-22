@@ -151,8 +151,6 @@ def all_fines():
 # ---------------------------------------------------------
 # 🔹 RAZORPAY WEBHOOK — HANDLE PAYMENT SUCCESS
 # ---------------------------------------------------------
-from routes.receipt import create_receipt   # ADD THIS IMPORT AT TOP
-
 @fine_bp.route("/razorpay-webhook", methods=["POST"])
 def razorpay_webhook():
     try:
@@ -177,96 +175,86 @@ def razorpay_webhook():
             print("❌ Invalid Razorpay signature")
             return "Invalid signature", 400
 
-        # 🔹 Parse event
+
+        # ---------------------------------------------------------
+        # 🔹 Parse Razorpay event
+        # ---------------------------------------------------------
         event = json.loads(payload)
 
-        # 🔹 Only handle successful captured payments
-        if event.get("event") == "payment.captured":
+        if event.get("event") != "payment.captured":
+            return "Event ignored", 200
 
-            payment = event["payload"]["payment"]["entity"]
 
-            enrollment = payment["notes"].get("enrollment")
-            reason = payment["notes"].get("reason", "College Fine")
+        # ---------------------------------------------------------
+        # 🔹 Extract payment info
+        # ---------------------------------------------------------
+        payment = event["payload"]["payment"]["entity"]
 
-            amount_paid = payment["amount"] // 100   # convert paisa → rupees
+        enrollment = str(payment["notes"].get("enrollment")).strip()
+        reason = payment["notes"].get("reason", "College Fine")
 
-            razorpay_payment_id = payment["id"]
-            razorpay_order_id = payment["order_id"]
-            payment_method = payment.get("method", "UPI")
+        amount_paid = payment["amount"] // 100
 
-            print(f"✅ Payment captured for {enrollment}, Amount: ₹{amount_paid}")
+        razorpay_payment_id = payment["id"]
+        razorpay_order_id = payment["order_id"]
+        payment_method = payment.get("method", "UPI")
 
-            # ---------------------------------------------------------
-            # 1️⃣ SAVE TRANSACTION
-            # ---------------------------------------------------------
-            db.payment_transactions.insert_one({
-                "enrollment": enrollment,
-                "amount_paid": amount_paid,
-                "razorpay_payment_id": razorpay_payment_id,
-                "razorpay_order_id": razorpay_order_id,
-                "status": "success",
-                "createdAt": datetime.now()
-            })
+        print(f"✅ Payment captured for {enrollment}, Amount: ₹{amount_paid}")
 
-            # ---------------------------------------------------------
-            # 2️⃣ CLEAR FINES AUTOMATICALLY
-            # ---------------------------------------------------------
-            fines = list(db.fine.find({
-                "enrollment": enrollment,
-                "status": {"$in": ["Unpaid", "Partial"]}
-            }))
 
-            remaining_payment = amount_paid
+        # ---------------------------------------------------------
+        # 1️⃣ SAVE TRANSACTION
+        # ---------------------------------------------------------
+        db.payment_transactions.insert_one({
+            "enrollment": enrollment,
+            "amount_paid": amount_paid,
+            "razorpay_payment_id": razorpay_payment_id,
+            "razorpay_order_id": razorpay_order_id,
+            "status": "success",
+            "createdAt": datetime.now()
+        })
+
+
+        # ---------------------------------------------------------
+        # 2️⃣ CLEAR ALL FINES USING SAME LOGIC AS clear-fines API
+        # ---------------------------------------------------------
+        fines = list(db.fine.find({
+            "enrollment": enrollment,
+            "status": {"$in": ["Unpaid", "Partial"]}
+        }))
+
+        if fines:
 
             for f in fines:
 
-                if remaining_payment <= 0:
-                    break
+                db.fine.update_one(
+                    {"_id": f["_id"]},
+                    {"$set": {
+                        "fine": 0,
+                        "status": "Paid",
+                        "updatedAt": datetime.now()
+                    }}
+                )
 
-                fine_amount = int(f.get("fine", 0))
+            print(f"✅ All fines cleared for {enrollment}")
 
-                if remaining_payment >= fine_amount:
-
-                    # FULL CLEAR
-                    db.fine.update_one(
-                        {"_id": f["_id"]},
-                        {"$set": {
-                            "fine": 0,
-                            "status": "Paid",
-                            "updatedAt": datetime.now()
-                        }}
-                    )
-
-                    remaining_payment -= fine_amount
-
-                else:
-
-                    # PARTIAL CLEAR
-                    db.fine.update_one(
-                        {"_id": f["_id"]},
-                        {"$set": {
-                            "fine": fine_amount - remaining_payment,
-                            "status": "Partial",
-                            "updatedAt": datetime.now()
-                        }}
-                    )
-
-                    remaining_payment = 0
+        else:
+            print(f"ℹ️ No pending fines for {enrollment}")
 
 
-            # ---------------------------------------------------------
-            # 3️⃣ CREATE RECEIPT  ⭐ IMPORTANT
-            # ---------------------------------------------------------
-            create_receipt({
-                "enrollment": enrollment,
-                "payment_id": razorpay_payment_id,
-                "order_id": razorpay_order_id,
-                "amount_paid": amount_paid,
-                "reason": reason,
-                "method": payment_method
-            })
+        # ---------------------------------------------------------
+        # 3️⃣ CREATE RECEIPT
+        # ---------------------------------------------------------
+        create_receipt({
+            "enrollment": enrollment,
+            "payment_id": razorpay_payment_id,
+            "order_id": razorpay_order_id,
+            "amount_paid": amount_paid,
+            "reason": reason,
+            "method": payment_method
+        })
 
-            print("🧾 Receipt created successfully")
+        print("🧾 Receipt created successfully")
 
 
         return "OK", 200

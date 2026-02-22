@@ -26,39 +26,53 @@ def create_order():
     try:
         data = request.get_json(force=True)
 
-        enrollment = data.get("enrollment")
+        enrollment = str(data.get("enrollment", "")).strip()
         amount = int(data.get("amount", 0))
-        reason = data.get("reason", "College Fine")
+        reason = str(data.get("reason", "College Fine")).strip()
+        class_name = str(data.get("class", "")).strip()
 
+        # Validation
         if not enrollment or amount <= 0:
             return jsonify({
                 "success": False,
                 "message": "Invalid enrollment or amount"
             }), 400
 
+
+        # ---------------------------------------------------------
+        # CREATE RAZORPAY ORDER
+        # ---------------------------------------------------------
         order = client.order.create({
             "amount": amount * 100,   # convert to paisa
             "currency": "INR",
             "payment_capture": 1,
+
+            # ⭐ IMPORTANT — SEND EXTRA DATA HERE
             "notes": {
                 "enrollment": enrollment,
-                "reason": reason
+                "reason": reason,
+                "class": class_name
             }
         })
+
 
         return jsonify({
             "success": True,
             "order_id": order["id"],
-            "amount": amount * 100,   # frontend ko paisa bhejo
-            "key": KEY_ID             # Razorpay public key
+            "amount": amount * 100,
+            "key": KEY_ID,
+            "enrollment": enrollment,
+            "reason": reason,
+            "class": class_name
         })
 
+
     except Exception as e:
+        print("❌ Create order error:", e)
         return jsonify({
             "success": False,
             "error": str(e)
         }), 500
-
 # 🔹 VERIFY PAYMENT (MANDATORY SECURITY)
 @razorpay_bp.route("/api/fines/verify-payment", methods=["POST"])
 def verify_payment():
