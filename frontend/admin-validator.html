@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Receipt Validator - Admin</title>
+
+<style>
+
+body{
+font-family: Arial;
+background:#f4f6f9;
+padding:40px;
+}
+
+.container{
+max-width:500px;
+margin:auto;
+background:white;
+padding:30px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+text-align:center;
+}
+
+input{
+width:100%;
+padding:12px;
+margin-top:15px;
+border:1px solid #ccc;
+border-radius:6px;
+font-size:16px;
+}
+
+button{
+margin-top:15px;
+padding:12px 20px;
+background:#007bff;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+button:hover{
+background:#0056b3;
+}
+
+.result{
+margin-top:20px;
+padding:15px;
+border-radius:6px;
+font-weight:bold;
+}
+
+.valid{
+background:#d4edda;
+color:#155724;
+}
+
+.invalid{
+background:#f8d7da;
+color:#721c24;
+}
+
+.details{
+margin-top:15px;
+text-align:left;
+font-size:14px;
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h2>Receipt Validator</h2>
+
+<input type="text" id="receiptId" placeholder="Enter Receipt ID">
+
+<button onclick="validateReceipt()">Validate Receipt</button>
+
+<div id="result"></div>
+
+<div id="details" class="details"></div>
+
+</div>
+
+<script>
+
+async function validateReceipt(){
+
+const receiptId =
+document.getElementById("receiptId").value.trim();
+
+if(!receiptId){
+alert("Enter Receipt ID");
+return;
+}
+
+const resultDiv = document.getElementById("result");
+const detailsDiv = document.getElementById("details");
+
+resultDiv.innerHTML = "Checking...";
+detailsDiv.innerHTML = "";
+
+try{
+
+const res =
+await fetch(`/api/receipt/validate/${receiptId}`);
+
+const data = await res.json();
+
+if(data.valid){
+
+resultDiv.innerHTML =
+"✅ Valid Receipt";
+
+resultDiv.className =
+"result valid";
+
+detailsDiv.innerHTML =
+`
+Receipt ID: ${data.receipt.id}<br>
+Enrollment: ${data.receipt.enrollment}<br>
+Amount: ₹${data.receipt.amount}<br>
+Reason: ${data.receipt.reason}<br>
+Date: ${data.receipt.date}
+`;
+
+}
+else{
+
+resultDiv.innerHTML =
+"❌ Fake / Invalid Receipt";
+
+resultDiv.className =
+"result invalid";
+
+}
+
+}
+catch(err){
+
+resultDiv.innerHTML =
+"❌ Receipt not found";
+
+resultDiv.className =
+"result invalid";
+
+}
+
+}
+
+</script>
+
+</body>
+</html>

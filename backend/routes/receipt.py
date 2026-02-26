@@ -290,3 +290,33 @@ def get_receipt(receipt_id):
             "success": False,
             "message": "Invalid receipt ID"
         }), 400
+    
+
+# -------------------------------------------------
+# VALIDATE RECEIPT BY ID
+# -------------------------------------------------
+@receipt_bp.route("/validate/<receipt_id>", methods=["GET"])
+@cross_origin()
+def validate_receipt(receipt_id):
+
+    receipt = db.receipts.find_one({"id": receipt_id})
+
+    if receipt:
+
+        return jsonify({
+            "valid": True,
+            "receipt": {
+                "id": receipt["id"],
+                "enrollment": receipt["enrollment"],
+                "amount": receipt["amount"],
+                "reason": receipt["reason"],
+                "date": str(receipt["date"])
+            }
+        }), 200
+
+    else:
+
+        return jsonify({
+            "valid": False,
+            "message": "Receipt not found"
+        }), 404
