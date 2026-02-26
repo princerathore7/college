@@ -111,9 +111,7 @@ function viewReceipt(id){
 
     const receipts = JSON.parse(localStorage.getItem("studentReceipts")) || [];
 
-   const receipt = receipts.find(r =>
-    (r.receipt_id === id) || (r._id === id)
-);
+    const receipt = receipts.find(r => r.id === id);
 
     if(!receipt){
         alert("Receipt not found");
