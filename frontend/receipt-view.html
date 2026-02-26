@@ -15,15 +15,14 @@ body{
 }
 
 .receipt-container{
-    max-width:700px;
+    max-width:750px;
     margin:auto;
     background:white;
     border-radius:10px;
-    box-shadow:0 0 15px rgba(0,0,0,0.15);
+    box-shadow:0 0 20px rgba(0,0,0,0.15);
     padding:30px;
 }
 
-/* Header */
 .header{
     text-align:center;
     border-bottom:2px solid #eee;
@@ -46,7 +45,6 @@ body{
     margin-top:5px;
 }
 
-/* Body */
 .details{
     margin-top:25px;
 }
@@ -67,22 +65,30 @@ body{
     color:#555;
 }
 
-/* Amount Highlight */
 .amount-box{
     text-align:center;
-    margin-top:20px;
-    padding:15px;
+    margin-top:25px;
+    padding:18px;
     background:#e8f4ff;
     border-radius:8px;
 }
 
 .amount{
-    font-size:28px;
+    font-size:30px;
     font-weight:bold;
     color:#007bff;
 }
 
-/* Footer */
+.status-paid{
+    color:green;
+    font-weight:bold;
+}
+
+.status-pending{
+    color:orange;
+    font-weight:bold;
+}
+
 .footer{
     text-align:center;
     margin-top:25px;
@@ -90,7 +96,6 @@ body{
     font-size:14px;
 }
 
-/* Buttons */
 .buttons{
     text-align:center;
     margin-top:20px;
@@ -120,15 +125,8 @@ button:hover{
 }
 
 @media print{
-
-    body{
-        background:white;
-    }
-
-    .buttons{
-        display:none;
-    }
-
+    body{ background:white; }
+    .buttons{ display:none; }
 }
 
 </style>
@@ -137,25 +135,16 @@ button:hover{
 
 <div class="receipt-container">
 
-    <!-- Header -->
     <div class="header">
-
-        <!-- Replace with your real logo -->
-        <img src="logop.png"
-             class="logo">
-
+        <img src="logop.png" class="logo">
         <div class="college-name">
             Acropolis Institute of Technology & Research
         </div>
-
         <div class="receipt-title">
             PAYMENT RECEIPT
         </div>
-
     </div>
 
-
-    <!-- Receipt Details -->
     <div class="details">
 
         <div class="row">
@@ -164,8 +153,18 @@ button:hover{
         </div>
 
         <div class="row">
+            <div class="label">Payment ID</div>
+            <div class="value" id="paymentId"></div>
+        </div>
+
+        <div class="row">
             <div class="label">Enrollment Number</div>
             <div class="value" id="enrollment"></div>
+        </div>
+
+        <div class="row">
+            <div class="label">Class</div>
+            <div class="value" id="className"></div>
         </div>
 
         <div class="row">
@@ -174,31 +173,28 @@ button:hover{
         </div>
 
         <div class="row">
-            <div class="label">Date, Time</div>
-            <div class="value" id="date"></div>
+            <div class="label">Status</div>
+            <div class="value" id="status"></div>
         </div>
 
+        <div class="row">
+            <div class="label">Date & Time</div>
+            <div class="value" id="dateTime"></div>
+        </div>
 
     </div>
 
-
-    <!-- Amount -->
     <div class="amount-box">
         Paid Amount
         <div class="amount" id="amount"></div>
     </div>
 
-
-    <!-- Footer -->
     <div class="footer">
         This is a computer generated receipt.<br>
         No signature required.
     </div>
 
-
-    <!-- Buttons -->
     <div class="buttons">
-
         <button onclick="window.print()">
             <i class="fa fa-print"></i> Print
         </button>
@@ -206,84 +202,68 @@ button:hover{
         <button class="back-btn" onclick="goBack()">
             <i class="fa fa-arrow-left"></i> Back
         </button>
-
     </div>
 
 </div>
 
-
 <script>
 
-/* Load receipt from localStorage */
+/* Load receipt */
 
 const receipt = JSON.parse(localStorage.getItem("selectedReceipt"));
 
 if(!receipt){
-
     alert("Receipt not found");
     window.location.href = "my-receipt.html";
-
 }
 
-/* Fill data */
+/* Extract Proper Fields */
 
-document.getElementById("receiptId").innerText = receipt.id || "-";
+const receiptId = receipt.receipt_id || receipt._id || "-";
+const paymentId = receipt.payment_id || "-";
+const enrollment = receipt.enrollment || "-";
+const className = receipt.class || "-";
+const reason = receipt.reason || "-";
+const status = receipt.status || "-";
+const amount = receipt.amount_paid || receipt.amount || "0";
 
-document.getElementById("enrollment").innerText = receipt.enrollment || "-";
+/* Date */
 
-document.getElementById("reason").innerText = receipt.reason || "-";
+let formattedDate = "-";
 
-document.getElementById("amount").innerText =
-    "₹ " + (receipt.amount || "0");
-
-
-/* Date & Time */
-if(receipt.date){
-
-    let dateObj;
-
-    // Try ISO format first
-    dateObj = new Date(receipt.date);
-
-    // If invalid, show raw date
-    if(isNaN(dateObj.getTime())){
-
-        document.getElementById("date").innerText = receipt.date;
-        document.getElementById("time").innerText = "Not available";
-
+if(receipt.createdAt){
+    const d = new Date(receipt.createdAt);
+    if(!isNaN(d.getTime())){
+        formattedDate = d.toLocaleString("en-IN");
     }
-    else{
+}
 
-        document.getElementById("date").innerText =
-            dateObj.toLocaleDateString("en-IN", {
-                day: "2-digit",
-                month: "long",
-                year: "numeric"
-            });
+/* Fill Data */
 
-        document.getElementById("time").innerText =
-            dateObj.toLocaleTimeString("en-IN", {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit"
-            });
+document.getElementById("receiptId").innerText = receiptId;
+document.getElementById("paymentId").innerText = paymentId;
+document.getElementById("enrollment").innerText = enrollment;
+document.getElementById("className").innerText = className;
+document.getElementById("reason").innerText = reason;
+document.getElementById("amount").innerText = "₹ " + amount;
+document.getElementById("dateTime").innerText = formattedDate;
 
-    }
+/* Status Styling */
 
+const statusElement = document.getElementById("status");
+statusElement.innerText = status;
+
+if(status.toLowerCase() === "paid"){
+    statusElement.classList.add("status-paid");
 }
 else{
-
-    document.getElementById("date").innerText = "Not available";
-    document.getElementById("time").innerText = "Not available";
-
+    statusElement.classList.add("status-pending");
 }
 
-/* Back button */
+/* Back */
 
 function goBack(){
-
     window.location.href = "my-receipt.html";
-
 }
 
 </script>
