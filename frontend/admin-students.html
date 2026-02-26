@@ -40,10 +40,19 @@ th{background:#f1f3f8}
   <h2>Admin — Students</h2>
   <button class="actionBtn" onclick="logout()">Logout</button>
 </header>
-
+<div style="
+background:#fff3cd;
+color:#856404;
+padding:10px 20px;
+font-size:13px;
+border-bottom:1px solid #ffeeba;
+">
+⚠️ Info: Student attendance, pending fees and fines will only update after pressing the <b>Refresh</b> button. Before refresh, cached data may be shown.
+</div>
 <main style="padding:20px;max-width:1400px;margin:auto">
 
 <div class="controls">
+  
   <select id="year">
     <option value="">All Years</option>
     <option value="1">1st Year</option>
@@ -118,7 +127,17 @@ th{background:#f1f3f8}
     <option value="DPLASTIC">Diploma - Plastic Engineering</option>
     <option value="DPOLY">Diploma - Polymer Engineering</option>
   </select>
+<select id="feesFilter">
+  <option value="">All Fees Status</option>
+  <option value="pending">Pending Fees Only</option>
+  <option value="clear">No Pending Fees</option>
+</select>
 
+<select id="fineFilter">
+  <option value="">All Fine Status</option>
+  <option value="pending">Pending Fine Only</option>
+  <option value="clear">No Fine</option>
+</select>
   <button class="actionBtn" id="refreshBtn">Refresh</button>
 </div>
 
@@ -242,16 +261,38 @@ async function render(refresh=false){
   const yearVal = document.getElementById("year").value;
   const branchVal = document.getElementById("branch").value.toLowerCase();
   const searchEnr = document.getElementById("searchEnrollment").value.trim().toLowerCase();
-
+const feesFilter = document.getElementById("feesFilter").value;
+const fineFilter = document.getElementById("fineFilter").value;
   const students = await fetchStudents(refresh);
 
-  let filtered = students.filter(s=>{
-    let ok = true;
-    if(yearVal) ok = ok && String(s.year) === yearVal;
-    if(branchVal) ok = ok && (s.branch || "").toLowerCase().includes(branchVal);
-    if(searchEnr) ok = ok && s.enrollment.toLowerCase().includes(searchEnr);
-    return ok;
-  });
+let filtered = students.filter(s=>{
+
+  let ok = true;
+
+  if(yearVal)
+    ok = ok && String(s.year) === yearVal;
+
+  if(branchVal)
+    ok = ok && (s.branch || "").toLowerCase().includes(branchVal);
+
+  if(searchEnr)
+    ok = ok && s.enrollment.toLowerCase().includes(searchEnr);
+
+  if(feesFilter === "pending")
+    ok = ok && (s.pendingFees ?? 0) > 0;
+
+  if(feesFilter === "clear")
+    ok = ok && (s.pendingFees ?? 0) === 0;
+
+  if(fineFilter === "pending")
+    ok = ok && (s.fine ?? 0) > 0;
+
+  if(fineFilter === "clear")
+    ok = ok && (s.fine ?? 0) === 0;
+
+  return ok;
+
+});
 
   if(searchEnr){
     filtered.sort((a,b)=>{
@@ -318,7 +359,7 @@ function editFine(enr){
 /* ===============================
    EVENTS
 ================================ */
-["year","branch"].forEach(id=>{
+["year","branch","feesFilter","fineFilter"].forEach(id=>{
   document.getElementById(id).addEventListener("change",()=>render(false));
 });
 document.getElementById("searchEnrollment").addEventListener("input",()=>render(false));
