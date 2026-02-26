@@ -355,7 +355,7 @@ def admin_get_all_receipts():
 
                 "mongo_id": str(r.get("_id")),
 
-                "receipt_id": r.get("receipt_id"),
+       "receipt_id": r.get("receipt_id") if r.get("receipt_id") else str(r.get("_id")),
 
                 "enrollment": r.get("enrollment"),
 
