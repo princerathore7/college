@@ -29,7 +29,7 @@ def extract_pdf_text(pdf_path):
             text += page.extract_text() + "\n"
     return text
 db.bus_routes.insert_one({
-    "destination": "Aopolis institutes",
+    "destination": "Acropolis institutes",
     "stop": "Maksi",
     "buses": ["G64", "G58", "G52"]
 })
@@ -48,7 +48,7 @@ def search_bus():
     return jsonify({
         "success": True,
         "stop": stop,
-        "destination": "Aopolis institutes",
+        "destination": "Acropolis institutes",
         "buses": rec["buses"]
     })
 
