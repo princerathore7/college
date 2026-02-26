@@ -2,84 +2,157 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Admin Receipt Panel</title>
+<title>Admin Receipt Validation Panel</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 
+:root{
+    --primary:#2563eb;
+    --primary-dark:#1e40af;
+    --success:#16a34a;
+    --danger:#dc2626;
+    --bg:#f1f5f9;
+    --card:#ffffff;
+    --text:#0f172a;
+    --muted:#64748b;
+}
+
 body{
-    font-family: Arial;
-    background: #f4f6f9;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: var(--bg);
     margin:0;
-    padding:20px;
+    padding:0;
 }
 
+/* Header */
+.header{
+    background:white;
+    padding:15px 30px;
+    display:flex;
+    align-items:center;
+    gap:15px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.08);
+}
+
+.header img{
+    height:50px;
+}
+
+.header h2{
+    margin:0;
+    font-size:20px;
+    color:var(--text);
+}
+
+/* Container */
 .container{
-    max-width:1200px;
+    max-width:1300px;
     margin:auto;
+    padding:25px;
 }
 
-h1{
-    text-align:center;
-    margin-bottom:20px;
+/* Card */
+.card{
+    background:var(--card);
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.06);
 }
 
+/* Top bar */
 .top-bar{
     display:flex;
-    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
     margin-bottom:15px;
 }
 
-input{
+select, input{
     padding:10px;
-    width:300px;
-    border:1px solid #ccc;
+    border:1px solid #cbd5e1;
     border-radius:6px;
+    font-size:14px;
 }
 
+input{
+    width:260px;
+}
+
+/* Buttons */
 button{
-    padding:10px 15px;
+    padding:10px 16px;
     border:none;
-    background:#007bff;
-    color:white;
     border-radius:6px;
+    background:var(--primary);
+    color:white;
     cursor:pointer;
+    font-weight:600;
+    transition:0.2s;
 }
 
 button:hover{
-    background:#0056b3;
+    background:var(--primary-dark);
 }
 
+/* Table */
 table{
     width:100%;
     border-collapse:collapse;
-    background:white;
-}
-
-th, td{
-    padding:10px;
-    border-bottom:1px solid #ddd;
-    text-align:left;
 }
 
 th{
-    background:#343a40;
+    background:#0f172a;
     color:white;
+    padding:12px;
+    font-size:14px;
 }
 
-.status-paid{
-    color:green;
+td{
+    padding:12px;
+    border-bottom:1px solid #e2e8f0;
+    font-size:14px;
+}
+
+tr:hover{
+    background:#f8fafc;
+}
+
+/* Status badges */
+.badge{
+    padding:5px 10px;
+    border-radius:20px;
+    font-size:12px;
     font-weight:bold;
 }
 
-.status-fake{
-    color:red;
-    font-weight:bold;
+.paid{
+    background:#dcfce7;
+    color:var(--success);
+}
+
+.fake{
+    background:#fee2e2;
+    color:var(--danger);
+}
+
+.pending{
+    background:#fef9c3;
+    color:#ca8a04;
 }
 
 .loading{
     text-align:center;
     padding:20px;
+    color:var(--muted);
+}
+
+.validate-btn{
+    background:#16a34a;
+}
+
+.validate-btn:hover{
+    background:#15803d;
 }
 
 </style>
@@ -87,15 +160,29 @@ th{
 
 <body>
 
+<!-- HEADER -->
+<div class="header">
+    <img src="logo.jpg">
+    <h2>Admin Receipt Validation Panel</h2>
+</div>
+
 <div class="container">
 
-<h1>Admin Receipt Validation Panel</h1>
+<div class="card">
 
 <div class="top-bar">
 
-<input type="text" id="searchInput" placeholder="Enter Receipt ID">
+<select id="searchType">
+    <option value="receipt_id">Receipt ID</option>
+    <option value="payment_id">Payment ID</option>
+    <option value="enrollment">Enrollment Number</option>
+</select>
+
+<input type="text" id="searchInput" placeholder="Enter search value">
 
 <button onclick="searchReceipt()">Search</button>
+
+<button onclick="resetSearch()">Reset</button>
 
 <button onclick="loadReceipts()">Refresh</button>
 
@@ -104,7 +191,6 @@ th{
 <table>
 
 <thead>
-
 <tr>
 <th>Receipt ID</th>
 <th>Enrollment</th>
@@ -115,18 +201,17 @@ th{
 <th>Status</th>
 <th>Validate</th>
 </tr>
-
 </thead>
 
 <tbody id="receiptTable">
-
 <tr>
 <td colspan="8" class="loading">Loading receipts...</td>
 </tr>
-
 </tbody>
 
 </table>
+
+</div>
 
 </div>
 
@@ -134,36 +219,39 @@ th{
 
 const API = "https://college-hwbb.onrender.com/api/receipts/admin/all";
 
+let allReceipts = [];
 
 async function loadReceipts(){
 
     const table = document.getElementById("receiptTable");
 
-    table.innerHTML = "<tr><td colspan='8' class='loading'>Loading...</td></tr>";
+    table.innerHTML =
+    "<tr><td colspan='8' class='loading'>Loading receipts...</td></tr>";
 
     try{
 
         const res = await fetch(API);
-
         const data = await res.json();
 
         if(!data.success){
-
-            table.innerHTML = "<tr><td colspan='8'>Failed to load</td></tr>";
+            table.innerHTML =
+            "<tr><td colspan='8'>Failed to load</td></tr>";
             return;
         }
 
-        renderTable(data.receipts);
+        allReceipts = data.receipts;
+
+        renderTable(allReceipts);
 
     }
-    catch(err){
+    catch{
 
-        table.innerHTML = "<tr><td colspan='8'>Server error</td></tr>";
+        table.innerHTML =
+        "<tr><td colspan='8'>Server error</td></tr>";
 
     }
 
 }
-
 
 function renderTable(receipts){
 
@@ -171,7 +259,8 @@ function renderTable(receipts){
 
     if(receipts.length === 0){
 
-        table.innerHTML = "<tr><td colspan='8'>No receipts found</td></tr>";
+        table.innerHTML =
+        "<tr><td colspan='8'>No receipts found</td></tr>";
         return;
 
     }
@@ -184,29 +273,46 @@ function renderTable(receipts){
             ? new Date(r.createdAt).toLocaleString("en-IN")
             : "-";
 
+        let badgeClass = "pending";
+
+        if(r.status?.toLowerCase() === "paid")
+            badgeClass = "paid";
+
+        if(r.status?.toLowerCase() === "fake")
+            badgeClass = "fake";
+
         table.innerHTML += `
 
         <tr>
 
-            <td>${r.receipt_id}</td>
+        <td>${r.receipt_id}</td>
 
-            <td>${r.enrollment}</td>
+        <td>${r.enrollment}</td>
 
-            <td>₹${r.amount_paid}</td>
+        <td>₹${r.amount_paid}</td>
 
-            <td>${r.reason}</td>
+        <td>${r.reason}</td>
 
-            <td>${r.payment_id}</td>
+        <td>${r.payment_id}</td>
 
-            <td>${date}</td>
+        <td>${date}</td>
 
-            <td class="status-paid">${r.status}</td>
+        <td>
+            <span class="badge ${badgeClass}">
+                ${r.status}
+            </span>
+        </td>
 
-            <td>
-                <button onclick="validateReceipt('${r.receipt_id}')">
-                    Validate
-                </button>
-            </td>
+        <td>
+
+        <button class="validate-btn"
+        onclick="validateReceipt('${r.receipt_id}')">
+
+        Validate
+
+        </button>
+
+        </td>
 
         </tr>
 
@@ -216,19 +322,25 @@ function renderTable(receipts){
 
 }
 
-
 async function validateReceipt(receipt_id){
 
     try{
 
-        const res = await fetch("https://college-hwbb.onrender.com/api/receipts/validate/" + receipt_id);
+        const res =
+        await fetch(
+        "https://college-hwbb.onrender.com/api/receipts/validate/" + receipt_id
+        );
 
         const data = await res.json();
 
         if(data.valid){
 
-            alert("✅ VALID RECEIPT\n\nEnrollment: " + data.receipt.enrollment +
-                  "\nAmount: ₹" + data.receipt.amount);
+            alert(
+            "✅ VALID RECEIPT\n\n" +
+            "Enrollment: " + data.receipt.enrollment +
+            "\nAmount: ₹" + data.receipt.amount +
+            "\nPayment ID: " + data.receipt.payment_id
+            );
 
         }
         else{
@@ -246,47 +358,50 @@ async function validateReceipt(receipt_id){
 
 }
 
-
 function searchReceipt(){
 
-    const input = document.getElementById("searchInput").value.trim();
+    const value =
+    document.getElementById("searchInput")
+    .value.trim()
+    .toLowerCase();
 
-    if(!input){
+    const type =
+    document.getElementById("searchType")
+    .value;
 
-        loadReceipts();
+    if(!value){
+
+        renderTable(allReceipts);
         return;
 
     }
 
-    fetch("https://college-hwbb.onrender.com/api/receipts/validate/" + input)
-    .then(res => res.json())
-    .then(data => {
+    const filtered = allReceipts.filter(r => {
 
-        if(data.valid){
+        if(type === "receipt_id")
+            return r.receipt_id?.toLowerCase().includes(value);
 
-            renderTable([{
+        if(type === "payment_id")
+            return r.payment_id?.toLowerCase().includes(value);
 
-                receipt_id: data.receipt.receipt_id,
-                enrollment: data.receipt.enrollment,
-                amount_paid: data.receipt.amount,
-                reason: data.receipt.reason,
-                payment_id: data.receipt.payment_id,
-                createdAt: data.receipt.date,
-                status: data.receipt.status
+        if(type === "enrollment")
+            return r.enrollment?.toLowerCase().includes(value);
 
-            }]);
-
-        }
-        else{
-
-            alert("Receipt not found");
-
-        }
+        return false;
 
     });
 
+    renderTable(filtered);
+
 }
 
+function resetSearch(){
+
+    document.getElementById("searchInput").value = "";
+
+    renderTable(allReceipts);
+
+}
 
 loadReceipts();
 
@@ -294,4 +409,3 @@ loadReceipts();
 
 </body>
 </html>
-```
