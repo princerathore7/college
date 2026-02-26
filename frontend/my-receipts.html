@@ -3,51 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <title>My Receipts</title>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
+
 body{
-    font-family: Arial;
-    background:#f4f6f9;
-    padding:20px;
+font-family: Arial;
+background:#f4f6f9;
+padding:20px;
 }
 
 .container{
-    max-width:900px;
-    margin:auto;
-    background:white;
-    padding:20px;
-    border-radius:10px;
-    box-shadow:0 0 10px rgba(0,0,0,0.1);
+max-width:800px;
+margin:auto;
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
 
 h2{
-    margin-bottom:20px;
+margin-bottom:20px;
 }
 
 .receipt{
-    border:1px solid #ddd;
-    padding:15px;
-    margin-bottom:15px;
-    border-radius:8px;
+border:1px solid #ddd;
+padding:15px;
+margin-bottom:10px;
+border-radius:8px;
 }
 
 button{
-    background:#007bff;
-    color:white;
-    border:none;
-    padding:8px 15px;
-    border-radius:5px;
-    cursor:pointer;
+background:#007bff;
+color:white;
+border:none;
+padding:8px 15px;
+border-radius:5px;
+cursor:pointer;
 }
 
 button:hover{
-    background:#0056b3;
+background:#0056b3;
 }
 
 .empty{
-    color:gray;
+color:gray;
 }
+
 </style>
 </head>
 <body>
@@ -62,81 +65,150 @@ button:hover{
 
 <script>
 
-// ⚠️ Get enrollment from login session or localStorage
-const enrollment = localStorage.getItem("studentEnrollment");
+const API_BASE = "/api/receipts";
 
+
+// --------------------------------------------------
+// LOAD RECEIPTS FROM SERVER
+// --------------------------------------------------
 async function loadReceipts(){
 
-    const container = document.getElementById("receiptList");
+    const enrollment = localStorage.getItem("studentEnrollment");
 
     if(!enrollment){
-        container.innerHTML = "<p class='empty'>Student not logged in</p>";
+
+        document.getElementById("receiptList").innerHTML =
+            "<p class='empty'>Enrollment not found. Please login again.</p>";
+
         return;
     }
 
-    container.innerHTML = "Loading receipts...";
-
     try{
 
-        const res = await fetch(`/api/receipts/finestudent/${enrollment}`);
+        const res = await fetch(`${API_BASE}/finestudent/${enrollment}`);
+
         const data = await res.json();
 
-        if(!data.success || data.receipts.length === 0){
-            container.innerHTML = "<p class='empty'>No receipts found</p>";
+        if(!data.success){
+
+            document.getElementById("receiptList").innerHTML =
+                "<p class='empty'>Failed to load receipts</p>";
+
             return;
         }
 
-        container.innerHTML = "";
+        const receipts = data.receipts;
 
-        data.receipts.forEach(receipt => {
+        // Save locally also
+        localStorage.setItem("studentReceipts", JSON.stringify(receipts));
 
-            const receiptId = receipt.receipt_id || receipt._id;
-
-            container.innerHTML += `
-            <div class="receipt">
-
-                <b>Receipt ID:</b> ${receiptId} <br>
-
-                <b>Payment ID:</b> ${receipt.payment_id || "-"} <br>
-
-                <b>Order ID:</b> ${receipt.order_id || "-"} <br>
-
-                <b>Enrollment:</b> ${receipt.enrollment} <br>
-
-                <b>Class:</b> ${receipt.class || "-"} <br>
-
-                <b>Amount Paid:</b> ₹${receipt.amount_paid} <br>
-
-                <b>Reason:</b> ${receipt.reason} <br>
-
-                <b>Status:</b> ${receipt.status} <br>
-
-                <b>Date:</b> ${
-                    receipt.createdAt
-                    ? new Date(receipt.createdAt).toLocaleString("en-IN")
-                    : "-"
-                } <br><br>
-
-                <button onclick="viewReceipt('${receiptId}')">
-                    View Receipt
-                </button>
-
-            </div>
-            `;
-        });
+        renderReceipts(receipts);
 
     }
-    catch(error){
-        container.innerHTML = "<p class='empty'>Server error</p>";
+    catch(err){
+
+        console.error(err);
+
+        document.getElementById("receiptList").innerHTML =
+            "<p class='empty'>Server error loading receipts</p>";
+
     }
+
 }
 
 
-function viewReceipt(id){
-    window.location.href = `receipt-view.html?id=${id}`;
+// --------------------------------------------------
+// RENDER RECEIPTS
+// --------------------------------------------------
+function renderReceipts(receipts){
+
+    const container = document.getElementById("receiptList");
+
+    if(receipts.length === 0){
+
+        container.innerHTML =
+            "<p class='empty'>No receipts found</p>";
+
+        return;
+    }
+
+    container.innerHTML = "";
+
+    receipts.forEach(receipt => {
+
+        const receiptId = receipt.receipt_id || receipt._id;
+
+        const dateText = receipt.createdAt
+            ? new Date(receipt.createdAt).toLocaleString("en-IN")
+            : "-";
+
+        container.innerHTML += `
+
+        <div class="receipt">
+
+            <b>Receipt ID:</b> ${receiptId} <br>
+
+            <b>Payment ID:</b> ${receipt.payment_id || "-"} <br>
+
+            <b>Enrollment:</b> ${receipt.enrollment} <br>
+
+            <b>Class:</b> ${receipt.class || "-"} <br>
+
+            <b>Amount:</b> ₹${receipt.amount_paid} <br>
+
+            <b>Reason:</b> ${receipt.reason} <br>
+
+            <b>Status:</b> ${receipt.status} <br>
+
+            <b>Date:</b> ${dateText} <br><br>
+
+            <button onclick="viewReceipt('${receiptId}')">
+                View Receipt
+            </button>
+
+        </div>
+
+        `;
+
+    });
+
 }
 
+
+// --------------------------------------------------
+// VIEW RECEIPT
+// --------------------------------------------------
+function viewReceipt(receiptId){
+
+    const receipts = JSON.parse(
+        localStorage.getItem("studentReceipts")
+    ) || [];
+
+    const receipt = receipts.find(r =>
+        (r.receipt_id === receiptId) ||
+        (r._id === receiptId)
+    );
+
+    if(!receipt){
+
+        alert("Receipt not found");
+
+        return;
+    }
+
+    localStorage.setItem(
+        "selectedReceipt",
+        JSON.stringify(receipt)
+    );
+
+    window.location.href = "receipt-view.html";
+
+}
+
+
+// --------------------------------------------------
 loadReceipts();
+// --------------------------------------------------
 
 </script>
 
