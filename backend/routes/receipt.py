@@ -296,7 +296,6 @@ def get_receipt(receipt_id):
 # -------------------------------------------------
 # VALIDATE RECEIPT BY ID
 # -------------------------------------------------
-
 @receipt_bp.route("/validate/<receipt_id>", methods=["GET"])
 @cross_origin()
 def validate_receipt(receipt_id):
@@ -304,7 +303,7 @@ def validate_receipt(receipt_id):
     try:
 
         receipt = db.receipts.find_one({
-            "_id": ObjectId(receipt_id)
+            "receipt_id": receipt_id
         })
 
         if receipt:
@@ -312,11 +311,13 @@ def validate_receipt(receipt_id):
             return jsonify({
                 "valid": True,
                 "receipt": {
-                    "id": str(receipt["_id"]),
+                    "receipt_id": receipt.get("receipt_id"),
                     "enrollment": receipt.get("enrollment"),
                     "amount": receipt.get("amount_paid"),
                     "reason": receipt.get("reason"),
-                    "date": str(receipt.get("createdAt"))
+                    "date": receipt.get("createdAt").isoformat() if receipt.get("createdAt") else None,
+                    "payment_id": receipt.get("payment_id"),
+                    "status": receipt.get("status")
                 }
             }), 200
 
@@ -329,7 +330,9 @@ def validate_receipt(receipt_id):
 
     except Exception as e:
 
+        print("VALIDATE ERROR:", str(e))
+
         return jsonify({
             "valid": False,
-            "message": "Invalid receipt ID format"
-        }), 400
+            "message": "Server error"
+        }), 500
