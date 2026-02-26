@@ -113,6 +113,7 @@ def create_receipt(data):
 
         receipt = {
 
+              "receipt_id": "RCP--ACRO" + uuid.uuid4().hex[:8].upper(),
             "enrollment": enrollment,
 
             "payment_id": data.get("payment_id"),
@@ -295,28 +296,40 @@ def get_receipt(receipt_id):
 # -------------------------------------------------
 # VALIDATE RECEIPT BY ID
 # -------------------------------------------------
+
 @receipt_bp.route("/validate/<receipt_id>", methods=["GET"])
 @cross_origin()
 def validate_receipt(receipt_id):
 
-    receipt = db.receipts.find_one({"id": receipt_id})
+    try:
 
-    if receipt:
+        receipt = db.receipts.find_one({
+            "_id": ObjectId(receipt_id)
+        })
 
-        return jsonify({
-            "valid": True,
-            "receipt": {
-                "id": receipt["id"],
-                "enrollment": receipt["enrollment"],
-                "amount": receipt["amount"],
-                "reason": receipt["reason"],
-                "date": str(receipt["date"])
-            }
-        }), 200
+        if receipt:
 
-    else:
+            return jsonify({
+                "valid": True,
+                "receipt": {
+                    "id": str(receipt["_id"]),
+                    "enrollment": receipt.get("enrollment"),
+                    "amount": receipt.get("amount_paid"),
+                    "reason": receipt.get("reason"),
+                    "date": str(receipt.get("createdAt"))
+                }
+            }), 200
+
+        else:
+
+            return jsonify({
+                "valid": False,
+                "message": "Receipt not found"
+            }), 404
+
+    except Exception as e:
 
         return jsonify({
             "valid": False,
-            "message": "Receipt not found"
-        }), 404
+            "message": "Invalid receipt ID format"
+        }), 400
