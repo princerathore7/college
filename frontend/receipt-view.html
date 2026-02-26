@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Payment Receipt</title>
+<title>Fine Payment Receipt</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
@@ -14,15 +14,40 @@ body{
     padding:20px;
 }
 
+/* RECEIPT CONTAINER */
 .receipt-container{
+    position:relative;
     max-width:750px;
     margin:auto;
     background:white;
     border-radius:10px;
     box-shadow:0 0 20px rgba(0,0,0,0.15);
     padding:30px;
+    overflow:hidden;
 }
 
+/* WATERMARK */
+.watermark{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    opacity:0.04; /* ultra low opacity */
+    pointer-events:none;
+    z-index:0;
+    background-image:url("logo.jpg");
+    background-repeat:repeat;
+    background-size:120px;
+}
+
+/* CONTENT ABOVE WATERMARK */
+.content{
+    position:relative;
+    z-index:1;
+}
+
+/* HEADER */
 .header{
     text-align:center;
     border-bottom:2px solid #eee;
@@ -45,6 +70,7 @@ body{
     margin-top:5px;
 }
 
+/* DETAILS */
 .details{
     margin-top:25px;
 }
@@ -65,6 +91,7 @@ body{
     color:#555;
 }
 
+/* AMOUNT BOX */
 .amount-box{
     text-align:center;
     margin-top:25px;
@@ -79,6 +106,7 @@ body{
     color:#007bff;
 }
 
+/* STATUS */
 .status-paid{
     color:green;
     font-weight:bold;
@@ -89,6 +117,7 @@ body{
     font-weight:bold;
 }
 
+/* FOOTER */
 .footer{
     text-align:center;
     margin-top:25px;
@@ -96,6 +125,7 @@ body{
     font-size:14px;
 }
 
+/* BUTTONS */
 .buttons{
     text-align:center;
     margin-top:20px;
@@ -109,7 +139,6 @@ button{
     margin:5px;
     border-radius:6px;
     cursor:pointer;
-    font-size:15px;
 }
 
 button:hover{
@@ -124,9 +153,17 @@ button:hover{
     background:#4e555b;
 }
 
+/* PRINT MODE */
 @media print{
-    body{ background:white; }
-    .buttons{ display:none; }
+
+    body{
+        background:white;
+    }
+
+    .buttons{
+        display:none;
+    }
+
 }
 
 </style>
@@ -135,110 +172,149 @@ button:hover{
 
 <div class="receipt-container">
 
-    <div class="header">
-        <img src="logop.png" class="logo">
-        <div class="college-name">
-            Acropolis Institute of Technology & Research
-        </div>
-        <div class="receipt-title">
-            PAYMENT RECEIPT
-        </div>
-    </div>
+    <!-- WATERMARK -->
+    <div class="watermark"></div>
 
-    <div class="details">
+    <!-- CONTENT -->
+    <div class="content">
 
-        <div class="row">
-            <div class="label">Receipt ID</div>
-            <div class="value" id="receiptId"></div>
-        </div>
+        <div class="header">
+            <img src="logo.jpg" class="logo">
 
-        <div class="row">
-            <div class="label">Payment ID</div>
-            <div class="value" id="paymentId"></div>
+            <div class="college-name">
+                Acropolis Institute of Technology & Research
+            </div>
+
+            <div class="receipt-title">
+                Fine Payment Receipt
+            </div>
         </div>
 
-        <div class="row">
-            <div class="label">Enrollment Number</div>
-            <div class="value" id="enrollment"></div>
+        <div class="details">
+
+            <div class="row">
+                <div class="label">Receipt ID</div>
+                <div class="value" id="receiptId"></div>
+            </div>
+
+            <div class="row">
+                <div class="label">Payment ID</div>
+                <div class="value" id="paymentId"></div>
+            </div>
+
+            <div class="row">
+                <div class="label">Enrollment Number</div>
+                <div class="value" id="enrollment"></div>
+            </div>
+
+            <div class="row">
+                <div class="label">Class</div>
+                <div class="value" id="className"></div>
+            </div>
+
+            <div class="row">
+                <div class="label">Reason</div>
+                <div class="value" id="reason"></div>
+            </div>
+
+            <div class="row">
+                <div class="label">Status</div>
+                <div class="value" id="status"></div>
+            </div>
+
+            <div class="row">
+                <div class="label">Date & Time</div>
+                <div class="value" id="dateTime"></div>
+            </div>
+
         </div>
 
-        <div class="row">
-            <div class="label">Class</div>
-            <div class="value" id="className"></div>
+        <div class="amount-box">
+            Paid Amount
+            <div class="amount" id="amount"></div>
         </div>
 
-        <div class="row">
-            <div class="label">Reason</div>
-            <div class="value" id="reason"></div>
+        <div class="footer">
+            This is a computer generated receipt.<br>
+            No signature required.
         </div>
 
-        <div class="row">
-            <div class="label">Status</div>
-            <div class="value" id="status"></div>
+        <div class="buttons">
+
+            <button onclick="window.print()">
+                <i class="fa fa-print"></i> Print
+            </button>
+
+            <button class="back-btn" onclick="goBack()">
+                <i class="fa fa-arrow-left"></i> Back
+            </button>
+
         </div>
 
-        <div class="row">
-            <div class="label">Date & Time</div>
-            <div class="value" id="dateTime"></div>
-        </div>
-
-    </div>
-
-    <div class="amount-box">
-        Paid Amount
-        <div class="amount" id="amount"></div>
-    </div>
-
-    <div class="footer">
-        This is a computer generated receipt.<br>
-        No signature required.
-    </div>
-
-    <div class="buttons">
-        <button onclick="window.print()">
-            <i class="fa fa-print"></i> Print
-        </button>
-
-        <button class="back-btn" onclick="goBack()">
-            <i class="fa fa-arrow-left"></i> Back
-        </button>
     </div>
 
 </div>
 
 <script>
 
-/* Load receipt */
+/* GET RECEIPT */
 
 const receipt = JSON.parse(localStorage.getItem("selectedReceipt"));
 
 if(!receipt){
+
     alert("Receipt not found");
     window.location.href = "my-receipt.html";
+
 }
 
-/* Extract Proper Fields */
+/* GET CLASS FROM LOCAL STORAGE */
+
+let className = receipt.class;
+
+if(!className){
+
+    const studentProfile = JSON.parse(localStorage.getItem("studentProfile"));
+
+    if(studentProfile && studentProfile.class){
+
+        className = studentProfile.class;
+
+    }
+    else{
+
+        className = "-";
+
+    }
+
+}
+
+/* EXTRACT DATA */
 
 const receiptId = receipt.receipt_id || receipt._id || "-";
 const paymentId = receipt.payment_id || "-";
 const enrollment = receipt.enrollment || "-";
-const className = receipt.class || "-";
 const reason = receipt.reason || "-";
 const status = receipt.status || "-";
 const amount = receipt.amount_paid || receipt.amount || "0";
 
-/* Date */
+/* DATE */
 
 let formattedDate = "-";
 
 if(receipt.createdAt){
+
     const d = new Date(receipt.createdAt);
+
     if(!isNaN(d.getTime())){
+
         formattedDate = d.toLocaleString("en-IN");
+
     }
+
 }
 
-/* Fill Data */
+/* FILL */
 
 document.getElementById("receiptId").innerText = receiptId;
 document.getElementById("paymentId").innerText = paymentId;
@@ -248,22 +324,29 @@ document.getElementById("reason").innerText = reason;
 document.getElementById("amount").innerText = "₹ " + amount;
 document.getElementById("dateTime").innerText = formattedDate;
 
-/* Status Styling */
+/* STATUS COLOR */
 
 const statusElement = document.getElementById("status");
+
 statusElement.innerText = status;
 
 if(status.toLowerCase() === "paid"){
+
     statusElement.classList.add("status-paid");
+
 }
 else{
+
     statusElement.classList.add("status-pending");
+
 }
 
-/* Back */
+/* BACK */
 
 function goBack(){
+
     window.location.href = "my-receipt.html";
+
 }
 
 </script>
