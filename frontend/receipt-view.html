@@ -141,7 +141,7 @@ button:hover{
     <div class="header">
 
         <!-- Replace with your real logo -->
-        <img src="https://upload.wikimedia.org/wikipedia/en/4/4a/Acropolis_Institute_of_Technology_and_Research_logo.png"
+        <img src="logop.jpg"
              class="logo">
 
         <div class="college-name">
@@ -242,25 +242,45 @@ document.getElementById("amount").innerText =
 
 
 /* Date & Time */
-
 if(receipt.date){
 
-    const dateObj = new Date(receipt.date);
+    let dateObj;
 
-    document.getElementById("date").innerText =
-        dateObj.toLocaleDateString();
+    // Try ISO format first
+    dateObj = new Date(receipt.date);
 
-    document.getElementById("time").innerText =
-        dateObj.toLocaleTimeString();
+    // If invalid, show raw date
+    if(isNaN(dateObj.getTime())){
+
+        document.getElementById("date").innerText = receipt.date;
+        document.getElementById("time").innerText = "Not available";
+
+    }
+    else{
+
+        document.getElementById("date").innerText =
+            dateObj.toLocaleDateString("en-IN", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric"
+            });
+
+        document.getElementById("time").innerText =
+            dateObj.toLocaleTimeString("en-IN", {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit"
+            });
+
+    }
 
 }
 else{
 
-    document.getElementById("date").innerText = "-";
-    document.getElementById("time").innerText = "-";
+    document.getElementById("date").innerText = "Not available";
+    document.getElementById("time").innerText = "Not available";
 
 }
-
 
 /* Back button */
 
