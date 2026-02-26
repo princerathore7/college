@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Payment Receipt</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    background:#f0f2f5;
+    padding:20px;
+}
+
+.receipt-container{
+    max-width:700px;
+    margin:auto;
+    background:white;
+    border-radius:10px;
+    box-shadow:0 0 15px rgba(0,0,0,0.15);
+    padding:30px;
+}
+
+/* Header */
+.header{
+    text-align:center;
+    border-bottom:2px solid #eee;
+    padding-bottom:15px;
+}
+
+.logo{
+    width:80px;
+    margin-bottom:10px;
+}
+
+.college-name{
+    font-size:22px;
+    font-weight:bold;
+}
+
+.receipt-title{
+    font-size:18px;
+    color:#555;
+    margin-top:5px;
+}
+
+/* Body */
+.details{
+    margin-top:25px;
+}
+
+.row{
+    display:flex;
+    justify-content:space-between;
+    padding:10px 0;
+    border-bottom:1px solid #eee;
+}
+
+.label{
+    font-weight:bold;
+    color:#333;
+}
+
+.value{
+    color:#555;
+}
+
+/* Amount Highlight */
+.amount-box{
+    text-align:center;
+    margin-top:20px;
+    padding:15px;
+    background:#e8f4ff;
+    border-radius:8px;
+}
+
+.amount{
+    font-size:28px;
+    font-weight:bold;
+    color:#007bff;
+}
+
+/* Footer */
+.footer{
+    text-align:center;
+    margin-top:25px;
+    color:#777;
+    font-size:14px;
+}
+
+/* Buttons */
+.buttons{
+    text-align:center;
+    margin-top:20px;
+}
+
+button{
+    background:#007bff;
+    color:white;
+    border:none;
+    padding:10px 20px;
+    margin:5px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:15px;
+}
+
+button:hover{
+    background:#0056b3;
+}
+
+.back-btn{
+    background:#6c757d;
+}
+
+.back-btn:hover{
+    background:#4e555b;
+}
+
+@media print{
+
+    body{
+        background:white;
+    }
+
+    .buttons{
+        display:none;
+    }
+
+}
+
+</style>
+</head>
+<body>
+
+<div class="receipt-container">
+
+    <!-- Header -->
+    <div class="header">
+
+        <!-- Replace with your real logo -->
+        <img src="https://upload.wikimedia.org/wikipedia/en/4/4a/Acropolis_Institute_of_Technology_and_Research_logo.png"
+             class="logo">
+
+        <div class="college-name">
+            Acropolis Institute of Technology & Research
+        </div>
+
+        <div class="receipt-title">
+            PAYMENT RECEIPT
+        </div>
+
+    </div>
+
+
+    <!-- Receipt Details -->
+    <div class="details">
+
+        <div class="row">
+            <div class="label">Receipt ID</div>
+            <div class="value" id="receiptId"></div>
+        </div>
+
+        <div class="row">
+            <div class="label">Enrollment Number</div>
+            <div class="value" id="enrollment"></div>
+        </div>
+
+        <div class="row">
+            <div class="label">Reason</div>
+            <div class="value" id="reason"></div>
+        </div>
+
+        <div class="row">
+            <div class="label">Date</div>
+            <div class="value" id="date"></div>
+        </div>
+
+        <div class="row">
+            <div class="label">Time</div>
+            <div class="value" id="time"></div>
+        </div>
+
+    </div>
+
+
+    <!-- Amount -->
+    <div class="amount-box">
+        Paid Amount
+        <div class="amount" id="amount"></div>
+    </div>
+
+
+    <!-- Footer -->
+    <div class="footer">
+        This is a computer generated receipt.<br>
+        No signature required.
+    </div>
+
+
+    <!-- Buttons -->
+    <div class="buttons">
+
+        <button onclick="window.print()">
+            <i class="fa fa-print"></i> Print
+        </button>
+
+        <button class="back-btn" onclick="goBack()">
+            <i class="fa fa-arrow-left"></i> Back
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* Load receipt from localStorage */
+
+const receipt = JSON.parse(localStorage.getItem("selectedReceipt"));
+
+if(!receipt){
+
+    alert("Receipt not found");
+    window.location.href = "my-receipt.html";
+
+}
+
+/* Fill data */
+
+document.getElementById("receiptId").innerText = receipt.id || "-";
+
+document.getElementById("enrollment").innerText = receipt.enrollment || "-";
+
+document.getElementById("reason").innerText = receipt.reason || "-";
+
+document.getElementById("amount").innerText =
+    "₹ " + (receipt.amount || "0");
+
+
+/* Date & Time */
+
+if(receipt.date){
+
+    const dateObj = new Date(receipt.date);
+
+    document.getElementById("date").innerText =
+        dateObj.toLocaleDateString();
+
+    document.getElementById("time").innerText =
+        dateObj.toLocaleTimeString();
+
+}
+else{
+
+    document.getElementById("date").innerText = "-";
+    document.getElementById("time").innerText = "-";
+
+}
+
+
+/* Back button */
+
+function goBack(){
+
+    window.location.href = "my-receipt.html";
+
+}
+
+</script>
+
+</body>
+</html>

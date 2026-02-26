@@ -78,7 +78,7 @@ function loadReceipts(){
 
     container.innerHTML = "";
 
-    receipts.reverse().forEach(receipt => {
+    receipts.slice().reverse().forEach(receipt => {
 
         container.innerHTML += `
         <div class="receipt">
@@ -98,6 +98,7 @@ function loadReceipts(){
 
 }
 
+
 function viewReceipt(id){
 
     const receipts = JSON.parse(localStorage.getItem("studentReceipts")) || [];
@@ -109,15 +110,14 @@ function viewReceipt(id){
         return;
     }
 
-    alert(
-        "Receipt ID: " + receipt.id + "\n" +
-        "Enrollment: " + receipt.enrollment + "\n" +
-        "Amount: ₹" + receipt.amount + "\n" +
-        "Reason: " + receipt.reason + "\n" +
-        "Date: " + receipt.date
-    );
+    // ✅ Save selected receipt separately
+    localStorage.setItem("selectedReceipt", JSON.stringify(receipt));
+
+    // ✅ Redirect to receipt view page
+    window.location.href = "receipt-view.html";
 
 }
+
 
 loadReceipts();
 
