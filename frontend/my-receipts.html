@@ -80,22 +80,34 @@ function loadReceipts(){
 
     receipts.slice().reverse().forEach(receipt => {
 
+        const receiptId = receipt.receipt_id || receipt._id;
+
         container.innerHTML += `
         <div class="receipt">
-            <b>Receipt ID:</b> ${receipt.id} <br>
-            <b>Enrollment:</b> ${receipt.enrollment} <br>
-            <b>Amount:</b> ₹${receipt.amount} <br>
-            <b>Reason:</b> ${receipt.reason} <br>
-            <b>Date:</b> ${receipt.date} <br><br>
 
-            <button onclick='viewReceipt("${receipt.id}")'>
+            <b>Receipt ID:</b> ${receiptId} <br>
+
+            <b>Payment ID:</b> ${receipt.payment_id || "-"} <br>
+
+            <b>Enrollment:</b> ${receipt.enrollment} <br>
+
+            <b>Amount:</b> ₹${receipt.amount_paid} <br>
+
+            <b>Reason:</b> ${receipt.reason} <br>
+
+            <b>Date:</b> ${
+                receipt.createdAt
+                ? new Date(receipt.createdAt).toLocaleString("en-IN")
+                : "-"
+            } <br><br>
+
+            <button onclick='viewReceipt("${receiptId}")'>
                 View Receipt
             </button>
+
         </div>
         `;
-
     });
-
 }
 
 
@@ -103,7 +115,9 @@ function viewReceipt(id){
 
     const receipts = JSON.parse(localStorage.getItem("studentReceipts")) || [];
 
-    const receipt = receipts.find(r => r.id === id);
+   const receipt = receipts.find(r =>
+    (r.receipt_id === id) || (r._id === id)
+);
 
     if(!receipt){
         alert("Receipt not found");
