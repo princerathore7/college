@@ -73,15 +73,17 @@ const API_BASE = "/api/receipts";
 // --------------------------------------------------
 async function loadReceipts(){
 
-    const enrollment = localStorage.getItem("studentEnrollment");
+    const profile = JSON.parse(localStorage.getItem("studentProfile"));
 
-    if(!enrollment){
+    if(!profile || !profile.enrollment){
 
         document.getElementById("receiptList").innerHTML =
             "<p class='empty'>Enrollment not found. Please login again.</p>";
 
         return;
     }
+
+    const enrollment = profile.enrollment;
 
     try{
 
@@ -99,7 +101,6 @@ async function loadReceipts(){
 
         const receipts = data.receipts;
 
-        // Save locally also
         localStorage.setItem("studentReceipts", JSON.stringify(receipts));
 
         renderReceipts(receipts);
