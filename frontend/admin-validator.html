@@ -107,7 +107,7 @@ detailsDiv.innerHTML = "";
 try{
 
 const res =
-await fetch(`/api/receipt/validate/${receiptId}`);
+await fetch(`https://college-hwbb.onrender.com/api/receipt/validate/${receiptId}`);
 
 const data = await res.json();
 
