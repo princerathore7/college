@@ -1,0 +1,298 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Receipt Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body{
+    font-family: Arial;
+    background: #f4f6f9;
+    margin:0;
+    padding:20px;
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+}
+
+h1{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.top-bar{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:15px;
+}
+
+input{
+    padding:10px;
+    width:300px;
+    border:1px solid #ccc;
+    border-radius:6px;
+}
+
+button{
+    padding:10px 15px;
+    border:none;
+    background:#007bff;
+    color:white;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#0056b3;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+}
+
+th, td{
+    padding:10px;
+    border-bottom:1px solid #ddd;
+    text-align:left;
+}
+
+th{
+    background:#343a40;
+    color:white;
+}
+
+.status-paid{
+    color:green;
+    font-weight:bold;
+}
+
+.status-fake{
+    color:red;
+    font-weight:bold;
+}
+
+.loading{
+    text-align:center;
+    padding:20px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Admin Receipt Validation Panel</h1>
+
+<div class="top-bar">
+
+<input type="text" id="searchInput" placeholder="Enter Receipt ID">
+
+<button onclick="searchReceipt()">Search</button>
+
+<button onclick="loadReceipts()">Refresh</button>
+
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+<th>Receipt ID</th>
+<th>Enrollment</th>
+<th>Amount</th>
+<th>Reason</th>
+<th>Payment ID</th>
+<th>Date</th>
+<th>Status</th>
+<th>Validate</th>
+</tr>
+
+</thead>
+
+<tbody id="receiptTable">
+
+<tr>
+<td colspan="8" class="loading">Loading receipts...</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<script>
+
+const API = "https://college-hwbb.onrender.com/api/receipts/admin/all";
+
+
+async function loadReceipts(){
+
+    const table = document.getElementById("receiptTable");
+
+    table.innerHTML = "<tr><td colspan='8' class='loading'>Loading...</td></tr>";
+
+    try{
+
+        const res = await fetch(API);
+
+        const data = await res.json();
+
+        if(!data.success){
+
+            table.innerHTML = "<tr><td colspan='8'>Failed to load</td></tr>";
+            return;
+        }
+
+        renderTable(data.receipts);
+
+    }
+    catch(err){
+
+        table.innerHTML = "<tr><td colspan='8'>Server error</td></tr>";
+
+    }
+
+}
+
+
+function renderTable(receipts){
+
+    const table = document.getElementById("receiptTable");
+
+    if(receipts.length === 0){
+
+        table.innerHTML = "<tr><td colspan='8'>No receipts found</td></tr>";
+        return;
+
+    }
+
+    table.innerHTML = "";
+
+    receipts.forEach(r => {
+
+        const date = r.createdAt
+            ? new Date(r.createdAt).toLocaleString("en-IN")
+            : "-";
+
+        table.innerHTML += `
+
+        <tr>
+
+            <td>${r.receipt_id}</td>
+
+            <td>${r.enrollment}</td>
+
+            <td>₹${r.amount_paid}</td>
+
+            <td>${r.reason}</td>
+
+            <td>${r.payment_id}</td>
+
+            <td>${date}</td>
+
+            <td class="status-paid">${r.status}</td>
+
+            <td>
+                <button onclick="validateReceipt('${r.receipt_id}')">
+                    Validate
+                </button>
+            </td>
+
+        </tr>
+
+        `;
+
+    });
+
+}
+
+
+async function validateReceipt(receipt_id){
+
+    try{
+
+        const res = await fetch("https://college-hwbb.onrender.com/api/receipts/validate/" + receipt_id);
+
+        const data = await res.json();
+
+        if(data.valid){
+
+            alert("✅ VALID RECEIPT\n\nEnrollment: " + data.receipt.enrollment +
+                  "\nAmount: ₹" + data.receipt.amount);
+
+        }
+        else{
+
+            alert("❌ FAKE RECEIPT");
+
+        }
+
+    }
+    catch{
+
+        alert("Server error");
+
+    }
+
+}
+
+
+function searchReceipt(){
+
+    const input = document.getElementById("searchInput").value.trim();
+
+    if(!input){
+
+        loadReceipts();
+        return;
+
+    }
+
+    fetch("https://college-hwbb.onrender.com/api/receipts/validate/" + input)
+    .then(res => res.json())
+    .then(data => {
+
+        if(data.valid){
+
+            renderTable([{
+
+                receipt_id: data.receipt.receipt_id,
+                enrollment: data.receipt.enrollment,
+                amount_paid: data.receipt.amount,
+                reason: data.receipt.reason,
+                payment_id: data.receipt.payment_id,
+                createdAt: data.receipt.date,
+                status: data.receipt.status
+
+            }]);
+
+        }
+        else{
+
+            alert("Receipt not found");
+
+        }
+
+    });
+
+}
+
+
+loadReceipts();
+
+</script>
+
+</body>
+</html>
+```

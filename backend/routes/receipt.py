@@ -336,3 +336,71 @@ def validate_receipt(receipt_id):
             "valid": False,
             "message": "Server error"
         }), 500
+    # ---------------------------------------------------------
+# ADMIN : GET ALL RECEIPTS WITH FULL DETAILS
+# ---------------------------------------------------------
+@receipt_bp.route("/admin/all", methods=["GET"])
+@cross_origin()
+def admin_get_all_receipts():
+
+    try:
+
+        receipts_cursor = db.receipts.find().sort("createdAt", -1)
+
+        receipts = []
+
+        for r in receipts_cursor:
+
+            receipts.append({
+
+                "mongo_id": str(r.get("_id")),
+
+                "receipt_id": r.get("receipt_id"),
+
+                "enrollment": r.get("enrollment"),
+
+                "payment_id": r.get("payment_id"),
+
+                "order_id": r.get("order_id"),
+
+                "amount_paid": r.get("amount_paid"),
+
+                "reason": r.get("reason"),
+
+                "class": r.get("class"),
+
+                "payment_method": r.get("payment_method"),
+
+                "status": r.get("status"),
+
+                "createdAt": r.get("createdAt").isoformat() if r.get("createdAt") else None,
+
+                # Extra useful admin fields
+                "is_valid": True if r.get("status") == "Paid" else False,
+
+                "verified": True
+
+            })
+
+        return jsonify({
+
+            "success": True,
+
+            "total_receipts": len(receipts),
+
+            "receipts": receipts
+
+        }), 200
+
+
+    except Exception as e:
+
+        print("ADMIN GET ALL RECEIPTS ERROR:", str(e))
+
+        return jsonify({
+
+            "success": False,
+
+            "message": "Server error"
+
+        }), 500
