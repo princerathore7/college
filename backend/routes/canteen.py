@@ -194,7 +194,7 @@ def commission_report():
 # CANTEEN AUTH (Owner)
 # ==============================
 
-@canteen_bp.route("/api/canteen/signup", methods=["POST"])
+@canteen_bp.route("/signup", methods=["POST"])
 def canteen_signup():
     data = request.json
 
