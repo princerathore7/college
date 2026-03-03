@@ -3,6 +3,7 @@ from datetime import datetime
 from bson import ObjectId
 from pymongo import MongoClient
 import random
+import os
 from werkzeug.security import generate_password_hash, check_password_hash
 UPLOAD_FOLDER = "static/menu_images"
 if not os.path.exists(UPLOAD_FOLDER):
