@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Your Cart</title>
+<title>Confirm & Place Order</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -42,6 +42,14 @@ h2{
     align-items:center;
 }
 
+input{
+    width:100%;
+    padding:8px;
+    margin:8px 0;
+    border:1px solid #ddd;
+    border-radius:6px;
+}
+
 button{
     padding:6px 10px;
     border:none;
@@ -69,9 +77,17 @@ button{
 </head>
 <body>
 
-<h2>🛒 Your Cart</h2>
+<h2>🛒 Your Cart & Order Details</h2>
 
 <div class="cart-container" id="cartContainer"></div>
+
+<!-- User Details Form -->
+<div class="cart-container" style="margin-top:20px;">
+    <h3>Customer Details</h3>
+    <input type="text" id="name" placeholder="Your Name" required>
+    <input type="text" id="mobile" placeholder="Mobile Number" required>
+    <input type="text" id="payment_id" placeholder="Payment ID" required>
+</div>
 
 <script>
 
@@ -81,7 +97,6 @@ let cart = JSON.parse(localStorage.getItem("cart")) || [];
 // Group same items together
 function groupCartItems(){
     const grouped = {};
-
     cart.forEach(item=>{
         if(grouped[item._id]){
             grouped[item._id].quantity += 1;
@@ -89,12 +104,10 @@ function groupCartItems(){
             grouped[item._id] = {...item, quantity:1};
         }
     });
-
     return Object.values(grouped);
 }
 
 function renderCart(){
-
     const container=document.getElementById("cartContainer");
     container.innerHTML="";
 
@@ -107,9 +120,7 @@ function renderCart(){
     let total=0;
 
     groupedItems.forEach(item=>{
-
         total += item.price * item.quantity;
-
         const div=document.createElement("div");
         div.className="cart-item";
 
@@ -126,7 +137,6 @@ function renderCart(){
                 <button class="remove-btn" onclick="removeItem('${item._id}')">Remove</button>
             </div>
         `;
-
         container.appendChild(div);
     });
 
@@ -166,10 +176,20 @@ function removeItem(id){
     renderCart();
 }
 
+// PLACE ORDER
 async function placeOrder(total){
 
     if(cart.length===0){
         alert("Cart empty!");
+        return;
+    }
+
+    const name = document.getElementById("name").value.trim();
+    const mobile = document.getElementById("mobile").value.trim();
+    const payment_id = document.getElementById("payment_id").value.trim();
+
+    if(!name || !mobile || !payment_id){
+        alert("Please fill all customer details!");
         return;
     }
 
@@ -180,7 +200,10 @@ async function placeOrder(total){
         user_id:user_id,
         canteen_id:canteen_id,
         items:cart,
-        total_price:total
+        total_price:total,
+        name:name,
+        mobile:mobile,
+        payment_id:payment_id
     };
 
     try{

@@ -6,6 +6,8 @@ import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from db import db
 
+from datetime import datetime, timedelta
+
 # -----------------------------------
 # Blueprint
 # -----------------------------------
@@ -53,21 +55,36 @@ def get_all_menu():
         item["_id"] = str(item["_id"])
     return jsonify(items)
 
-
 @canteen_bp.route("/place-order", methods=["POST"])
 def place_order():
     data = request.json
 
+    # Required fields
+    user_id = data.get("user_id")
+    canteen_id = data.get("canteen_id")
+    items = data.get("items")
+    total_price = data.get("total_price")
+    name = data.get("name")  # Customer name
+    mobile = data.get("mobile")  # Customer mobile
+    payment_id = data.get("payment_id")  # Payment transaction ID
+
+    # Validate required fields
+    if not all([user_id, canteen_id, items, total_price, name, mobile, payment_id]):
+        return jsonify({"error": "All fields are required"}), 400
+
     token_number = random.randint(100, 999)
 
     order = {
-        "user_id": data["user_id"],
-        "canteen_id": data["canteen_id"],
-        "items": data["items"],
-        "total_price": float(data["total_price"]),
-        "payment_status": "Pending",
+        "user_id": user_id,
+        "canteen_id": canteen_id,
+        "items": items,
+        "total_price": float(total_price),
+        "payment_status": "Paid",  # Since manual payment ID is provided
         "order_status": "New",
         "token_number": token_number,
+        "name": name,
+        "mobile": mobile,
+        "payment_id": payment_id,
         "created_at": datetime.utcnow()
     }
 
@@ -78,7 +95,6 @@ def place_order():
         "order_id": str(result.inserted_id),
         "token_number": token_number
     })
-
 
 @canteen_bp.route("/my-orders/<user_id>", methods=["GET"])
 def my_orders(user_id):
@@ -98,49 +114,29 @@ def owner_orders(canteen_id):
         order["_id"] = str(order["_id"])
     return jsonify(orders)
 
-
 @canteen_bp.route("/owner/update-status/<order_id>", methods=["POST"])
 def update_status(order_id):
     data = request.json
 
     try:
-        order = orders_collection.find_one({"_id": ObjectId(order_id)})
+        status = data.get("status")
 
-        if not order:
-            return jsonify({"error": "Order not found"}), 404
-
-        # Status update data
-        updated_order = {
-            **order,
-            "order_status": data.get("status"),
+        update_data = {
+            "order_status": status,
             "updated_at": datetime.utcnow()
         }
 
         if data.get("estimated_time"):
-            updated_order["estimated_time"] = int(data.get("estimated_time"))
+            update_data["estimated_time"] = int(data.get("estimated_time"))
 
-        # If Accepted or Rejected → delete from DB
-        if data.get("status") in ["Accepted", "Rejected"]:
-            orders_collection.delete_one({"_id": ObjectId(order_id)})
+        # If Accepted or Rejected → mark for deletion after 12 hours
+        if status in ["Accepted", "Rejected"]:
+            update_data["finalized_at"] = datetime.utcnow()
+            update_data["delete_after"] = datetime.utcnow() + timedelta(hours=12)
 
-            return jsonify({
-                "message": "Order finalized ",
-                "order_data": {
-                    "_id": str(order["_id"]),
-                    "token_number": order.get("token_number"),
-                    "customer_name": order.get("customer_name"),
-                    "customer_mobile": order.get("customer_mobile"),
-                    "payment_id": order.get("payment_id"),
-                    "total_price": order.get("total_price"),
-                    "order_status": data.get("status"),
-                    "estimated_time": updated_order.get("estimated_time")
-                }
-            })
-
-        # Otherwise just update normally
         orders_collection.update_one(
             {"_id": ObjectId(order_id)},
-            {"$set": updated_order}
+            {"$set": update_data}
         )
 
         return jsonify({"message": "Order status updated"})
