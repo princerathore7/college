@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Canteen Owner Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    margin:0;
+    font-family: Arial, sans-serif;
+    background:#f4f6f9;
+}
+
+.header{
+    background:#2d3748;
+    color:white;
+    padding:20px;
+}
+
+.container{
+    padding:20px;
+}
+
+.section{
+    margin-top:30px;
+}
+
+.card{
+    background:white;
+    padding:15px;
+    margin-bottom:15px;
+    border-radius:8px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+button{
+    padding:6px 12px;
+    border:none;
+    border-radius:4px;
+    cursor:pointer;
+    margin-right:5px;
+    margin-top:5px;
+}
+
+.accept{ background:#38a169; color:white; }
+.prepare{ background:#dd6b20; color:white; }
+.ready{ background:#3182ce; color:white; }
+.delete{ background:#e53e3e; color:white; }
+.addBtn{ background:#805ad5; color:white; }
+
+.sales-box{
+    background:#edf2f7;
+    padding:10px;
+    border-radius:6px;
+}
+
+/* Modal */
+.modal{
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.5);
+    justify-content:center;
+    align-items:center;
+}
+
+.modal-content{
+    background:white;
+    padding:20px;
+    width:350px;
+    border-radius:8px;
+}
+
+input{
+    width:100%;
+    padding:8px;
+    margin-top:8px;
+}
+.message{
+    margin-top:10px;
+    font-weight:bold;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h2 id="canteenName"></h2>
+    <p>ID: <span id="canteenId"></span></p>
+    <p>Mobile: <span id="canteenMobile"></span></p>
+</div>
+
+<div class="container">
+
+    <!-- SALES -->
+    <div class="sales-box">
+        <strong>Today's Orders:</strong> <span id="totalOrders">0</span> |
+        <strong>Total Sales:</strong> ₹<span id="totalSales">0</span>
+    </div>
+
+    <!-- ORDERS SECTION -->
+    <div class="section">
+        <h3>Orders</h3>
+        <div id="ordersContainer"></div>
+    </div>
+
+    <!-- MENU SECTION -->
+    <div class="section">
+        <h3>Menu Management</h3>
+        <button class="addBtn" onclick="openModal()">+ Add Item</button>
+        <div id="menuContainer"></div>
+    </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="menuModal">
+    <div class="modal-content">
+        <h3>Add Menu Item</h3>
+        <input type="text" id="menuName" placeholder="Item Name">
+        <input type="text" id="menuCategory" placeholder="Category">
+        <input type="number" id="menuPrice" placeholder="Price">
+        <input type="file" id="menuPhoto">
+        <button onclick="addMenu()">Add</button>
+        <button onclick="closeModal()">Cancel</button>
+        <p class="message" id="menuMessage"></p>
+    </div>
+</div>
+
+<script>
+
+const BASE_URL = "https://college-hwbb.onrender.com";
+const canteen_id = localStorage.getItem("canteen_id");
+const canteen_name = localStorage.getItem("canteen_name");
+
+if(!canteen_id){
+    alert("Login Required!");
+    window.location.href="canteen-login.html";
+}
+
+document.getElementById("canteenName").innerText = canteen_name;
+document.getElementById("canteenId").innerText = canteen_id;
+
+// FETCH MOBILE
+async function fetchCanteenDetails(){
+    try{
+        const res = await fetch(`${BASE_URL}/canteens`);
+        const data = await res.json();
+        const found = data.find(c => c._id === canteen_id);
+        if(found){
+            document.getElementById("canteenMobile").innerText = found.mobile;
+        }
+    }catch{
+        alert("Error loading canteen details");
+    }
+}
+fetchCanteenDetails();
+
+// ORDERS
+async function fetchOrders(){
+    try{
+        const res = await fetch(`${BASE_URL}/owner/orders/${canteen_id}`);
+        const orders = await res.json();
+        const container = document.getElementById("ordersContainer");
+        container.innerHTML="";
+
+        orders.forEach(order=>{
+            const card=document.createElement("div");
+            card.className="card";
+            card.innerHTML=`
+                <p><strong>Token:</strong> ${order.token_number}</p>
+                <p><strong>Status:</strong> ${order.order_status}</p>
+                <p><strong>Total:</strong> ₹${order.total_price}</p>
+                <button class="accept" onclick="updateStatus('${order._id}','Accepted')">Accept</button>
+                <button class="prepare" onclick="updateStatus('${order._id}','Preparing')">Preparing</button>
+                <button class="ready" onclick="updateStatus('${order._id}','Ready')">Ready</button>
+            `;
+            container.appendChild(card);
+        });
+
+    }catch{
+        alert("Error fetching orders");
+    }
+}
+fetchOrders();
+setInterval(fetchOrders,5000);
+
+// UPDATE STATUS
+async function updateStatus(order_id,status){
+    await fetch(`${BASE_URL}/owner/update-status/${order_id}`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({status:status})
+    });
+    fetchOrders();
+}
+
+// SALES
+async function fetchSales(){
+    const res = await fetch(`${BASE_URL}/owner/daily-sales/${canteen_id}`);
+    const data = await res.json();
+    document.getElementById("totalOrders").innerText=data.total_orders;
+    document.getElementById("totalSales").innerText=data.total_sales;
+}
+fetchSales();
+setInterval(fetchSales,10000);
+
+// MENU LIST
+async function fetchMenu(){
+    const res = await fetch(`${BASE_URL}/menu/${canteen_id}`);
+    const items = await res.json();
+    const container=document.getElementById("menuContainer");
+    container.innerHTML="";
+
+    items.forEach(item=>{
+        const card=document.createElement("div");
+        card.className="card";
+        card.innerHTML=`
+            <p><strong>${item.name}</strong> (₹${item.price})</p>
+            <p>${item.category}</p>
+            ${item.image ? `<img src="${BASE_URL}${item.image}" width="80">` : ""}
+            <button class="delete" onclick="deleteMenu('${item._id}')">Delete</button>
+        `;
+        container.appendChild(card);
+    });
+}
+fetchMenu();
+
+// DELETE MENU
+async function deleteMenu(id){
+    if(!confirm("Delete this item?")) return;
+
+    await fetch(`${BASE_URL}/owner/delete-menu/${id}`,{
+        method:"DELETE"
+    });
+
+    alert("Item Deleted");
+    fetchMenu();
+}
+
+// ADD MENU
+async function addMenu(){
+    const name=document.getElementById("menuName").value;
+    const category=document.getElementById("menuCategory").value;
+    const price=document.getElementById("menuPrice").value;
+    const photo=document.getElementById("menuPhoto").files[0];
+
+    if(!name || !category || !price){
+        document.getElementById("menuMessage").innerText="All fields required!";
+        return;
+    }
+
+    const formData=new FormData();
+    formData.append("canteen_id",canteen_id);
+    formData.append("name",name);
+    formData.append("category",category);
+    formData.append("price",price);
+    if(photo) formData.append("photo",photo);
+
+    const res=await fetch(`${BASE_URL}/owner/add-menu`,{
+        method:"POST",
+        body:formData
+    });
+
+    const data=await res.json();
+    document.getElementById("menuMessage").innerText=data.message || data.error;
+
+    if(res.ok){
+        fetchMenu();
+        setTimeout(closeModal,1000);
+    }
+}
+
+// MODAL
+function openModal(){
+    document.getElementById("menuModal").style.display="flex";
+}
+function closeModal(){
+    document.getElementById("menuModal").style.display="none";
+    document.getElementById("menuMessage").innerText="";
+}
+
+</script>
+</body>
+</html>
