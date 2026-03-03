@@ -96,7 +96,6 @@ input{
 </button>
 
 <script>
-
 const BASE_URL = "https://college-hwbb.onrender.com/api/canteen";
 const canteen_id = localStorage.getItem("canteen_id");
 const canteen_name = localStorage.getItem("canteen_name");
@@ -110,47 +109,63 @@ document.getElementById("canteenName").innerText = canteen_name;
 document.getElementById("canteenId").innerText = canteen_id;
 
 // =========================
+// SEARCH BAR
+// =========================
+const ordersSearchInput = document.createElement("input");
+ordersSearchInput.placeholder = "Search by Token Number...";
+ordersSearchInput.style.width = "200px";
+ordersSearchInput.style.padding = "6px";
+ordersSearchInput.style.marginBottom = "10px";
+document.getElementById("ordersContainer").before(ordersSearchInput);
+
+ordersSearchInput.addEventListener("input", filterOrders);
+
+// =========================
 // FETCH ORDERS
 // =========================
+let allOrders = [];
+
 async function fetchOrders(){
     try{
         const res = await fetch(`${BASE_URL}/owner/orders/${canteen_id}`);
         const orders = await res.json();
-        const container = document.getElementById("ordersContainer");
-        container.innerHTML="";
-
-        orders.forEach(order=>{
-            const card=document.createElement("div");
-            card.className="card";
-
-            card.innerHTML=`
-                <p><strong>Token:</strong> ${order.token_number}</p>
-                <p><strong>Status:</strong> ${order.order_status}</p>
-                <p><strong>Total:</strong> ₹${order.total_price}</p>
-
-                <button class="accept" onclick="acceptOrder('${order._id}')">Accept</button>
-                <button class="prepare" onclick="updateStatus('${order._id}','Preparing')">Preparing</button>
-                <button class="ready" onclick="updateStatus('${order._id}','Ready')">Ready</button>
-                <button class="reject" onclick="updateStatus('${order._id}','Rejected')">Reject</button>
-            `;
-
-            container.appendChild(card);
-        });
-
+        allOrders = orders; // save for search
+        renderOrders(orders);
     }catch{
         alert("Error fetching orders");
     }
 }
 
-fetchOrders();
-setInterval(fetchOrders,5000);
+function renderOrders(orders){
+    const container = document.getElementById("ordersContainer");
+    container.innerHTML="";
 
+    orders.forEach(order=>{
+        const card=document.createElement("div");
+        card.className="card";
+
+        card.innerHTML=`
+            <p><strong>Token:</strong> ${order.token_number}</p>
+            <p><strong>Name:</strong> ${order.name || "-"}</p>
+            <p><strong>Mobile:</strong> ${order.mobile || "-"}</p>
+            <p><strong>Payment ID:</strong> ${order.payment_id || "-"}</p>
+            <p><strong>Status:</strong> ${order.order_status}</p>
+            <p><strong>Total:</strong> ₹${order.total_price}</p>
+
+            <button class="accept" onclick="acceptOrder('${order._id}')">Accept</button>
+            <button class="prepare" onclick="updateStatus('${order._id}','Preparing')">Preparing</button>
+            <button class="ready" onclick="updateStatus('${order._id}','Ready')">Ready</button>
+            <button class="reject" onclick="updateStatus('${order._id}','Rejected')">Reject</button>
+        `;
+
+        container.appendChild(card);
+    });
+}
 
 // =========================
 // ACCEPT WITH TIME
 // =========================
 async function acceptOrder(order_id){
-
     const time = prompt("Enter Estimated Time (in minutes):");
     if(!time || isNaN(time)){
         alert("Enter valid time");
@@ -175,12 +190,10 @@ async function acceptOrder(order_id){
     fetchOrders();
 }
 
-
 // =========================
-// UPDATE STATUS (Reject also delete)
+// UPDATE STATUS (Reject also delete from DB)
 // =========================
 async function updateStatus(order_id,status){
-
     const res = await fetch(`${BASE_URL}/owner/update-status/${order_id}`,{
         method:"POST",
         headers:{"Content-Type":"application/json"},
@@ -196,69 +209,25 @@ async function updateStatus(order_id,status){
     fetchOrders();
 }
 
-
 // =========================
 // SAVE TO LOCAL STORAGE
 // =========================
 function saveToLocal(order){
-
     let orders = JSON.parse(localStorage.getItem("my_orders")) || [];
     orders.push(order);
     localStorage.setItem("my_orders", JSON.stringify(orders));
 }
 
-
 // =========================
-// SALES (UNCHANGED)
+// SEARCH FILTER FUNCTION
 // =========================
-async function fetchSales(){
-    const res = await fetch(`${BASE_URL}/owner/daily-sales/${canteen_id}`);
-    const data = await res.json();
-    document.getElementById("totalOrders").innerText=data.total_orders;
-    document.getElementById("totalSales").innerText=data.total_sales;
+function filterOrders(){
+    const query = ordersSearchInput.value.trim();
+    if(!query) return renderOrders(allOrders);
+
+    const filtered = allOrders.filter(o => o.token_number.toString().includes(query));
+    renderOrders(filtered);
 }
-fetchSales();
-setInterval(fetchSales,10000);
-
-
-// =========================
-// MENU (UNCHANGED)
-// =========================
-async function fetchMenu(){
-    const res = await fetch(`${BASE_URL}/menu/${canteen_id}`);
-    const items = await res.json();
-    const container=document.getElementById("menuContainer");
-    container.innerHTML="";
-
-    items.forEach(item=>{
-        const card=document.createElement("div");
-        card.className="card";
-        card.innerHTML=`
-            <p><strong>${item.name}</strong> (₹${item.price})</p>
-            <p>${item.category}</p>
-            ${item.image ? `<img src="${BASE_URL}${item.image}" width="80">` : ""}
-            <button class="delete" onclick="deleteMenu('${item._id}')">Delete</button>
-        `;
-        container.appendChild(card);
-    });
-}
-fetchMenu();
-
-async function deleteMenu(id){
-    if(!confirm("Delete this item?")) return;
-
-    await fetch(`${BASE_URL}/owner/delete-menu/${id}`,{
-        method:"DELETE"
-    });
-
-    alert("Item Deleted");
-    fetchMenu();
-}
-
-function goToPostPage(){
-    window.location.href="canteen-post.html";
-}
-
 </script>
 </body>
 </html>
