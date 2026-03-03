@@ -118,19 +118,9 @@ input{
 </div>
 
 <!-- MODAL -->
-<div class="modal" id="menuModal">
-    <div class="modal-content">
-        <h3>Add Menu Item</h3>
-        <input type="text" id="menuName" placeholder="Item Name">
-        <input type="text" id="menuCategory" placeholder="Category">
-        <input type="number" id="menuPrice" placeholder="Price">
-        <input type="file" id="menuPhoto">
-        <button onclick="addMenu()">Add</button>
-        <button onclick="closeModal()">Cancel</button>
-        <p class="message" id="menuMessage"></p>
-    </div>
-</div>
-
+<button onclick="goToPostPage()" style="background:#2b6cb0;color:white;padding:8px 14px;border:none;border-radius:6px;margin-top:10px;">
+    ➕ Post Menu Items
+</button>
 <script>
 
 const BASE_URL = "https://college-hwbb.onrender.com/api/canteen";
@@ -241,48 +231,8 @@ async function deleteMenu(id){
     alert("Item Deleted");
     fetchMenu();
 }
-
-// ADD MENU
-async function addMenu(){
-    const name=document.getElementById("menuName").value;
-    const category=document.getElementById("menuCategory").value;
-    const price=document.getElementById("menuPrice").value;
-    const photo=document.getElementById("menuPhoto").files[0];
-
-    if(!name || !category || !price){
-        document.getElementById("menuMessage").innerText="All fields required!";
-        return;
-    }
-
-  const formData = new FormData();
-formData.append("canteen_id", canteenId);
-formData.append("name", name);
-formData.append("category", category);
-formData.append("price", price);
-
-    if(photo) formData.append("photo",photo);
-
-    const res=await fetch(`${BASE_URL}/owner/add-menu`,{
-        method:"POST",
-        body:formData
-    });
-
-    const data=await res.json();
-    document.getElementById("menuMessage").innerText=data.message || data.error;
-
-    if(res.ok){
-        fetchMenu();
-        setTimeout(closeModal,1000);
-    }
-}
-
-// MODAL
-function openModal(){
-    document.getElementById("menuModal").style.display="flex";
-}
-function closeModal(){
-    document.getElementById("menuModal").style.display="none";
-    document.getElementById("menuMessage").innerText="";
+function goToPostPage(){
+    window.location.href="canteen-post.html";
 }
 
 </script>
