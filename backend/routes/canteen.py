@@ -274,3 +274,19 @@ def delete_canteen(canteen_id):
         return jsonify({"message": "Canteen deleted successfully"})
     except:
         return jsonify({"error": "Invalid ID"}), 400
+@canteen_bp.route("/admin/menu/<canteen_id>", methods=["GET"])
+def admin_menu_by_canteen(canteen_id):
+    items = list(menu_collection.find({"canteen_id": canteen_id}))
+    
+    for item in items:
+        item["_id"] = str(item["_id"])
+    
+    return jsonify(items)
+@canteen_bp.route("/admin/orders/<canteen_id>", methods=["GET"])
+def admin_orders_by_canteen(canteen_id):
+    orders = list(orders_collection.find({"canteen_id": canteen_id}))
+    
+    for order in orders:
+        order["_id"] = str(order["_id"])
+    
+    return jsonify(orders)
