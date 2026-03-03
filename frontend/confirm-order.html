@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Confirm Order</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    font-family:Arial;
+    background:#f4f6f9;
+    padding:20px;
+}
+.card{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    max-width:400px;
+}
+button{
+    margin-top:10px;
+    padding:8px 14px;
+    border:none;
+    border-radius:6px;
+    background:#ff5200;
+    color:white;
+    cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<h2>Confirm Your Order</h2>
+
+<div class="card" id="orderCard"></div>
+
+<script>
+
+const item=JSON.parse(localStorage.getItem("selected_item"));
+
+if(!item){
+    alert("No item selected!");
+    window.location.href="canteen.html";
+}
+
+document.getElementById("orderCard").innerHTML=`
+    <h3>${item.name}</h3>
+    <p>Canteen: ${item.canteen_name || "Canteen"}</p>
+    <p>Category: ${item.category}</p>
+    <p>Price: ₹${item.price}</p>
+    <button onclick="confirmOrder()">Confirm Order</button>
+`;
+
+function confirmOrder(){
+    alert("Order Confirmed (Backend integration pending)");
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Admin Menu Control</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    font-family:Arial;
+    background:#f4f6f9;
+    padding:20px;
+}
+.card{
+    background:white;
+    padding:15px;
+    margin-bottom:15px;
+    border-radius:8px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+button{
+    padding:6px 12px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+.delete{ background:#e53e3e;color:white; }
+.fetch{ background:#3182ce;color:white; }
+.section{ margin-top:30px; }
+</style>
+</head>
+<body>
+
+<h2>Admin Panel - Manage Menu</h2>
+
+<input type="text" id="canteenId" placeholder="Enter Canteen ID">
+<button class="fetch" onclick="loadData()">Fetch Data</button>
+
+<div class="section">
+    <h3>Menu Items</h3>
+    <div id="menuContainer"></div>
+</div>
+
+<div class="section">
+    <h3>Orders</h3>
+    <div id="ordersContainer"></div>
+</div>
+
+<script>
+
+const BASE_URL="https://college-hwbb.onrender.com/api/canteen";
+
+async function loadData(){
+
+    const canteen_id=document.getElementById("canteenId").value;
+
+    if(!canteen_id){
+        alert("Enter Canteen ID");
+        return;
+    }
+
+    fetchMenu(canteen_id);
+    fetchOrders(canteen_id);
+}
+
+async function fetchMenu(canteen_id){
+
+    const res=await fetch(`${BASE_URL}/admin/menu/${canteen_id}`);
+    const items=await res.json();
+
+    const container=document.getElementById("menuContainer");
+    container.innerHTML="";
+
+    items.forEach(item=>{
+        const card=document.createElement("div");
+        card.className="card";
+        card.innerHTML=`
+            <p><strong>${item.name}</strong> - ₹${item.price}</p>
+            <p>${item.category}</p>
+            <button class="delete" onclick="deleteMenu('${item._id}','${canteen_id}')">Delete</button>
+        `;
+        container.appendChild(card);
+    });
+}
+
+async function fetchOrders(canteen_id){
+
+    const res=await fetch(`${BASE_URL}/admin/orders/${canteen_id}`);
+    const orders=await res.json();
+
+    const container=document.getElementById("ordersContainer");
+    container.innerHTML="";
+
+    orders.forEach(order=>{
+        const card=document.createElement("div");
+        card.className="card";
+        card.innerHTML=`
+            <p><strong>Token:</strong> ${order.token_number}</p>
+            <p>Status: ${order.order_status}</p>
+            <p>Total: ₹${order.total_price}</p>
+        `;
+        container.appendChild(card);
+    });
+}
+
+async function deleteMenu(menu_id,canteen_id){
+
+    if(!confirm("Delete this menu item?")) return;
+
+    await fetch(`${BASE_URL}/admin/delete-menu/${menu_id}`,{
+        method:"DELETE"
+    });
+
+    alert("Menu Deleted");
+    fetchMenu(canteen_id);
+}
+
+</script>
+
+</body>
+</html>

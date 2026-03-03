@@ -125,7 +125,33 @@ def daily_sales(canteen_id):
         "total_sales": total
     })
 
+# Fetch menu items of specific canteen (Admin)
+@canteen_bp.route("/admin/menu/<canteen_id>", methods=["GET"])
+def get_menu_by_canteen(canteen_id):
 
+    items = list(menu_collection.find({"canteen_id": canteen_id}))
+
+    for item in items:
+        item["_id"] = str(item["_id"])
+
+    return jsonify(items)
+@canteen_bp.route("/menu/all", methods=["GET"])
+def get_all_menu():
+    items = list(menu_collection.find())
+
+    for item in items:
+        item["_id"] = str(item["_id"])
+
+    return jsonify(items)
+# Delete menu item (Admin)
+@canteen_bp.route("/admin/delete-menu/<menu_id>", methods=["DELETE"])
+def delete_menu(menu_id):
+
+    try:
+        menu_collection.delete_one({"_id": ObjectId(menu_id)})
+        return jsonify({"message": "Menu deleted successfully"})
+    except:
+        return jsonify({"error": "Invalid ID"}), 400
 # Menu Edit (Owner)
 @canteen_bp.route("/owner/add-menu", methods=["POST"])
 def add_menu():

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Canteen Food Order</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#f8f8f8;
+}
+
+.header{
+    background:#ff5200;
+    color:white;
+    padding:15px;
+    font-size:20px;
+    font-weight:bold;
+}
+
+.search-bar{
+    padding:15px;
+    background:white;
+    display:flex;
+    gap:10px;
+}
+
+input, select{
+    padding:8px;
+    border:1px solid #ddd;
+    border-radius:6px;
+    flex:1;
+}
+
+.container{
+    padding:15px;
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+    gap:15px;
+}
+
+.card{
+    background:white;
+    border-radius:10px;
+    overflow:hidden;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    transition:0.2s;
+}
+
+.card:hover{
+    transform:scale(1.02);
+}
+
+.card img{
+    width:100%;
+    height:160px;
+    object-fit:cover;
+}
+
+.card-body{
+    padding:12px;
+}
+
+.canteen-name{
+    font-size:12px;
+    color:gray;
+}
+
+.item-name{
+    font-size:16px;
+    font-weight:bold;
+    margin:5px 0;
+}
+
+.price{
+    color:#ff5200;
+    font-weight:bold;
+}
+
+button{
+    margin-top:10px;
+    width:100%;
+    padding:8px;
+    border:none;
+    border-radius:6px;
+    background:#ff5200;
+    color:white;
+    cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+    🍽 College Canteen
+</div>
+
+<div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search food...">
+    <select id="categoryFilter">
+        <option value="">All Categories</option>
+        <option value="Fast Food">Fast Food</option>
+        <option value="Drinks">Drinks</option>
+        <option value="Snacks">Snacks</option>
+    </select>
+</div>
+
+<div class="container" id="foodContainer"></div>
+
+<script>
+
+const BASE_URL="https://college-hwbb.onrender.com/api/canteen";
+let allItems=[];
+
+async function fetchAllItems(){
+    try{
+        const res=await fetch(`${BASE_URL}/menu/all`);
+        const data=await res.json();
+        allItems=data;
+        displayItems(data);
+    }catch{
+        alert("Error loading menu");
+    }
+}
+
+function displayItems(items){
+
+    const container=document.getElementById("foodContainer");
+    container.innerHTML="";
+
+    items.forEach(item=>{
+        const card=document.createElement("div");
+        card.className="card";
+
+        card.innerHTML=`
+            <img src="${item.photo ? item.photo : 'https://via.placeholder.com/300x200'}">
+            <div class="card-body">
+                <div class="canteen-name">${item.canteen_name || "Canteen"}</div>
+                <div class="item-name">${item.name}</div>
+                <div>${item.category}</div>
+                <div class="price">₹${item.price}</div>
+                <button onclick='placeOrder(${JSON.stringify(item)})'>Place Order</button>
+            </div>
+        `;
+
+        container.appendChild(card);
+    });
+}
+
+function placeOrder(item){
+    localStorage.setItem("selected_item",JSON.stringify(item));
+    window.location.href="confirm-order.html";
+}
+
+document.getElementById("searchInput").addEventListener("input",filterItems);
+document.getElementById("categoryFilter").addEventListener("change",filterItems);
+
+function filterItems(){
+
+    const search=document.getElementById("searchInput").value.toLowerCase();
+    const category=document.getElementById("categoryFilter").value;
+
+    const filtered=allItems.filter(item=>{
+        const matchSearch=item.name.toLowerCase().includes(search);
+        const matchCategory=category ? item.category===category : true;
+        return matchSearch && matchCategory;
+    });
+
+    displayItems(filtered);
+}
+
+fetchAllItems();
+
+</script>
+
+</body>
+</html>
