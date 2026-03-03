@@ -11,17 +11,21 @@ body{
     font-family: Arial, sans-serif;
     background:#f4f6f9;
 }
+
 .header{
     background:#2d3748;
     color:white;
     padding:20px;
 }
+
 .container{
     padding:20px;
 }
+
 .section{
     margin-top:30px;
 }
+
 .card{
     background:white;
     padding:15px;
@@ -29,6 +33,7 @@ body{
     border-radius:8px;
     box-shadow:0 4px 10px rgba(0,0,0,0.1);
 }
+
 button{
     padding:6px 12px;
     border:none;
@@ -37,17 +42,20 @@ button{
     margin-right:5px;
     margin-top:5px;
 }
+
 .accept{ background:#38a169; color:white; }
 .prepare{ background:#dd6b20; color:white; }
 .ready{ background:#3182ce; color:white; }
 .reject{ background:#e53e3e; color:white; }
 .delete{ background:#e53e3e; color:white; }
+.addBtn{ background:#805ad5; color:white; }
 
 .sales-box{
     background:#edf2f7;
     padding:10px;
     border-radius:6px;
 }
+
 input{
     width:100%;
     padding:8px;
@@ -75,7 +83,17 @@ input{
         <div id="ordersContainer"></div>
     </div>
 
+    <div class="section">
+        <h3>Menu Management</h3>
+        <button class="addBtn" onclick="openModal()">+ Add Item</button>
+        <div id="menuContainer"></div>
+    </div>
+
 </div>
+
+<button onclick="goToPostPage()" style="background:#2b6cb0;color:white;padding:8px 14px;border:none;border-radius:6px;margin-top:10px;">
+    ➕ Post Menu Items
+</button>
 
 <script>
 
@@ -91,10 +109,9 @@ if(!canteen_id){
 document.getElementById("canteenName").innerText = canteen_name;
 document.getElementById("canteenId").innerText = canteen_id;
 
-// ======================
+// =========================
 // FETCH ORDERS
-// ======================
-
+// =========================
 async function fetchOrders(){
     try{
         const res = await fetch(`${BASE_URL}/owner/orders/${canteen_id}`);
@@ -108,18 +125,15 @@ async function fetchOrders(){
 
             card.innerHTML=`
                 <p><strong>Token:</strong> ${order.token_number}</p>
-                <p><strong>Customer:</strong> ${order.customer_name || "N/A"}</p>
-                <p><strong>Mobile:</strong> ${order.customer_mobile || "N/A"}</p>
-                <p><strong>Payment ID:</strong> ${order.payment_id || "N/A"}</p>
-                <p><strong>Total:</strong> ₹${order.total_price}</p>
                 <p><strong>Status:</strong> ${order.order_status}</p>
-                ${order.estimated_time ? `<p><strong>Time:</strong> ${order.estimated_time} mins</p>` : ""}
+                <p><strong>Total:</strong> ₹${order.total_price}</p>
 
                 <button class="accept" onclick="acceptOrder('${order._id}')">Accept</button>
                 <button class="prepare" onclick="updateStatus('${order._id}','Preparing')">Preparing</button>
                 <button class="ready" onclick="updateStatus('${order._id}','Ready')">Ready</button>
-                <button class="reject" onclick="rejectOrder('${order._id}')">Reject</button>
+                <button class="reject" onclick="updateStatus('${order._id}','Rejected')">Reject</button>
             `;
+
             container.appendChild(card);
         });
 
@@ -127,17 +141,17 @@ async function fetchOrders(){
         alert("Error fetching orders");
     }
 }
+
 fetchOrders();
 setInterval(fetchOrders,5000);
 
-// ======================
-// ACCEPT WITH TIME
-// ======================
 
+// =========================
+// ACCEPT WITH TIME
+// =========================
 async function acceptOrder(order_id){
 
-    const time = prompt("Enter Estimated Time (minutes):");
-
+    const time = prompt("Enter Estimated Time (in minutes):");
     if(!time || isNaN(time)){
         alert("Enter valid time");
         return;
@@ -161,20 +175,16 @@ async function acceptOrder(order_id){
     fetchOrders();
 }
 
-// ======================
-// REJECT
-// ======================
 
-async function rejectOrder(order_id){
-
-    if(!confirm("Reject this order?")) return;
+// =========================
+// UPDATE STATUS (Reject also delete)
+// =========================
+async function updateStatus(order_id,status){
 
     const res = await fetch(`${BASE_URL}/owner/update-status/${order_id}`,{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
-            status:"Rejected"
-        })
+        body:JSON.stringify({status:status})
     });
 
     const data = await res.json();
@@ -186,37 +196,21 @@ async function rejectOrder(order_id){
     fetchOrders();
 }
 
-// ======================
-// NORMAL STATUS
-// ======================
 
-async function updateStatus(order_id,status){
-    await fetch(`${BASE_URL}/owner/update-status/${order_id}`,{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({status:status})
-    });
-
-    fetchOrders();
-}
-
-// ======================
+// =========================
 // SAVE TO LOCAL STORAGE
-// ======================
-
+// =========================
 function saveToLocal(order){
 
     let orders = JSON.parse(localStorage.getItem("my_orders")) || [];
-
     orders.push(order);
-
     localStorage.setItem("my_orders", JSON.stringify(orders));
 }
 
-// ======================
-// SALES
-// ======================
 
+// =========================
+// SALES (UNCHANGED)
+// =========================
 async function fetchSales(){
     const res = await fetch(`${BASE_URL}/owner/daily-sales/${canteen_id}`);
     const data = await res.json();
@@ -225,6 +219,45 @@ async function fetchSales(){
 }
 fetchSales();
 setInterval(fetchSales,10000);
+
+
+// =========================
+// MENU (UNCHANGED)
+// =========================
+async function fetchMenu(){
+    const res = await fetch(`${BASE_URL}/menu/${canteen_id}`);
+    const items = await res.json();
+    const container=document.getElementById("menuContainer");
+    container.innerHTML="";
+
+    items.forEach(item=>{
+        const card=document.createElement("div");
+        card.className="card";
+        card.innerHTML=`
+            <p><strong>${item.name}</strong> (₹${item.price})</p>
+            <p>${item.category}</p>
+            ${item.image ? `<img src="${BASE_URL}${item.image}" width="80">` : ""}
+            <button class="delete" onclick="deleteMenu('${item._id}')">Delete</button>
+        `;
+        container.appendChild(card);
+    });
+}
+fetchMenu();
+
+async function deleteMenu(id){
+    if(!confirm("Delete this item?")) return;
+
+    await fetch(`${BASE_URL}/owner/delete-menu/${id}`,{
+        method:"DELETE"
+    });
+
+    alert("Item Deleted");
+    fetchMenu();
+}
+
+function goToPostPage(){
+    window.location.href="canteen-post.html";
+}
 
 </script>
 </body>
