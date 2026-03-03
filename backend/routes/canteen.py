@@ -112,8 +112,11 @@ def owner_orders(canteen_id):
     orders = list(orders_collection.find({"canteen_id": canteen_id}))
     for order in orders:
         order["_id"] = str(order["_id"])
+        # Ensure these fields exist in response
+        order["name"] = order.get("name", "")
+        order["mobile"] = order.get("mobile", "")
+        order["payment_id"] = order.get("payment_id", "")
     return jsonify(orders)
-
 @canteen_bp.route("/owner/update-status/<order_id>", methods=["POST"])
 def update_status(order_id):
     data = request.json
