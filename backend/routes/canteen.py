@@ -135,26 +135,23 @@ def add_menu():
     category = request.form.get("category")
     price = request.form.get("price")
 
+    photo = request.files.get("photo")
+
     if not canteen_id or not name or not category or not price:
         return jsonify({"error": "All fields required"}), 400
 
-    image_url = None
+    photo_url = None
 
-    if "photo" in request.files:
-        photo = request.files["photo"]
-
-        if photo.filename != "":
-            filename = secure_filename(photo.filename)
-            filepath = os.path.join(UPLOAD_FOLDER, filename)
-            photo.save(filepath)
-            image_url = f"/static/menu_images/{filename}"
+    if photo:
+        # yaha tum cloudinary ya local save kar sakte ho
+        photo_url = photo.filename  # temporary
 
     menu_item = {
         "canteen_id": canteen_id,
         "name": name,
         "category": category,
-        "price": float(price),
-        "image": image_url
+        "price": price,
+        "photo": photo_url
     }
 
     menu_collection.insert_one(menu_item)
