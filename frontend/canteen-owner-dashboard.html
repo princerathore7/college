@@ -125,6 +125,9 @@ async function fetchOrders(){
 
             card.innerHTML=`
                 <p><strong>Token:</strong> ${order.token_number}</p>
+                <p><strong>Customer Name:</strong> ${order.name || "-"}</p>
+                <p><strong>Mobile:</strong> ${order.mobile || "-"}</p>
+                <p><strong>Payment ID:</strong> ${order.payment_id || "-"}</p>
                 <p><strong>Status:</strong> ${order.order_status}</p>
                 <p><strong>Total:</strong> ₹${order.total_price}</p>
 
@@ -144,7 +147,6 @@ async function fetchOrders(){
 
 fetchOrders();
 setInterval(fetchOrders,5000);
-
 
 // =========================
 // ACCEPT WITH TIME
