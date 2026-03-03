@@ -18,6 +18,18 @@ body{
     padding:15px;
     font-size:20px;
     font-weight:bold;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.cart-btn{
+    background:white;
+    color:#ff5200;
+    padding:6px 12px;
+    border-radius:20px;
+    cursor:pointer;
+    font-size:14px;
 }
 
 .search-bar{
@@ -80,7 +92,7 @@ input, select{
 }
 
 button{
-    margin-top:10px;
+    margin-top:8px;
     width:100%;
     padding:8px;
     border:none;
@@ -95,6 +107,9 @@ button{
 
 <div class="header">
     🍽 College Canteen
+    <div class="cart-btn" onclick="goToCart()">
+        🛒 Cart (<span id="cartCount">0</span>)
+    </div>
 </div>
 
 <div class="search-bar">
@@ -113,6 +128,11 @@ button{
 
 const BASE_URL="https://college-hwbb.onrender.com/api/canteen";
 let allItems=[];
+
+function updateCartCount(){
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    document.getElementById("cartCount").innerText = cart.length;
+}
 
 async function fetchAllItems(){
     try{
@@ -141,7 +161,7 @@ function displayItems(items){
                 <div class="item-name">${item.name}</div>
                 <div>${item.category}</div>
                 <div class="price">₹${item.price}</div>
-                <button onclick='placeOrder(${JSON.stringify(item)})'>Place Order</button>
+                <button onclick='addToCart(${JSON.stringify(item)})'>Add to Cart</button>
             </div>
         `;
 
@@ -149,8 +169,15 @@ function displayItems(items){
     });
 }
 
-function placeOrder(item){
-    localStorage.setItem("selected_item",JSON.stringify(item));
+function addToCart(item){
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    cart.push(item);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    updateCartCount();
+    alert("Item added to cart");
+}
+
+function goToCart(){
     window.location.href="confirm-order.html";
 }
 
@@ -172,6 +199,7 @@ function filterItems(){
 }
 
 fetchAllItems();
+updateCartCount();
 
 </script>
 
