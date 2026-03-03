@@ -102,16 +102,51 @@ def owner_orders(canteen_id):
 @canteen_bp.route("/owner/update-status/<order_id>", methods=["POST"])
 def update_status(order_id):
     data = request.json
+
     try:
+        order = orders_collection.find_one({"_id": ObjectId(order_id)})
+
+        if not order:
+            return jsonify({"error": "Order not found"}), 404
+
+        # Status update data
+        updated_order = {
+            **order,
+            "order_status": data.get("status"),
+            "updated_at": datetime.utcnow()
+        }
+
+        if data.get("estimated_time"):
+            updated_order["estimated_time"] = int(data.get("estimated_time"))
+
+        # If Accepted or Rejected → delete from DB
+        if data.get("status") in ["Accepted", "Rejected"]:
+            orders_collection.delete_one({"_id": ObjectId(order_id)})
+
+            return jsonify({
+                "message": "Order finalized ",
+                "order_data": {
+                    "_id": str(order["_id"]),
+                    "token_number": order.get("token_number"),
+                    "customer_name": order.get("customer_name"),
+                    "customer_mobile": order.get("customer_mobile"),
+                    "payment_id": order.get("payment_id"),
+                    "total_price": order.get("total_price"),
+                    "order_status": data.get("status"),
+                    "estimated_time": updated_order.get("estimated_time")
+                }
+            })
+
+        # Otherwise just update normally
         orders_collection.update_one(
             {"_id": ObjectId(order_id)},
-            {"$set": {"order_status": data["status"]}}
+            {"$set": updated_order}
         )
+
         return jsonify({"message": "Order status updated"})
-    except:
-        return jsonify({"error": "Invalid Order ID"}), 400
 
-
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 @canteen_bp.route("/owner/daily-sales/<canteen_id>", methods=["GET"])
 def daily_sales(canteen_id):
     today = datetime.utcnow().date()

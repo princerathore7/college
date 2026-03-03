@@ -31,7 +31,14 @@ body{
     cursor:pointer;
     font-size:14px;
 }
-
+.order-btn{
+    background:white;
+    color:#ff5200;
+    padding:6px 12px;
+    border-radius:20px;
+    cursor:pointer;
+    font-size:14px;
+}
 .search-bar{
     padding:15px;
     background:white;
@@ -110,6 +117,9 @@ button{
     <div class="cart-btn" onclick="goToCart()">
         🛒 Cart (<span id="cartCount">0</span>)
     </div>
+      <div class="order-btn" onclick="goToOrder()">
+        🛒 My orders (<span id="orderCount">0</span>)
+    </div>
 </div>
 
 <div class="search-bar">
@@ -180,7 +190,9 @@ function addToCart(item){
 function goToCart(){
     window.location.href="confirm-order.html";
 }
-
+function goToOrder(){
+    window.location.href="my-orders.html";
+}
 document.getElementById("searchInput").addEventListener("input",filterItems);
 document.getElementById("categoryFilter").addEventListener("change",filterItems);
 
