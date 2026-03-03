@@ -1,25 +1,31 @@
 from flask import Blueprint, request, jsonify
 from datetime import datetime
 from bson import ObjectId
-from pymongo import MongoClient
 import random
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
+from db import db   # ✅ Central DB import
+
+# -----------------------------------
+# Blueprint
+# -----------------------------------
+canteen_bp = Blueprint("canteen_bp", __name__, url_prefix="/api/canteen")
+
+# -----------------------------------
+# Collections
+# -----------------------------------
+users_collection = db.users
+canteens_collection = db.canteens
+menu_collection = db.menu
+orders_collection = db.orders
+
+# -----------------------------------
+# Upload Folder Setup
+# -----------------------------------
 UPLOAD_FOLDER = "static/menu_images"
+
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
-canteen_bp = Blueprint("canteen_bp", __name__)
-
-# MongoDB connection
-client = MongoClient("YOUR_MONGO_URI")
-db = client["college_canteen"]
-
-users_collection = db["users"]
-canteens_collection = db["canteens"]
-menu_collection = db["menu"]
-orders_collection = db["orders"]
-canteens_collection = db["canteens"]
-
 # ==============================
 # STUDENT SIDE APIs
 # ==============================
