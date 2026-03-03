@@ -225,7 +225,7 @@ def canteen_signup():
         "message": "Canteen Registered Successfully",
         "canteen_id": str(result.inserted_id)
     })
-@canteen_bp.route("/canteen/login", methods=["POST"])
+@canteen_bp.route("/login", methods=["POST"])
 def canteen_login():
     data = request.json
 
@@ -248,7 +248,7 @@ def canteen_login():
         "canteen_id": str(canteen["_id"]),
         "name": canteen["name"]
     })
-@canteen_bp.route("/canteen/delete/<canteen_id>", methods=["DELETE"])
+@canteen_bp.route("/delete/<canteen_id>", methods=["DELETE"])
 def delete_canteen(canteen_id):
 
     result = canteens_collection.delete_one({
