@@ -111,7 +111,30 @@ def update_status(order_id):
     except:
         return jsonify({"error": "Invalid Order ID"}), 400
 
+# ===================================
+# ADMIN SIDE
+# ===================================
 
+# Get orders of specific canteen (Admin)
+@canteen_bp.route("/admin/orders/<canteen_id>", methods=["GET"])
+def admin_orders_by_canteen(canteen_id):
+    orders = list(orders_collection.find({"canteen_id": canteen_id}))
+    
+    for order in orders:
+        order["_id"] = str(order["_id"])
+    
+    return jsonify(orders)
+
+
+# Get all orders (Admin)
+@canteen_bp.route("/admin/orders", methods=["GET"])
+def all_orders():
+    orders = list(orders_collection.find({}))
+    
+    for order in orders:
+        order["_id"] = str(order["_id"])
+    
+    return jsonify(orders)
 @canteen_bp.route("/owner/daily-sales/<canteen_id>", methods=["GET"])
 def daily_sales(canteen_id):
     today = datetime.utcnow().date()
