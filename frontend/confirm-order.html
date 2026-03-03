@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Confirm Order</title>
+<title>Your Cart</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -11,50 +11,204 @@ body{
     background:#f4f6f9;
     padding:20px;
 }
-.card{
+
+h2{
+    margin-bottom:20px;
+}
+
+.cart-container{
+    max-width:600px;
+    margin:auto;
+}
+
+.cart-item{
     background:white;
-    padding:20px;
+    padding:15px;
+    margin-bottom:15px;
     border-radius:10px;
     box-shadow:0 4px 10px rgba(0,0,0,0.1);
-    max-width:400px;
 }
-button{
+
+.item-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.qty-controls{
     margin-top:10px;
-    padding:8px 14px;
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+
+button{
+    padding:6px 10px;
     border:none;
     border-radius:6px;
+    cursor:pointer;
+}
+
+.add-btn{ background:#38a169; color:white; }
+.remove-btn{ background:#e53e3e; color:white; }
+.place-btn{
     background:#ff5200;
     color:white;
-    cursor:pointer;
+    width:100%;
+    padding:10px;
+    font-size:16px;
+    margin-top:20px;
+}
+
+.total-box{
+    font-weight:bold;
+    margin-top:15px;
+    font-size:18px;
 }
 </style>
 </head>
 <body>
 
-<h2>Confirm Your Order</h2>
+<h2>🛒 Your Cart</h2>
 
-<div class="card" id="orderCard"></div>
+<div class="cart-container" id="cartContainer"></div>
 
 <script>
 
-const item=JSON.parse(localStorage.getItem("selected_item"));
+const BASE_URL="https://college-hwbb.onrender.com/api/canteen";
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-if(!item){
-    alert("No item selected!");
-    window.location.href="canteen.html";
+// Group same items together
+function groupCartItems(){
+    const grouped = {};
+
+    cart.forEach(item=>{
+        if(grouped[item._id]){
+            grouped[item._id].quantity += 1;
+        } else {
+            grouped[item._id] = {...item, quantity:1};
+        }
+    });
+
+    return Object.values(grouped);
 }
 
-document.getElementById("orderCard").innerHTML=`
-    <h3>${item.name}</h3>
-    <p>Canteen: ${item.canteen_name || "Canteen"}</p>
-    <p>Category: ${item.category}</p>
-    <p>Price: ₹${item.price}</p>
-    <button onclick="confirmOrder()">Confirm Order</button>
-`;
+function renderCart(){
 
-function confirmOrder(){
-    alert("Order Confirmed (Backend integration pending)");
+    const container=document.getElementById("cartContainer");
+    container.innerHTML="";
+
+    if(cart.length===0){
+        container.innerHTML="<p>Your cart is empty.</p>";
+        return;
+    }
+
+    const groupedItems = groupCartItems();
+    let total=0;
+
+    groupedItems.forEach(item=>{
+
+        total += item.price * item.quantity;
+
+        const div=document.createElement("div");
+        div.className="cart-item";
+
+        div.innerHTML=`
+            <div class="item-header">
+                <strong>${item.name}</strong>
+                <span>₹${item.price}</span>
+            </div>
+            <p>${item.category}</p>
+            <div class="qty-controls">
+                <button class="remove-btn" onclick="decreaseQty('${item._id}')">-</button>
+                <span>Qty: ${item.quantity}</span>
+                <button class="add-btn" onclick="increaseQty('${item._id}')">+</button>
+                <button class="remove-btn" onclick="removeItem('${item._id}')">Remove</button>
+            </div>
+        `;
+
+        container.appendChild(div);
+    });
+
+    const totalDiv=document.createElement("div");
+    totalDiv.className="total-box";
+    totalDiv.innerHTML=`Total: ₹${total}`;
+    container.appendChild(totalDiv);
+
+    const placeBtn=document.createElement("button");
+    placeBtn.className="place-btn";
+    placeBtn.innerText="Place Order";
+    placeBtn.onclick=()=>placeOrder(total);
+    container.appendChild(placeBtn);
 }
+
+function increaseQty(id){
+    const item = cart.find(i=>i._id===id);
+    if(item){
+        cart.push(item);
+        localStorage.setItem("cart",JSON.stringify(cart));
+        renderCart();
+    }
+}
+
+function decreaseQty(id){
+    const index = cart.findIndex(i=>i._id===id);
+    if(index>-1){
+        cart.splice(index,1);
+        localStorage.setItem("cart",JSON.stringify(cart));
+        renderCart();
+    }
+}
+
+function removeItem(id){
+    cart = cart.filter(i=>i._id!==id);
+    localStorage.setItem("cart",JSON.stringify(cart));
+    renderCart();
+}
+
+async function placeOrder(total){
+
+    if(cart.length===0){
+        alert("Cart empty!");
+        return;
+    }
+
+    const user_id="demo_user"; // Replace with logged in user ID
+    const canteen_id=cart[0].canteen_id;
+
+    const orderData={
+        user_id:user_id,
+        canteen_id:canteen_id,
+        items:cart,
+        total_price:total
+    };
+
+    try{
+        const res=await fetch(`${BASE_URL}/place-order`,{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify(orderData)
+        });
+
+        const data=await res.json();
+
+        if(res.ok){
+            alert("Order Placed! Token: "+data.token_number);
+            localStorage.removeItem("cart");
+            renderCart();
+            window.location.href="canteen.html";
+        }else{
+            alert(data.error);
+        }
+
+    }catch{
+        alert("Server Error!");
+    }
+}
+
+renderCart();
 
 </script>
 
