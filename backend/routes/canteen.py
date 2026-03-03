@@ -132,7 +132,6 @@ def daily_sales(canteen_id):
         "total_sales": total
     })
 
-
 @canteen_bp.route("/owner/add-menu", methods=["POST"])
 def add_menu():
     canteen_id = request.form.get("canteen_id")
@@ -147,9 +146,12 @@ def add_menu():
     photo_url = None
 
     if photo:
-        filepath = os.path.join(UPLOAD_FOLDER, photo.filename)
+        filename = photo.filename
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
         photo.save(filepath)
-        photo_url = filepath
+
+        # 👇 IMPORTANT LINE
+        photo_url = f"https://college-hwbb.onrender.com/{filepath}"
 
     menu_item = {
         "canteen_id": canteen_id,
@@ -162,7 +164,6 @@ def add_menu():
     menu_collection.insert_one(menu_item)
 
     return jsonify({"message": "Menu item added successfully"})
-
 
 @canteen_bp.route("/owner/delete-menu/<menu_id>", methods=["DELETE"])
 def owner_delete_menu(menu_id):
