@@ -225,6 +225,13 @@ function openNotification(id,title){
   let t=decodeURIComponent(title).toLowerCase();
   if(t.includes("attendance")) location.href="attendance.html";
   else if(t.includes("event")) location.href="events.html";
+    else if (
+    t.includes("bus route") || 
+    t.includes("route updated") || 
+    t.includes("bus")
+  ) {
+    location.href = "bus-routes.html";   // 👈 yahan redirect hoga
+  }
   else location.href="notice-read.html";
 }
 
