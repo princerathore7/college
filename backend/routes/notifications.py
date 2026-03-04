@@ -296,17 +296,39 @@ def notify_exams():
     return jsonify({"success": True, "result": result})
 
 
-# Bus route update
+
+# 🚌 Bus Route Update Notification API
 @notifications_bp.route('/api/notify/bus', methods=['POST'])
 def notify_bus():
-    data = request.json
-    title = data.get('title', "Bus Route Update")
-    body = data.get('body', "New bus route PDF uploaded")
-    url = data.get('url', "/bus-route.html")
-    result = send_global(title, body, url)
-    return jsonify({"success": True, "result": result})
+    try:
+        # Ensure JSON request
+        if not request.is_json:
+            return jsonify({
+                "success": False,
+                "message": "Request must be JSON"
+            }), 400
 
+        data = request.get_json()
 
+        # Default values if not provided
+        title = data.get("title", "🚌 Bus Route Update")
+        body = data.get("body", "New bus route PDF uploaded")
+        url = data.get("url", "/bus-route.html")
+
+        # Send notification
+        result = send_global(title, body, url)
+
+        return jsonify({
+            "success": True,
+            "message": "Notification sent successfully",
+            "result": result
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
 # Events update (global)
 @notifications_bp.route('/api/notify/events', methods=['POST'])
 def notify_events():

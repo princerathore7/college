@@ -5,8 +5,8 @@ import cloudinary.uploader
 from db import db
 import pdfplumber
 import re
-# 🔔 Notification helper
-from routes.notifications import notify_bus
+# # 🔔 Notification helper
+# from routes.notifications import notify_bus
 
 bus_bp = Blueprint("bus_bp", __name__, url_prefix="/api/bus")
 def find_buses_for_stop(text, stop_name):
@@ -18,6 +18,7 @@ def find_buses_for_stop(text, stop_name):
             # Look upward for Bus No lines
             for l in lines:
                 match = re.search(r"Bus No.-\s*(G\d+)", l)
+             
                 if match:
                     buses.add(match.group(1))
 
