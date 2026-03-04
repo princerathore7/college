@@ -5,9 +5,19 @@ import random
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from db import db
+from werkzeug.utils import secure_filename
 
 from datetime import datetime, timedelta
+import cloudinary
 import cloudinary.uploader
+import cloudinary.api
+import os
+
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET")
+)
 # -----------------------------------
 # Blueprint
 # -----------------------------------
@@ -26,9 +36,9 @@ orders_collection = db.orders
 # -----------------------------------
 
 
-if photo:
-    upload_result = cloudinary.uploader.upload(photo)
-    photo_url = upload_result["secure_url"]
+# if photo:
+#     upload_result = cloudinary.uploader.upload(photo)
+#     photo_url = upload_result["secure_url"]
 # ===================================
 # STUDENT SIDE
 # ===================================
@@ -53,8 +63,19 @@ def get_menu(canteen_id):
 @canteen_bp.route("/menu/all", methods=["GET"])
 def get_all_menu():
     items = list(menu_collection.find())
+
     for item in items:
         item["_id"] = str(item["_id"])
+
+        # 🔥 Get canteen name
+        try:
+            canteen = canteens_collection.find_one(
+                {"_id": ObjectId(item["canteen_id"])}
+            )
+            item["canteen_name"] = canteen["name"] if canteen else "Canteen"
+        except:
+            item["canteen_name"] = "Canteen"
+
     return jsonify(items)
 
 @canteen_bp.route("/place-order", methods=["POST"])
@@ -170,48 +191,70 @@ def daily_sales(canteen_id):
 
 @canteen_bp.route("/owner/add-menu", methods=["POST"])
 def add_menu():
-    canteen_id = request.form.get("canteen_id")
-    name = request.form.get("name")
-    category = request.form.get("category")
-    price = request.form.get("price")
-    photo = request.files.get("photo")
+    try:
+        canteen_id = request.form.get("canteen_id")
+        name = request.form.get("name")
+        category = request.form.get("category")
+        price = request.form.get("price")
+        photo = request.files.get("photo")
 
-    if not all([canteen_id, name, category, price]):
-        return jsonify({"error": "All fields required"}), 400
+        if not all([canteen_id, name, category, price]):
+            return jsonify({"error": "All fields are required"}), 400
 
-    photo_url = None
+        photo_url = None
 
-    if photo:
-        filename = photo.filename
-        filepath = os.path.join(UPLOAD_FOLDER, filename)
-        photo.save(filepath)
+        # ✅ Upload directly to Cloudinary
+        if photo:
+            upload_result = cloudinary.uploader.upload(
+                photo,
+                folder="canteen_menu"
+            )
+            photo_url = upload_result["secure_url"]
 
-        # 👇 IMPORTANT LINE
-        photo_url = f"https://college-hwbb.onrender.com/{filepath}"
+        menu_item = {
+            "canteen_id": canteen_id,
+            "name": name,
+            "category": category,
+            "price": float(price),
+            "photo": photo_url,
+            "created_at": datetime.utcnow()
+        }
 
-    menu_item = {
-        "canteen_id": canteen_id,
-        "name": name,
-        "category": category,
-        "price": float(price),
-        "photo": photo_url
-    }
+        menu_collection.insert_one(menu_item)
 
-    menu_collection.insert_one(menu_item)
+        return jsonify({"message": "Menu item added successfully"}), 201
 
-    return jsonify({"message": "Menu item added successfully"})
+    except ValueError:
+        return jsonify({"error": "Price must be a number"}), 400
+
+    except Exception as e:
+        print("❌ Cloudinary Upload Error:", e)
+        return jsonify({"error": "Server error"}), 500
 
 @canteen_bp.route("/owner/delete-menu/<menu_id>", methods=["DELETE"])
 def owner_delete_menu(menu_id):
     try:
-        result = menu_collection.delete_one({"_id": ObjectId(menu_id)})
-        if result.deleted_count == 0:
+        # 🔍 First find the menu item
+        menu_item = menu_collection.find_one({"_id": ObjectId(menu_id)})
+
+        if not menu_item:
             return jsonify({"error": "Item not found"}), 404
-        return jsonify({"message": "Item deleted successfully"})
-    except:
+
+        # 🗑 Delete image from Cloudinary if exists
+        if menu_item.get("public_id"):
+            try:
+                cloudinary.uploader.destroy(menu_item["public_id"])
+            except Exception as cloud_error:
+                print("⚠️ Cloudinary Delete Error:", cloud_error)
+
+        # 🗑 Delete from MongoDB
+        menu_collection.delete_one({"_id": ObjectId(menu_id)})
+
+        return jsonify({"message": "Item and photo deleted successfully"}), 200
+
+    except Exception as e:
+        print("❌ Delete Menu Error:", e)
         return jsonify({"error": "Invalid ID"}), 400
-
-
 # ===================================
 # ADMIN SIDE
 # ===================================
