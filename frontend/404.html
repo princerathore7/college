@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:'Poppins',sans-serif;
+        }
+
+        body{
+            background:#0b1f3a; /* Navy Blue */
+            color:white;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:100vh;
+            text-align:center;
+            overflow:hidden;
+        }
+
+        .container{
+            max-width:700px;
+            padding:40px;
+            background:white;
+            color:#0b1f3a;
+            border-radius:20px;
+            box-shadow:0 20px 50px rgba(0,0,0,0.4);
+            animation:fadeIn 1s ease-in-out;
+        }
+
+        .logo{
+            width:120px;
+            margin-bottom:20px;
+        }
+
+        h1{
+            font-size:80px;
+            font-weight:700;
+            color:#e10600; /* Red */
+        }
+
+        h2{
+            font-size:26px;
+            margin-bottom:15px;
+        }
+
+        p{
+            font-size:16px;
+            margin-bottom:30px;
+            color:#444;
+        }
+
+        .btn{
+            display:inline-block;
+            padding:12px 28px;
+            background:#0b1f3a;
+            color:white;
+            text-decoration:none;
+            border-radius:30px;
+            font-weight:600;
+            transition:0.3s ease;
+        }
+
+        .btn:hover{
+            background:#e10600;
+            transform:scale(1.05);
+        }
+
+        @keyframes fadeIn{
+            from{opacity:0; transform:translateY(20px);} 
+            to{opacity:1; transform:translateY(0);} 
+        }
+
+        .footer{
+            margin-top:20px;
+            font-size:13px;
+            color:#777;
+        }
+
+        @media(max-width:600px){
+            h1{font-size:60px;}
+            .container{padding:25px;}
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Replace src with your actual logo path -->
+        <img src="logo.jpg" alt="Logo" class="logo">
+
+        <h1>404</h1>
+        <h2>Oops! This Page Took a Wrong Turn.</h2>
+        <p>
+            The page you're looking for doesn't exist or may have been moved.
+            Don’t worry — even the best journeys hit a dead end sometimes.
+        </p>
+
+        <a href="/" class="btn">Return to Homepage</a>
+
+        <div class="footer">
+            If you believe this is an error, please contact support.
+        </div>
+    </div>
+
+</body>
+</html>
