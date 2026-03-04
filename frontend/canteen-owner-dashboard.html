@@ -148,6 +148,7 @@ async function fetchOrders(){
                 <button class="prepare" onclick="updateStatus('${order._id}','Preparing')">Preparing</button>
                 <button class="ready" onclick="updateStatus('${order._id}','Ready')">Ready</button>
                 <button class="reject" onclick="updateStatus('${order._id}','Rejected')">Reject</button>
+                <button class="delete" onclick="deleteOrder('${order._id}')">Delete</button>
             `;
 
             container.appendChild(card);
@@ -160,7 +161,28 @@ async function fetchOrders(){
 
 fetchOrders();
 setInterval(fetchOrders,5000);
+async function deleteOrder(order_id){
 
+    if(!confirm("Are you sure you want to delete this order?")) return;
+
+    try{
+        const res = await fetch(`${BASE_URL}/owner/delete-order/${order_id}`,{
+            method:"DELETE"
+        });
+
+        const data = await res.json();
+
+        if(res.ok){
+            alert("Order Deleted Successfully");
+            fetchOrders();
+        }else{
+            alert(data.error || "Error deleting order");
+        }
+
+    }catch(error){
+        alert("Server Error");
+    }
+}
 // =========================
 // ACCEPT WITH TIME
 // =========================

@@ -325,3 +325,17 @@ def admin_orders_by_canteen(canteen_id):
         order["_id"] = str(order["_id"])
     
     return jsonify(orders)
+# ==========================
+# OWNER DELETE ORDER
+# ==========================
+@canteen_bp.route("/owner/delete-order/<order_id>", methods=["DELETE"])
+def owner_delete_order(order_id):
+    try:
+        result = orders_collection.delete_one({"_id": ObjectId(order_id)})
+
+        if result.deleted_count == 0:
+            return jsonify({"error": "Order not found"}), 404
+
+        return jsonify({"message": "Order deleted successfully"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
