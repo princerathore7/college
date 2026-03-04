@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>All Orders - Canteen</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body{
+    margin:0;
+    font-family: Arial, sans-serif;
+    background:#f4f6f9;
+}
+
+.header{
+    background:#2d3748;
+    color:white;
+    padding:20px;
+}
+
+.container{
+    padding:20px;
+}
+
+.card{
+    background:white;
+    padding:15px;
+    margin-bottom:15px;
+    border-radius:8px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+button{
+    padding:6px 12px;
+    border:none;
+    border-radius:4px;
+    cursor:pointer;
+    margin-top:5px;
+}
+
+.backBtn{
+    background:#3182ce;
+    color:white;
+}
+
+.refreshBtn{
+    background:#38a169;
+    color:white;
+    margin-left:10px;
+}
+
+.status{
+    padding:4px 8px;
+    border-radius:4px;
+    font-size:12px;
+    color:white;
+}
+
+.New{ background:#718096; }
+.Accepted{ background:#38a169; }
+.Preparing{ background:#dd6b20; }
+.Ready{ background:#3182ce; }
+.Rejected{ background:#e53e3e; }
+
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h2>📦 All Orders</h2>
+    <button class="backBtn" onclick="goBack()">⬅ Back to Dashboard</button>
+    <button class="refreshBtn" onclick="fetchOrders()">🔄 Refresh</button>
+</div>
+
+<div class="container">
+    <div id="ordersContainer"></div>
+</div>
+
+<script>
+
+const BASE_URL = "https://college-hwbb.onrender.com/api/canteen";
+const canteen_id = localStorage.getItem("canteen_id");
+
+if(!canteen_id){
+    alert("Login Required!");
+    window.location.href="canteen-login.html";
+}
+
+// ===========================
+// FETCH ALL ORDERS
+// ===========================
+async function fetchOrders(){
+
+    try{
+
+        const res = await fetch(`${BASE_URL}/owner/orders/${canteen_id}`);
+        const orders = await res.json();
+
+        const container = document.getElementById("ordersContainer");
+        container.innerHTML = "";
+
+        if(orders.length === 0){
+            container.innerHTML = "<p>No Orders Found</p>";
+            return;
+        }
+
+        orders.reverse().forEach(order => {
+
+            const card = document.createElement("div");
+            card.className = "card";
+
+            card.innerHTML = `
+                <p><strong>Token Number:</strong> ${order.token_number}</p>
+                <p><strong>Customer Name:</strong> ${order.name || "Not Provided"}</p>
+                <p><strong>Mobile Number:</strong> ${order.mobile || "Not Provided"}</p>
+                <p><strong>Payment ID:</strong> ${order.payment_id || "Not Provided"}</p>
+                <p><strong>Total Price:</strong> ₹${order.total_price}</p>
+                <p><strong>Order Status:</strong> 
+                    <span class="status ${order.order_status}">
+                        ${order.order_status}
+                    </span>
+                </p>
+                <p><strong>Payment Status:</strong> ${order.payment_status}</p>
+                <p><strong>Estimated Time:</strong> ${order.estimated_time ? order.estimated_time + " mins" : "-"}</p>
+                <p><strong>Order Date:</strong> ${new Date(order.created_at).toLocaleString()}</p>
+            `;
+
+            container.appendChild(card);
+
+        });
+
+    }catch(error){
+        alert("Error loading orders");
+        console.error(error);
+    }
+
+}
+
+fetchOrders();
+setInterval(fetchOrders, 8000);
+
+
+// ===========================
+// BACK BUTTON
+// ===========================
+function goBack(){
+    window.location.href="canteen-owner-dashboard.html";
+}
+
+</script>
+
+</body>
+</html>

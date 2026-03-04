@@ -94,6 +94,10 @@ input{
 <button onclick="goToPostPage()" style="background:#2b6cb0;color:white;padding:8px 14px;border:none;border-radius:6px;margin-top:10px;">
     ➕ Post Menu Items
 </button>
+<button onclick="goToOrdersPage()" 
+style="background:#2b6cb0;color:white;padding:8px 14px;border:none;border-radius:6px;margin-top:10px;">
+📦 View All Orders
+</button>
 
 <script>
 
@@ -108,7 +112,16 @@ if(!canteen_id){
 
 document.getElementById("canteenName").innerText = canteen_name;
 document.getElementById("canteenId").innerText = canteen_id;
+function goToOrdersPage(){
+    const canteenId = localStorage.getItem("canteen_id");
 
+    if(!canteenId){
+        alert("Login Required!");
+        return;
+    }
+
+    window.location.href="orders.html";
+}
 // =========================
 // FETCH ORDERS
 // =========================
