@@ -7,7 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from db import db
 
 from datetime import datetime, timedelta
-
+import cloudinary.uploader
 # -----------------------------------
 # Blueprint
 # -----------------------------------
@@ -24,9 +24,11 @@ orders_collection = db.orders
 # -----------------------------------
 # Upload Folder Setup
 # -----------------------------------
-UPLOAD_FOLDER = "static/menu_images"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+
+if photo:
+    upload_result = cloudinary.uploader.upload(photo)
+    photo_url = upload_result["secure_url"]
 # ===================================
 # STUDENT SIDE
 # ===================================
