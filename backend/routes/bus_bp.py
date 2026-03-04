@@ -5,8 +5,7 @@ import cloudinary.uploader
 from db import db
 import pdfplumber
 import re
-# # 🔔 Notification helper
-# from routes.notifications import notify_bus
+from routes.notifications import send_global
 
 bus_bp = Blueprint("bus_bp", __name__, url_prefix="/api/bus")
 def find_buses_for_stop(text, stop_name):
@@ -18,7 +17,6 @@ def find_buses_for_stop(text, stop_name):
             # Look upward for Bus No lines
             for l in lines:
                 match = re.search(r"Bus No.-\s*(G\d+)", l)
-             
                 if match:
                     buses.add(match.group(1))
 
@@ -88,7 +86,7 @@ def upload_bus_pdf():
         db.bus.update_one({}, {"$set": {"pdf_url": pdf_url}}, upsert=True)
 
         # 🔔 GLOBAL NOTIFICATION (ALL USERS)
-        notify_bus(
+        send_global(
             title="🚌 Bus Route Updated",
             body="New bus route PDF has been uploaded. Check routes now.",
             url="/bus-route.html"
