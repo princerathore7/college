@@ -35,10 +35,13 @@ def add_bulk_fines():
             return jsonify({"success": False, "message": "No fines provided"}), 400
 
         for f in fines:
+            enrollment = f.get("enrollment")
+            fine_amount = int(f.get("fine", 0))
+
             record = {
-                "enrollment": f.get("enrollment"),
+                "enrollment": enrollment,
                 "class": f.get("class"),
-                "fine": int(f.get("fine", 0)),
+                "fine": fine_amount,
                 "reason": f.get("reason", ""),
                 "status": "Unpaid",
                 "createdAt": datetime.now(),
@@ -46,6 +49,17 @@ def add_bulk_fines():
             }
 
             db.fine.insert_one(record)
+
+            # 🔔 SEND WARNING NOTIFICATION
+            try:
+                send_fine_notification(
+                    enrollment,
+                    "⚠ Fine Assigned",
+                    f"A fine of ₹{fine_amount} has been assigned to your account. Please check your fines section.",
+                    "/fines.html"
+                )
+            except Exception as n:
+                print("Notification error:", n)
 
         return jsonify({
             "success": True,
@@ -55,7 +69,6 @@ def add_bulk_fines():
     except Exception as e:
         print("❌ bulk-add error:", e)
         return jsonify({"success": False, "message": "Server error"}), 500
-
 
 # ---------------------------------------------------------
 # 2️⃣ SEARCH FINES OF ONE STUDENT (ADMIN / TEACHER)
