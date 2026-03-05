@@ -458,7 +458,7 @@ def clear_all_notifications():
 
     return jsonify(success=True)
 
-@app.route("/notifications/send_push", methods=["POST"])
+@notifications_bp.route("/notifications/send_push", methods=["POST"])
 def send_push_notification():
     data = request.json
     message = data.get("message")
