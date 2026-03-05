@@ -478,7 +478,7 @@ def send_fine_notification(enrollment, title, body, url):
     log_notification(
         title,
         body,
-        "student",
+        "enrollment",
         enrollment,
         {"url": url},
         result
