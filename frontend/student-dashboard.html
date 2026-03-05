@@ -23,20 +23,21 @@
 
 body {
     font-family: 'Poppins', sans-serif;
-    background: #f6f8fb;
-    color: #222;
+    background: #f0f2f5;
+    color: #0b1f3a;
     overflow-y: auto;
 }
 
 /* HEADER */
+/* ===== HEADER (NAVY & RED THEME) ===== */
 header {
-    background: linear-gradient(135deg, #2960b7, #112d4e);
+    background: linear-gradient(135deg, #0b1f3a, #1a3a5f);
     color: #fff;
     padding: 14px 18px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 3px 12px rgba(10,25,49,0.35);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -45,10 +46,11 @@ header {
 
 
 
-.logo-area {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+.logo-area img {
+    height: 44px;
+    border-radius: 6px;
+    background: white; /* Contrast for logo */
+    padding: 2px;
 }
 
 .logo-area img {
@@ -57,8 +59,9 @@ header {
 }
 
 .logo-area h1 {
-    font-family: 'Playfair Display', serif;
     font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 1px;
 }
 
 .top-actions {
@@ -71,15 +74,17 @@ header {
     padding: 9px 14px;
     border-radius: 8px;
     border: none;
-    background: #fff;
-    color: #2b5d03;
+    background: #e10600; /* Red */
+    color: #fff;
     font-weight: 600;
     cursor: pointer;
-    transition: 0.2s;
+    transition: 0.3s;
 }
 
 .action-btn:hover {
+    background: #b00000;
     transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(225, 6, 0, 0.3);
 }
 
 
@@ -89,15 +94,15 @@ header {
   top: 0;
   left: 0;
   width: 260px;
-  height: 100vh; /* full viewport height */
-  background: #021355;
+  height: 100vh;
+  background: #0b1f3a; /* Solid Navy */
   color: #fff;
   padding-top: 70px;
   transform: translateX(-260px);
   transition: 0.3s ease;
   z-index: 1500;
-  overflow-y: auto; /* ✅ make it scrollable */
-  overscroll-behavior: contain; /* optional: avoid page scroll when reaching top/bottom */
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 /* Sidebar visible */
@@ -121,13 +126,16 @@ header {
 .sidebar a {
   display: block;
   padding: 14px 18px;
-  color: white;
+  color: #fff;
   text-decoration: none;
   font-size: 16px;
+  border-left: 4px solid transparent;
+  transition: 0.2s;
 }
 
 .sidebar a:hover {
-  background: rgba(255,255,255,0.1);
+  background: rgba(225, 6, 0, 0.1);
+  border-left: 4px solid #e10600;
 }
 
 /* MAIN */
@@ -224,14 +232,14 @@ h2.section-title {
 /* BADGES */
 .badge { 
     display: inline-block;
-    padding: 5px 8px;
-    border-radius: 8px;
+    padding: 5px 10px;
+    border-radius: 6px;
     color: #fff;
-    font-weight: 700;
+    font-weight: 600;
+    font-size: 12px;
 }
 .badge.pending { background: #ff9800; }
 .badge.paid { background: #28a745; }
-
 /* MODAL */
 .modal {
     display: none;
@@ -331,7 +339,7 @@ h2.section-title {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: linear-gradient(135deg, #4f46e5, #6366f1);
+ background: #0b1f3a;
   color: #fff;
   border: none;
   padding: 10px 18px;
@@ -351,8 +359,11 @@ h2.section-title {
 .refresh-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 18px rgba(79, 70, 229, 0.4);
+  background: #e10600;
 }
-
+input:checked + .slider {
+  background-color: #e10600; /* Red when active */
+}
 .refresh-btn:active {
   transform: scale(0.95);
 }
@@ -370,6 +381,7 @@ h2.section-title {
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   margin: 16px 0;
   font-weight: 600;
+  
 }
 
 .switch {
@@ -504,7 +516,7 @@ input:checked + .slider:before {
 /* Fine amount highlight */
 .fine-amount {
     font-weight: 700;
-    color: #d32f2f;
+    color: #e10600;
 }
 
 /* Paid / Pending badge (already matching) */
@@ -727,7 +739,8 @@ input:checked + .slider:before {
       <th>Status</th>
     </tr>
   </thead> -->
-     <button class="assignment-btn" onclick="openAssignments()">
+     <button class="assignment
+     -btn" onclick="openAssignments()">
   📚 View Assignments
 </button>
   <tbody id="assignmentBody"></tbody>
