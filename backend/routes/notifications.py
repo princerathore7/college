@@ -478,16 +478,15 @@ def send_push_notification():
             print("Push failed: {}", repr(ex))
     
     return jsonify({"status": "sent"})
-@notifications_bp.route("api/count/<enrollment>", methods=["GET"])
+@notifications_bp.route("/api/notifications/count/<enrollment>", methods=["GET"])
 def get_unread_notification_count(enrollment):
 
     try:
-        count = notifications_collection.count_documents({
+        count = notifications_col.count_documents({
             "$or": [
-                {"target": "global"},
-                {"target": enrollment}
-            ],
-            "read_by": {"$ne": enrollment}
+                {"target_type": "global"},
+                {"target_type": "enrollment", "target": enrollment}
+            ]
         })
 
         return jsonify({
