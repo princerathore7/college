@@ -4,7 +4,10 @@ import firebase_admin
 from firebase_admin import credentials, messaging
 from datetime import datetime
 import os, json
-from pywebpush import webpush
+from pywebpush import webpush, WebPushException
+VAPID_PRIVATE_KEY = "ZboOm3c13rPA2SE_G9CWuHroK-nlZN0cCaP-2I0oJl8="
+VAPID_PUBLIC_KEY = "r3DetDmR9tuA_HX3t7J5qbzPdufL0P9-HpzEM0kyZiY="
+VAPID_CLAIMS = {"sub": "prince242.com@gmail.com"}
 
 notifications_bp = Blueprint('notifications', __name__)
 
@@ -454,3 +457,46 @@ def clear_all_notifications():
     })
 
     return jsonify(success=True)
+
+@app.route("/notifications/send_push", methods=["POST"])
+def send_push_notification():
+    data = request.json
+    message = data.get("message")
+    
+    # fetch all user subscriptions from DB
+    subscriptions = Subscription.query.all()  # subscription me endpoint + keys stored honi chahiye
+    
+    for sub in subscriptions:
+        try:
+            webpush(
+                subscription_info=json.loads(sub.subscription_json),
+                data=json.dumps({"title": "New Notification", "body": message}),
+                vapid_private_key=VAPID_PRIVATE_KEY,
+                vapid_claims=VAPID_CLAIMS
+            )
+        except WebPushException as ex:
+            print("Push failed: {}", repr(ex))
+    
+    return jsonify({"status": "sent"})
+@notifications_bp.route("/count/<enrollment>", methods=["GET"])
+def get_unread_notification_count(enrollment):
+
+    try:
+        count = notifications_collection.count_documents({
+            "$or": [
+                {"target": "global"},
+                {"target": enrollment}
+            ],
+            "read_by": {"$ne": enrollment}
+        })
+
+        return jsonify({
+            "success": True,
+            "count": count
+        })
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
