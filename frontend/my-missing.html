@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>My Missing Complaints</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+
+body{
+    font-family:Poppins;
+    background:#f3f5f9;
+    margin:0;
+}
+
+header{
+    background:#0b1f3a;
+    color:white;
+    padding:15px 20px;
+    font-size:20px;
+}
+
+.container{
+    max-width:1000px;
+    margin:auto;
+    padding:20px;
+}
+
+.card{
+    background:white;
+    border-radius:12px;
+    padding:15px;
+    margin-bottom:15px;
+    display:flex;
+    gap:15px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+
+.card img{
+    width:120px;
+    height:120px;
+    object-fit:cover;
+    border-radius:10px;
+}
+
+.details{
+    flex:1;
+}
+
+.details h3{
+    margin:0;
+    font-size:18px;
+}
+
+.details p{
+    margin:6px 0;
+    font-size:14px;
+}
+
+.status{
+    padding:4px 10px;
+    border-radius:6px;
+    font-size:12px;
+    font-weight:600;
+}
+
+.pending{
+    background:#fff3cd;
+    color:#856404;
+}
+
+.approved{
+    background:#d4edda;
+    color:#155724;
+}
+
+.disapproved{
+    background:#f8d7da;
+    color:#721c24;
+}
+
+.empty{
+    text-align:center;
+    margin-top:50px;
+    color:#777;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+<i class="fa-solid fa-box-open"></i> My Missing Complaints
+</header>
+
+<div class="container">
+
+<div id="complaintsContainer"></div>
+
+</div>
+
+
+<script>
+
+const API_BASE = "https://your-backend-url.com"; // change to your backend
+
+async function loadComplaints(){
+
+    const enrollment = localStorage.getItem("enrollment");
+
+    if(!enrollment){
+        alert("Enrollment not found");
+        return;
+    }
+
+    try{
+
+        const res = await fetch(`${API_BASE}/api/missing/my/${enrollment}`);
+        const data = await res.json();
+
+        const container = document.getElementById("complaintsContainer");
+
+        if(!data.success || data.data.length===0){
+            container.innerHTML = `<div class="empty">
+            <i class="fa-solid fa-box-open"></i><br><br>
+            No complaints submitted yet
+            </div>`;
+            return;
+        }
+
+        data.data.forEach(item=>{
+
+            const statusClass = item.status;
+
+            const card = document.createElement("div");
+            card.className="card";
+
+            card.innerHTML = `
+            
+            <img src="${item.photo}">
+
+            <div class="details">
+
+            <h3>${item.category}</h3>
+
+            <p>${item.description}</p>
+
+            <p><b>Date:</b> ${new Date(item.created_at).toLocaleDateString()}</p>
+
+            <span class="status ${statusClass}">
+            ${item.status.toUpperCase()}
+            </span>
+
+            </div>
+
+            `;
+
+            container.appendChild(card);
+
+        });
+
+    }
+    catch(err){
+        console.log(err);
+    }
+
+}
+
+loadComplaints();
+
+</script>
+
+</body>
+</html>
