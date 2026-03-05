@@ -520,36 +520,73 @@ if(!mentorId || !ALLOWED_SOURCES.includes(source)){
            4. CLASS UPDATE LOGIC
            ========================================= */
         async function updateClass() {
-            const enrollment = document.getElementById("enrollment").value.trim();
-            const newClass = document.getElementById("newClass").value;
-            const year = document.getElementById("yearSelect").value;
 
-            if (!newClass || !year) { alert("Select both Year and Branch"); return; }
-            const combinedClass = `${year} ${newClass}`;
+    const enrollment = document.getElementById("enrollment").value.trim();
+    const newClass = document.getElementById("newClass").value;
+    const year = document.getElementById("yearSelect").value;
 
-            // Add to Background Queue
-            addRequest(enrollment, "Class Update", () => ({
-                url: `${API_BASE}/students/${enrollment}/class`,
-                options: {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ class: combinedClass })
-                }
-            }));
+    if (!enrollment) {
+        alert("Enter Enrollment first");
+        return;
+    }
 
-            // Optimistic UI Update
-            document.getElementById("sClassBadge").textContent = combinedClass;
-            
-            // Trigger Notification (Fire & Forget)
-            fetch("/api/notify/class", {
-                method: "POST",
-                headers: {"Content-Type":"application/json"},
-                body: JSON.stringify({ class: combinedClass, title: "Class Updated", body: `New Class: ${combinedClass}`, url: "/student-dashboard.html" })
-            }).catch(e => console.log("Notify skipped"));
+    if (!newClass || !year) {
+        alert("Select both Year and Branch");
+        return;
+    }
 
-            // Reset Graph Logic if Class Changes
-            alert(`Class updated to ${combinedClass}. Attendance graph reset recommended.`);
+    const combinedClass = `${year} ${newClass}`;
+
+    // 1️⃣ CLASS UPDATE
+    addRequest(enrollment, "Class Update", () => ({
+        url: `${API_BASE}/students/${enrollment}/class`,
+        options: {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                class: combinedClass
+            })
         }
+    }));
+
+
+    // 2️⃣ ATTENDANCE RESET
+    addRequest(enrollment, "Attendance Reset", () => ({
+        url: `${API_BASE}/attendance/reset`,
+        options: {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                enrollment: enrollment,
+                reason: "Class Changed"
+            })
+        }
+    }));
+
+
+    // 3️⃣ UI UPDATE
+    document.getElementById("sClassBadge").textContent = combinedClass;
+
+
+    // 4️⃣ NOTIFICATION
+    fetch(`${API_BASE}/notify/class`, {
+        method: "POST",
+        headers: {
+            "Content-Type":"application/json"
+        },
+        body: JSON.stringify({
+            class: combinedClass,
+            title: "📚 Class Updated",
+            body: `Your class has been changed to ${combinedClass}. Attendance has been reset.`,
+            url: "/student-dashboard.html"
+        })
+    }).catch(e => console.log("Notify skipped"));
+
+
+    // 5️⃣ ALERT
+    alert(`✅ Class updated to ${combinedClass} and attendance reset successfully.`);
+
+}
 
         /* =========================================
            5. ATTENDANCE LOGIC & GRAPH
