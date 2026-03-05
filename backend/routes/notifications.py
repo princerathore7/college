@@ -463,7 +463,30 @@ def clear_all_notifications():
     })
 
     return jsonify(success=True)
+def send_fine_notification(enrollment, title, body, url):
 
+    token_doc = tokens_col.find_one({"enrollment": enrollment})
+
+    if not token_doc:
+        print("❌ No token found for:", enrollment)
+        return
+
+    tokens = token_doc.get("tokens", [])
+
+    result = send_fcm_notification(title, body, tokens, url)
+
+    log_notification(
+        title,
+        body,
+        "student",
+        enrollment,
+        {"url": url},
+        result
+    )
+
+    print("✅ Fine notification sent:", result)
+
+    return result
 @notifications_bp.route("/notifications/send_push", methods=["POST"])
 def send_push_notification():
     data = request.json
@@ -505,3 +528,4 @@ def get_unread_notification_count(enrollment):
             "success": False,
             "error": str(e)
         }), 500
+    

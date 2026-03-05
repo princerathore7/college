@@ -11,7 +11,7 @@ import json
 from routes.receipt import create_receipt
 # 🔔 Notification helper
 from routes.notifications import notify_fine
-
+from routes.notifications import send_fine_notification
 fine_bp = Blueprint("fine_bp", __name__, url_prefix="/api/fines")
 
 # ---------------------------------------------------------
@@ -95,12 +95,12 @@ def update_fine(fine_id):
             }}
         )
         # 🔔 Send notification to student
-        notify_fine({
-    "enrollment": enrollment,
-    "title": "Fine Updated",
-    "body": f"Your fine has been updated to ₹{fine_amount}",
-    "url": "/fines.html"
-})
+        send_fine_notification(
+            enrollment,
+            "Fine Updated",
+            f"Your fine has been updated to ₹{fine_amount}",
+            "/fines.html"
+        )
         return jsonify({
             "success": True,
             "message": "Fine updated successfully"
