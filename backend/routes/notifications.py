@@ -478,7 +478,7 @@ def send_push_notification():
             print("Push failed: {}", repr(ex))
     
     return jsonify({"status": "sent"})
-@notifications_bp.route("/count/<enrollment>", methods=["GET"])
+@notifications_bp.route("api/count/<enrollment>", methods=["GET"])
 def get_unread_notification_count(enrollment):
 
     try:
