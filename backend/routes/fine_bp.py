@@ -75,12 +75,15 @@ def get_student_fines(enrollment):
 @fine_bp.route("/update/<fine_id>", methods=["PUT"])
 def update_fine(fine_id):
     try:
+        print("Fine ID:", fine_id)
+
         data = request.get_json(force=True)
 
         fine_amount = int(data.get("fine", 0))
         reason = data.get("reason", "Fine updated")
 
         fine_record = db.fine.find_one({"_id": ObjectId(fine_id)})
+
         if not fine_record:
             return jsonify({"success": False, "message": "Fine not found"}), 404
 
@@ -94,13 +97,18 @@ def update_fine(fine_id):
                 "updatedAt": datetime.now()
             }}
         )
-        # 🔔 Send notification to student
-        send_fine_notification(
-            enrollment,
-            "Fine Updated",
-            f"Your fine has been updated to ₹{fine_amount}",
-            "/fines.html"
-        )
+
+        # 🔔 SAFE NOTIFICATION
+        try:
+            send_fine_notification(
+                enrollment,
+                "Fine Updated",
+                f"Your fine has been updated to ₹{fine_amount}",
+                "/fines.html"
+            )
+        except Exception as n:
+            print("Notification error:", n)
+
         return jsonify({
             "success": True,
             "message": "Fine updated successfully"
@@ -109,7 +117,6 @@ def update_fine(fine_id):
     except Exception as e:
         print("❌ Update fine error:", e)
         return jsonify({"success": False, "message": "Server error"}), 500
-
 # ---------------------------------------------------------
 # 4️⃣ DELETE FINE BY ID
 # ---------------------------------------------------------
