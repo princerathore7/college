@@ -471,7 +471,7 @@ def send_fine_notification(enrollment, title, body, url):
         print("❌ No token found for:", enrollment)
         return
 
-    tokens = token_doc.get("tokens", [])
+    tokens = [token_doc.get("token")]
 
     result = send_fcm_notification(title, body, tokens, url)
 
