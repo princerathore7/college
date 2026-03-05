@@ -598,9 +598,9 @@ input:checked + .slider:before {
   
   <div class="header-actions">
     <!-- Notifications -->
-    <button id="openNotifications" class="notif-btn">
-      🔔 Notifications <span id="notifCount" class="notif-count">0</span>
-    </button>
+  <button id="openNotifications" class="notif-btn">
+ 🔔 Notifications <span id="notifCount" class="notif-count">0</span>
+</button>
 </header>
 
 
@@ -1084,7 +1084,7 @@ document.getElementById("menuToggle").addEventListener("click", openSidebar);
 </script>
 
  <!-- Your notification logic -->
-<script src="/static/js/notification.js"></script>
+<script src="/static/js/notifications.js"></script>
 <script>
   window.addEventListener("load", () => {
     enableNotifications();
@@ -1164,7 +1164,9 @@ document.addEventListener("DOMContentLoaded", () => {
   subscribeUserToPush();
 });
 
-
+document.addEventListener("DOMContentLoaded", () => {
+    loadNotificationCount();
+});
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("/service-worker.js")
@@ -1273,7 +1275,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
- 
+ async function loadNotificationCount() {
+
+    const enrollment = localStorage.getItem("enrollment");
+
+    if (!enrollment) return;
+
+    try {
+
+        const res = await fetch(`/api/notifications/count/${enrollment}`);
+        const data = await res.json();
+
+        if (data.success) {
+            document.getElementById("notifCount").innerText = data.count;
+        }
+
+    } catch (error) {
+        console.error("Notification count error:", error);
+    }
+}
+
+loadNotificationCount();
 </script>
 </body>
 </html>
