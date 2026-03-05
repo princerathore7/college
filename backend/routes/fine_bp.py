@@ -94,7 +94,13 @@ def update_fine(fine_id):
                 "updatedAt": datetime.now()
             }}
         )
-
+        # 🔔 Send notification to student
+        notify_fine({
+    "enrollment": enrollment,
+    "title": "Fine Updated",
+    "body": f"Your fine has been updated to ₹{fine_amount}",
+    "url": "/fines.html"
+})
         return jsonify({
             "success": True,
             "message": "Fine updated successfully"

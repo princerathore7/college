@@ -238,18 +238,24 @@ def notify_marks():
 
 # Fine update
 @notifications_bp.route('/api/notify/fine', methods=['POST'])
-def notify_fine(enrollment, title, body, url):
-    sub = db.notifications.find_one({"enrollment": enrollment})
-    if not sub:
-        return
+def notify_fine():
 
-    send_web_push(
-        subscription=sub["subscription"],
-        title=title,
-        body=body,
-        url=url
-    )
+    data = request.json
 
+    enrollment = data.get("enrollment")
+    title = data.get("title", "Fine Update")
+    body = data.get("body", "Your fine has been updated")
+    url = data.get("url", "/fines.html")
+
+    if not enrollment:
+        return jsonify({"success": False, "message": "Enrollment required"}), 400
+
+    result = send_to_enrollment(enrollment, title, body, url)
+
+    return jsonify({
+        "success": True,
+        "result": result
+    })
 
 # Notices / Assignments / Exams
 @notifications_bp.route('/api/notify/notices', methods=['POST'])
