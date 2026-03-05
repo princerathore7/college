@@ -1283,7 +1283,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
 
-        const res = await fetch(`/api/notifications/count/${enrollment}`);
+        const res = await fetch(`${API_ROOT}/api/notifications/count/${enrollment}`);
         const data = await res.json();
 
         if (data.success) {
