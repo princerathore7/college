@@ -1,228 +1,328 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Campus Lost & Found | Acropolis Portal</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>Acropolis | Lost & Found Professional</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0f172a; /* Deep Navy */
+            --accent: #2563eb; /* Modern Blue */
+            --bg: #f1f5f9;
+            --white: #ffffff;
+            --text-main: #1e293b;
+        }
 
-<style>
-:root {
-    --primary: #0b1f3a;
-    --accent: #3498db;
-    --bg: #f8fbff;
-    --white: #ffffff;
-}
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
 
-body {
-    margin: 0;
-    font-family: 'Poppins', sans-serif;
-    background: var(--bg);
-    color: #333;
-}
+        /* Hero Header Section */
+        header {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.9)), 
+                        url('logo.jpg') center/cover; /* Logo as background texture */
+            color: #fff;
+            padding: 100px 20px 140px;
+            text-align: center;
+            position: relative;
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 0% 100%);
+        }
 
-header {
-    background: var(--primary);
-    color: #fff;
-    padding: 40px 20px;
-    text-align: center;
-    border-radius: 0 0 30px 30px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    position: relative;
-}
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
 
-header h2 { margin: 0; font-size: 28px; letter-spacing: 1px; }
-header p { opacity: 0.8; font-weight: 300; margin-top: 10px; }
+        .header-logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));
+        }
 
-.container {
-    max-width: 1200px;
-    margin: -30px auto 50px;
-    padding: 0 20px;
-}
+        header h1 {
+            font-size: 3rem;
+            margin: 0;
+            font-weight: 800;
+            letter-spacing: -1px;
+            text-transform: uppercase;
+        }
 
-/* Search Controls */
-.search-box {
-    background: var(--white);
-    padding: 20px;
-    border-radius: 15px;
-    display: flex;
-    gap: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-    margin-bottom: 30px;
-}
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+            margin-top: 15px;
+        }
 
-.search-box input, .search-box select {
-    padding: 12px 15px;
-    border: 2px solid #edf2f7;
-    border-radius: 10px;
-    outline: none;
-    font-family: inherit;
-    transition: 0.3s;
-}
+        /* Floating Search Controls */
+        .container {
+            max-width: 1200px;
+            margin: -60px auto 50px;
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
+        }
 
-.search-box input { flex: 3; }
-.search-box select { flex: 1; }
-.search-box input:focus { border-color: var(--accent); }
+        .search-container {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 25px;
+            border-radius: 20px;
+            display: flex;
+            gap: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
 
-/* Grid & Cards */
-.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 25px;
-}
+        .search-box { flex: 3; position: relative; }
+        .search-box input, .filter-box select {
+            width: 100%;
+            padding: 15px 20px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            outline: none;
+            font-size: 16px;
+            transition: 0.3s;
+            box-sizing: border-box;
+        }
 
-.card {
-    background: var(--white);
-    border-radius: 20px;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    border: 1px solid #eee;
-    cursor: pointer;
-    position: relative;
-}
+        .filter-box { flex: 1; }
 
-.card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-}
+        .search-box input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
 
-.card img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-}
+        /* Grid & Cards */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
 
-.card-content { padding: 15px; }
+        .card {
+            background: var(--white);
+            border-radius: 24px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(0,0,0,0.05);
+            position: relative;
+        }
 
-.tag {
-    background: #e1f0ff;
-    color: var(--accent);
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-}
+        .card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.12);
+        }
 
-.item-title {
-    margin: 10px 0 5px;
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--primary);
-}
+        .card-img-wrapper {
+            position: relative;
+            height: 220px;
+            overflow: hidden;
+        }
 
-.item-sub {
-    font-size: 13px;
-    color: #777;
-    display: flex;
-    justify-content: space-between;
-}
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
 
-/* Modal System */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(5px);
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
+        .card:hover img { transform: scale(1.1); }
 
-.modal-content {
-    background: white;
-    max-width: 500px;
-    width: 100%;
-    border-radius: 25px;
-    position: relative;
-    overflow: hidden;
-    animation: zoomIn 0.3s ease;
-}
+        .card-content { padding: 20px; }
 
-@keyframes zoomIn {
-    from { transform: scale(0.9); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
+        .status-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.9);
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent);
+        }
 
-.modal-header img { width: 100%; height: 250px; object-fit: cover; }
-.modal-body { padding: 25px; }
-.close-btn {
-    position: absolute;
-    right: 20px;
-    top: 20px;
-    background: white;
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-weight: bold;
-    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
-}
+        .tag {
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
-.empty-state {
-    text-align: center;
-    padding: 50px;
-    color: #999;
-}
-.empty-state span { font-size: 60px; display: block; margin-bottom: 10px; }
+        .item-title {
+            margin: 10px 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+        }
 
-</style>
+        .item-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #64748b;
+            font-size: 14px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        /* Modal System */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            max-width: 600px;
+            width: 100%;
+            border-radius: 30px;
+            position: relative;
+            overflow: hidden;
+            animation: modalSlide 0.4s ease-out;
+        }
+
+        @keyframes modalSlide {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-img-container {
+            position: relative;
+            height: 300px;
+            background: #eee;
+        }
+
+        .modal-img-container img { width: 100%; height: 100%; object-fit: cover; }
+
+        .fullscreen-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: 0.3s;
+        }
+
+        .fullscreen-btn:hover { background: #fff; transform: scale(1.05); }
+
+        .modal-body { padding: 30px; }
+
+        .close-x {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+            background: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Utils */
+        .empty-state { text-align: center; padding: 100px 0; grid-column: 1/-1; }
+        .empty-state span { font-size: 80px; display: block; filter: grayscale(1); }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 2rem; }
+            .search-container { flex-direction: column; }
+            header { padding: 60px 20px 100px; }
+        }
+    </style>
 </head>
-
 <body>
 
 <header>
-    <h2>🔍 Missing Items Portal</h2>
-    <p>Help your fellow students! Found something? Report it immediately. 🎒✨</p>
+    <div class="header-content">
+        <img src="logo.jpg" alt="Acropolis Logo" class="header-logo">
+        <h1>Acropolis Portal</h1>
+        <p>Official Lost & Found Repository for Students & Staff</p>
+    </div>
 </header>
 
 <div class="container">
-    <div class="search-box">
-        <input type="text" id="search" placeholder="Looking for a specific item? (e.g. Blue Bag)">
-        <select id="category">
-            <option value="">All Categories</option>
-            <option>Electronic Item</option>
-            <option>Bag</option>
-            <option>Tiffin</option>
-            <option>Money</option>
-            <option>Books</option>
-            <option>ID Card</option>
-            <option>Other</option>
-        </select>
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" id="search" placeholder="Search for items (e.g., 'Calculator', 'Keys')...">
+        </div>
+        <div class="filter-box">
+            <select id="category">
+                <option value="">All Categories</option>
+                <option>Electronic Item</option>
+                <option>Bag</option>
+                <option>Tiffin</option>
+                <option>Money</option>
+                <option>Books</option>
+                <option>ID Card</option>
+                <option>Other</option>
+            </select>
+        </div>
     </div>
 
     <div class="grid" id="grid"></div>
 
     <div class="empty-state" id="empty" style="display:none;">
-        <span>😟</span>
-        <p>No items match your search. Try a different keyword!</p>
+        <span>🔍</span>
+        <h3>No Items Found</h3>
+        <p>We couldn't find any items matching your criteria.</p>
     </div>
 </div>
 
 <div class="modal" id="itemModal">
     <div class="modal-content">
-        <div class="close-btn" onclick="closeModal()">×</div>
-        <div class="modal-header">
+        <button class="close-x" onclick="closeModal()">×</button>
+        <div class="modal-img-container">
             <img id="modalImg" src="">
+            <button class="fullscreen-btn" onclick="viewFullScreen()">
+                ⛶ View Full Screen
+            </button>
         </div>
         <div class="modal-body">
             <span class="tag" id="modalTag">Category</span>
-            <h3 id="modalTitle" style="margin: 15px 0 10px; color: var(--primary);">Item Name</h3>
-            <p id="modalDesc" style="color: #555; line-height: 1.6; font-size: 14px;">Full description goes here...</p>
-            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-            <div style="font-size: 13px; color: #888;">
-                <p>📍 <strong>Owner's Class:</strong> <span id="modalClass">...</span></p>
-                <p>📅 <strong>Reported on:</strong> <span id="modalDate">...</span></p>
+            <h2 id="modalTitle" class="item-title" style="font-size: 28px;">Item Name</h2>
+            <p id="modalDesc" style="color: #475569; line-height: 1.6;">Description...</p>
+            
+            <div style="background: #f8fafc; padding: 20px; border-radius: 15px; margin-top: 20px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 14px;">
+                    <div>
+                        <strong style="display:block; color: #94a3b8;">Owner's Class</strong>
+                        <span id="modalClass" style="font-weight: 600;">-</span>
+                    </div>
+                    <div>
+                        <strong style="display:block; color: #94a3b8;">Found Date</strong>
+                        <span id="modalDate" style="font-weight: 600;">-</span>
+                    </div>
+                </div>
             </div>
-            <button onclick="closeModal()" style="width:100%; padding:12px; border-radius:10px; border:none; background:var(--primary); color:white; font-weight:600; margin-top:10px; cursor:pointer;">Got it!</button>
+            
+            <button onclick="closeModal()" style="width:100%; padding:15px; border-radius:12px; border:none; background:var(--primary); color:white; font-weight:600; margin-top:25px; cursor:pointer; font-size: 16px;">Close Details</button>
         </div>
     </div>
 </div>
@@ -231,29 +331,18 @@ header p { opacity: 0.8; font-weight: 300; margin-top: 10px; }
 const API = "https://college-hwbb.onrender.com/api/missing/public";
 const grid = document.getElementById("grid");
 const empty = document.getElementById("empty");
-
-// Modal Elements
 const modal = document.getElementById("itemModal");
-const modalImg = document.getElementById("modalImg");
-const modalTitle = document.getElementById("modalTitle");
-const modalTag = document.getElementById("modalTag");
-const modalDesc = document.getElementById("modalDesc");
-const modalClass = document.getElementById("modalClass");
-const modalDate = document.getElementById("modalDate");
 
 let allItems = [];
 
 async function loadItems(){
-    const search = document.getElementById("search").value.toLowerCase();
-    const category = document.getElementById("category").value;
-
     try {
         const response = await fetch(API);
         const res = await response.json();
         allItems = res.data || [];
-        renderItems(allItems, search, category);
+        renderItems(allItems, "", "");
     } catch (error) {
-        console.error("Error loading items:", error);
+        console.error("API Error:", error);
     }
 }
 
@@ -273,17 +362,20 @@ function renderItems(items, searchTerm, categoryTerm) {
 
     empty.style.display = "none";
 
-    filtered.forEach((item, index) => {
+    filtered.forEach(item => {
         const card = document.createElement('div');
         card.className = 'card';
         card.innerHTML = `
-            <img src="${item.photo}" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+            <div class="card-img-wrapper">
+                <span class="status-badge">Found</span>
+                <img src="${item.photo}" onerror="this.src='https://via.placeholder.com/400x300?text=No+Preview'">
+            </div>
             <div class="card-content">
                 <span class="tag">${item.category}</span>
                 <div class="item-title">${item.name}</div>
-                <div class="item-sub">
-                    <span>👤 ${item.class}</span>
-                    <span>📍 Acropolis</span>
+                <div class="item-info">
+                    <span>📍 Room: ${item.class}</span>
+                    <span>🕒 ${new Date(item.created_at).toLocaleDateString()}</span>
                 </div>
             </div>
         `;
@@ -293,12 +385,12 @@ function renderItems(items, searchTerm, categoryTerm) {
 }
 
 function openModal(item) {
-    modalImg.src = item.photo;
-    modalTag.innerText = item.category;
-    modalTitle.innerText = item.name;
-    modalDesc.innerText = item.description;
-    modalClass.innerText = item.class;
-    modalDate.innerText = new Date(item.created_at).toLocaleString();
+    document.getElementById("modalImg").src = item.photo;
+    document.getElementById("modalTag").innerText = item.category;
+    document.getElementById("modalTitle").innerText = item.name;
+    document.getElementById("modalDesc").innerText = item.description;
+    document.getElementById("modalClass").innerText = item.class;
+    document.getElementById("modalDate").innerText = new Date(item.created_at).toLocaleDateString();
     modal.style.display = "flex";
 }
 
@@ -306,15 +398,22 @@ function closeModal() {
     modal.style.display = "none";
 }
 
-// Close modal when clicking outside
-window.onclick = function(event) {
-    if (event.target == modal) closeModal();
+function viewFullScreen() {
+    const imgUrl = document.getElementById("modalImg").src;
+    window.open(imgUrl, '_blank');
 }
 
-document.getElementById("search").addEventListener("input", () => renderItems(allItems, document.getElementById("search").value.toLowerCase(), document.getElementById("category").value));
-document.getElementById("category").addEventListener("change", () => renderItems(allItems, document.getElementById("search").value.toLowerCase(), document.getElementById("category").value));
+// Event Listeners
+document.getElementById("search").addEventListener("input", (e) => {
+    renderItems(allItems, e.target.value.toLowerCase(), document.getElementById("category").value);
+});
 
-// Initial Load
+document.getElementById("category").addEventListener("change", (e) => {
+    renderItems(allItems, document.getElementById("search").value.toLowerCase(), e.target.value);
+});
+
+window.onclick = (e) => { if (e.target == modal) closeModal(); }
+
 loadItems();
 </script>
 
