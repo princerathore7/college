@@ -194,15 +194,34 @@
         font-weight: 600;
         margin-bottom: 15px;
     }
+    .title-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.title-row .logo-img{
+    height:40px;
+}
+
+.title-row h1{
+    margin:0;
+    font-size:28px;
+}
 </style>
 </head>
 <body>
 
 <div class="no-print-area">
     <button class="back-btn" onclick="window.history.back()">← Back to Dashboard</button>
-    <h1>Examination Portal</h1>
+
+    <div class="title-row">
+        <img src="logop.png" alt="Acropolis Logo" class="logo-img" onerror="this.style.display='none'">
+        <h1><strong>Acropolis Institute</strong> Results Portal</h1>
+    </div>
+
     <p>Please enter your Enrollment ID to Visualize your official marksheet.</p>
-    
+</div>
     <div class="input-group">
         <input id="enr" type="text" placeholder="Example: EN001" />
         <button class="btn btn-primary" onclick="loadMarks()">View Marksheet</button>
