@@ -224,8 +224,10 @@
     <div class="student-details">
         <div class="detail-item"><strong>Student Name:</strong> <span id="studentName">--</span></div>
         <div class="detail-item"><strong>Enrollment No:</strong> <span id="studentEnr">--</span></div>
-        <div class="detail-item"><strong>Course/Class:</strong> B.Tech (Computer Science)</div>
-        <div class="detail-item"><strong>Academic Session:</strong> 2025-26</div>
+<div class="detail-item">
+<strong>Course/Class:</strong> <span id="studentClass">--</span>
+</div>
+        <strong>Academic Session:</strong> <span id="session"></span>
     </div>
 
     <table>
@@ -299,7 +301,11 @@ async function loadMarks(){
 
         const data = await res.json();
         const m = data.marks;
-
+function setSession(){
+    const y = new Date().getFullYear();
+    document.getElementById("session").innerText = y + "-" + (y+1);
+}
+setSession();
         // UI Update
         document.getElementById('studentName').innerText = m.name || 'Student Name';
         document.getElementById('studentEnr').innerText = m.enrollment;
@@ -311,7 +317,7 @@ async function loadMarks(){
         // Reveal Marksheet and Print Button
         document.getElementById('result').style.display = 'block';
         document.getElementById('printBtn').style.display = 'inline-block';
-        
+       document.getElementById('studentClass').innerText = m.class || "--"; 
     } catch(err) {
         console.error(err);
         alert('Server connection error. Please try again.');
