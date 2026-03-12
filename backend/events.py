@@ -72,10 +72,10 @@ def post_event():
 
     # 🔔 GLOBAL NOTIFICATION (ALL USERS)
     send_global(
-        title="📢 New Event Announced",
-        body=data["title"].strip(),
-        url="/events.html"
-    )
+    title="📢 New Event Announced",
+    body=data["title"].strip(),
+    url=f"https://college-hwbb.onrender.com/event.html?eventId={event_id}"
+)
 
     return jsonify({
         "success": True,

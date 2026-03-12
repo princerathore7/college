@@ -99,19 +99,21 @@
 
 <script>
   // 🔹 Auto link detect function (WhatsApp style)
-  function linkify(text) {
-    if (!text) return "";
+function linkify(text) {
+  if (!text) return "";
 
-    const urlPattern = /(https?:\/\/[^\s]+)|(www\.[^\s]+)/g;
+  const urlPattern = /((https?:\/\/|www\.)[^\s]+)/g;
 
-    return text.replace(urlPattern, function (url) {
-      let href = url;
-      if (!href.startsWith("http")) {
-        href = "https://" + href;
-      }
-      return `<a href="${href}" target="_blank">${url}</a>`;
-    });
-  }
+  return text.replace(urlPattern, function(url) {
+    let href = url;
+
+    if (!href.startsWith("http")) {
+      href = "https://" + href;
+    }
+
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+  });
+}
 
   // 🔹 Get eventId from URL
   const urlParams = new URLSearchParams(window.location.search);
