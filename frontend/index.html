@@ -4,93 +4,104 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="logop.png">
-<title>Acropolis </title>
+<title>Acropolis - Loading</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;800&display=swap" rel="stylesheet">
 
 <style>
-:root{
-  --dark-blue:#2E3192;
-  --light-blue:#00AEEF;
-  --red:#ED1C24;
+:root {
+  --dark-blue: #2E3192;
+  --light-blue: #00AEEF;
+  --red: #ED1C24;
 }
 
-body{
-  margin:0;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-  background:#fff;
-  font-family:'Open Sans',sans-serif;
-  overflow:hidden;
+body {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #fff;
+  font-family: 'Open Sans', sans-serif;
+  overflow: hidden;
 }
 
-.container{
-  position:relative;
-  width:300px;
-  text-align:center;
+.container {
+  position: relative;
+  width: 400px; /* Thoda bada container better visibility ke liye */
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
-#acropolis-logo{
-  width:300px;
-  display:block;
+/* SVG Animation Layer */
+#animation-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
 }
 
-.path-hidden{
-  stroke-dasharray:1000;
-  stroke-dashoffset:1000;
-  opacity:0;
-  transition:opacity 0.8s ease;
+/* Final Logo Layer */
+#final-logo {
+  position: absolute;
+  width: 280px; /* Orbit size ke hisab se adjusted */
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 1;
 }
 
-/* fade out ellipses */
-.fade-out{
-  opacity:0 !important;
+#final-logo.show {
+  opacity: 1;
+  transform: scale(1);
 }
 
-/* LOGO IMAGE */
-#final-logo{
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%) scale(0.9);
-  width:140px;
-  opacity:0;
-  transition:opacity 1s ease, transform 1s ease;
-  pointer-events:none;
+.path-hidden {
+  stroke-dasharray: 1500;
+  stroke-dashoffset: 1500;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-#final-logo.show{
-  opacity:1;
-  transform:translate(-50%,-50%) scale(1);
+.fade-out {
+  opacity: 0 !important;
+  transition: opacity 0.5s ease;
 }
 
-/* Text */
-.text-container{
-  margin-top:20px;
-  opacity:0;
-  transform:translateY(20px);
-  transition:all 1s ease;
+/* Text Container */
+.text-container {
+  position: absolute;
+  bottom: 10px;
+  width: 100%;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.8s ease 0.3s;
 }
 
-.text-container.visible{
-  opacity:1;
-  transform:translateY(0);
+.text-container.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-.title{
-  font-size:48px;
-  font-weight:800;
-  color:var(--dark-blue);
-  margin:0;
+.title {
+  font-size: 42px;
+  font-weight: 800;
+  color: var(--dark-blue);
+  margin: 0;
+  letter-spacing: 2px;
 }
 
-.subtitle{
-  font-size:22px;
-  font-weight:300;
-  color:#777;
-  margin-top:-5px;
+.subtitle {
+  font-size: 18px;
+  font-weight: 300;
+  color: #777;
+  margin-top: -5px;
 }
 </style>
 </head>
@@ -98,73 +109,67 @@ body{
 <body>
 
 <div class="container">
+  <img src="logop.png" id="final-logo" alt="Acropolis Logo">
 
-<img src="logop.png" id="final-logo" alt="Acropolis Logo">
+  <svg id="animation-wrapper" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+    <ellipse id="orbit-1" cx="250" cy="250" rx="140" ry="65"
+      fill="none" stroke="var(--dark-blue)" stroke-width="6"
+      transform="rotate(-25 250 250)" class="path-hidden"/>
 
-<svg id="acropolis-logo" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
+    <ellipse id="orbit-2" cx="250" cy="250" rx="130" ry="60"
+      fill="none" stroke="var(--red)" stroke-width="6"
+      transform="rotate(25 250 250)" class="path-hidden"/>
 
-  <ellipse id="orbit-1" cx="250" cy="200" rx="220" ry="100"
-    fill="none" stroke="var(--dark-blue)" stroke-width="8"
-    transform="rotate(-20 250 200)" class="path-hidden"/>
+    <ellipse id="orbit-3" cx="250" cy="250" rx="120" ry="80"
+      fill="none" stroke="var(--light-blue)" stroke-width="6"
+      transform="rotate(90 250 250)" class="path-hidden"/>
+  </svg>
 
-  <ellipse id="orbit-2" cx="250" cy="200" rx="200" ry="90"
-    fill="none" stroke="var(--red)" stroke-width="8"
-    transform="rotate(20 250 200)" class="path-hidden"/>
-
-  <ellipse id="orbit-3" cx="250" cy="200" rx="180" ry="110"
-    fill="none" stroke="var(--light-blue)" stroke-width="8"
-    transform="rotate(70 250 200)" class="path-hidden"/>
-
-</svg>
-
-<div class="text-container" id="brand-text">
-  <h1 class="title">ACROPOLIS</h1>
-  <p class="subtitle">Enlightening Wisdom</p>
-</div>
-
+  <div class="text-container" id="brand-text">
+    <h1 class="title">ACROPOLIS</h1>
+    <p class="subtitle">Enlightening Wisdom</p>
+  </div>
 </div>
 
 <script>
-const animationData=[
- {id:'orbit-1',delay:200,duration:1200},
- {id:'orbit-2',delay:500,duration:1200},
- {id:'orbit-3',delay:800,duration:1200}
+const orbits = [
+  { id: 'orbit-1', delay: 200 },
+  { id: 'orbit-2', delay: 500 },
+  { id: 'orbit-3', delay: 800 }
 ];
 
-function startAnimation(){
- animationData.forEach(item=>{
-  setTimeout(()=>{
-   const el=document.getElementById(item.id);
-   el.style.opacity='1';
-   el.style.transition=`stroke-dashoffset ${item.duration}ms ease`;
-   el.style.strokeDashoffset='0';
+function startAnimation() {
+  orbits.forEach((orbit, index) => {
+    setTimeout(() => {
+      const el = document.getElementById(orbit.id);
+      el.style.opacity = '1';
+      el.style.transition = 'stroke-dashoffset 1.5s ease-in-out, opacity 0.3s ease';
+      el.style.strokeDashoffset = '0';
 
-   if(item.id==='orbit-3'){
-     setTimeout(()=>{
-       // fade out ellipses
-       document.querySelectorAll('ellipse').forEach(e=>{
-         e.classList.add('fade-out');
-       });
+      // Jab aakhri orbit khatam hone wala ho
+      if (index === orbits.length - 1) {
+        setTimeout(() => {
+          // Orbits ko fade out karo
+          document.querySelectorAll('ellipse').forEach(e => e.classList.add('fade-out'));
+          
+          // Original Logo ko dikhao
+          document.getElementById('final-logo').classList.add('show');
+          
+          // Text ko dikhao
+          document.getElementById('brand-text').classList.add('visible');
+        }, 1200);
+      }
+    }, orbit.delay);
+  });
 
-       // fade in logo
-       document.getElementById('final-logo').classList.add('show');
-
-       // show text
-       document.getElementById('brand-text').classList.add('visible');
-
-     },item.duration);
-   }
-  },item.delay);
- });
+  // Page Redirect (After 4 seconds to allow animation to finish)
+  setTimeout(function() {
+    window.location.href = "/login";
+  }, 4500);
 }
 
-window.onload=startAnimation;
+window.onload = startAnimation;
 </script>
-  <script>
-        // Backup JavaScript redirection
-        setTimeout(function() {
-            window.location.href = "/login";
-        }, 3000); // 3 seconds delay
-    </script>
+
 </body>
 </html>
