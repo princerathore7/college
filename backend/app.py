@@ -38,6 +38,7 @@ from routes.razorpay import razorpay_bp
 from routes.missing import missing_bp
 from routes.receipt import receipt_bp
 from routes.canteen import canteen_bp
+
 # ---------------------------------------------
 # FLASK APP SETUP
 # ---------------------------------------------
