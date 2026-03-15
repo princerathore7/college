@@ -91,6 +91,9 @@ def student_signup():
         enrollment = data.get("enrollment")
         password = data.get("password")
         branch = data.get("branch")
+        email = data.get("email")
+        phone = data.get("phone") 
+        
 
         if not all([name, enrollment, password, branch]):
             return jsonify({"success": False, "message": "All fields are required"}), 400
@@ -103,7 +106,11 @@ def student_signup():
             "name": name,
             "enrollment": enrollment,
             "password": hashed_pw,
-            "branch": branch
+            "branch": branch,
+            "email": email,
+            "phone": phone,
+            "createdAt": datetime.utcnow()
+
         })
 
         # 👇 Add also into class collection
@@ -214,3 +221,26 @@ def get_collection_name(branch_section):
         return f"class_{cls}_{sec}"
     except Exception:
         raise ValueError("Invalid branch-section format. Use e.g., '1-A'")
+@students_bp.route("/<enrollment>/profile", methods=["PUT"])
+def update_profile(enrollment):
+    data = request.json
+
+    email = data.get("email")
+    phone = data.get("phone")
+
+    update_data = {}
+
+    if email:
+        update_data["email"] = email
+    if phone:
+        update_data["phone"] = phone
+
+    if not update_data:
+        return jsonify({"success": False, "message": "Nothing to update"}), 400
+
+    students_collection.update_one(
+        {"enrollment": enrollment},
+        {"$set": update_data}
+    )
+
+    return jsonify({"success": True, "message": "Profile updated"})
