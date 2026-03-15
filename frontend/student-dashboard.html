@@ -706,6 +706,9 @@ transform:scale(1.05);
 <a href="/iuwhfiuwhefiuwhefiuwhefiaboutdevportal992">
 <i class="fa-solid fa-code"></i> About Dev
 </a>
+<a href="/student-profile.html">
+  <i class="fa-solid fa-user"></i> Profile
+</a>
 
 
   <!-- NEW FINES BUTTON -->
@@ -868,11 +871,7 @@ async function loadStudentProfileAPI(enrollment) {
     console.error("Profile fetch failed:", err);
   }
 }
-function openProfile(){
 
-window.location.href="student-profile.html"
-
-}
 function renderProfile(s) {
   if (!s) return;
 
