@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_cors import CORS
+from flask_cors import cross_origin
 from utils.email_service import send_reset_email, send_email
 from db import db
 from datetime import datetime
@@ -11,8 +12,11 @@ CORS(auth_bp)
 
 # 🔹 Forgot password
 @auth_bp.route("/forgot-password", methods=["POST"])
+@cross_origin()
 def forgot_password():
-
+ 
+    if request.method == "OPTIONS":
+     return jsonify({"status":"ok"}),200
     data = request.json
     email = data.get("email")
 
