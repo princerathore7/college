@@ -146,7 +146,6 @@ def student_login():
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 # ----------------- PENDING FEES -----------------
-
 @students_bp.route("/<enrollment>/pending-fees", methods=["GET", "POST", "OPTIONS"])
 def pending_fees(enrollment):
     try:
@@ -155,14 +154,21 @@ def pending_fees(enrollment):
             return jsonify({}), 200
 
         fees_collection = users_db["fees"]
+        student = students_collection.find_one({"enrollment": enrollment}, {"_id": 0})  # fetch student info
+
+        if not student:
+            return jsonify({"success": False, "message": "Student not found"}), 404
 
         if request.method == "GET":
+            # Get pending fees
             record = fees_collection.find_one({"enrollment": enrollment}, {"_id": 0})
-            if record:
-                return jsonify({"success": True, "pending_fees": record.get("pending_fees", 0)}), 200
-            else:
-                # if no record yet, default 0
-                return jsonify({"success": True, "pending_fees": 0}), 200
+            pending = record.get("pending_fees", 0) if record else 0
+
+            # Merge student info + pending fees
+            student_info = student.copy()  # don't mutate original
+            student_info["pending_fees"] = pending
+
+            return jsonify({"success": True, "student": student_info}), 200
 
         if request.method == "POST":
             data = request.get_json()
