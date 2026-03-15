@@ -1,4 +1,3 @@
-```python
 from flask import Blueprint, request, jsonify
 from flask_cors import CORS, cross_origin
 from utils.email_service import send_reset_email, send_email
