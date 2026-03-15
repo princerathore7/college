@@ -7,8 +7,11 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 
 
 # 🔹 Forgot password
-@auth_bp.route("/forgot-password", methods=["POST"])
+@auth_bp.route("/forgot-password", methods=["POST", "OPTIONS"])
 def forgot_password():
+
+    if request.method == "OPTIONS":
+        return jsonify({"status": "ok"}), 200
 
     data = request.json
     email = data.get("email")
@@ -18,10 +21,8 @@ def forgot_password():
     if not user:
         return jsonify({"success": False, "message": "User not found"}), 404
 
-    # send reset email
     token = send_reset_email(email)
 
-    # save token in DB
     db.password_resets.insert_one({
         "email": email,
         "token": token,
