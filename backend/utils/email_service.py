@@ -8,7 +8,7 @@ SMTP_PORT = int(os.getenv("MAIL_PORT", 587))
 SMTP_USERNAME = os.getenv("MAIL_USERNAME")
 SMTP_PASSWORD = os.getenv("MAIL_PASSWORD")
 SENDER_EMAIL = os.getenv("MAIL_DEFAULT_SENDER")
-CORS(app, origins=["https://acropoliss.netlify.app"])
+
 def send_email(to_email, subject, body):
 
     msg = MIMEText(body, "html")
