@@ -2,11 +2,13 @@ from flask import Blueprint, request, jsonify
 from flask_cors import CORS
 from flask_cors import cross_origin
 from utils.email_service import send_reset_email, send_email
-from db import db
+from pymongo import MongoClient
+import os
 from datetime import datetime
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
-
+client = MongoClient(os.getenv("MONGO_COLLEGE_DB_URI"))
+db = client["college_db"]
 # ✅ Enable CORS
 CORS(auth_bp)
 
