@@ -414,11 +414,19 @@ Update
 </td>
 
 <td>
+
 <button class="actionBtn"
-style="background:${suspended ? '#dc2626':'#16a34a'}"
-onclick="toggleStatus('${s.enrollment}', ${suspended})">
-${suspended ? 'Suspended':'Active'}
+style="background:#16a34a"
+onclick="activateStudent('${s.enrollment}')">
+Activate
 </button>
+
+<button class="actionBtn"
+style="background:#dc2626"
+onclick="suspendStudent('${s.enrollment}')">
+Suspend
+</button>
+
 </td>
 
 <td>
@@ -443,40 +451,66 @@ Delete
 /* ===============================
    SUSPEND / ACTIVATE
 ================================ */
-async function toggleStatus(enr, current){
+async function suspendStudent(enr){
 
-  const confirmAction = confirm(
-    current ? "Activate this student?" : "Suspend this student?"
-  );
+  const confirmAction = confirm("Suspend this student?");
 
   if(!confirmAction) return;
 
   try{
 
     await fetch(`https://college-hwbb.onrender.com/api/students/${enr}/suspend`,{
-
       method:"PUT",
-
       headers:{ "Content-Type":"application/json" },
-
       body: JSON.stringify({
-        suspend: !current
+        suspend:true
       })
-
     });
 
-    alert("Status Updated");
-localStorage.removeItem("admin_students");
+    alert("Student Suspended");
+
+    localStorage.removeItem("admin_students");
+
     render(true);
 
   }catch(e){
 
-    alert("Error updating status");
+    alert("Error suspending student");
 
   }
 
 }
 
+
+async function activateStudent(enr){
+
+  const confirmAction = confirm("Activate this student?");
+
+  if(!confirmAction) return;
+
+  try{
+
+    await fetch(`https://college-hwbb.onrender.com/api/students/${enr}/suspend`,{
+      method:"PUT",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({
+        suspend:false
+      })
+    });
+
+    alert("Student Activated");
+
+    localStorage.removeItem("admin_students");
+
+    render(true);
+
+  }catch(e){
+
+    alert("Error activating student");
+
+  }
+
+}
 
 /* ===============================
    DELETE STUDENT
