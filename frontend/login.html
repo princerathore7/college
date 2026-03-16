@@ -479,7 +479,11 @@ form.addEventListener("submit", async (e) => {
 
     /* ---------- SUCCESS HANDLING ---------- */
     if (res.ok) {
-
+/* ---------- STUDENT SUSPENSION CHECK ---------- */
+if (role === "student" && data.suspended) {
+  window.location.href = "suspended.html";
+  return;
+}
       /* STUDENT */
       if (role === "student" && data.success) {
         localStorage.setItem("enrollment", data.enrollment);

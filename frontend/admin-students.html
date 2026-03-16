@@ -266,6 +266,7 @@ async function render(refresh=false){
 const feesFilter = document.getElementById("feesFilter").value;
 const fineFilter = document.getElementById("fineFilter").value;
   const students = await fetchStudents(refresh);
+const suspended = s.suspended ?? false;
 
 let filtered = students.filter(s=>{
 
@@ -341,9 +342,9 @@ let filtered = students.filter(s=>{
 
   <td>
     <button class="actionBtn"
-      style="background:${s.suspended ? '#dc2626':'#16a34a'}"
-      onclick="toggleStatus('${s.enrollment}', ${s.suspended})">
-      ${s.suspended ? 'Suspended':'Active'}
+      style="background:${suspended ? '#dc2626':'#16a34a'}"
+onclick="toggleStatus('${s.enrollment}', ${suspended})">
+${suspended ? 'Suspended':'Active'}
     </button>
   </td>
 

@@ -138,10 +138,22 @@ def student_login():
         if not user:
             return jsonify({"success": False, "message": "User not found"}), 401
 
+        # ⭐ CHECK SUSPENSION
+        if user.get("suspended"):
+            return jsonify({
+                "success": False,
+                "suspended": True,
+                "message": "Account suspended"
+            }), 403
+
         if not check_password_hash(user["password"], password):
             return jsonify({"success": False, "message": "Invalid password"}), 401
 
-        return jsonify({"success": True, "enrollment": enrollment, "name": user["name"]}), 200
+        return jsonify({
+            "success": True,
+            "enrollment": enrollment,
+            "name": user["name"]
+        }), 200
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
