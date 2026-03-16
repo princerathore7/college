@@ -1,159 +1,222 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Account Suspended | Acropolis Student Portal</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Restricted | Acropolis Student Portal</title>
+    <style>
+        :root {
+            --primary-red: #d32f2f;
+            --dark-bg: #0f0f0f;
+            --card-bg: #ffffff;
+            --text-main: #1a1a1a;
+            --text-muted: #5f6368;
+        }
 
-<style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family: "Segoe UI", Arial, sans-serif;
-}
+        body {
+            background-color: var(--dark-bg);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(211, 47, 47, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 0, 0, 0.5) 0%, transparent 40%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-body{
-background:#000;
-display:flex;
-align-items:center;
-justify-content:center;
-height:100vh;
-color:#000;
-}
+        .card {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 650px;
+            padding: 50px 40px;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-top: 6px solid var(--primary-red);
+        }
 
-.card{
-background:#fff;
-width:90%;
-max-width:760px;
-padding:40px;
-border-radius:12px;
-box-shadow:0 20px 60px rgba(0,0,0,0.6);
-text-align:center;
-}
+        /* Subtle Background Warning Pattern */
+        .card::before {
+            content: "RESTRICTED";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            font-size: 8rem;
+            font-weight: 900;
+            color: rgba(0, 0, 0, 0.03);
+            z-index: 0;
+            pointer-events: none;
+        }
 
-/* LOGO */
-.logo{
-width:120px;
-margin-bottom:20px;
-}
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+        }
 
-/* TITLE */
-h1{
-font-size:30px;
-margin-bottom:10px;
-}
+        .logo {
+            width: 140px;
+            margin-bottom: 30px;
+            filter: grayscale(0.2);
+        }
 
-.warning{
-color:#c62828;
-font-size:18px;
-font-weight:600;
-margin-bottom:18px;
-}
+        .status-icon {
+            background: #ffebee;
+            color: var(--primary-red);
+            width: 60px;
+            height: 60px;
+            line-height: 60px;
+            border-radius: 50%;
+            font-size: 30px;
+            margin: 0 auto 20px;
+            animation: pulse 2s infinite;
+        }
 
-/* TEXT */
-p{
-font-size:15px;
-line-height:1.7;
-color:#333;
-margin-bottom:18px;
-}
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4); }
+            70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(211, 47, 47, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
+        }
 
-/* INFO BOX */
-.info{
-background:#f3f3f3;
-border-left:5px solid #000;
-padding:18px;
-border-radius:6px;
-text-align:left;
-margin:25px 0;
-}
+        h1 {
+            color: var(--text-main);
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
 
-.info ul{
-padding-left:20px;
-}
+        .warning-tag {
+            display: inline-block;
+            background: var(--primary-red);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
 
-.info li{
-margin-bottom:10px;
-}
+        p {
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
 
-/* BUTTON */
-button{
-background:#000;
-color:#fff;
-border:none;
-padding:12px 28px;
-border-radius:6px;
-font-size:14px;
-cursor:pointer;
-margin-top:20px;
-transition:0.3s;
-}
+        .action-box {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: left;
+            margin: 30px 0;
+        }
 
-button:hover{
-background:#333;
-}
+        .action-box h3 {
+            font-size: 16px;
+            color: var(--text-main);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
 
-/* FOOTER */
-.footer{
-margin-top:25px;
-font-size:13px;
-color:#777;
-}
+        .action-box ul {
+            list-style: none;
+        }
 
-</style>
+        .action-box li {
+            font-size: 14px;
+            color: #444;
+            margin-bottom: 12px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        /* Custom Checkmark/Bullet */
+        .action-box li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--primary-red);
+            font-weight: bold;
+        }
+
+        .btn-return {
+            background: #1a1a1a;
+            color: #fff;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 250px;
+        }
+
+        .btn-return:hover {
+            background: #444;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .footer {
+            margin-top: 35px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: #999;
+            line-height: 1.5;
+        }
+    </style>
 </head>
-
 <body>
 
 <div class="card">
+    <div class="content-wrapper">
+        <img src="logo.jpg" alt="Acropolis Logo" class="logo">
+        
+        <div class="status-icon">!</div>
+        
+        <div class="warning-tag">Security Alert</div>
+        <h1>Account Temporarily Suspended</h1>
 
-<img src="logo.jpg" class="logo">
+        <p>
+            The administration has restricted access to your Student Portal. This measure is typically taken due to pending documentation, administrative audits, or policy compliance reviews.
+        </p>
 
-<h1>Account Suspended</h1>
+        <div class="action-box">
+            <h3>Required Steps for Reactivation:</h3>
+            <ul>
+                <li>Schedule a meeting with your <b>Faculty Mentor</b> for a status brief.</li>
+                <li>Visit the <b>Department Administration Office</b> to clear pending dues/documents.</li>
+                <li>Obtain formal clearance from the <b>Head of Department (HOD)</b>.</li>
+            </ul>
+        </div>
 
-<div class="warning">
-⚠ Your Student Portal Access Has Been Temporarily Suspended
-</div>
+        <button class="btn-return" onclick="window.location.href='login.html'">
+            Return to Login
+        </button>
 
-<p>
-Your access to the Acropolis Student Portal has been temporarily restricted by the administration. 
-This may occur due to disciplinary reasons, pending verification, institutional policy violations, 
-or administrative actions taken by the department.
-</p>
-
-<div class="info">
-
-<strong>If you believe this action was applied by mistake, you may resolve the issue by:</strong>
-
-<ul>
-<li>Contacting your <b>Faculty Mentor</b></li>
-<li>Meeting your <b>Head of Department (HOD)</b></li>
-<li>Coordinating with your <b>Department Administration Office</b></li>
-<li>Providing clarification or required documents if requested by the institution</li>
-</ul>
-
-</div>
-
-<p>
-Once the matter is reviewed and approved by the administration, your portal access will be restored automatically.
-</p>
-
-<p>
-For further assistance, you may contact your department office or institutional administration through official communication channels.
-</p>
-
-<button onclick="window.location.href='login.html'">
-Return to Login
-</button>
-
-<div class="footer">
-© Acropolis Institute of Technology & Research <br>
-Student Portal Administration
-</div>
-
+        <div class="footer">
+            Official Notice: Acropolis Institute of Technology & Research <br>
+            Department of Student Affairs & IT Administration
+        </div>
+    </div>
 </div>
 
 </body>
-</html>
+</html>>
