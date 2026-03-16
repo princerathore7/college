@@ -1,257 +1,392 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ID Creator - Acropolis Campus</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student ID Creator - Acropolis Campus</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-:root {
-  --primary-color: #31c2cf;
-  --text-gray: #777;
-  --input-bg: #e8f0fe;
+
+:root{
+--primary:#003366;
+--accent:#31c2cf;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: 'Poppins', sans-serif;
-  height: 100vh;
-  display: flex;
-  overflow: hidden;
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Poppins;
 }
 
-.main-wrapper { display: flex; width: 100%; height: 100%; }
-
-/* --- Left Side: Slider --- */
-.image-section {
-  flex: 1.2;
-  position: relative;
-  background-color: #000;
+body{
+display:flex;
+height:100vh;
+background:#f4f6fa;
+overflow:hidden;
 }
 
-.image-section img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  position: absolute;
-  transition: opacity 1s ease-in-out;
-  opacity: 0;
+.main-wrapper{
+display:flex;
+width:100%;
 }
 
-.image-section img.active { opacity: 1; }
-
-.logo-overlay {
-  position: absolute; top: 30px; left: 30px; z-index: 10;
-  color: white; font-weight: bold; font-size: 24px; letter-spacing: 2px;
+.image-section{
+flex:1.2;
+position:relative;
+background:black;
 }
 
-/* --- Right Side: Form --- */
-.form-section {
-  flex: 1;
-  background: white;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 0 8%;
-  overflow-y: auto;
+.image-section img{
+width:100%;
+height:100%;
+object-fit:cover;
+position:absolute;
+opacity:0;
+transition:1s;
 }
 
-.form-header h1 { font-size: 1.8rem; font-weight: 300; color: #555; text-transform: uppercase; }
-.form-header p { color: var(--text-gray); font-size: 0.9rem; margin-bottom: 30px; }
-
-input, select {
-  width: 100%; padding: 12px; margin-bottom: 15px;
-  border: none; background-color: var(--input-bg);
-  border-bottom: 2px solid transparent; outline: none; transition: 0.3s;
+.image-section img.active{
+opacity:1;
 }
 
-input:focus, select:focus { border-bottom-color: var(--primary-color); }
-
-.btn-create {
-  background-color: var(--primary-color);
-  color: white; border: none; padding: 12px 40px;
-  font-size: 1rem; cursor: pointer; float: right; margin-top: 10px;
+.logo-overlay{
+position:absolute;
+top:30px;
+left:30px;
+color:white;
+font-size:26px;
+font-weight:600;
+letter-spacing:2px;
 }
 
-/* --- Modal/Popup Styles --- */
-.modal-overlay {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.7); display: none;
-  justify-content: center; align-items: center; z-index: 100;
+.form-section{
+flex:1;
+background:white;
+padding:60px 8%;
+overflow-y:auto;
 }
 
-.id-card-popup {
-  background: white; padding: 30px; border-radius: 15px;
-  width: 350px; text-align: center; position: relative;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+.form-header h1{
+font-weight:400;
+margin-bottom:5px;
 }
 
-.id-card-content { padding: 10px; border: 2px dashed var(--primary-color); border-radius: 10px; margin-bottom: 20px; background: #f9ffff; }
-.id-card-content h2 { color: var(--primary-color); margin-bottom: 15px; font-size: 1.2rem; }
-.id-card-content p { font-size: 0.9rem; margin: 5px 0; text-align: left; border-bottom: 1px solid #eee; padding-bottom: 2px; }
-.id-card-content b { color: #333; }
+.form-header p{
+color:gray;
+margin-bottom:30px;
+}
 
-.modal-btns { display: flex; gap: 10px; justify-content: center; }
-.btn-ss { background: #4caf50; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
-.btn-close { background: #f44336; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+input,select{
+width:100%;
+padding:12px;
+margin-bottom:15px;
+border:none;
+background:#e8f0fe;
+border-bottom:2px solid transparent;
+outline:none;
+}
 
-@media (max-width: 900px) { .image-section { display: none; } }
+input:focus,select:focus{
+border-bottom:2px solid var(--accent);
+}
+
+.btn-create{
+background:var(--primary);
+color:white;
+border:none;
+padding:12px 40px;
+cursor:pointer;
+float:right;
+}
+
+.modal-overlay{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.7);
+display:none;
+justify-content:center;
+align-items:center;
+z-index:100;
+}
+
+.id-card-popup{
+background:white;
+padding:25px;
+border-radius:10px;
+text-align:center;
+width:340px;
+}
+
+.id-card{
+border:2px solid #003366;
+padding:15px;
+border-radius:10px;
+background:#f8fbff;
+}
+
+.id-card img.logo{
+width:70px;
+margin-bottom:5px;
+}
+
+.id-card img.photo{
+width:90px;
+height:100px;
+object-fit:cover;
+border-radius:6px;
+margin-bottom:10px;
+}
+
+.id-card p{
+font-size:13px;
+text-align:left;
+margin-bottom:4px;
+}
+
+.modal-btns{
+margin-top:15px;
+display:flex;
+gap:10px;
+justify-content:center;
+}
+
+.modal-btns button{
+border:none;
+padding:8px 14px;
+border-radius:5px;
+cursor:pointer;
+color:white;
+}
+
+.btn-img{background:#4caf50;}
+.btn-pdf{background:#2196f3;}
+.btn-close{background:#f44336;}
+
+@media(max-width:900px){
+.image-section{display:none;}
+}
+
 </style>
 </head>
+
 <body>
 
 <div class="main-wrapper">
-  <div class="image-section" id="slider">
-    <div class="logo-overlay">ACROPOLIS</div>
-    <img src="model1.png" class="active">
-    <img src="model2.png">
-    <img src="model3.png">
-  </div>
 
-  <div class="form-section">
-    <div class="form-header">
-      <h1>Student ID Creator</h1>
-      <p>Enter details to generate new student credentials</p>
-    </div>
+<div class="image-section" id="slider">
+<div class="logo-overlay">ACROPOLIS</div>
 
-    <form id="signupForm">
-      <input type="text" id="studentName" placeholder="Full Name" required />
-      <input type="text" id="enrollment" placeholder="Enrollment Number" required />
-      <input type="password" id="password" placeholder="Set Password" required />
+<img src="model1.png" class="active">
+<img src="model2.png">
+<img src="model3.png">
 
-      <select id="branchSelect" required>
-        <option value="">-- Select Branch --</option>
-        <option value="CSE1">CSE1</option><option value="CSE2">CSE2</option>
-        <option value="IT1">IT1</option><option value="IT2">IT2</option>
-        <option value="AIDS1">AIDS1</option><option value="CSD1">CSD1</option>
-        </select>
-
-      <select id="semesterSelect" required>
-        <option value="">-- Select Semester --</option>
-      </select>
-
-      <select id="yearSelect" required>
-        <option value="">-- Select Year --</option>
-        <option value="1st">1st Year</option>
-        <option value="2nd">2nd Year</option>
-        <option value="3rd">3rd Year</option>
-        <option value="4th">4th Year</option>
-      </select>
-
-      <button type="submit" id="submitBtn" class="btn-create">Create ID</button>
-    </form>
-  </div>
 </div>
 
+<div class="form-section">
+
+<div class="form-header">
+<h1>Student ID Creator</h1>
+<p>Create new student credentials</p>
+</div>
+
+<form id="signupForm">
+
+<input type="text" id="studentName" placeholder="Full Name" required>
+
+<input type="text" id="enrollment" placeholder="Enrollment Number" required>
+
+<input type="password" id="password" placeholder="Set Password" required>
+
+<input type="email" id="email" placeholder="Email Address" required>
+
+<input type="tel" id="phone" placeholder="Mobile Number" required>
+
+<input type="file" id="photo" accept="image/*" required>
+
+<select id="branchSelect" required>
+
+<option value="">Select Branch</option>
+
+<option>CSE1</option>
+<option>CSE2</option>
+<option>IT1</option>
+<option>IT2</option>
+<option>AIDS1</option>
+<option>CSD1</option>
+
+</select>
+
+<select id="semesterSelect"></select>
+
+<select id="yearSelect">
+
+<option value="">Year</option>
+
+<option>1st Year</option>
+<option>2nd Year</option>
+<option>3rd Year</option>
+<option>4th Year</option>
+
+</select>
+
+<button class="btn-create">Create ID</button>
+
+</form>
+
+</div>
+
+</div>
+
+<!-- POPUP -->
+
 <div class="modal-overlay" id="modalOverlay">
-  <div class="id-card-popup">
-    <div id="captureArea" class="id-card-content">
-      <img src="logo.jpg" style="width: 60px; margin-bottom: 5px;">
-      <h2>New ID Created</h2>
-      <p><b>Name:</b> <span id="resName"></span></p>
-      <p><b>Enrollment:</b> <span id="resEnroll"></span></p>
-      <p><b>Password:</b> <span id="resPass"></span></p>
-      <p><b>Branch:</b> <span id="resBranch"></span></p>
-      <p><b>Sem:</b> <span id="resSem"></span> | <b>Year:</b> <span id="resYear"></span></p>
-    </div>
-    <div class="modal-btns">
-      <button class="btn-ss" onclick="takeScreenshot()">Download SS</button>
-      <button class="btn-close" onclick="closeModal()">Close</button>
-    </div>
-  </div>
+
+<div class="id-card-popup">
+
+<div class="id-card" id="captureArea">
+
+<img src="logo.jpg" class="logo">
+
+<h3>ACROPOLIS INSTITUTE</h3>
+
+<img id="resPhoto" class="photo">
+
+<p><b>Name:</b> <span id="resName"></span></p>
+
+<p><b>Enrollment:</b> <span id="resEnroll"></span></p>
+
+<p><b>Password:</b> <span id="resPass"></span></p>
+
+<p><b>Email:</b> <span id="resEmail"></span></p>
+
+<p><b>Phone:</b> <span id="resPhone"></span></p>
+
+<p><b>Branch:</b> <span id="resBranch"></span></p>
+
+<p><b>Semester:</b> <span id="resSem"></span></p>
+
+<p><b>Year:</b> <span id="resYear"></span></p>
+
+</div>
+
+<div class="modal-btns">
+
+<button class="btn-img" onclick="downloadImage()">Download Image</button>
+
+<button class="btn-pdf" onclick="downloadPDF()">Download PDF</button>
+
+<button class="btn-close" onclick="closeModal()">Close</button>
+
+</div>
+
+</div>
+
 </div>
 
 <script>
-/* Access Control Logic */
-const mentorId = localStorage.getItem("mentorId");
-const source = sessionStorage.getItem("accessSource");
-const ALLOWED_SOURCES = ["ad", "admin"];
 
-if(!mentorId || !ALLOWED_SOURCES.includes(source)){
-  document.body.innerHTML = `<h2 style="text-align:center;margin-top:20vh;color:red">❌ Access Denied</h2>`;
+const images=document.querySelectorAll("#slider img");
+let idx=0;
+
+setInterval(()=>{
+images[idx].classList.remove("active");
+idx=(idx+1)%images.length;
+images[idx].classList.add("active");
+},5000);
+
+const semSelect=document.getElementById("semesterSelect");
+
+for(let i=1;i<=8;i++){
+let opt=document.createElement("option");
+opt.value=i;
+opt.textContent="Semester "+i;
+semSelect.appendChild(opt);
 }
 
-/* Slider Logic */
-const images = document.querySelectorAll('#slider img');
-let idx = 0;
-setInterval(() => {
-  images[idx].classList.remove('active');
-  idx = (idx + 1) % images.length;
-  images[idx].classList.add('active');
-}, 5000);
+const form=document.getElementById("signupForm");
+const modal=document.getElementById("modalOverlay");
 
-/* Semester Population */
-const semSelect = document.getElementById("semesterSelect");
-for (let i = 1; i <= 8; i++) {
-  let opt = document.createElement("option");
-  opt.value = i; opt.textContent = `Semester ${i}`;
-  semSelect.appendChild(opt);
-}
+form.addEventListener("submit",function(e){
 
-/* Signup Logic */
-const form = document.getElementById("signupForm");
-const modal = document.getElementById("modalOverlay");
+e.preventDefault();
 
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const btn = document.getElementById("submitBtn");
-  btn.innerText = "Creating...";
-  btn.disabled = true;
+const reader=new FileReader();
 
-  const formData = {
-    name: document.getElementById("studentName").value,
-    enrollment: document.getElementById("enrollment").value,
-    password: document.getElementById("password").value,
-    branch: document.getElementById("branchSelect").value,
-    semester: document.getElementById("semesterSelect").value,
-    year: document.getElementById("yearSelect").value
-  };
+const photo=document.getElementById("photo").files[0];
 
-  try {
-    const res = await fetch("https://college-hwbb.onrender.com/api/students/signup", {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify(formData)
-    });
+reader.onload=function(){
 
-    const data = await res.json();
-    if(res.ok && data.success){
-        // Show Data in Popup
-        document.getElementById("resName").innerText = formData.name;
-        document.getElementById("resEnroll").innerText = formData.enrollment;
-        document.getElementById("resPass").innerText = formData.password;
-        document.getElementById("resBranch").innerText = formData.branch;
-        document.getElementById("resSem").innerText = formData.semester;
-        document.getElementById("resYear").innerText = formData.year;
-        
-        modal.style.display = "flex";
-        form.reset(); // Form clear for next ID
-    } else {
-      alert(data.message || "Failed to create ID");
-    }
-  } catch(err) {
-    alert("Server Error");
-  } finally {
-    btn.innerText = "Create ID";
-    btn.disabled = false;
-  }
+document.getElementById("resPhoto").src=reader.result;
+
+};
+
+reader.readAsDataURL(photo);
+
+document.getElementById("resName").innerText=document.getElementById("studentName").value;
+
+document.getElementById("resEnroll").innerText=document.getElementById("enrollment").value;
+
+document.getElementById("resPass").innerText=document.getElementById("password").value;
+
+document.getElementById("resEmail").innerText=document.getElementById("email").value;
+
+document.getElementById("resPhone").innerText=document.getElementById("phone").value;
+
+document.getElementById("resBranch").innerText=document.getElementById("branchSelect").value;
+
+document.getElementById("resSem").innerText=document.getElementById("semesterSelect").value;
+
+document.getElementById("resYear").innerText=document.getElementById("yearSelect").value;
+
+modal.style.display="flex";
+
 });
 
-/* Popup Functions */
-function closeModal() { modal.style.display = "none"; }
-
-function takeScreenshot() {
-  const element = document.getElementById("captureArea");
-  html2canvas(element).then(canvas => {
-    const link = document.createElement('a');
-    link.download = `ID_${document.getElementById("resEnroll").innerText}.png`;
-    link.href = canvas.toDataURL();
-    link.click();
-  });
+function closeModal(){
+modal.style.display="none";
 }
+
+function downloadImage(){
+
+html2canvas(document.getElementById("captureArea")).then(canvas=>{
+
+let link=document.createElement("a");
+
+link.download="Student_ID.png";
+
+link.href=canvas.toDataURL();
+
+link.click();
+
+});
+
+}
+
+async function downloadPDF(){
+
+const {jsPDF}=window.jspdf;
+
+const canvas=await html2canvas(document.getElementById("captureArea"));
+
+const img=canvas.toDataURL("image/png");
+
+const pdf=new jsPDF();
+
+pdf.addImage(img,"PNG",10,10,180,0);
+
+pdf.save("Student_ID.pdf");
+
+}
+
 </script>
 
 </body>

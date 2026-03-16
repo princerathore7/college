@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Students Control Panel</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+
+body{
+font-family:Poppins;
+background:#f4f7fb;
+margin:0;
+padding:20px;
+}
+
+h1{
+text-align:center;
+color:#003366;
+}
+
+.search-box{
+margin:20px auto;
+max-width:500px;
+display:flex;
+}
+
+.search-box input{
+flex:1;
+padding:12px;
+border:1px solid #ccc;
+border-radius:6px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+background:white;
+margin-top:20px;
+}
+
+th,td{
+padding:12px;
+border-bottom:1px solid #eee;
+text-align:left;
+}
+
+th{
+background:#003366;
+color:white;
+}
+
+.btn{
+padding:6px 10px;
+border:none;
+border-radius:4px;
+cursor:pointer;
+color:white;
+margin-right:4px;
+}
+
+.suspend{background:#ff9800;}
+.activate{background:#4caf50;}
+.delete{background:#f44336;}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Student Management</h1>
+
+<div class="search-box">
+<input type="text" id="searchInput" placeholder="Search by name or enrollment">
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+<th>Name</th>
+<th>Enrollment</th>
+<th>Email</th>
+<th>Phone</th>
+<th>Branch</th>
+<th>Fees</th>
+<th>Fines</th>
+<th>Actions</th>
+</tr>
+
+</thead>
+
+<tbody id="studentTable"></tbody>
+
+</table>
+
+<script>
+
+const API="https://college-hwbb.onrender.com/api"
+
+let allStudents=[]
+
+async function loadStudents(){
+
+try{
+
+const res=await fetch(`${API}/students`)
+const data=await res.json()
+
+allStudents=data.students || []
+
+renderStudents(allStudents)
+
+}catch(err){
+
+console.error(err)
+
+}
+
+}
+
+function renderStudents(list){
+
+const table=document.getElementById("studentTable")
+table.innerHTML=""
+
+list.forEach(async s=>{
+
+let fees=0
+let fines=0
+
+try{
+
+const feeRes=await fetch(`${API}/students/${s.enrollment}/pending-fees`)
+const feeData=await feeRes.json()
+
+fees=feeData.student?.pending_fees || 0
+
+}catch{}
+
+try{
+
+const fineRes=await fetch(`${API}/fines/${s.enrollment}`)
+const fineData=await fineRes.json()
+
+fines=fineData.reduce((sum,f)=>sum+Number(f.fine||0),0)
+
+}catch{}
+
+const row=document.createElement("tr")
+
+row.innerHTML=`
+
+<td>${s.name}</td>
+<td>${s.enrollment}</td>
+<td>${s.email || "-"}</td>
+<td>${s.phone || "-"}</td>
+<td>${s.branch || "-"}</td>
+
+<td>₹${fees}</td>
+
+<td>₹${fines}</td>
+
+<td>
+
+<button class="btn suspend" onclick="suspend('${s.enrollment}')">Suspend</button>
+
+<button class="btn activate" onclick="activate('${s.enrollment}')">Activate</button>
+
+<button class="btn delete" onclick="deleteStudent('${s.enrollment}')">Delete</button>
+
+</td>
+
+`
+
+table.appendChild(row)
+
+})
+
+}
+
+document.getElementById("searchInput").addEventListener("input",function(){
+
+const val=this.value.toLowerCase()
+
+const filtered=allStudents.filter(s=>
+
+s.name.toLowerCase().includes(val) ||
+
+s.enrollment.toLowerCase().includes(val)
+
+)
+
+renderStudents(filtered)
+
+})
+
+async function suspend(enrollment){
+
+await fetch(`${API}/students/${enrollment}/suspend`,{
+
+method:"PUT",
+
+headers:{"Content-Type":"application/json"},
+
+body:JSON.stringify({suspend:true})
+
+})
+
+alert("Student Suspended")
+
+loadStudents()
+
+}
+
+async function activate(enrollment){
+
+await fetch(`${API}/students/${enrollment}/suspend`,{
+
+method:"PUT",
+
+headers:{"Content-Type":"application/json"},
+
+body:JSON.stringify({suspend:false})
+
+})
+
+alert("Student Activated")
+
+loadStudents()
+
+}
+
+async function deleteStudent(enrollment){
+
+if(!confirm("Delete this student?")) return
+
+await fetch(`${API}/students/${enrollment}`,{
+
+method:"DELETE"
+
+})
+
+alert("Student Deleted")
+
+loadStudents()
+
+}
+
+loadStudents()
+
+</script>
+
+</body>
+</html>

@@ -250,3 +250,27 @@ def update_profile(enrollment):
     )
 
     return jsonify({"success": True, "message": "Profile updated"})
+@students_bp.route("/<enrollment>/suspend", methods=["PUT"])
+def suspend_student(enrollment):
+    try:
+        data = request.get_json()
+        suspend = data.get("suspend", True)
+
+        student = students_collection.find_one({"enrollment": enrollment})
+        if not student:
+            return jsonify({"success": False, "message": "Student not found"}), 404
+
+        students_collection.update_one(
+            {"enrollment": enrollment},
+            {"$set": {"suspended": suspend}}
+        )
+
+        status = "suspended" if suspend else "activated"
+
+        return jsonify({
+            "success": True,
+            "message": f"Student {status} successfully"
+        }), 200
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
