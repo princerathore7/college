@@ -370,7 +370,7 @@ async function toggleStatus(enr, current){
 
   try{
 
-    await fetch(`https://college-hwbb.onrender.com/api/admin/student/${enr}/status`,{
+await fetch(`https://college-hwbb.onrender.com/api/students/${enr}/suspend`,{
       method:"PUT",
       headers:{ "Content-Type":"application/json" },
       body: JSON.stringify({
