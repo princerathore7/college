@@ -466,7 +466,7 @@ async function toggleStatus(enr, current){
     });
 
     alert("Status Updated");
-
+localStorage.removeItem("admin_students");
     render(true);
 
   }catch(e){
