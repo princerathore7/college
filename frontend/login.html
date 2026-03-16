@@ -476,14 +476,14 @@ form.addEventListener("submit", async (e) => {
     });
 
     const data = await res.json();
-
-    /* ---------- SUCCESS HANDLING ---------- */
-    if (res.ok) {
-/* ---------- STUDENT SUSPENSION CHECK ---------- */
 if (role === "student" && data.suspended) {
   window.location.href = "suspended.html";
   return;
 }
+    /* ---------- SUCCESS HANDLING ---------- */
+    if (res.ok) {
+/* ---------- STUDENT SUSPENSION CHECK ---------- */
+
       /* STUDENT */
       if (role === "student" && data.success) {
         localStorage.setItem("enrollment", data.enrollment);
