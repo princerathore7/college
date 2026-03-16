@@ -176,9 +176,8 @@ border-bottom:1px solid #ffeeba;
 </table>
 
 </main>
-
-
 <script>
+
 /* ===============================
    ACCESS CONTROL — ADMIN PAGES
 ================================ */
@@ -194,12 +193,14 @@ if(!mentorId || !ALLOWED_SOURCES.includes(source)){
   throw new Error("Unauthorized access");
 }
 
+
 /* ===============================
    API ENDPOINTS
 ================================ */
 const API_STUDENTS = "https://college-hwbb.onrender.com/api/admin/students";
 const API_ATT = "https://college-hwbb.onrender.com/api/attendance/student/";
 const API_FINE = "https://college-hwbb.onrender.com/api/fines/student-dashboard/";
+
 
 /* ===============================
    LOGOUT
@@ -209,93 +210,130 @@ function logout(){
   location.href="login.html";
 }
 
+
 /* ===============================
    FETCH STUDENTS
 ================================ */
 async function fetchStudents(force=false){
+
   if(!force){
     const cached = localStorage.getItem("admin_students");
     if(cached) return JSON.parse(cached);
   }
+
   try{
+
     const res = await fetch(API_STUDENTS);
     const data = await res.json();
+
     if(data.success){
       localStorage.setItem("admin_students", JSON.stringify(data.students));
       return data.students;
     }
+
     return [];
+
   }catch(e){
     console.error(e);
     return [];
   }
 }
 
+
 /* ===============================
    FETCH ATTENDANCE
 ================================ */
 async function fetchAttendance(enr){
+
   try{
+
     const res = await fetch(API_ATT + enr);
     const data = await res.json();
+
     return data.success ? data.attendance : null;
-  }catch(e){ return null; }
+
+  }catch(e){
+
+    return null;
+
+  }
+
 }
+
 
 /* ===============================
    FETCH FINE
 ================================ */
 async function fetchFine(enr){
+
   try{
+
     const res = await fetch(API_FINE + enr);
     const data = await res.json();
-    if(data.success && data.fines?.length)
-      return data.fines.reduce((s,f)=>s+f.fine,0);
+
+    if(data.success && data.fines?.length){
+      return data.fines.reduce((sum,f)=>sum+f.fine,0);
+    }
+
     return 0;
-  }catch(e){ return 0; }
+
+  }catch(e){
+
+    return 0;
+
+  }
+
 }
+
 
 /* ===============================
    RENDER STUDENTS TABLE
 ================================ */
 async function render(refresh=false){
+
   const body = document.getElementById("studentsBody");
-  const yearVal = document.getElementById("year").value;
+
+  const yearVal   = document.getElementById("year").value;
   const branchVal = document.getElementById("branch").value.toLowerCase();
   const searchEnr = document.getElementById("searchEnrollment").value.trim().toLowerCase();
-const feesFilter = document.getElementById("feesFilter").value;
-const fineFilter = document.getElementById("fineFilter").value;
+
+  const feesFilter = document.getElementById("feesFilter").value;
+  const fineFilter = document.getElementById("fineFilter").value;
+
   const students = await fetchStudents(refresh);
-const suspended = s.suspended ?? false;
 
-let filtered = students.filter(s=>{
 
-  let ok = true;
+  /* ---------- FILTER ---------- */
 
-  if(yearVal)
-    ok = ok && String(s.year) === yearVal;
+  let filtered = students.filter(s=>{
 
-  if(branchVal)
-    ok = ok && (s.branch || "").toLowerCase().includes(branchVal);
+    let ok = true;
 
-  if(searchEnr)
-    ok = ok && s.enrollment.toLowerCase().includes(searchEnr);
+    if(yearVal)
+      ok = ok && String(s.year) === yearVal;
 
-  if(feesFilter === "pending")
-    ok = ok && (s.pendingFees ?? 0) > 0;
+    if(branchVal)
+      ok = ok && (s.branch || "").toLowerCase().includes(branchVal);
 
-  if(feesFilter === "clear")
-    ok = ok && (s.pendingFees ?? 0) === 0;
+    if(searchEnr)
+      ok = ok && s.enrollment.toLowerCase().includes(searchEnr);
 
-  if(fineFilter === "pending")
-    ok = ok && (s.fine ?? 0) > 0;
+    if(feesFilter === "pending")
+      ok = ok && (s.pendingFees ?? 0) > 0;
 
-  if(fineFilter === "clear")
-    ok = ok && (s.fine ?? 0) === 0;
+    if(feesFilter === "clear")
+      ok = ok && (s.pendingFees ?? 0) === 0;
 
-  return ok;
+    if(fineFilter === "pending")
+      ok = ok && (s.fine ?? 0) > 0;
 
-});
+    if(fineFilter === "clear")
+      ok = ok && (s.fine ?? 0) === 0;
+
+    return ok;
+
+  });
+
 
   if(searchEnr){
     filtered.sort((a,b)=>{
@@ -303,64 +341,108 @@ let filtered = students.filter(s=>{
     });
   }
 
+
   body.innerHTML = "";
+
+
   if(!filtered.length){
-    body.innerHTML = `<tr><td colspan="7" class="no-data">No students found</td></tr>`;
+
+    body.innerHTML = `
+    <tr>
+      <td colspan="9" class="no-data">No students found</td>
+    </tr>`;
+
     return;
   }
 
+
+  /* ---------- LOOP ---------- */
+
   for(const s of filtered){
+
+    const suspended = s.suspended ?? false;
+
     let att = s.attendance;
     let fine = s.fine ?? 0;
+
     if(refresh){
+
       att = await fetchAttendance(s.enrollment);
       fine = await fetchFine(s.enrollment);
+
       s.attendance = att;
       s.fine = fine;
+
     }
 
     const badge = att
-      ? `<span class="badge ${att.percentage>=75?"green":att.percentage>=60?"yellow":"red"}">${att.percentage}%</span>
-         <button class="actionBtn" onclick="editAttendance('${s.enrollment}')">Edit</button>`
+      ? `<span class="badge ${att.percentage>=75?"green":att.percentage>=60?"yellow":"red"}">
+           ${att.percentage}%
+         </span>
+         <button class="actionBtn" onclick="editAttendance('${s.enrollment}')">
+           Edit
+         </button>`
       : "—";
 
+
     body.innerHTML += `
+
 <tr>
-  <td>${s.enrollment}</td>
-  <td>${s.name}</td>
-  <td>${s.year}</td>
-  <td>${s.branch}</td>
-  <td>${badge}</td>
 
-  <td>₹ ${s.pendingFees ?? 0}
-    <button class="actionBtn" onclick="editFees('${s.enrollment}')">Update</button>
-  </td>
+<td>${s.enrollment}</td>
 
-  <td>₹ ${fine}
-    <button class="actionBtn" onclick="editFine('${s.enrollment}')">Update</button>
-  </td>
+<td>${s.name}</td>
 
-  <td>
-    <button class="actionBtn"
-      style="background:${suspended ? '#dc2626':'#16a34a'}"
+<td>${s.year}</td>
+
+<td>${s.branch}</td>
+
+<td>${badge}</td>
+
+<td>
+₹ ${s.pendingFees ?? 0}
+<button class="actionBtn" onclick="editFees('${s.enrollment}')">
+Update
+</button>
+</td>
+
+<td>
+₹ ${fine}
+<button class="actionBtn" onclick="editFine('${s.enrollment}')">
+Update
+</button>
+</td>
+
+<td>
+<button class="actionBtn"
+style="background:${suspended ? '#dc2626':'#16a34a'}"
 onclick="toggleStatus('${s.enrollment}', ${suspended})">
 ${suspended ? 'Suspended':'Active'}
-    </button>
-  </td>
+</button>
+</td>
 
-  <td>
-    <button class="actionBtn"
-      style="background:#dc2626"
-      onclick="deleteStudent('${s.enrollment}')">
-      Delete
-    </button>
-  </td>
+<td>
+<button class="actionBtn"
+style="background:#dc2626"
+onclick="deleteStudent('${s.enrollment}')">
+Delete
+</button>
+</td>
 
-</tr>`;
+</tr>
+
+`;
+
   }
 
   localStorage.setItem("admin_students", JSON.stringify(students));
+
 }
+
+
+/* ===============================
+   SUSPEND / ACTIVATE
+================================ */
 async function toggleStatus(enr, current){
 
   const confirmAction = confirm(
@@ -371,12 +453,16 @@ async function toggleStatus(enr, current){
 
   try{
 
-await fetch(`https://college-hwbb.onrender.com/api/students/${enr}/suspend`,{
+    await fetch(`https://college-hwbb.onrender.com/api/students/${enr}/suspend`,{
+
       method:"PUT",
+
       headers:{ "Content-Type":"application/json" },
+
       body: JSON.stringify({
         suspend: !current
       })
+
     });
 
     alert("Status Updated");
@@ -384,9 +470,17 @@ await fetch(`https://college-hwbb.onrender.com/api/students/${enr}/suspend`,{
     render(true);
 
   }catch(e){
+
     alert("Error updating status");
+
   }
+
 }
+
+
+/* ===============================
+   DELETE STUDENT
+================================ */
 async function deleteStudent(enr){
 
   const confirmDelete = confirm("Delete this student permanently?");
@@ -404,35 +498,62 @@ async function deleteStudent(enr){
     render(true);
 
   }catch(e){
+
     alert("Error deleting student");
+
   }
 
 }
+
+
 /* ===============================
-   REDIRECTION LOGIC
+   REDIRECTION
 ================================ */
+
 function editAttendance(enr){
+
   localStorage.setItem("selectedEnrollment", enr);
+
   window.location.href = "/bebwfbewhfbeubuewdueadminxyzzxy";
+
 }
+
 function editFees(enr){
+
   localStorage.setItem("selectedEnrollment", enr);
+
   window.location.href = "pending.html";
+
 }
+
 function editFine(enr){
+
   localStorage.setItem("selectedEnrollment", enr);
+
   window.location.href = "/ewuhewbbewubewbeadmin-fine";
+
 }
+
 
 /* ===============================
    EVENTS
 ================================ */
+
 ["year","branch","feesFilter","fineFilter"].forEach(id=>{
-  document.getElementById(id).addEventListener("change",()=>render(false));
+
+  document.getElementById(id)
+  .addEventListener("change",()=>render(false));
+
 });
-document.getElementById("searchEnrollment").addEventListener("input",()=>render(false));
-document.getElementById("refreshBtn").addEventListener("click",()=>render(true));
+
+document.getElementById("searchEnrollment")
+.addEventListener("input",()=>render(false));
+
+document.getElementById("refreshBtn")
+.addEventListener("click",()=>render(true));
+
 document.addEventListener("DOMContentLoaded",()=>render(false));
+
 </script>
 </body>
 </html>
