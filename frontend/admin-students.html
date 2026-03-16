@@ -166,6 +166,8 @@ border-bottom:1px solid #ffeeba;
   <th>Attendance</th>
   <th>Pending Fees</th>
   <th>Fine</th>
+  <th>Status</th>
+  <th>Delete</th>
 </tr>
 </thead>
 <tbody id="studentsBody">
@@ -322,24 +324,89 @@ let filtered = students.filter(s=>{
       : "—";
 
     body.innerHTML += `
-      <tr>
-        <td>${s.enrollment}</td>
-        <td>${s.name}</td>
-        <td>${s.year}</td>
-        <td>${s.branch}</td>
-        <td>${badge}</td>
-        <td>₹ ${s.pendingFees ?? 0}
-          <button class="actionBtn" onclick="editFees('${s.enrollment}')">Update</button>
-        </td>
-        <td>₹ ${fine}
-          <button class="actionBtn" onclick="editFine('${s.enrollment}')">Update</button>
-        </td>
-      </tr>`;
+<tr>
+  <td>${s.enrollment}</td>
+  <td>${s.name}</td>
+  <td>${s.year}</td>
+  <td>${s.branch}</td>
+  <td>${badge}</td>
+
+  <td>₹ ${s.pendingFees ?? 0}
+    <button class="actionBtn" onclick="editFees('${s.enrollment}')">Update</button>
+  </td>
+
+  <td>₹ ${fine}
+    <button class="actionBtn" onclick="editFine('${s.enrollment}')">Update</button>
+  </td>
+
+  <td>
+    <button class="actionBtn"
+      style="background:${s.suspended ? '#dc2626':'#16a34a'}"
+      onclick="toggleStatus('${s.enrollment}', ${s.suspended})">
+      ${s.suspended ? 'Suspended':'Active'}
+    </button>
+  </td>
+
+  <td>
+    <button class="actionBtn"
+      style="background:#dc2626"
+      onclick="deleteStudent('${s.enrollment}')">
+      Delete
+    </button>
+  </td>
+
+</tr>`;
   }
 
   localStorage.setItem("admin_students", JSON.stringify(students));
 }
+async function toggleStatus(enr, current){
 
+  const confirmAction = confirm(
+    current ? "Activate this student?" : "Suspend this student?"
+  );
+
+  if(!confirmAction) return;
+
+  try{
+
+    await fetch(`https://college-hwbb.onrender.com/api/admin/student/${enr}/status`,{
+      method:"PUT",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({
+        suspend: !current
+      })
+    });
+
+    alert("Status Updated");
+
+    render(true);
+
+  }catch(e){
+    alert("Error updating status");
+  }
+}
+async function deleteStudent(enr){
+
+  const confirmDelete = confirm("Delete this student permanently?");
+
+  if(!confirmDelete) return;
+
+  try{
+
+    await fetch(`https://college-hwbb.onrender.com/api/students/${enr}`,{
+      method:"DELETE"
+    });
+
+    alert("Student Deleted");
+
+    render(true);
+
+  }catch(e){
+    alert("Error deleting student");
+  }
+
+}
 /* ===============================
    REDIRECTION LOGIC
 ================================ */

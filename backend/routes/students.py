@@ -274,3 +274,28 @@ def suspend_student(enrollment):
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+@students_bp.route("/<enrollment>", methods=["DELETE"])
+def delete_student(enrollment):
+    try:
+
+        student = students_collection.find_one({"enrollment": enrollment})
+        if not student:
+            return jsonify({"success": False, "message": "Student not found"}), 404
+
+        branch = student.get("branch")
+
+        # delete from users.students
+        students_collection.delete_one({"enrollment": enrollment})
+
+        # delete from class collection also
+        if branch:
+            coll_name = get_collection_name(branch)
+            classes_db[coll_name].delete_one({"enrollment": enrollment})
+
+        return jsonify({
+            "success": True,
+            "message": "Student deleted successfully"
+        }), 200
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
