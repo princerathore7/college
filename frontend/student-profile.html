@@ -60,22 +60,25 @@
             border-radius: 5px;
         }
 
-        .signature {
-            text-align: center;
-        }
+     .signature {
+    text-align: right; /* right side le aayega */
+    margin-top: -10px; /* thoda upar shift */
+    margin-right: 20px; /* right me push */
+}
 
-        .signature img {
-            width: 60px;
-            display: block;
-            margin: 0 auto;
-        }
+.signature img {
+    width: 120px; /* pehle 60px tha → ab double */
+    display: block;
+    margin-left: auto; /* right align image */
+}
 
-        .signature p {
-            font-size: 12px;
-            font-weight: 700;
-            color: #0a2c5a;
-            margin: 0;
-        }
+.signature p {
+    font-size: 22px; /* thoda bada text */
+    font-weight: 700; /* 1400 invalid hota hai → max 900 hota hai */
+    color: #0a2c5a;
+    margin: 0;
+    text-align: right;
+}
 
         /* Right Side: Details and Logo */
         .right-section {
@@ -95,7 +98,12 @@
         .college-logo {
             width: 140px;
         }
-
+        .ennn {
+            color: #0a2c5a;
+            text-align: right;
+            margin-right: 20px;
+            font-size: 10px;
+        }
         .card-title {
             font-size: 14px;
             font-weight: 700;
@@ -185,6 +193,7 @@
         <div class="right-section">
             <div class="header">
                 <img src="logo.jpg" class="college-logo" alt="ACROPOLIS">
+             <span class="ennn">Enlightment Wisdom</span>
                 <span class="card-title">STUDENT I. CARD</span>
             </div>
 
