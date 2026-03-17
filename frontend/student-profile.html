@@ -1,201 +1,265 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student ID Card</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #e0e5ec;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
 
-<title>Student Profile</title>
+        /* ID Card Container */
+        .id-card {
+            width: 500px;
+            height: 300px;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 10px 10px 20px rgba(0,0,0,0.1);
+            display: flex;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #ddd;
+        }
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+        /* Red Stripe at the bottom */
+        .id-card::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background: #d32f2f;
+        }
 
-<style>
+        /* Left Side: Photo and Director Sign */
+        .left-section {
+            width: 35%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            border-right: 1px solid #eee;
+        }
 
-body{
-font-family:'Poppins',sans-serif;
-background:#f4f6fb;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-margin:0;
-}
+        .profile-img {
+            width: 110px;
+            height: 130px;
+            object-fit: cover;
+            border: 2px solid #0a2c5a;
+            border-radius: 5px;
+        }
 
-.card{
+        .signature {
+            text-align: center;
+        }
 
-width:400px;
-background:white;
-border-radius:15px;
-box-shadow:0 10px 25px rgba(0,0,0,0.15);
-padding:30px;
-text-align:center;
-}
+        .signature img {
+            width: 60px;
+            display: block;
+            margin: 0 auto;
+        }
 
-.logo{
-width:120px;
-margin-bottom:10px;
-}
+        .signature p {
+            font-size: 12px;
+            font-weight: 700;
+            color: #0a2c5a;
+            margin: 0;
+        }
 
-h2{
-margin:5px 0 20px 0;
-color:#0a2c5a;
-}
+        /* Right Side: Details and Logo */
+        .right-section {
+            width: 65%;
+            padding: 15px 25px;
+            display: flex;
+            flex-direction: column;
+        }
 
-.info{
-text-align:left;
-margin-bottom:15px;
-}
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
 
-label{
-font-size:14px;
-font-weight:600;
-color:#444;
-}
+        .college-logo {
+            width: 140px;
+        }
 
-input{
-width:100%;
-padding:10px;
-border-radius:8px;
-border:1px solid #ddd;
-margin-top:5px;
-font-size:14px;
-}
+        .card-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #777;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
-.readonly{
-background:#f2f2f2;
-border:none;
-}
+        .details {
+            font-size: 13px;
+            line-height: 1.6;
+        }
 
-button{
+        .detail-row {
+            margin-bottom: 5px;
+            display: flex;
+        }
 
-width:100%;
-background:#0a2c5a;
-color:white;
-border:none;
-padding:12px;
-border-radius:8px;
-font-size:16px;
-cursor:pointer;
-margin-top:10px;
+        .label {
+            font-weight: 700;
+            color: #0a2c5a;
+            width: 100px;
+        }
 
-}
+        .value {
+            color: #333;
+            font-weight: 600;
+        }
 
-button:hover{
-background:#d32f2f;
-}
+        /* Edit Section (Below ID Card) */
+        .edit-panel {
+            margin-top: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 460px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
 
-.success{
+        .input-group {
+            margin-bottom: 10px;
+        }
 
-color:green;
-margin-top:10px;
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
 
-}
+        input {
+            width: 95%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
 
-</style>
+        button {
+            width: 100%;
+            background: #0a2c5a;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+.btn-download { background: #d32f2f; color: white; }
+        button:hover { background: #d32f2f; }
 
+        .msg { font-size: 12px; text-align: center; margin-top: 10px; color: green; }
+
+    </style>
 </head>
-
-
 <body>
 
-<div class="card">
+    <div class="id-card">
+        <div class="left-section">
+            <img src="student-photo.jpg" id="disp-img" class="profile-img" alt="Student Photo">
+            <div class="signature">
+                <img src="sign.png" alt="sign">
+                <p>Director</p>
+            </div>
+        </div>
 
-<img src="logo.jpg" class="logo">
+        <div class="right-section">
+            <div class="header">
+                <img src="logo.jpg" class="college-logo" alt="ACROPOLIS">
+                <span class="card-title">STUDENT I. CARD</span>
+            </div>
 
-<h2>Student Profile</h2>
+            <div class="details">
+                <div class="detail-row"><span class="label">Session:</span> <span class="value" id="disp-session">2024-2025</span></div>
+                <div class="detail-row"><span class="label">Scholar No.:</span> <span class="value" id="disp-enrollment">AITR241385</span></div>
+                <div class="detail-row"><span class="label">Name:</span> <span class="value" id="disp-name">Loading...</span></div>
+                <div class="detail-row"><span class="label">Course:</span> <span class="value" id="disp-class">B. Tech. - IT</span></div>
+                <div class="detail-row"><span class="label">Email:</span> <span class="value" id="disp-email">-</span></div>
+            </div>
+        </div>
+    </div>
 
-<div class="info">
-<label>Name</label>
-<input type="text" id="name" class="readonly" readonly>
-</div>
-
-<div class="info">
-<label>Enrollment</label>
-<input type="text" id="enrollment" class="readonly" readonly>
-</div>
-
-<div class="info">
-<label>Class</label>
-<input type="text" id="class" class="readonly" readonly>
-</div>
-
-<div class="info">
-<label>Email</label>
-<input type="email" id="email">
-</div>
-
-<div class="info">
-<label>Phone</label>
-<input type="text" id="phone">
-</div>
-
-<button onclick="updateProfile()">Update Profile</button>
-
-<div class="success" id="msg"></div>
-
-</div>
+    <div class="edit-panel">
+        <div class="input-group">
+            <label>Update Email</label>
+            <input type="email" id="email" placeholder="Enter new email">
+        </div>
+        <div class="input-group">
+            <label>Update Phone</label>
+            <input type="text" id="phone" placeholder="Enter phone number">
+        </div>
+        <button onclick="updateProfile()">Save Changes</button>
+        <button class="btn-download" onclick="downloadPDF()">Download ID Card</button>
+        <div class="msg" id="msg"></div>
+    </div>
 
 <script>
+    const API = "https://college-hwbb.onrender.com/api";
+    const enrollment = localStorage.getItem("enrollment") || "AITR241385"; // Default for testing
 
-const API="https://college-hwbb.onrender.com/api";
+    async function loadProfile(){
+        try {
+            const res = await fetch(`${API}/students/${enrollment}/class`);
+            const data = await res.json();
+            if(data.success){
+                // ID Card Display Update
+                document.getElementById("disp-name").innerText = data.student.name;
+                document.getElementById("disp-enrollment").innerText = data.student.enrollment;
+                document.getElementById("disp-class").innerText = data.student.class || data.student.branch;
+                document.getElementById("disp-email").innerText = data.student.email || "N/A";
+                
+                // Form Update
+                document.getElementById("email").value = data.student.email || "";
+                document.getElementById("phone").value = data.student.phone || "";
+            }
+        } catch(err) { console.log(err); }
+    }
 
-const enrollment=localStorage.getItem("enrollment");
-
-async function loadProfile(){
-
-try{
-
-const res=await fetch(`${API}/students/${enrollment}/class`);
-
-const data=await res.json();
-
-if(data.success){
-
-document.getElementById("name").value=data.student.name;
-document.getElementById("enrollment").value=data.student.enrollment;
-document.getElementById("class").value=data.student.class || data.student.branch;
-document.getElementById("email").value=data.student.email || "";
-document.getElementById("phone").value=data.student.phone || "";
-
-}
-
-}catch(err){
-
-console.log(err)
-
-}
-
-}
-
-async function updateProfile(){
-
-const email=document.getElementById("email").value;
-const phone=document.getElementById("phone").value;
-
-const res=await fetch(`${API}/students/${enrollment}/profile`,{
-
-method:"PUT",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify({
-
-email,
-phone
-
-})
-
-});
-
-const data=await res.json();
-
-document.getElementById("msg").innerText=data.message;
-
-}
-
-loadProfile();
-
+    async function updateProfile(){
+        const email = document.getElementById("email").value;
+        const phone = document.getElementById("phone").value;
+        try {
+            const res = await fetch(`${API}/students/${enrollment}/profile`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, phone })
+            });
+            const data = await res.json();
+            document.getElementById("msg").innerText = data.message;
+            loadProfile(); // Refresh ID card values
+        } catch(err) { console.log(err); }
+    }
+function downloadPDF() {
+        const element = document.getElementById('id-card-wrap');
+        const opt = {
+            margin:       10,
+            filename:     `ID_Card_${enrollment}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
+    loadProfile();
 </script>
 
 </body>

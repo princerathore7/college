@@ -91,9 +91,7 @@ cloudinary.config(
 VAPID_PRIVATE_KEY = os.getenv("VAPID_PRIVATE_KEY")
 VAPID_PUBLIC_KEY = os.getenv("VAPID_PUBLIC_KEY")
 
-# ---------------------------------------------
-# REGISTER BLUEPRINTS
-# ---------------------------------------------
+
 for bp in [
     notices_bp, students_bp, mentors_bp, attendance_bp,
     assignments_bp, classes_bp, class_mgmt_bp,
@@ -105,9 +103,7 @@ for bp in [
 ]:
     app.register_blueprint(bp)
 
-# ---------------------------------------------
-# BASIC ROUTES
-# ---------------------------------------------
+
 @app.route('/')
 def home():
     return {"message": "College Dashboard API running"}, 200
@@ -124,9 +120,8 @@ def mentor_login_page():
 def admin_dashboard():
     return render_template("admin-class-man.html")
 
-# ---------------------------------------------
 # TIMETABLE UPLOAD / DELETE / FETCH (background upload)
-# ---------------------------------------------
+
 def async_upload(pdf, filename):
     cloudinary.uploader.upload(pdf, public_id=filename, resource_type="raw", folder="timetables")
 
@@ -172,9 +167,9 @@ def get_timetable_by_class():
     except Exception:
         return jsonify({"success": False, "message": "No timetable found"}), 404
 
-# ---------------------------------------------
+
 # UNIFORM REQUEST ROUTES
-# ---------------------------------------------
+
 @app.route("/api/uniform/request", methods=["POST"])
 def create_request():
     data = request.json
@@ -212,9 +207,8 @@ def modify_status(req_id):
         print("❌ Error updating status:", e)
         return jsonify({"success": False, "msg": "Error updating status"}), 500
 
-# ---------------------------------------------
 # STUDENT & CLASS ROUTES
-# ---------------------------------------------
+
 @app.route('/api/classes/<string:branch>/<string:class_name>/students', methods=['GET'])
 def get_students_by_branch_class(branch, class_name):
     students = list(students_collection.find(
@@ -328,8 +322,8 @@ def serve_uploads(filename):
 def firebase_sw():
     return send_from_directory("static/js", "firebase-messaging-sw.js")
 
-# ---------------------------------------------
+
 # MAIN ENTRY POINT
-# ---------------------------------------------
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
