@@ -129,7 +129,7 @@ td {
 <script>
 async function loadStats() {
     try {
-        const res = await fetch("http://127.0.0.1:5000/login-stats");
+        const res = await fetch("https://college-hwbb.onrender.com/login-stats");
         const data = await res.json();
 
         if (!data.success) {
