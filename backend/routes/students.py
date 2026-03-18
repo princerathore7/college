@@ -15,6 +15,8 @@ if not MONGO_URL:
     raise Exception("MONGO_URL environment variable missing!")
 
 client = MongoClient(MONGO_URL)
+analytics_db = client["analytics"]
+login_stats_collection = analytics_db["login_stats"]
 classes_db = client["classes"]         # collections for each class-section
 users_db = client["users"]             # user login DB
 students_collection = users_db["students"]  # explicit collection reference
@@ -316,7 +318,7 @@ def track_login(user_type):
     try:
         today = datetime.utcnow().strftime("%Y-%m-%d")
 
-        db.login_stats.update_one(
+        login_stats_collection.update_one(
             {"date": today},
             {
                 "$inc": {
@@ -329,11 +331,10 @@ def track_login(user_type):
 
     except Exception as e:
         print("Login tracking error:", e)
-        
 @students_bp.route("/login-stats", methods=["GET"])
 def get_login_stats():
     try:
-        stats = list(db.login_stats.find({}, {"_id": 0}).sort("date", -1))
+        stats = list(login_stats_collection.find({}, {"_id": 0}).sort("date", -1))
 
         return jsonify({
             "success": True,
