@@ -5,7 +5,7 @@ from bson import ObjectId
 import datetime
 import os
 mentors_bp = Blueprint("mentors_bp", __name__, url_prefix="/api")
-
+from datetime import datetime
 # ------------------------------------
 # Helper: Convert Mongo ObjectId to str
 # ------------------------------------
@@ -78,7 +78,7 @@ def mentor_login():
             "success": False,
             "message": "Your account is suspended. Contact admin."
         }), 403
-
+    track_login("mentor")
     # ✅ Login success
     return jsonify({
         "success": True,
@@ -218,3 +218,23 @@ def verify_authority_password():
         return jsonify({"success":True})
 
     return jsonify({"success":False}),401
+
+def track_login(user_type):
+    try:
+        today = datetime.utcnow().strftime("%Y-%m-%d")
+
+        db.login_stats.update_one(
+            {"date": today},
+            {
+                "$inc": {
+                    "total_logins": 1,
+                    f"{user_type}_logins": 1
+                }
+            },
+            upsert=True
+        )
+
+    except Exception as e:
+        print("Login tracking error:", e)
+
+        

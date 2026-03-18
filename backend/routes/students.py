@@ -148,7 +148,7 @@ def student_login():
 
         if not check_password_hash(user["password"], password):
             return jsonify({"success": False, "message": "Invalid password"}), 401
-
+        track_login("student")
         return jsonify({
             "success": True,
             "enrollment": enrollment,
@@ -311,3 +311,21 @@ def delete_student(enrollment):
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+    
+def track_login(user_type):
+    try:
+        today = datetime.utcnow().strftime("%Y-%m-%d")
+
+        db.login_stats.update_one(
+            {"date": today},
+            {
+                "$inc": {
+                    "total_logins": 1,
+                    f"{user_type}_logins": 1
+                }
+            },
+            upsert=True
+        )
+
+    except Exception as e:
+        print("Login tracking error:", e)
