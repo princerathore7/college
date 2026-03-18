@@ -329,3 +329,16 @@ def track_login(user_type):
 
     except Exception as e:
         print("Login tracking error:", e)
+        
+@students_bp.route("/login-stats", methods=["GET"])
+def get_login_stats():
+    try:
+        stats = list(db.login_stats.find({}, {"_id": 0}).sort("date", -1))
+
+        return jsonify({
+            "success": True,
+            "data": stats
+        }), 200
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
