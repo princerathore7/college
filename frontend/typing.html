@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TypingTest.com - 2 Minutes Test</title>
+    <style>
+        :root {
+            --bg-color: #585d63;
+            --sidebar-bg: #4b4f55;
+            --container-bg: #6c7177;
+            --text-main: #ffffff;
+            --text-muted: #d1d5db;
+            --border-color: #ffffff20;
+            --cyan-accent: #4dd0e1;
+            --correct-text: #4dd0e1;
+            --error-text: #ff5252;
+            --active-bg: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar (Same as previous) */
+        .sidebar {
+            width: 220px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            z-index: 10;
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex; align-items: center; justify-content: center; gap: 5px;
+        }
+
+        .logo-icon {
+            background: var(--text-main); color: var(--bg-color);
+            border-radius: 50%; width: 24px; height: 24px;
+            display: inline-flex; align-items: center; justify-content: center; font-size: 14px;
+        }
+
+        .login-btn {
+            background: transparent; border: 1px solid var(--text-main); color: var(--text-main);
+            border-radius: 20px; padding: 5px 20px; margin: 0 auto 20px; display: block; cursor: pointer;
+        }
+
+        .nav-links { list-style: none; flex-grow: 1; }
+        .nav-links li { padding: 12px 20px; font-size: 14px; cursor: pointer; opacity: 0.9; }
+        .nav-links li:hover { background-color: rgba(255, 255, 255, 0.1); }
+
+        /* Main Area */
+        .main-wrapper {
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+        }
+
+        .page-title {
+            font-size: 26px;
+            font-style: italic;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        /* Typing Box Container */
+        .typing-container {
+            width: 750px;
+            max-width: 90%;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid var(--cyan-accent);
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        /* Typing Header */
+        .typing-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .timer {
+            color: var(--cyan-accent);
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .mode-selector {
+            display: flex;
+            background: rgba(0,0,0,0.2);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .mode-selector span {
+            padding: 5px 15px;
+            font-size: 12px;
+            cursor: pointer;
+            color: #aaa;
+        }
+        .mode-selector span.active {
+            background: var(--text-main);
+            color: var(--sidebar-bg);
+            font-weight: bold;
+        }
+
+        .close-btn {
+            color: var(--cyan-accent);
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: opacity 0.2s;
+        }
+        .close-btn:hover { opacity: 0.7; }
+        .close-icon { border: 1px solid var(--cyan-accent); border-radius: 50%; padding: 0 4px; font-size: 10px; }
+
+        /* Typing Area */
+        .typing-content-wrapper {
+            padding: 20px 30px 40px;
+            position: relative;
+            cursor: text;
+        }
+
+        .typing-text {
+            font-size: 20px;
+            line-height: 2.2;
+            color: var(--text-muted);
+            font-family: 'Courier New', Courier, monospace; /* Monospace for typing feel */
+            white-space: pre-wrap;
+            user-select: none;
+        }
+
+        .typing-text span {
+            padding: 2px 0;
+            margin-right: 5px;
+            display: inline-block;
+            border-bottom: 2px solid transparent;
+        }
+
+        /* Dynamic states for words */
+        .typing-text span.active {
+            background-color: var(--active-bg);
+            border-bottom: 2px solid var(--text-main);
+            color: var(--text-main);
+        }
+        .typing-text span.correct { color: var(--correct-text); }
+        .typing-text span.error { color: var(--error-text); text-decoration: underline; }
+        .typing-text span.partial-error { color: #ff9e9e; }
+
+        /* Lines separator (visual styling) */
+        hr.text-line {
+            border: 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-top: -15px;
+            margin-bottom: 25px;
+        }
+
+        /* Hidden input to catch keystrokes on mobile/desktop easily */
+        #typing-input {
+            position: absolute;
+            opacity: 0;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            z-index: -1;
+        }
+
+        /* Dummy Ads (Similar to previous) */
+        .dummy-ad {
+            background: linear-gradient(135deg, #1a0033 0%, #4d0066 100%);
+            color: white; border: 2px solid #00ffff; text-align: center;
+            display: flex; justify-content: center; align-items: center; position: relative;
+        }
+        .ad-top { width: 728px; height: 90px; margin-bottom: 20px; flex-direction: row; gap: 20px; }
+        .ad-bottom { position: absolute; bottom: 20px; width: 728px; height: 90px; flex-direction: row; gap: 20px; }
+        .ad-right { position: absolute; right: 20px; top: 20px; width: 160px; height: 300px; flex-direction: column; }
+        .ad-title { color: #ffff00; font-size: 18px; font-weight: bold; }
+        .ad-btn { background: #ff00ff; border: none; color: white; padding: 5px 15px; border-radius: 15px; font-weight: bold;}
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo"><div class="logo-icon">T</div>TypingTest<span style="font-size: 12px; font-weight: normal;">.com</span></div>
+        <button class="login-btn">Log In</button>
+        <ul class="nav-links">
+            <li>Typing Test</li>
+            <li>Typing Practice</li>
+            <li>Typing Lessons</li>
+            <li>Tricky Keys</li>
+            <li>Typing Benchmark</li>
+            <li>Typing Certification</li>
+        </ul>
+    </div>
+
+    <div class="main-wrapper">
+        
+        <div class="dummy-ad ad-top">
+            <div class="ad-title">The TRIVIA PARTY<br><span style="color:#00ffff; font-size:14px;">with FRIENDS!</span></div>
+            <button class="ad-btn">FREE APP</button>
+        </div>
+
+        <h2 class="page-title">2 Minutes Typing Test</h2>
+
+        <div class="typing-container">
+            <div class="typing-header">
+                <div class="timer" id="time-display">2:00</div>
+                <div class="mode-selector">
+                    <span class="active">Normal</span>
+                    <span>Pro</span>
+                    <span>Phone</span>
+                </div>
+                <div class="close-btn" id="close-btn">CLOSE <span class="close-icon">x</span></div>
+            </div>
+
+            <div class="typing-content-wrapper" onclick="document.getElementById('typing-input').focus()">
+                <div class="typing-text" id="text-display"></div>
+                <input type="text" id="typing-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus>
+            </div>
+        </div>
+
+        <div class="dummy-ad ad-bottom">
+            <div class="ad-title">OFFRE DE PRINTEMPS<br><span style="font-size: 12px; color:white; font-weight:normal;">15% de remise et une journée offerte</span></div>
+            <div style="background: black; padding: 10px; font-weight: bold; font-style: italic; color: yellow;">Hertz</div>
+        </div>
+
+        <div class="dummy-ad ad-right">
+            <div class="ad-title" style="margin-bottom: 10px;">TRIVIA PARTY</div>
+            <button class="ad-btn">PLAY NOW</button>
+        </div>
+
+    </div>
+
+    <script>
+        // Target Text paragraph
+        const textToType = "My brother went to a secret party and had a very strange experience, where according to him, all the kids were playing bizarre games and jumping around. The music was extremely loud and the lights were flashing in weird bright colors. He said he saw someone walking upside down on the ceiling, but I think he was just making it up to sound cool. Still, it sounded like a completely crazy and unforgettable night.";
+        
+        const wordsArray = textToType.split(" ");
+        const textDisplay = document.getElementById("text-display");
+        const typingInput = document.getElementById("typing-input");
+        const timeDisplay = document.getElementById("time-display");
+        const closeBtn = document.getElementById("close-btn");
+
+        let currentWordIndex = 0;
+        let timeLeft = 120; // 2 minutes in seconds
+        let timerStarted = false;
+        let timerInterval;
+
+        // Redirect Function
+        function endTestAndRedirect() {
+            clearInterval(timerInterval);
+            window.location.href = "typing-test2.html";
+        }
+
+        // Close Button Click
+        closeBtn.addEventListener("click", endTestAndRedirect);
+
+        // Initialize Text on Screen
+        function initText() {
+            textDisplay.innerHTML = "";
+            wordsArray.forEach((word, index) => {
+                const span = document.createElement("span");
+                span.innerText = word;
+                span.id = `word-${index}`;
+                textDisplay.appendChild(span);
+                
+                // Add fake lines for visual resemblance to screenshot
+                if ((index + 1) % 9 === 0 && index !== wordsArray.length - 1) {
+                    const hr = document.createElement("hr");
+                    hr.className = "text-line";
+                    textDisplay.appendChild(document.createElement("br"));
+                    textDisplay.appendChild(hr);
+                }
+            });
+            // Highlight first word
+            document.getElementById(`word-0`).classList.add("active");
+        }
+
+        // Timer function
+        function startTimer() {
+            timerStarted = true;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+                if (timeLeft <= 0) {
+                    endTestAndRedirect();
+                }
+            }, 1000);
+        }
+
+        // Typing logic
+        typingInput.addEventListener("input", (e) => {
+            if (!timerStarted) {
+                startTimer();
+            }
+
+            const typedValue = typingInput.value;
+            const currentWordSpan = document.getElementById(`word-${currentWordIndex}`);
+            const targetWord = wordsArray[currentWordIndex];
+
+            // If user presses Space (word completion)
+            if (typedValue.endsWith(" ")) {
+                const typedWord = typedValue.trim();
+                
+                // Remove active state
+                currentWordSpan.classList.remove("active", "partial-error");
+
+                // Check if correct or error
+                if (typedWord === targetWord) {
+                    currentWordSpan.classList.add("correct");
+                } else {
+                    currentWordSpan.classList.add("error");
+                }
+
+                // Move to next word
+                currentWordIndex++;
+                typingInput.value = ""; // Clear input for next word
+
+                // Highlight next word if it exists
+                if (currentWordIndex < wordsArray.length) {
+                    document.getElementById(`word-${currentWordIndex}`).classList.add("active");
+                } else {
+                    // Test completed before time
+                    endTestAndRedirect();
+                }
+            } else {
+                // Partial typing check (Turn red if mistyping halfway)
+                if (targetWord.startsWith(typedValue)) {
+                    currentWordSpan.classList.remove("partial-error");
+                } else {
+                    currentWordSpan.classList.add("partial-error");
+                }
+            }
+        });
+
+        // Ensure focus stays on hidden input if user clicks inside the container
+        document.addEventListener("click", () => {
+            typingInput.focus();
+        });
+
+        // Run initialization
+        initText();
+    </script>
+</body>
+</html>

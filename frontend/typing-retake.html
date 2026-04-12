@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TypingTest.com - Retake</title>
+    <style>
+        :root {
+            /* Dark Mode (Default) Colors */
+            --bg-color: #4b4f55;
+            --sidebar-bg: #4b4f55;
+            --container-bg: #6c7177;
+            --text-main: #ffffff;
+            --text-muted: #d1d5db;
+            --btn-primary: #007c89;
+            --btn-outline: transparent;
+            --border-color: #ffffff40;
+            --input-bg: #ffffff;
+            --input-text: #333333;
+        }
+
+        .light-mode {
+            /* Light Mode Colors */
+            --bg-color: #f0f2f5;
+            --sidebar-bg: #ffffff;
+            --container-bg: #e4e6eb;
+            --text-main: #1c1e21;
+            --text-muted: #606770;
+            --btn-primary: #007c89;
+            --border-color: #ccd0d5;
+            --input-bg: #ffffff;
+            --input-text: #1c1e21;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 220px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            z-index: 10;
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .logo-icon {
+            background: var(--text-main);
+            color: var(--bg-color);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .login-btn {
+            background: transparent;
+            border: 1px solid var(--text-main);
+            color: var(--text-main);
+            border-radius: 20px;
+            padding: 5px 20px;
+            margin: 0 auto 20px;
+            display: block;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .nav-links {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .nav-links li {
+            padding: 12px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            color: var(--text-main);
+            opacity: 0.9;
+        }
+
+        .nav-links li:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Main Content */
+        .main-wrapper {
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-bottom: 80px; /* Space for bottom ad */
+            padding-right: 200px; /* Space for right ad */
+        }
+
+        .test-container {
+            background-color: var(--container-bg);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            width: 700px;
+            max-width: 90%;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .test-container h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+
+        .test-container p {
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+
+        .select-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .custom-select {
+            width: 300px;
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: none;
+            background-color: var(--input-bg);
+            color: var(--input-text);
+            font-size: 16px;
+            margin-bottom: 15px;
+            appearance: none;
+            cursor: pointer;
+            outline: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px top 50%;
+            background-size: 12px auto;
+        }
+
+        .start-btn {
+            background-color: var(--btn-primary);
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background-color 0.2s;
+        }
+
+        .start-btn:hover {
+            background-color: #006670;
+        }
+
+        /* Floating Buttons inside Container */
+        .floating-btn {
+            position: absolute;
+            background: transparent;
+            border: 1px solid var(--text-main);
+            color: var(--text-main);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .btn-games { bottom: 30px; left: 40px; }
+        .btn-lessons { top: 120px; right: 40px; }
+
+        /* Theme Toggle Container */
+        .theme-toggle-container {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .sidebar-toggle {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 20px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider { background-color: #2196F3; }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* Dummy Ads Styling */
+        .dummy-ad {
+            background: linear-gradient(135deg, #1a0033 0%, #4d0066 100%);
+            color: white;
+            border: 2px solid #00ffff;
+            text-align: center;
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+        .dummy-ad::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 0, 255, 0.1) 10px, rgba(255, 0, 255, 0.1) 20px);
+        }
+        .ad-title { color: #ffff00; font-size: 18px; z-index: 1; text-shadow: 2px 2px 0px #000; }
+        .ad-subtitle { color: #00ffff; font-size: 14px; z-index: 1; margin-top: 5px; }
+        .ad-btn { background: #ff00ff; border: none; color: white; padding: 5px 10px; border-radius: 10px; font-size: 12px; margin-top: 10px; z-index: 1; font-weight: bold;}
+
+        /* Positioning Ads */
+        .ad-right {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            width: 160px;
+            height: 300px;
+        }
+
+        .ad-bottom {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 728px;
+            height: 90px;
+            flex-direction: row;
+            justify-content: space-around;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo">
+            <div class="logo-icon">T</div>
+            TypingTest<span style="font-size: 12px; font-weight: normal;">.com</span>
+        </div>
+        <button class="login-btn">Log In</button>
+        <ul class="nav-links">
+            <li>Typing Test</li>
+            <li>Typing Practice</li>
+            <li>Typing Lessons</li>
+            <li>Tricky Keys</li>
+            <li>Typing Benchmark</li>
+            <li>Typing Certification</li>
+            <li>Bigram Blitz</li>
+            <li>Typing Games</li>
+            <li>Typing Challenge</li>
+        </ul>
+        
+        <div class="sidebar-toggle">
+            <label class="switch">
+                <input type="checkbox" id="theme-toggle-sidebar">
+                <span class="slider"></span>
+            </label>
+            Dark mode
+        </div>
+    </div>
+
+    <div class="main-wrapper">
+        
+        <div class="test-container">
+            <button class="floating-btn btn-games">TYPING GAMES</button>
+            <button class="floating-btn btn-lessons">TYPING LESSONS</button>
+
+            <h1>Check your typing skills in a minute</h1>
+            <p>Type away to join 150+ million test takers!</p>
+
+            <span class="select-label">SELECT YOUR TEST</span>
+            
+            <select class="custom-select">
+                <option value="1">1 Minute Test</option>
+                <option value="2" selected>2 Minutes Test</option>
+                <option value="3">3 Minutes Test</option>
+                <option value="5">5 Minutes Test</option>
+            </select>
+            <br>
+            <select class="custom-select">
+                <option value="easy">Easy Text</option>
+                <option value="medium">Medium Text</option>
+                <option value="hard" selected>Hard Text</option>
+                <option value="benchmark">Benchmark (2 min)</option>
+                <option value="certificate">Certificate</option>
+                <option value="tricky">Tricky Spelling</option>
+            </select>
+            <br>
+            
+            <button class="start-btn" onclick="startTest()">START TEST</button>
+
+            <div class="theme-toggle-container">
+                <label class="switch">
+                    <input type="checkbox" id="theme-toggle-center">
+                    <span class="slider"></span>
+                </label>
+                Dark Mode
+            </div>
+        </div>
+
+        <div class="dummy-ad ad-right">
+            <div class="ad-title">TRIVIA PARTY</div>
+            <div class="ad-subtitle">with FRIENDS!</div>
+            <button class="ad-btn">FREE APP</button>
+        </div>
+
+        <div class="dummy-ad ad-bottom">
+            <div style="z-index: 1; text-align: left;">
+                <div class="ad-title" style="font-size: 16px;">The TRIVIA PARTY</div>
+                <div class="ad-subtitle">with FRIENDS!</div>
+            </div>
+            <button class="ad-btn">FREE APP</button>
+            <div style="z-index: 1; font-size: 12px; color: yellow;">Play VIRTUALLY<br>or In-Person!</div>
+        </div>
+
+    </div>
+
+    <script>
+        // Redirect function on button click
+        function startTest() {
+            window.location.href = 'typing-test2.html';
+        }
+
+        // Theme Toggle Logic
+        const body = document.body;
+        const toggleSidebar = document.getElementById('theme-toggle-sidebar');
+        const toggleCenter = document.getElementById('theme-toggle-center');
+
+        function syncToggles(isLightMode) {
+            if (isLightMode) {
+                body.classList.add('light-mode');
+                toggleSidebar.checked = true;
+                toggleCenter.checked = true;
+            } else {
+                body.classList.remove('light-mode');
+                toggleSidebar.checked = false;
+                toggleCenter.checked = false;
+            }
+        }
+
+        toggleSidebar.addEventListener('change', (e) => syncToggles(e.target.checked));
+        toggleCenter.addEventListener('change', (e) => syncToggles(e.target.checked));
+
+        // Ensure default is dark mode matching the toggle states
+        syncToggles(false);
+    </script>
+</body>
+</html>
