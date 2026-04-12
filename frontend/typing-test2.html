@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TypingTest.com Clone</title>
+    <style>
+        /* CSS Variables for Dark/Light Theme */
+        :root {
+            --bg-outer: #4d5358;
+            --bg-sidebar: #555b60;
+            --bg-main: #61676c;
+            --bg-card: #6c7378;
+            --text-main: #ffffff;
+            --text-muted: #cccccc;
+            --accent-teal: #28c9b9;
+            --border-color: #484d51;
+        }
+
+        .light-theme {
+            --bg-outer: #f0f0f0;
+            --bg-sidebar: #ffffff;
+            --bg-main: #e8e8e8;
+            --bg-card: #ffffff;
+            --text-main: #222222;
+            --text-muted: #555555;
+            --border-color: #cccccc;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body {
+            background-color: var(--bg-outer);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 220px;
+            background-color: var(--bg-sidebar);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .logo-area {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .logo-area h2 {
+            font-size: 20px;
+            font-style: italic;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .logo-circle {
+            width: 24px;
+            height: 24px;
+            background-color: #fff;
+            color: #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .login-btn {
+            background: transparent;
+            border: 1px solid var(--text-muted);
+            color: var(--text-main);
+            padding: 5px 25px;
+            border-radius: 15px;
+            margin-top: 10px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .nav-links {
+            list-style: none;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-links li {
+            padding: 12px 20px;
+            font-size: 13px;
+            color: var(--text-main);
+            cursor: pointer;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-links li:hover {
+            background-color: var(--bg-main);
+            border-left: 3px solid var(--accent-teal);
+        }
+
+        /* Dark Mode Toggle Switch */
+        .theme-toggle-container {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 34px;
+            height: 18px;
+        }
+
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 12px;
+            width: 12px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #00bfff;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(16px);
+        }
+
+        .theme-label {
+            font-size: 13px;
+            color: var(--text-main);
+        }
+
+        /* Main Content Wrapper */
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-main);
+            position: relative;
+            overflow-y: auto;
+        }
+
+        /* Top and Bottom Ad Banners */
+        .ad-banner {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            padding: 10px 0;
+            background-color: var(--bg-outer);
+        }
+
+        .ad-banner img {
+            max-width: 728px;
+            width: 100%;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        /* Content Layout with Right Sidebar Ad */
+        .content-layout {
+            display: flex;
+            flex: 1;
+            padding: 20px;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .center-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 850px;
+        }
+
+        .right-ad-sidebar {
+            width: 160px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .right-ad-sidebar img {
+            width: 100%;
+            height: 600px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        /* Screen Cards */
+        .card {
+            background-color: var(--bg-card);
+            border-radius: 15px;
+            padding: 30px;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        /* ========== RESULT SCREEN UI ========== */
+        .header-top {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .header-top h1 {
+            font-size: 26px;
+            font-style: italic;
+        }
+
+        .retake-btn {
+            position: absolute;
+            right: 0;
+            background-color: var(--accent-teal);
+            color: #fff;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-circle {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: 4px solid var(--accent-teal);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+            background-color: var(--bg-card);
+        }
+
+        /* Make editable fields distinct on hover/focus */
+        .editable-val {
+            font-size: 30px;
+            font-weight: bold;
+            outline: none;
+            min-width: 40px;
+            text-align: center;
+            border-bottom: 1px dashed transparent;
+            cursor: text;
+        }
+
+        .editable-val:focus, .editable-val:hover {
+            border-bottom: 1px dashed var(--accent-teal);
+            background-color: rgba(40, 201, 185, 0.1);
+        }
+
+        .stat-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .math-symbol {
+            font-size: 35px;
+            color: #999;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        .stat-name {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Bottom Section of Result Screen */
+        .bottom-section {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .chart-box {
+            flex: 1;
+            border: 1px dashed var(--text-muted);
+            border-radius: 10px;
+            padding: 20px;
+            position: relative;
+            height: 220px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+        }
+
+        .bar-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 35px;
+        }
+
+        .bar-score {
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .bar {
+            width: 100%;
+            background-color: #7fffd4;
+            border-radius: 3px 3px 0 0;
+        }
+
+        .bar.avg {
+            background-color: #aaa;
+        }
+
+        .bar-label {
+            font-size: 10px;
+            margin-top: 8px;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .training-box {
+            width: 250px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .train-title {
+            font-style: italic;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .train-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+        }
+
+        .train-highlight {
+            color: var(--accent-teal);
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .train-btn {
+            background-color: #00bfff;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* ========== TEST SCREEN UI ========== */
+        .test-title-wrapper {
+            background-color: var(--bg-card);
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .test-title-wrapper h1 {
+            font-size: 24px;
+            font-style: italic;
+        }
+
+        .test-box {
+            background-color: var(--bg-card);
+            border-radius: 0 0 10px 10px;
+            padding: 30px;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .timer {
+            color: var(--accent-teal);
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .mode-tabs {
+            display: flex;
+            background-color: var(--bg-main);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .mode-tabs span {
+            padding: 5px 20px;
+            font-size: 12px;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .mode-tabs span.active {
+            background-color: #ffa500;
+            color: #fff;
+        }
+
+        .close-btn {
+            cursor: pointer;
+            color: var(--accent-teal);
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .typing-area {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 22px;
+            line-height: 2.2;
+            color: var(--text-muted);
+        }
+
+        .typing-area .typed {
+            color: var(--text-main);
+            background-color: rgba(127, 255, 212, 0.2); /* Slight highlight */
+        }
+        
+        .typing-area .cursor {
+            border-left: 2px solid #ffa500;
+            animation: blink 1s infinite;
+        }
+
+        .line {
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            white-space: nowrap;
+        }
+
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo-area">
+            <h2><div class="logo-circle">T</div> TypingTest.com</h2>
+            <button class="login-btn">Log In</button>
+        </div>
+        <ul class="nav-links">
+            <li>Typing Test</li>
+            <li>Typing Practice</li>
+            <li>Typing Lessons</li>
+            <li>Tricky Keys</li>
+            <li>Typing Benchmark</li>
+            <li>Typing Certification</li>
+            <li>Bigram Blitz</li>
+            <li>Typing Games</li>
+            <li>Typing Challenge</li>
+        </ul>
+        <div class="theme-toggle-container">
+            <label class="switch">
+                <input type="checkbox" id="theme-toggle">
+                <span class="slider"></span>
+            </label>
+            <span class="theme-label" id="theme-text">Light mode</span>
+        </div>
+    </aside>
+
+    <div class="main-wrapper">
+        
+        <div class="ad-banner">
+            <img src="https://placehold.co/728x90/4a148c/ffffff?text=The+TRIVIA+PARTY+with+FRIENDS!+FREE+APP" alt="Top Ad Dummy">
+        </div>
+
+        <div class="content-layout">
+            
+            <div class="center-content">
+                
+                <div class="card" id="result-screen">
+                    <div class="header-top">
+                        <h1>Your Test Score</h1>
+                        <button class="retake-btn" id="retake-btn">RETAKE TEST</button>
+                    </div>
+
+                    <div class="stats-row">
+                        <div class="stat-group">
+                            <div class="stat-circle">
+                                <div class="editable-val" contenteditable="true">32</div>
+                                <div class="stat-sub">WPM</div>
+                            </div>
+                            <div class="stat-name">Typing Speed</div>
+                        </div>
+
+                        <div class="math-symbol">&#10005;</div>
+
+                        <div class="stat-group">
+                            <div class="stat-circle" style="border-color: #28c9b9;">
+                                <div style="display:flex; align-items:baseline;">
+                                    <div class="editable-val" contenteditable="true">96</div><span style="font-size:18px;">%</span>
+                                </div>
+                                <div class="stat-sub">1 typos</div>
+                            </div>
+                            <div class="stat-name">Accuracy</div>
+                        </div>
+
+                        <div class="math-symbol">&#61;</div>
+
+                        <div class="stat-group">
+                            <div class="stat-circle">
+                                <div class="editable-val" contenteditable="true">31</div>
+                                <div class="stat-sub">WPM</div>
+                            </div>
+                            <div class="stat-name">Net Speed</div>
+                        </div>
+                    </div>
+
+                    <div class="bottom-section">
+                        <div class="chart-box">
+                            <div class="bar-wrap"><div class="bar-score">36</div><div class="bar avg" style="height: 60px;"></div><div class="bar-label">Average<br>Typist</div></div>
+                            <div class="bar-wrap"><div class="bar-score">24</div><div class="bar" style="height: 40px;"></div><div class="bar-label">11:22 am</div></div>
+                            <div class="bar-wrap"><div class="bar-score">29</div><div class="bar" style="height: 50px;"></div><div class="bar-label">11:24 am</div></div>
+                            <div class="bar-wrap"><div class="bar-score">24</div><div class="bar" style="height: 40px;"></div><div class="bar-label">11:25 am</div></div>
+                            <div class="bar-wrap"><div class="bar-score">26</div><div class="bar" style="height: 45px;"></div><div class="bar-label">11:27 am</div></div>
+                            <div class="bar-wrap"><div class="bar-score">18</div><div class="bar" style="height: 30px;"></div><div class="bar-label">11:28 am</div></div>
+                            <div class="bar-wrap"><div class="bar-score">31</div><div class="bar" style="height: 55px;"></div><div class="bar-label">11:29 am</div></div>
+                        </div>
+
+                        <div class="training-box">
+                            <h3 class="train-title">How About Training?</h3>
+                            <p class="train-desc">With touch typing your typing speed could be</p>
+                            <div class="train-highlight">
+                                <span>+</span> 85% <span style="font-size: 14px; color:var(--text-muted); font-weight:normal;">faster</span>
+                            </div>
+                            <button class="train-btn">TRAIN NOW</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="test-screen" style="display: none; width: 100%;">
+                    <div class="test-title-wrapper">
+                        <h1>2 Minutes Typing Test</h1>
+                    </div>
+                    
+                    <div class="test-box">
+                        <div class="test-header">
+                            <span class="timer">2:00</span>
+                            <div class="mode-tabs">
+                                <span style="color:#aaa; cursor:default;">MODE</span>
+                                <span class="active">Normal</span>
+                                <span>Pro</span>
+                                <span>Phone</span>
+                            </div>
+                            <span class="close-btn" id="close-btn">CLOSE &#10006;</span>
+                        </div>
+
+                        <div class="typing-area">
+                            <div class="line"><span class="typed">On </span><span class="cursor">J</span>uly the 7th, 2018, Joel Strasser</div>
+                            <div class="line">broke the record for the most</div>
+                            <div class="line">toothpick in a beard. He took 3 hours</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="right-ad-sidebar">
+                <img src="https://placehold.co/160x600/e63946/ffffff?text=AVIS+Promo+Ad" alt="Right Ad Dummy">
+            </div>
+
+        </div>
+
+        <div class="ad-banner" style="margin-top: auto; padding-bottom: 20px;">
+            <img src="https://placehold.co/728x90/4a148c/ffffff?text=The+TRIVIA+PARTY+with+FRIENDS!+FREE+APP" alt="Bottom Ad Dummy">
+        </div>
+
+    </div>
+
+    <script>
+        // Screen Navigation Logic
+        const resultScreen = document.getElementById('result-screen');
+        const testScreen = document.getElementById('test-screen');
+        const retakeBtn = document.getElementById('retake-btn');
+        const closeBtn = document.getElementById('close-btn');
+
+        // Show Test Screen, Hide Result
+        retakeBtn.addEventListener('click', () => {
+            resultScreen.style.display = 'none';
+            testScreen.style.display = 'block';
+        });
+
+        // Show Result Screen, Hide Test
+        closeBtn.addEventListener('click', () => {
+            testScreen.style.display = 'none';
+            resultScreen.style.display = 'block';
+        });
+
+        // Theme Toggle Logic
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeText = document.getElementById('theme-text');
+
+        themeToggle.addEventListener('change', () => {
+            if (themeToggle.checked) {
+                document.body.classList.add('light-theme');
+                themeText.textContent = "Dark mode"; // Jab light mein honge toh switch se Dark mode active hoga
+            } else {
+                document.body.classList.remove('light-theme');
+                themeText.textContent = "Light mode"; 
+            }
+        });
+    </script>
+</body>
+</html>
