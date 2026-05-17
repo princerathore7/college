@@ -239,12 +239,15 @@ let currentDay = getTodayName();
 // LOAD STUDENT DATA
 // ============================================
 
-const studentClass =
-localStorage.getItem("studentClass")
-|| localStorage.getItem("className")
-|| localStorage.getItem("class_assigned")
-|| "IT1";
+const profile =
+JSON.parse(localStorage.getItem("studentProfile")) || {};
 
+const studentClass =
+profile.class ||
+localStorage.getItem("studentClass") ||
+localStorage.getItem("className") ||
+localStorage.getItem("class_assigned") ||
+"IT1";
 const studentYear =
 localStorage.getItem("studentYear")
 || localStorage.getItem("year")
