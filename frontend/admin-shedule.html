@@ -426,7 +426,6 @@
   </div>
 
 </div>
-
 <script>
 
 const days = [
@@ -438,7 +437,8 @@ const days = [
   "Saturday"
 ];
 
-const daysContainer = document.getElementById("daysContainer");
+const daysContainer =
+document.getElementById("daysContainer");
 
 
 // =======================================================
@@ -447,7 +447,8 @@ const daysContainer = document.getElementById("daysContainer");
 
 days.forEach(day => {
 
-  const dayDiv = document.createElement("div");
+  const dayDiv =
+  document.createElement("div");
 
   dayDiv.className = "day-section";
 
@@ -457,7 +458,10 @@ days.forEach(day => {
 
       <span>${day}</span>
 
-      <button class="btn add-btn" onclick="addPeriod('${day}')">
+      <button
+        class="btn add-btn"
+        onclick="addPeriod('${day}')"
+      >
 
         <i class="fa-solid fa-plus"></i>
         Add Period
@@ -481,9 +485,13 @@ days.forEach(day => {
 
 function addPeriod(day){
 
-  const container = document.getElementById(`${day}-periods`);
+  const container =
+  document.getElementById(
+    `${day}-periods`
+  );
 
-  const periodDiv = document.createElement("div");
+  const periodDiv =
+  document.createElement("div");
 
   periodDiv.className = "period-card";
 
@@ -493,43 +501,76 @@ function addPeriod(day){
 
       <div>
         <label>Start Time</label>
-        <input type="time" class="startTime">
+        <input
+          type="time"
+          class="startTime"
+        >
       </div>
 
       <div>
         <label>End Time</label>
-        <input type="time" class="endTime">
+        <input
+          type="time"
+          class="endTime"
+        >
       </div>
 
       <div>
         <label>Type</label>
 
-        <select class="type-select periodType">
+        <select
+          class="type-select periodType"
+        >
 
-          <option value="subject">Subject</option>
-          <option value="break">Break</option>
+          <option value="subject">
+            Subject
+          </option>
+
+          <option value="break">
+            Break
+          </option>
 
         </select>
       </div>
 
       <div>
-        <label>Subject / Break Name</label>
-        <input type="text" class="subject" placeholder="Mathematics / Lunch Break">
+        <label>
+          Subject / Break Name
+        </label>
+
+        <input
+          type="text"
+          class="subject"
+          placeholder="Mathematics / Lunch Break"
+        >
       </div>
 
       <div>
         <label>Faculty Name</label>
-        <input type="text" class="faculty" placeholder="Sharma Sir">
+
+        <input
+          type="text"
+          class="faculty"
+          placeholder="Sharma Sir"
+        >
       </div>
 
       <div>
         <label>Room Number</label>
-        <input type="text" class="room" placeholder="A-101">
+
+        <input
+          type="text"
+          class="room"
+          placeholder="A-101"
+        >
       </div>
 
     </div>
 
-    <button class="btn remove-btn" onclick="this.parentElement.remove()">
+    <button
+      class="btn remove-btn"
+      onclick="this.parentElement.remove()"
+    >
 
       <i class="fa-solid fa-trash"></i>
       Remove
@@ -543,37 +584,78 @@ function addPeriod(day){
 }
 
 
+
 // =======================================================
 // SUBMIT TIMETABLE
 // =======================================================
 
 async function submitTimetable(){
 
-  const className = document.getElementById("className").value;
+  // =====================================
+  // GET VALUES
+  // =====================================
 
-  const year = document.getElementById("year").value;
+  const selectedClass =
+  document.getElementById(
+    "className"
+  ).value;
 
-  if(!year){
+  const selectedYear =
+  document.getElementById(
+    "year"
+  ).value;
+
+
+  // =====================================
+  // VALIDATION
+  // =====================================
+
+  if(!selectedYear){
 
     alert("Please select year");
     return;
 
   }
 
-  if(!className){
+  if(!selectedClass){
 
     alert("Please select class");
     return;
 
   }
 
+
+  // =====================================
+  // 🔥 IMPORTANT FIX
+  // MAKE SAME FORMAT AS STUDENT PROFILE
+  //
+  // Example:
+  // "2nd Year" + "IT2"
+  // =>
+  // "2nd Year IT2"
+  // =====================================
+
+  const finalClassName =
+  `${selectedYear} ${selectedClass}`;
+
+
+  // =====================================
+  // CREATE WEEKLY SCHEDULE
+  // =====================================
+
   const weeklySchedule = {};
 
   days.forEach(day => {
 
-    const periodContainer = document.getElementById(`${day}-periods`);
+    const periodContainer =
+    document.getElementById(
+      `${day}-periods`
+    );
 
-    const periodCards = periodContainer.querySelectorAll(".period-card");
+    const periodCards =
+    periodContainer.querySelectorAll(
+      ".period-card"
+    );
 
     weeklySchedule[day] = [];
 
@@ -581,63 +663,116 @@ async function submitTimetable(){
 
       const periodData = {
 
-        startTime: card.querySelector(".startTime").value,
-        endTime: card.querySelector(".endTime").value,
-        type: card.querySelector(".periodType").value,
-        subject: card.querySelector(".subject").value,
-        faculty: card.querySelector(".faculty").value,
-        room: card.querySelector(".room").value
+        startTime:
+        card.querySelector(
+          ".startTime"
+        ).value,
+
+        endTime:
+        card.querySelector(
+          ".endTime"
+        ).value,
+
+        type:
+        card.querySelector(
+          ".periodType"
+        ).value,
+
+        subject:
+        card.querySelector(
+          ".subject"
+        ).value,
+
+        faculty:
+        card.querySelector(
+          ".faculty"
+        ).value,
+
+        room:
+        card.querySelector(
+          ".room"
+        ).value
 
       };
 
-      weeklySchedule[day].push(periodData);
+      weeklySchedule[day]
+      .push(periodData);
 
     });
 
   });
 
 
+  // =====================================
   // FINAL DATA
+  // =====================================
 
   const finalData = {
 
-    year: year,
+    year: selectedYear,
 
-    className: className,
+    // 🔥 FIXED
+    className: finalClassName,
 
-    mentorID: localStorage.getItem("mentorID") || "MENTOR001",
+    mentorID:
+    localStorage.getItem(
+      "mentorID"
+    ) || "MENTOR001",
 
     weeklySchedule: weeklySchedule
 
   };
 
-  console.log(finalData);
+
+  console.log(
+    "FINAL DATA =>",
+    finalData
+  );
 
 
+  // =====================================
   // API CALL
+  // =====================================
 
   try{
 
     const response = await fetch(
+
       "https://college-hwbb.onrender.com/api/timetable/set-weekly",
+
       {
         method:"POST",
+
         headers:{
           "Content-Type":"application/json"
         },
-        body:JSON.stringify(finalData)
+
+        body:JSON.stringify(
+          finalData
+        )
+
       }
+
     );
 
-    const data = await response.json();
+    const data =
+    await response.json();
+
+    console.log(data);
+
 
     if(data.success){
 
-      alert("Timetable Posted Successfully");
+      alert(
+        "Timetable Posted Successfully"
+      );
 
     }else{
 
-      alert(data.message || "Failed to post timetable");
+      alert(
+        data.message ||
+        "Failed to post timetable"
+      );
 
     }
 
@@ -652,6 +787,5 @@ async function submitTimetable(){
 }
 
 </script>
-
 </body>
 </html>
