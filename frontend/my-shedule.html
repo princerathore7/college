@@ -244,10 +244,12 @@ JSON.parse(localStorage.getItem("studentProfile")) || {};
 
 const studentClass =
 profile.class ||
+profile.branch ||
 localStorage.getItem("studentClass") ||
 localStorage.getItem("className") ||
 localStorage.getItem("class_assigned") ||
-"IT1";
+"1IT1";
+console.log("Using class:", studentClass);
 const studentYear =
 localStorage.getItem("studentYear")
 || localStorage.getItem("year")
