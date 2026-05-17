@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Manage Timetables</title>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial, sans-serif;
+}
+
+body{
+  background:#f4f7fb;
+  padding:20px;
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:25px;
+}
+
+.title{
+  font-size:28px;
+  font-weight:700;
+  color:#0f172a;
+}
+
+.refresh-btn{
+  background:#2563eb;
+  color:white;
+  border:none;
+  padding:12px 18px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.cards-container{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(350px,1fr));
+  gap:20px;
+}
+
+.card{
+  background:white;
+  border-radius:18px;
+  padding:20px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:18px;
+}
+
+.class-name{
+  font-size:22px;
+  font-weight:700;
+  color:#1e293b;
+}
+
+.updated{
+  font-size:13px;
+  color:#64748b;
+}
+
+.day{
+  margin-bottom:16px;
+}
+
+.day-title{
+  font-weight:700;
+  color:#2563eb;
+  margin-bottom:8px;
+}
+
+.period{
+  background:#f8fafc;
+  border-left:4px solid #2563eb;
+  padding:10px;
+  border-radius:8px;
+  margin-bottom:8px;
+}
+
+.period-subject{
+  font-weight:700;
+  margin-bottom:4px;
+}
+
+.period-details{
+  font-size:14px;
+  color:#475569;
+}
+
+.actions{
+  display:flex;
+  gap:10px;
+  margin-top:18px;
+}
+
+.btn{
+  flex:1;
+  border:none;
+  padding:12px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.edit-btn{
+  background:#f59e0b;
+  color:white;
+}
+
+.delete-btn{
+  background:#ef4444;
+  color:white;
+}
+
+.empty{
+  text-align:center;
+  padding:60px 20px;
+  color:#64748b;
+  font-size:18px;
+}
+
+</style>
+</head>
+<body>
+
+<div class="header">
+
+  <div class="title">
+    <i class="fa-solid fa-calendar-days"></i>
+    Manage Timetables
+  </div>
+
+  <button class="refresh-btn" onclick="loadTimetables()">
+    <i class="fa-solid fa-rotate"></i>
+    Refresh
+  </button>
+
+</div>
+
+<div id="cardsContainer" class="cards-container"></div>
+
+<script>
+
+const API =
+"https://college-hwbb.onrender.com/api/timetable";
+
+const days = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday"
+];
+
+
+// ==========================================
+// LOAD ALL TIMETABLES
+// ==========================================
+
+async function loadTimetables(){
+
+  const container =
+  document.getElementById("cardsContainer");
+
+  container.innerHTML = `
+    <div class="empty">
+      Loading Timetables...
+    </div>
+  `;
+
+  try{
+
+    const response = await fetch(
+      `${API}/all`
+    );
+
+    const data = await response.json();
+
+    if(!data.success){
+
+      container.innerHTML = `
+        <div class="empty">
+          Failed to load timetables
+        </div>
+      `;
+
+      return;
+
+    }
+
+    const timetables =
+    data.timetables || [];
+
+    if(timetables.length === 0){
+
+      container.innerHTML = `
+        <div class="empty">
+          No Timetables Found
+        </div>
+      `;
+
+      return;
+
+    }
+
+    container.innerHTML = "";
+
+    timetables.forEach(timetable => {
+
+      const card =
+      document.createElement("div");
+
+      card.className = "card";
+
+      let daysHTML = "";
+
+      days.forEach(day => {
+
+        const schedule =
+        timetable.weeklySchedule?.[day] || [];
+
+        if(schedule.length === 0) return;
+
+        let periodsHTML = "";
+
+        schedule.forEach(period => {
+
+          periodsHTML += `
+
+            <div class="period">
+
+              <div class="period-subject">
+
+                ${
+                  period.subject ||
+                  period.title ||
+                  "Untitled"
+                }
+
+              </div>
+
+              <div class="period-details">
+
+                ${period.startTime}
+                -
+                ${period.endTime}
+
+                <br>
+
+                Faculty:
+                ${period.faculty || "N/A"}
+
+                <br>
+
+                Room:
+                ${period.room || "N/A"}
+
+              </div>
+
+            </div>
+
+          `;
+
+        });
+
+        daysHTML += `
+
+          <div class="day">
+
+            <div class="day-title">
+
+              ${day}
+
+            </div>
+
+            ${periodsHTML}
+
+          </div>
+
+        `;
+
+      });
+
+      card.innerHTML = `
+
+        <div class="top">
+
+          <div class="class-name">
+
+            ${timetable.className}
+
+          </div>
+
+          <div class="updated">
+
+            ${
+              timetable.updatedAt
+              ?
+              new Date(
+                timetable.updatedAt
+              ).toLocaleDateString()
+              :
+              ""
+            }
+
+          </div>
+
+        </div>
+
+        ${daysHTML}
+
+        <div class="actions">
+
+          <button
+            class="btn edit-btn"
+            onclick="editTimetable('${timetable.className}')"
+          >
+
+            <i class="fa-solid fa-pen"></i>
+            Edit
+
+          </button>
+
+          <button
+            class="btn delete-btn"
+            onclick="deleteTimetable('${timetable.className}')"
+          >
+
+            <i class="fa-solid fa-trash"></i>
+            Delete
+
+          </button>
+
+        </div>
+
+      `;
+
+      container.appendChild(card);
+
+    });
+
+  }catch(error){
+
+    console.error(error);
+
+    container.innerHTML = `
+      <div class="empty">
+        Server Error
+      </div>
+    `;
+
+  }
+
+}
+
+
+// ==========================================
+// DELETE TIMETABLE
+// ==========================================
+
+async function deleteTimetable(className){
+
+  const confirmDelete =
+  confirm(
+    `Delete timetable for ${className}?`
+  );
+
+  if(!confirmDelete) return;
+
+  try{
+
+    const response = await fetch(
+      `${API}/delete/${className}`,
+      {
+        method:"DELETE"
+      }
+    );
+
+    const data = await response.json();
+
+    if(data.success){
+
+      alert("Timetable Deleted");
+
+      loadTimetables();
+
+    }else{
+
+      alert(data.message);
+
+    }
+
+  }catch(error){
+
+    console.error(error);
+
+    alert("Server Error");
+
+  }
+
+}
+
+
+// ==========================================
+// EDIT TIMETABLE
+// ==========================================
+
+function editTimetable(className){
+
+  localStorage.setItem(
+    "editTimetableClass",
+    className
+  );
+
+  window.location.href =
+  `admin-time-table.html?edit=${className}`;
+
+}
+
+
+// ==========================================
+// INITIAL LOAD
+// ==========================================
+
+loadTimetables();
+
+</script>
+
+</body>
+</html>

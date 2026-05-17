@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>My Schedule</title>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial,sans-serif;
+}
+
+body{
+  background:#f4f7fb;
+  padding:20px;
+}
+
+/* ================= HEADER ================= */
+
+.header{
+  background:white;
+  border-radius:18px;
+  padding:22px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+  margin-bottom:22px;
+}
+
+.title{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-size:28px;
+  font-weight:700;
+  color:#0f172a;
+  margin-bottom:18px;
+}
+
+.info{
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+}
+
+.info-box{
+  background:#eff6ff;
+  color:#2563eb;
+  padding:10px 16px;
+  border-radius:12px;
+  font-weight:600;
+}
+
+/* ================= DAYS ================= */
+
+.days-tabs{
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+  margin-bottom:24px;
+}
+
+.day-btn{
+  border:none;
+  background:white;
+  padding:12px 20px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:700;
+  color:#475569;
+  box-shadow:0 2px 8px rgba(0,0,0,0.06);
+  transition:0.3s;
+  min-width:120px;
+}
+
+.day-btn.active{
+  background:#2563eb;
+  color:white;
+}
+
+/* ================= SCHEDULE ================= */
+
+.schedule-container{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+.period-card{
+  background:white;
+  border-radius:18px;
+  padding:20px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+  border-left:6px solid #2563eb;
+}
+
+.break-card{
+  border-left:6px solid #f59e0b;
+  background:#fff7ed;
+}
+
+.period-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16px;
+  gap:12px;
+}
+
+.subject{
+  font-size:22px;
+  font-weight:700;
+  color:#0f172a;
+}
+
+.break-title{
+  font-size:22px;
+  font-weight:700;
+  color:#b45309;
+}
+
+.time{
+  background:#dbeafe;
+  color:#1d4ed8;
+  padding:8px 14px;
+  border-radius:10px;
+  font-weight:700;
+  font-size:14px;
+}
+
+.details{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:14px;
+}
+
+.detail-box{
+  background:#f8fafc;
+  padding:14px;
+  border-radius:12px;
+  color:#334155;
+  font-weight:600;
+}
+
+.detail-box span{
+  display:block;
+  color:#64748b;
+  font-size:13px;
+  margin-bottom:6px;
+}
+
+.empty{
+  background:white;
+  border-radius:18px;
+  padding:60px 20px;
+  text-align:center;
+  color:#64748b;
+  font-size:20px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+
+.empty i{
+  font-size:60px;
+  color:#cbd5e1;
+}
+
+/* ================= MOBILE ================= */
+
+@media(max-width:768px){
+
+  .title{
+    font-size:22px;
+  }
+
+  .subject,
+  .break-title{
+    font-size:18px;
+  }
+
+  .period-top{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+}
+
+</style>
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+
+<div class="header">
+
+  <div class="title">
+    <i class="fa-solid fa-calendar-days"></i>
+    My Schedule
+  </div>
+
+  <div class="info">
+
+    <div class="info-box" id="studentClass">
+      Class: --
+    </div>
+
+    <div class="info-box" id="studentYear">
+      Year: --
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ================= DAYS ================= -->
+
+<div class="days-tabs" id="daysTabs"></div>
+
+<!-- ================= SCHEDULE ================= -->
+
+<div
+  class="schedule-container"
+  id="scheduleContainer"
+></div>
+
+<script>
+
+const API =
+"https://college-hwbb.onrender.com/api/timetable";
+
+const days = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday"
+];
+
+let fullSchedule = {};
+
+let currentDay = getTodayName();
+
+
+// ==========================================
+// LOAD STUDENT DATA
+// ==========================================
+
+const profile =
+JSON.parse(
+  localStorage.getItem("studentProfile")
+) || {};
+
+const studentClass =
+profile.class ||
+localStorage.getItem("studentClass") ||
+localStorage.getItem("className") ||
+"IT1";
+
+const studentYear =
+localStorage.getItem("studentYear") ||
+localStorage.getItem("year") ||
+"1st Year";
+
+document.getElementById(
+  "studentClass"
+).innerText =
+`Class: ${studentClass}`;
+
+document.getElementById(
+  "studentYear"
+).innerText =
+`Year: ${studentYear}`;
+
+
+
+// ==========================================
+// CREATE DAY BUTTONS
+// ==========================================
+
+const tabsContainer =
+document.getElementById("daysTabs");
+
+days.forEach(day => {
+
+  const btn =
+  document.createElement("button");
+
+  btn.className =
+  `day-btn ${
+    day === currentDay
+    ? "active"
+    : ""
+  }`;
+
+  btn.innerText = day;
+
+  btn.onclick = () => {
+
+    document
+    .querySelectorAll(".day-btn")
+    .forEach(b => {
+      b.classList.remove("active");
+    });
+
+    btn.classList.add("active");
+
+    currentDay = day;
+
+    renderSchedule(day);
+
+  };
+
+  tabsContainer.appendChild(btn);
+
+});
+
+
+
+// ==========================================
+// FETCH TIMETABLE
+// ==========================================
+
+async function fetchTimetable(){
+
+  try{
+
+    const response = await fetch(
+      `${API}/all`
+    );
+
+    const data = await response.json();
+
+    if(!data.success){
+
+      showEmpty();
+      return;
+
+    }
+
+    const matchedTimetable =
+    data.timetables.find(t => {
+
+      return (
+        t.className
+        ?.toUpperCase()
+        .trim()
+        ===
+        studentClass
+        .toUpperCase()
+        .trim()
+      );
+
+    });
+
+    if(!matchedTimetable){
+
+      showEmpty();
+      return;
+
+    }
+
+    fullSchedule =
+    matchedTimetable.weeklySchedule || {};
+
+    renderSchedule(currentDay);
+
+  }catch(error){
+
+    console.error(error);
+
+    showEmpty();
+
+  }
+
+}
+
+
+
+// ==========================================
+// RENDER SCHEDULE
+// ==========================================
+
+function renderSchedule(day){
+
+  const container =
+  document.getElementById(
+    "scheduleContainer"
+  );
+
+  const schedule =
+  fullSchedule[day] || [];
+
+  if(schedule.length === 0){
+
+    container.innerHTML = `
+
+      <div class="empty">
+
+        <i class="fa-solid fa-calendar-xmark"></i>
+
+        <br><br>
+
+        No schedule available for ${day}
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+  container.innerHTML = "";
+
+  schedule.forEach(item => {
+
+    const isBreak =
+    item.type === "break";
+
+    const card =
+    document.createElement("div");
+
+    card.className =
+    `period-card ${
+      isBreak
+      ? "break-card"
+      : ""
+    }`;
+
+    card.innerHTML = `
+
+      <div class="period-top">
+
+        <div class="${
+          isBreak
+          ? "break-title"
+          : "subject"
+        }">
+
+          ${
+            item.subject ||
+            item.title ||
+            "Untitled"
+          }
+
+        </div>
+
+        <div class="time">
+
+          ${item.startTime}
+          -
+          ${item.endTime}
+
+        </div>
+
+      </div>
+
+      <div class="details">
+
+        <div class="detail-box">
+
+          <span>Faculty</span>
+
+          ${item.faculty || "N/A"}
+
+        </div>
+
+        <div class="detail-box">
+
+          <span>Room</span>
+
+          ${item.room || "N/A"}
+
+        </div>
+
+        <div class="detail-box">
+
+          <span>Type</span>
+
+          ${item.type || "subject"}
+
+        </div>
+
+      </div>
+
+    `;
+
+    container.appendChild(card);
+
+  });
+
+}
+
+
+
+// ==========================================
+// EMPTY STATE
+// ==========================================
+
+function showEmpty(){
+
+  document.getElementById(
+    "scheduleContainer"
+  ).innerHTML = `
+
+    <div class="empty">
+
+      <i class="fa-solid fa-triangle-exclamation"></i>
+
+      <br><br>
+
+      Timetable Not Available
+
+    </div>
+
+  `;
+
+}
+
+
+
+// ==========================================
+// GET TODAY NAME
+// ==========================================
+
+function getTodayName(){
+
+  const dayIndex =
+  new Date().getDay();
+
+  const map = {
+
+    1:"Monday",
+    2:"Tuesday",
+    3:"Wednesday",
+    4:"Thursday",
+    5:"Friday",
+    6:"Saturday"
+
+  };
+
+  return map[dayIndex] || "Monday";
+
+}
+
+
+
+// ==========================================
+// INITIAL LOAD
+// ==========================================
+
+fetchTimetable();
+
+</script>
+
+</body>
+</html>
