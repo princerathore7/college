@@ -100,7 +100,7 @@ for bp in [
     bus_bp, management_bp, notes_bp, fine_bp,
     admin_students_bp, notifications_bp, attendance_pdf_bp,
       forms_bp, bus_track_bp, per_message_bp, razorpay_bp,
-    missing_bp, receipt_bp, canteen_bp, auth_bp, timetables_bp
+    missing_bp, receipt_bp, canteen_bp, auth_bp, timetable_bp
 ]:
     app.register_blueprint(bp)
 
