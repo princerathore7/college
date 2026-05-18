@@ -322,7 +322,12 @@ def serve_uploads(filename):
 @app.route("/firebase-messaging-sw.js")
 def firebase_sw():
     return send_from_directory("static/js", "firebase-messaging-sw.js")
+@app.route("/send-email-otp", methods=["POST"])
+def send_email_otp():
 
+    return jsonify({
+        "success": True
+    })
 
 # MAIN ENTRY POINT
 
