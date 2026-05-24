@@ -40,6 +40,14 @@ from routes.receipt import receipt_bp
 from routes.canteen import canteen_bp
 from routes.auth import auth_bp
 from routes.timetable import timetable_bp
+from routes.otp import otp_bp
+from routes.signup import signup_bp
+
+from routes.verification import verification_bp
+
+from routes.admin_verification import admin_verification_bp
+
+from routes.cleanup import cleanup_bp
 # ---------------------------------------------
 # FLASK APP SETUP
 # ---------------------------------------------
@@ -100,7 +108,10 @@ for bp in [
     bus_bp, management_bp, notes_bp, fine_bp,
     admin_students_bp, notifications_bp, attendance_pdf_bp,
       forms_bp, bus_track_bp, per_message_bp, razorpay_bp,
-    missing_bp, receipt_bp, canteen_bp, auth_bp, timetable_bp
+    missing_bp, receipt_bp, canteen_bp, auth_bp, timetable_bp, otp_bp, signup_bp,
+verification_bp,
+admin_verification_bp,
+cleanup_bp
 ]:
     app.register_blueprint(bp)
 

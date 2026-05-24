@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Email Verification Panel</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+background:#edf3fb;
+min-height:100vh;
+overflow-x:hidden;
+}
+
+/* TOPBAR */
+
+.topbar{
+width:100%;
+background:linear-gradient(135deg,#001f4d,#003366,#004080);
+padding:20px 35px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+color:white;
+box-shadow:0 5px 20px rgba(0,0,0,0.1);
+}
+
+.logo-area{
+display:flex;
+align-items:center;
+gap:15px;
+}
+
+.logo-box{
+width:65px;
+height:65px;
+background:white;
+border-radius:16px;
+padding:8px;
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+.logo-box img{
+width:100%;
+height:100%;
+object-fit:contain;
+}
+
+.logo-text h2{
+font-size:24px;
+font-weight:700;
+}
+
+.logo-text p{
+font-size:13px;
+color:#dbeafe;
+}
+
+.back-btn{
+background:rgba(255,255,255,0.12);
+padding:12px 18px;
+border-radius:14px;
+font-size:14px;
+text-decoration:none;
+color:white;
+border:1px solid rgba(255,255,255,0.15);
+}
+
+/* MAIN */
+
+.main-container{
+padding:35px;
+}
+
+.page-title{
+margin-bottom:30px;
+}
+
+.page-title h1{
+font-size:36px;
+color:#002855;
+margin-bottom:10px;
+}
+
+.page-title p{
+font-size:15px;
+line-height:1.8;
+color:#64748b;
+}
+
+/* TABLE */
+
+.table-container{
+background:white;
+border-radius:24px;
+padding:25px;
+overflow-x:auto;
+box-shadow:0 10px 30px rgba(0,0,0,0.08);
+border:1px solid #dbe7f5;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+min-width:1200px;
+}
+
+thead{
+background:#003366;
+color:white;
+}
+
+thead th{
+padding:18px;
+font-size:14px;
+font-weight:600;
+text-align:left;
+}
+
+tbody tr{
+border-bottom:1px solid #e2e8f0;
+transition:0.3s;
+}
+
+tbody tr:hover{
+background:#f8fbff;
+}
+
+tbody td{
+padding:18px;
+font-size:14px;
+color:#334155;
+vertical-align:top;
+line-height:1.7;
+}
+
+.student-photo{
+width:70px;
+height:70px;
+border-radius:14px;
+object-fit:cover;
+border:2px solid #dbe7f5;
+}
+
+.code-box{
+background:#003366;
+color:white;
+padding:10px 16px;
+border-radius:12px;
+font-size:18px;
+font-weight:700;
+letter-spacing:3px;
+display:inline-block;
+}
+
+.action-btn{
+padding:12px 18px;
+border:none;
+border-radius:12px;
+font-size:14px;
+font-weight:600;
+cursor:pointer;
+transition:0.3s;
+margin-bottom:10px;
+width:100%;
+}
+
+.send-btn{
+background:#003366;
+color:white;
+}
+
+.done-btn{
+background:#16a34a;
+color:white;
+}
+
+.action-btn:hover{
+transform:translateY(-2px);
+}
+
+.status-badge{
+padding:8px 14px;
+border-radius:30px;
+font-size:12px;
+font-weight:600;
+display:inline-block;
+}
+
+.pending{
+background:#fef3c7;
+color:#92400e;
+}
+
+.sent{
+background:#dcfce7;
+color:#166534;
+}
+
+.loading-box{
+background:white;
+padding:40px;
+border-radius:20px;
+text-align:center;
+font-size:18px;
+color:#003366;
+box-shadow:0 10px 25px rgba(0,0,0,0.08);
+}
+
+.empty-box{
+background:white;
+padding:50px;
+border-radius:24px;
+text-align:center;
+box-shadow:0 10px 25px rgba(0,0,0,0.08);
+}
+
+.empty-box i{
+font-size:70px;
+color:#003366;
+margin-bottom:20px;
+}
+
+.empty-box h2{
+color:#002855;
+margin-bottom:12px;
+}
+
+.empty-box p{
+color:#64748b;
+}
+
+/* MOBILE */
+
+@media(max-width:900px){
+
+.topbar{
+flex-direction:column;
+gap:18px;
+align-items:flex-start;
+padding:22px;
+}
+
+.main-container{
+padding:20px;
+}
+
+.page-title h1{
+font-size:30px;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- TOPBAR -->
+
+<div class="topbar">
+
+<div class="logo-area">
+
+<div class="logo-box">
+<img src="logo.jpg" alt="Logo">
+</div>
+
+<div class="logo-text">
+
+<h2>
+Email Verification Panel
+</h2>
+
+<p>
+Acropolis Digital Verification System
+</p>
+
+</div>
+
+</div>
+
+<a href="verification-dashboard.html" class="back-btn">
+
+<i class="fa-solid fa-arrow-left"></i>
+
+ Dashboard
+
+</a>
+
+</div>
+
+<!-- MAIN -->
+
+<div class="main-container">
+
+<div class="page-title">
+
+<h1>
+Pending Email Verification Requests
+</h1>
+
+<p>
+
+Review student verification requests and manually send personalized verification codes to registered email addresses.
+
+</p>
+
+</div>
+
+<!-- LOADING -->
+
+<div class="loading-box" id="loadingBox">
+
+Loading verification requests...
+
+</div>
+
+<!-- TABLE -->
+
+<div class="table-container" id="tableContainer" style="display:none;">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Photo</th>
+<th>Student Info</th>
+<th>Email</th>
+<th>Phone</th>
+<th>Academic</th>
+<th>Verification Code</th>
+<th>Status</th>
+<th>Actions</th>
+
+</tr>
+
+</thead>
+
+<tbody id="studentsTableBody">
+
+</tbody>
+
+</table>
+
+</div>
+
+<!-- EMPTY -->
+
+<div class="empty-box" id="emptyBox" style="display:none;">
+
+<i class="fa-solid fa-circle-check"></i>
+
+<h2>
+No Pending Requests
+</h2>
+
+<p>
+All student email verification requests have been completed successfully.
+</p>
+
+</div>
+
+</div>
+
+<script>
+
+const tableBody = document.getElementById("studentsTableBody");
+
+const loadingBox = document.getElementById("loadingBox");
+
+const tableContainer = document.getElementById("tableContainer");
+
+const emptyBox = document.getElementById("emptyBox");
+
+/* LOAD PENDING STUDENTS */
+
+async function loadPendingStudents(){
+
+try{
+
+const response = await fetch(
+
+"http://127.0.0.1:5000/api/admin/pending"
+
+);
+
+const data = await response.json();
+
+loadingBox.style.display = "none";
+
+if(data.success && data.students.length > 0){
+
+tableContainer.style.display = "block";
+
+tableBody.innerHTML = "";
+
+data.students.forEach(student => {
+
+const row = `
+
+<tr>
+
+<td>
+
+<img
+src="uploads/${student.photo}"
+class="student-photo"
+>
+
+</td>
+
+<td>
+
+<b>${student.studentName}</b><br>
+
+Enrollment: ${student.enrollment}<br>
+
+Year: ${student.year}
+
+</td>
+
+<td>
+
+${student.email}
+
+</td>
+
+<td>
+
+${student.phone}
+
+</td>
+
+<td>
+
+Branch: ${student.branch}<br>
+
+Semester: ${student.semester}
+
+</td>
+
+<td>
+
+<div class="code-box">
+
+${student.verificationCode}
+
+</div>
+
+</td>
+
+<td>
+
+${student.emailSent ?
+
+'<span class="status-badge sent">EMAIL SENT</span>'
+
+:
+
+'<span class="status-badge pending">PENDING</span>'
+
+}
+
+</td>
+
+<td>
+
+<button
+class="action-btn send-btn"
+onclick="sendEmail('${student._id}')"
+>
+
+<i class="fa-solid fa-envelope"></i>
+
+ Send Email
+
+</button>
+
+<button
+class="action-btn done-btn"
+onclick="markDone('${student._id}')"
+>
+
+<i class="fa-solid fa-check"></i>
+
+ Mark Done
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+tableBody.innerHTML += row;
+
+});
+
+}else{
+
+emptyBox.style.display = "block";
+
+}
+
+}catch(error){
+
+loadingBox.innerHTML = "Failed to load requests";
+
+console.log(error);
+
+}
+
+}
+
+/* SEND EMAIL */
+
+async function sendEmail(studentId){
+
+try{
+
+const response = await fetch(
+
+"http://127.0.0.1:5000/api/admin/send-email",
+
+{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+studentId:studentId
+
+})
+
+}
+
+);
+
+const data = await response.json();
+
+if(data.success){
+
+alert("Verification email sent successfully");
+
+loadPendingStudents();
+
+}else{
+
+alert(data.message);
+
+}
+
+}catch(error){
+
+alert("Server Error");
+
+console.log(error);
+
+}
+
+}
+
+/* MARK DONE */
+
+async function markDone(studentId){
+
+try{
+
+const response = await fetch(
+
+"http://127.0.0.1:5000/api/admin/mark-done",
+
+{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+studentId:studentId
+
+})
+
+}
+
+);
+
+const data = await response.json();
+
+if(data.success){
+
+alert("Student moved to done list");
+
+loadPendingStudents();
+
+}else{
+
+alert(data.message);
+
+}
+
+}catch(error){
+
+alert("Server Error");
+
+console.log(error);
+
+}
+
+}
+
+/* AUTO LOAD */
+
+loadPendingStudents();
+
+</script>
+
+</body>
+
+</html>

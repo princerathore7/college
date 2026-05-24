@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Done Verifications - Acropolis Digital Campus</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+background:#edf3fb;
+min-height:100vh;
+overflow-x:hidden;
+}
+
+/* TOPBAR */
+
+.topbar{
+width:100%;
+background:linear-gradient(135deg,#001f4d,#003366,#004080);
+padding:20px 35px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+color:white;
+box-shadow:0 5px 20px rgba(0,0,0,0.1);
+}
+
+.logo-area{
+display:flex;
+align-items:center;
+gap:15px;
+}
+
+.logo-box{
+width:65px;
+height:65px;
+background:white;
+border-radius:16px;
+padding:8px;
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+.logo-box img{
+width:100%;
+height:100%;
+object-fit:contain;
+}
+
+.logo-text h2{
+font-size:24px;
+font-weight:700;
+}
+
+.logo-text p{
+font-size:13px;
+color:#dbeafe;
+}
+
+.back-btn{
+background:rgba(255,255,255,0.12);
+padding:12px 18px;
+border-radius:14px;
+font-size:14px;
+text-decoration:none;
+color:white;
+border:1px solid rgba(255,255,255,0.15);
+}
+
+/* MAIN */
+
+.main-container{
+padding:35px;
+}
+
+.page-title{
+margin-bottom:30px;
+}
+
+.page-title h1{
+font-size:36px;
+color:#002855;
+margin-bottom:10px;
+}
+
+.page-title p{
+font-size:15px;
+line-height:1.8;
+color:#64748b;
+}
+
+/* SEARCH BAR */
+
+.search-box{
+background:white;
+padding:20px;
+border-radius:22px;
+margin-bottom:25px;
+box-shadow:0 10px 25px rgba(0,0,0,0.08);
+border:1px solid #dbe7f5;
+}
+
+.search-box input{
+width:100%;
+padding:16px;
+border:none;
+outline:none;
+border-radius:14px;
+background:#f7faff;
+font-size:15px;
+border:2px solid transparent;
+transition:0.3s;
+}
+
+.search-box input:focus{
+border-color:#003366;
+background:white;
+}
+
+/* TABLE */
+
+.table-container{
+background:white;
+border-radius:24px;
+padding:25px;
+overflow-x:auto;
+box-shadow:0 10px 30px rgba(0,0,0,0.08);
+border:1px solid #dbe7f5;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+min-width:1300px;
+}
+
+thead{
+background:#003366;
+color:white;
+}
+
+thead th{
+padding:18px;
+font-size:14px;
+font-weight:600;
+text-align:left;
+}
+
+tbody tr{
+border-bottom:1px solid #e2e8f0;
+transition:0.3s;
+}
+
+tbody tr:hover{
+background:#f8fbff;
+}
+
+tbody td{
+padding:18px;
+font-size:14px;
+color:#334155;
+line-height:1.8;
+vertical-align:top;
+}
+
+.student-photo{
+width:70px;
+height:70px;
+border-radius:14px;
+object-fit:cover;
+border:2px solid #dbe7f5;
+}
+
+.status-badge{
+padding:8px 14px;
+border-radius:30px;
+font-size:12px;
+font-weight:600;
+display:inline-block;
+background:#dcfce7;
+color:#166534;
+}
+
+.delete-btn{
+padding:12px 18px;
+border:none;
+border-radius:12px;
+font-size:14px;
+font-weight:600;
+cursor:pointer;
+background:#dc2626;
+color:white;
+transition:0.3s;
+}
+
+.delete-btn:hover{
+transform:translateY(-2px);
+}
+
+.loading-box{
+background:white;
+padding:40px;
+border-radius:20px;
+text-align:center;
+font-size:18px;
+color:#003366;
+box-shadow:0 10px 25px rgba(0,0,0,0.08);
+}
+
+.empty-box{
+background:white;
+padding:50px;
+border-radius:24px;
+text-align:center;
+box-shadow:0 10px 25px rgba(0,0,0,0.08);
+}
+
+.empty-box i{
+font-size:70px;
+color:#16a34a;
+margin-bottom:20px;
+}
+
+.empty-box h2{
+color:#002855;
+margin-bottom:12px;
+}
+
+.empty-box p{
+color:#64748b;
+}
+
+/* MOBILE */
+
+@media(max-width:900px){
+
+.topbar{
+flex-direction:column;
+gap:18px;
+align-items:flex-start;
+padding:22px;
+}
+
+.main-container{
+padding:20px;
+}
+
+.page-title h1{
+font-size:30px;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- TOPBAR -->
+
+<div class="topbar">
+
+<div class="logo-area">
+
+<div class="logo-box">
+<img src="logo.jpg" alt="Logo">
+</div>
+
+<div class="logo-text">
+
+<h2>
+Done Verification Records
+</h2>
+
+<p>
+Acropolis Digital Verification System
+</p>
+
+</div>
+
+</div>
+
+<a href="verification-dashboard.html" class="back-btn">
+
+<i class="fa-solid fa-arrow-left"></i>
+
+ Dashboard
+
+</a>
+
+</div>
+
+<!-- MAIN -->
+
+<div class="main-container">
+
+<div class="page-title">
+
+<h1>
+Verified Student Records
+</h1>
+
+<p>
+
+Access all completed verification records and successfully activated student digital identities.
+
+</p>
+
+</div>
+
+<!-- SEARCH -->
+
+<div class="search-box">
+
+<input
+type="text"
+id="searchInput"
+placeholder="Search by student name, enrollment, email or phone..."
+onkeyup="searchStudents()"
+>
+
+</div>
+
+<!-- LOADING -->
+
+<div class="loading-box" id="loadingBox">
+
+Loading completed verification records...
+
+</div>
+
+<!-- TABLE -->
+
+<div class="table-container" id="tableContainer" style="display:none;">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Photo</th>
+<th>Student Info</th>
+<th>Contact</th>
+<th>Academic</th>
+<th>Verification Code</th>
+<th>Status</th>
+<th>Verified At</th>
+<th>Actions</th>
+
+</tr>
+
+</thead>
+
+<tbody id="studentsTableBody">
+
+</tbody>
+
+</table>
+
+</div>
+
+<!-- EMPTY -->
+
+<div class="empty-box" id="emptyBox" style="display:none;">
+
+<i class="fa-solid fa-circle-check"></i>
+
+<h2>
+No Completed Verifications
+</h2>
+
+<p>
+No student verification records are currently available.
+</p>
+
+</div>
+
+</div>
+
+<script>
+
+const tableBody = document.getElementById("studentsTableBody");
+
+const loadingBox = document.getElementById("loadingBox");
+
+const tableContainer = document.getElementById("tableContainer");
+
+const emptyBox = document.getElementById("emptyBox");
+
+let allStudents = [];
+
+/* LOAD DONE LIST */
+
+async function loadDoneStudents(){
+
+try{
+
+const response = await fetch(
+
+"http://127.0.0.1:5000/api/admin/done-list"
+
+);
+
+const data = await response.json();
+
+loadingBox.style.display = "none";
+
+if(data.success && data.students.length > 0){
+
+allStudents = data.students;
+
+tableContainer.style.display = "block";
+
+renderStudents(allStudents);
+
+}else{
+
+emptyBox.style.display = "block";
+
+}
+
+}catch(error){
+
+loadingBox.innerHTML = "Failed to load records";
+
+console.log(error);
+
+}
+
+}
+
+/* RENDER STUDENTS */
+
+function renderStudents(students){
+
+tableBody.innerHTML = "";
+
+students.forEach(student => {
+
+const row = `
+
+<tr>
+
+<td>
+
+<img
+src="uploads/${student.photo}"
+class="student-photo"
+>
+
+</td>
+
+<td>
+
+<b>${student.studentName}</b><br>
+
+Enrollment: ${student.enrollment}
+
+</td>
+
+<td>
+
+Email: ${student.email}<br>
+
+Phone: ${student.phone}
+
+</td>
+
+<td>
+
+Branch: ${student.branch}<br>
+
+Semester: ${student.semester}<br>
+
+Year: ${student.year}
+
+</td>
+
+<td>
+
+<b>${student.verificationCode}</b>
+
+</td>
+
+<td>
+
+<span class="status-badge">
+
+VERIFIED
+
+</span>
+
+</td>
+
+<td>
+
+${student.verifiedAt || "N/A"}
+
+</td>
+
+<td>
+
+<button
+class="delete-btn"
+onclick="deleteStudent('${student._id}')"
+>
+
+<i class="fa-solid fa-trash"></i>
+
+ Delete
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+tableBody.innerHTML += row;
+
+});
+
+}
+
+/* SEARCH */
+
+function searchStudents(){
+
+const query = document.getElementById("searchInput")
+.value
+.toLowerCase();
+
+const filtered = allStudents.filter(student => {
+
+return (
+
+student.studentName.toLowerCase().includes(query)
+
+||
+
+student.enrollment.toLowerCase().includes(query)
+
+||
+
+student.email.toLowerCase().includes(query)
+
+||
+
+student.phone.toLowerCase().includes(query)
+
+);
+
+});
+
+renderStudents(filtered);
+
+}
+
+/* DELETE */
+
+async function deleteStudent(studentId){
+
+const confirmDelete = confirm(
+
+"Are you sure you want to delete this verification record?"
+
+);
+
+if(!confirmDelete){
+
+return;
+
+}
+
+try{
+
+const response = await fetch(
+
+"http://127.0.0.1:5000/api/admin/delete-done-student",
+
+{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+studentId:studentId
+
+})
+
+}
+
+);
+
+const data = await response.json();
+
+if(data.success){
+
+alert("Verification record deleted successfully");
+
+loadDoneStudents();
+
+}else{
+
+alert(data.message);
+
+}
+
+}catch(error){
+
+alert("Server Error");
+
+console.log(error);
+
+}
+
+}
+
+/* AUTO LOAD */
+
+loadDoneStudents();
+
+</script>
+
+</body>
+
+</html>

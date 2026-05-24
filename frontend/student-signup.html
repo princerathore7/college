@@ -1,493 +1,633 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Student Signup</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
+<title>Student Signup - Acropolis Digital Campus</title>
 
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-      font-family:'Poppins',sans-serif;
-    }
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    body{
-      min-height:100vh;
-      background:linear-gradient(135deg,#001f4d,#003c8f,#005bea);
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      padding:30px;
-    }
+<style>
 
-    .signup-box{
-      width:100%;
-      max-width:500px;
-      background:white;
-      border-radius:22px;
-      padding:35px;
-      box-shadow:0 15px 40px rgba(0,0,0,0.25);
-    }
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
 
-    .logo{
-      width:90px;
-      height:90px;
-      object-fit:cover;
-      border-radius:50%;
-      display:block;
-      margin:auto;
-      margin-bottom:18px;
-      border:4px solid #0b57d0;
-    }
+body{
+background:#eef3fb;
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:30px;
+overflow-x:hidden;
+}
 
-    h1{
-      text-align:center;
-      color:#002b6b;
-      margin-bottom:8px;
-      font-size:30px;
-    }
+.container{
+width:100%;
+max-width:1200px;
+display:flex;
+background:white;
+border-radius:25px;
+overflow:hidden;
+box-shadow:0 15px 40px rgba(0,0,0,0.12);
+}
 
-    .subtext{
-      text-align:center;
-      color:#666;
-      margin-bottom:28px;
-      font-size:14px;
-    }
+/* LEFT SIDE */
 
-    .input-group{
-      margin-bottom:18px;
-    }
+.left-section{
+width:42%;
+background:linear-gradient(135deg,#001f4d,#003366,#004080);
+padding:50px 40px;
+position:relative;
+color:white;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+}
 
-    label{
-      display:block;
-      margin-bottom:8px;
-      color:#002b6b;
-      font-weight:600;
-      font-size:14px;
-    }
+.logo-box{
+width:220px;
+height:220px;
+background:white;
+border-radius:25px;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:20px;
+margin-bottom:30px;
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
 
-    input{
-      width:100%;
-      padding:14px;
-      border-radius:12px;
-      border:2px solid #dfe7ff;
-      outline:none;
-      font-size:15px;
-      transition:0.3s;
-    }
+.logo-box img{
+width:100%;
+height:100%;
+object-fit:contain;
+}
 
-    input:focus{
-      border-color:#0b57d0;
-      box-shadow:0 0 0 4px rgba(11,87,208,0.1);
-    }
+.left-section h1{
+font-size:34px;
+font-weight:700;
+text-align:center;
+line-height:1.4;
+margin-bottom:15px;
+}
 
-    .otp-row{
-      display:flex;
-      gap:10px;
-      margin-top:10px;
-    }
+.left-section p{
+font-size:15px;
+line-height:1.8;
+text-align:center;
+color:#d9e7ff;
+max-width:420px;
+}
 
-    .otp-row input{
-      flex:1;
-    }
+.left-bottom{
+margin-top:40px;
+padding:18px;
+background:rgba(255,255,255,0.08);
+border:1px solid rgba(255,255,255,0.15);
+border-radius:16px;
+backdrop-filter:blur(8px);
+width:100%;
+}
 
-    .otp-btn{
-      padding:12px 16px;
-      border:none;
-      background:#0b57d0;
-      color:white;
-      border-radius:10px;
-      cursor:pointer;
-      font-weight:600;
-      transition:0.3s;
-      white-space:nowrap;
-    }
+.left-bottom h3{
+font-size:18px;
+margin-bottom:10px;
+}
 
-    .otp-btn:hover{
-      background:#003ea8;
-    }
+.left-bottom p{
+font-size:14px;
+text-align:left;
+}
 
-    .main-btn{
-      width:100%;
-      padding:15px;
-      border:none;
-      border-radius:14px;
-      background:linear-gradient(135deg,#0b57d0,#003ea8);
-      color:white;
-      font-size:16px;
-      font-weight:600;
-      cursor:pointer;
-      margin-top:20px;
-      transition:0.3s;
-    }
+/* RIGHT SIDE */
 
-    .main-btn:hover{
-      transform:translateY(-2px);
-      box-shadow:0 10px 25px rgba(0,0,0,0.18);
-    }
+.right-section{
+width:58%;
+padding:45px;
+background:white;
+overflow-y:auto;
+}
 
-    .success{
-      color:green;
-      font-size:13px;
-      margin-top:6px;
-    }
+.top-head{
+margin-bottom:30px;
+}
 
-    .error{
-      color:red;
-      font-size:13px;
-      margin-top:6px;
-    }
+.top-head h2{
+font-size:34px;
+color:#002855;
+margin-bottom:8px;
+}
 
-    #recaptcha-container{
-      margin-top:15px;
-      margin-bottom:15px;
-    }
+.top-head p{
+color:#6b7280;
+font-size:15px;
+}
 
-  </style>
+.form-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:18px;
+}
+
+.input-box{
+display:flex;
+flex-direction:column;
+}
+
+.input-box label{
+font-size:14px;
+font-weight:500;
+margin-bottom:7px;
+color:#003366;
+}
+
+.input-box input,
+.input-box select{
+padding:14px;
+border:none;
+outline:none;
+border-radius:14px;
+background:#edf3fb;
+font-size:15px;
+transition:0.3s;
+border:2px solid transparent;
+}
+
+.input-box input:focus,
+.input-box select:focus{
+border-color:#003366;
+background:white;
+}
+
+.full-width{
+grid-column:1/3;
+}
+
+.file-upload{
+background:#edf3fb;
+padding:14px;
+border-radius:14px;
+}
+
+.file-upload input{
+background:none;
+padding:0;
+}
+
+.submit-btn{
+margin-top:30px;
+width:100%;
+padding:16px;
+border:none;
+background:linear-gradient(135deg,#002855,#004080);
+color:white;
+font-size:17px;
+font-weight:600;
+border-radius:16px;
+cursor:pointer;
+transition:0.3s;
+}
+
+.submit-btn:hover{
+transform:translateY(-2px);
+box-shadow:0 10px 20px rgba(0,51,102,0.25);
+}
+
+.verify-box{
+margin-top:25px;
+background:#f3f8ff;
+border-left:5px solid #003366;
+padding:22px;
+border-radius:15px;
+display:none;
+}
+
+.verify-box h3{
+color:#002855;
+margin-bottom:10px;
+}
+
+.verify-box p{
+color:#4b5563;
+line-height:1.7;
+font-size:14px;
+margin-bottom:15px;
+}
+
+.verify-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:15px;
+margin-top:15px;
+}
+
+.verify-grid input{
+padding:14px;
+border:none;
+outline:none;
+border-radius:12px;
+background:white;
+border:1px solid #cbd5e1;
+}
+
+.verify-btn{
+margin-top:20px;
+padding:14px;
+width:100%;
+background:#003366;
+color:white;
+border:none;
+border-radius:12px;
+font-size:15px;
+cursor:pointer;
+}
+
+.already-link{
+margin-top:18px;
+text-align:center;
+font-size:14px;
+}
+
+.already-link a{
+text-decoration:none;
+color:#003366;
+font-weight:600;
+}
+
+.success-msg{
+margin-top:18px;
+padding:14px;
+background:#d1fae5;
+color:#065f46;
+border-radius:12px;
+display:none;
+}
+
+/* MOBILE */
+
+@media(max-width:950px){
+
+.container{
+flex-direction:column;
+}
+
+.left-section,
+.right-section{
+width:100%;
+}
+
+.left-section{
+padding:40px 25px;
+}
+
+.right-section{
+padding:35px 22px;
+}
+
+.form-grid{
+grid-template-columns:1fr;
+}
+
+.full-width{
+grid-column:auto;
+}
+
+.verify-grid{
+grid-template-columns:1fr;
+}
+
+}
+
+</style>
+
 </head>
+
 <body>
 
-<div class="signup-box">
+<div class="container">
 
-  <img src="logo.jpg" class="logo">
+<!-- LEFT SIDE -->
 
-  <h1>Student Signup</h1>
+<div class="left-section">
 
-  <p class="subtext">
-    Create your student account securely
-  </p>
+<div class="logo-box">
+<img src="logo.jpg" alt="Acropolis Logo">
+</div>
 
-  <div class="input-group">
-    <label>Full Name</label>
-    <input type="text" id="name" placeholder="Enter Full Name">
-  </div>
+<h1>
+Acropolis Digital Campus
+</h1>
 
-  <div class="input-group">
-    <label>Email Address</label>
-    <input type="email" id="email" placeholder="Enter Email Address">
+<p>
+Welcome to the advanced digital student verification system powered by S&P Developments. Create your academic identity securely and professionally.
+</p>
 
-    <div class="otp-row">
-      <input type="text" id="emailOtp" placeholder="Enter Email OTP">
+<div class="left-bottom">
 
-      <button class="otp-btn" onclick="sendEmailOTP()">
-        Send OTP
-      </button>
-    </div>
+<h3>Digital Verification Process</h3>
 
-    <button class="otp-btn" style="margin-top:10px;width:100%" onclick="verifyEmailOTP()">
-      Verify Email OTP
-    </button>
+<p>
+• Submit your academic information<br><br>
 
-    <div id="emailStatus"></div>
-  </div>
+• Wait for manual verification approval<br><br>
 
-  <div class="input-group">
-    <label>Mobile Number</label>
-    <input type="text" id="phone" placeholder="+919876543210">
+• Receive your personalized verification code<br><br>
 
-    <div id="recaptcha-container"></div>
-
-    <div class="otp-row">
-      <input type="text" id="phoneOtp" placeholder="Enter Mobile OTP">
-
-      <button class="otp-btn" onclick="sendPhoneOTP()">
-        Send OTP
-      </button>
-    </div>
-
-    <button class="otp-btn" style="margin-top:10px;width:100%" onclick="verifyPhoneOTP()">
-      Verify Mobile OTP
-    </button>
-
-    <div id="phoneStatus"></div>
-  </div>
-
-  <div class="input-group">
-    <label>Password</label>
-    <input type="password" id="password" placeholder="Create Password">
-  </div>
-
-  <button class="main-btn" onclick="signup()">
-    Create Account
-  </button>
+• Activate your student identity securely
+</p>
 
 </div>
 
-<script type="module">
+</div>
 
-import { initializeApp }
-from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+<!-- RIGHT SIDE -->
 
-import {
-  getAuth,
-  RecaptchaVerifier,
-  signInWithPhoneNumber
-}
-from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+<div class="right-section">
 
-const firebaseConfig = {
+<div class="top-head">
 
-  apiKey: "AIzaSyD6MJM4ggDOEPt2Y2cEXjDVekIdEerRUFo",
+<h2>Create Student Account</h2>
 
-  authDomain: "acropolis-institute-group.firebaseapp.com",
+<p>
+Fill all details carefully to begin your verification process.
+</p>
 
-  projectId: "acropolis-institute-group",
+</div>
 
-  storageBucket: "acropolis-institute-group.firebasestorage.app",
+<form id="signupForm">
 
-  messagingSenderId: "797942131160",
+<div class="form-grid">
 
-  appId: "1:797942131160:web:5a14bdc84506d62e9b2aad"
-};
+<div class="input-box">
+<label>Full Name</label>
+<input type="text" id="studentName" required>
+</div>
 
-const app = initializeApp(firebaseConfig);
+<div class="input-box">
+<label>Enrollment Number</label>
+<input type="text" id="enrollment" required>
+</div>
 
-const auth = getAuth(app);
+<div class="input-box">
+<label>Password</label>
+<input type="password" id="password" required>
+</div>
 
-window.emailVerified = false;
-window.phoneVerified = false;
-window.generatedEmailOTP = "";
+<div class="input-box">
+<label>Email Address</label>
+<input type="email" id="email" required>
+</div>
 
-window.recaptchaVerifier =
-new RecaptchaVerifier(
-  auth,
-  'recaptcha-container',
-  {
-    size:'normal'
-  }
+<div class="input-box">
+<label>Mobile Number</label>
+<input type="tel" id="phone" required>
+</div>
+
+<div class="input-box">
+<label>Branch</label>
+
+<select id="branch" required>
+
+<option value="">Select Branch</option>
+
+<option>CSE</option>
+<option>IT</option>
+<option>CSE AIML</option>
+<option>CSE DS</option>
+<option>AIDS</option>
+<option>EC</option>
+
+</select>
+
+</div>
+
+<div class="input-box">
+<label>Semester</label>
+
+<select id="semester" required>
+
+<option value="">Select Semester</option>
+
+<option>1</option>
+<option>2</option>
+<option>3</option>
+<option>4</option>
+<option>5</option>
+<option>6</option>
+<option>7</option>
+<option>8</option>
+
+</select>
+
+</div>
+
+<div class="input-box">
+<label>Year</label>
+
+<select id="year" required>
+
+<option value="">Select Year</option>
+
+<option>1st Year</option>
+<option>2nd Year</option>
+<option>3rd Year</option>
+<option>4th Year</option>
+
+</select>
+
+</div>
+
+<div class="input-box full-width">
+
+<label>Upload Student Photo</label>
+
+<div class="file-upload">
+<input type="file" id="photo" accept="image/*" required>
+</div>
+
+</div>
+
+</div>
+
+<button type="submit" class="submit-btn">
+Submit Verification Request
+</button>
+
+</form>
+
+<!-- VERIFICATION BOX -->
+
+<div class="verify-box" id="verifyBox">
+
+<h3>
+Verification Request Submitted
+</h3>
+
+<p>
+Kindly wait 6–8 hours. Your personalized verification code will be delivered manually to your registered email address and mobile number by the Acropolis Verification Team.
+</p>
+
+<div class="verify-grid">
+
+<input type="text" placeholder="Enter Email Verification Code">
+
+<input type="text" placeholder="Enter Mobile Verification Code">
+
+</div>
+
+<button class="verify-btn">
+Verify Student Account
+</button>
+
+<div class="already-link">
+
+<a href="student-verify.html">
+Already Applied & Received The Code?
+</a>
+
+</div>
+
+<div class="success-msg" id="successMsg">
+
+Verification request stored successfully.
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const signupForm = document.getElementById("signupForm");
+
+const verifyBox = document.getElementById("verifyBox");
+
+const successMsg = document.getElementById("successMsg");
+
+signupForm.addEventListener("submit", async function(e){
+
+e.preventDefault();
+
+const formData = new FormData();
+
+formData.append(
+"studentName",
+document.getElementById("studentName").value
 );
 
-window.sendPhoneOTP = async () => {
+formData.append(
+"enrollment",
+document.getElementById("enrollment").value
+);
 
-  const phone =
-  document.getElementById("phone").value;
+formData.append(
+"password",
+document.getElementById("password").value
+);
 
-  try {
+formData.append(
+"email",
+document.getElementById("email").value
+);
 
-    const confirmationResult =
-    await signInWithPhoneNumber(
-      auth,
-      phone,
-      window.recaptchaVerifier
-    );
+formData.append(
+"phone",
+document.getElementById("phone").value
+);
 
-    window.confirmationResult =
-    confirmationResult;
+formData.append(
+"branch",
+document.getElementById("branch").value
+);
 
-    document.getElementById("phoneStatus").innerHTML =
-    '<div class="success">OTP Sent Successfully</div>';
+formData.append(
+"semester",
+document.getElementById("semester").value
+);
 
-  }
+formData.append(
+"year",
+document.getElementById("year").value
+);
 
-  catch(err){
+formData.append(
+"photo",
+document.getElementById("photo").files[0]
+);
 
-    console.log(err);
+try{
 
-    document.getElementById("phoneStatus").innerHTML =
-    `<div class="error">${err.message}</div>`;
+const response = await fetch(
 
-  }
+"http://127.0.0.1:5000/api/signup/request",
 
-};
+{
+method:"POST",
+body:formData
+}
 
-window.verifyPhoneOTP = async () => {
+);
 
-  const otp =
-  document.getElementById("phoneOtp").value;
+const data = await response.json();
 
-  try {
+if(data.success){
 
-    await window.confirmationResult.confirm(otp);
+localStorage.setItem(
+"pendingEmail",
+document.getElementById("email").value
+);
 
-    window.phoneVerified = true;
+localStorage.setItem(
+"pendingPhone",
+document.getElementById("phone").value
+);
 
-    document.getElementById("phoneStatus").innerHTML =
-    '<div class="success">Mobile Number Verified</div>';
+localStorage.setItem(
+"verificationPending",
+"true"
+);
 
-  }
+verifyBox.style.display="block";
 
-  catch(err){
+successMsg.style.display="block";
 
-    document.getElementById("phoneStatus").innerHTML =
-    '<div class="error">Invalid Mobile OTP</div>';
+signupForm.reset();
 
-  }
+window.scrollTo({
+top:document.body.scrollHeight,
+behavior:"smooth"
+});
 
-};
+}else{
 
-window.sendEmailOTP = async () => {
+alert(data.message);
 
-  const email =
-  document.getElementById("email").value;
+}
 
-  if(!email){
+}catch(error){
 
-    alert("Enter Email First");
+alert("Server Error");
 
-    return;
+console.log(error);
 
-  }
+}
 
-  const otp =
-  Math.floor(100000 + Math.random() * 900000);
-
-  window.generatedEmailOTP = otp.toString();
-
-  try {
-
-    const response =
-    await fetch("/send-email-otp", {
-
-      method:"POST",
-
-      headers:{
-        "Content-Type":"application/json"
-      },
-
-      body:JSON.stringify({
-        email:email,
-        otp:otp
-      })
-
-    });
-
-    const data = await response.json();
-
-    if(data.success){
-
-      document.getElementById("emailStatus").innerHTML =
-      '<div class="success">Email OTP Sent Successfully</div>';
-
-    }
-
-    else{
-
-      document.getElementById("emailStatus").innerHTML =
-      '<div class="error">Failed To Send OTP</div>';
-
-    }
-
-  }
-
-  catch(err){
-
-    console.log(err);
-
-  }
-
-};
-
-window.verifyEmailOTP = () => {
-
-  const enteredOTP =
-  document.getElementById("emailOtp").value;
-
-  if(enteredOTP === window.generatedEmailOTP){
-
-    window.emailVerified = true;
-
-    document.getElementById("emailStatus").innerHTML =
-    '<div class="success">Email Verified Successfully</div>';
-
-  }
-
-  else{
-
-    document.getElementById("emailStatus").innerHTML =
-    '<div class="error">Invalid Email OTP</div>';
-
-  }
-
-};
-
-window.signup = async () => {
-
-  const name =
-  document.getElementById("name").value;
-
-  const email =
-  document.getElementById("email").value;
-
-  const phone =
-  document.getElementById("phone").value;
-
-  const password =
-  document.getElementById("password").value;
-
-  if(!window.emailVerified){
-
-    alert("Verify Email First");
-
-    return;
-
-  }
-
-  if(!window.phoneVerified){
-
-    alert("Verify Mobile Number First");
-
-    return;
-
-  }
-
-  try {
-
-    const response =
-    await fetch("/api/students/signup", {
-
-      method:"POST",
-
-      headers:{
-        "Content-Type":"application/json"
-      },
-
-      body:JSON.stringify({
-        name,
-        email,
-        phone,
-        password
-      })
-
-    });
-
-    const data = await response.json();
-
-    if(data.success){
-
-      alert("Signup Successful");
-
-      window.location.href =
-      "student-login.html";
-
-    }
-
-    else{
-
-      alert(data.message);
-
-    }
-
-  }
-
-  catch(err){
-
-    console.log(err);
-
-    alert("Server Error");
-
-  }
-
-};
+});
 
 </script>
 
 </body>
+
 </html>

@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Verification Dashboard - Acropolis Digital Campus</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+background:#eef3fb;
+min-height:100vh;
+overflow-x:hidden;
+}
+
+/* HEADER */
+
+.topbar{
+width:100%;
+background:linear-gradient(135deg,#001f4d,#003366,#004080);
+padding:20px 35px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+color:white;
+box-shadow:0 5px 20px rgba(0,0,0,0.1);
+}
+
+.logo-area{
+display:flex;
+align-items:center;
+gap:15px;
+}
+
+.logo-box{
+width:65px;
+height:65px;
+background:white;
+border-radius:16px;
+padding:8px;
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+.logo-box img{
+width:100%;
+height:100%;
+object-fit:contain;
+}
+
+.logo-text h2{
+font-size:24px;
+font-weight:700;
+}
+
+.logo-text p{
+font-size:13px;
+color:#dbeafe;
+}
+
+.admin-badge{
+background:rgba(255,255,255,0.12);
+padding:12px 18px;
+border-radius:14px;
+font-size:14px;
+backdrop-filter:blur(8px);
+border:1px solid rgba(255,255,255,0.15);
+}
+
+/* MAIN */
+
+.main-container{
+padding:40px;
+}
+
+.page-title{
+margin-bottom:35px;
+}
+
+.page-title h1{
+font-size:36px;
+color:#002855;
+margin-bottom:10px;
+}
+
+.page-title p{
+color:#64748b;
+font-size:15px;
+line-height:1.8;
+}
+
+/* CARDS */
+
+.cards-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+gap:25px;
+}
+
+.dashboard-card{
+background:white;
+border-radius:24px;
+padding:30px;
+box-shadow:0 10px 30px rgba(0,0,0,0.08);
+transition:0.3s;
+cursor:pointer;
+position:relative;
+overflow:hidden;
+border:1px solid #dbe7f5;
+}
+
+.dashboard-card:hover{
+transform:translateY(-5px);
+}
+
+.dashboard-card::before{
+content:"";
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:6px;
+background:linear-gradient(135deg,#003366,#004b8f);
+}
+
+.card-icon{
+width:80px;
+height:80px;
+border-radius:20px;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:32px;
+margin-bottom:25px;
+color:white;
+}
+
+.icon-email{
+background:linear-gradient(135deg,#003366,#0059b3);
+}
+
+.icon-sms{
+background:linear-gradient(135deg,#0f766e,#14b8a6);
+}
+
+.icon-done{
+background:linear-gradient(135deg,#16a34a,#22c55e);
+}
+
+.icon-db{
+background:linear-gradient(135deg,#7c3aed,#8b5cf6);
+}
+
+.dashboard-card h2{
+font-size:24px;
+color:#002855;
+margin-bottom:12px;
+}
+
+.dashboard-card p{
+font-size:14px;
+line-height:1.8;
+color:#64748b;
+margin-bottom:20px;
+}
+
+.card-btn{
+display:inline-block;
+padding:12px 18px;
+background:#003366;
+color:white;
+border-radius:12px;
+font-size:14px;
+font-weight:600;
+text-decoration:none;
+transition:0.3s;
+}
+
+.card-btn:hover{
+background:#002855;
+}
+
+/* STATUS PANEL */
+
+.status-panel{
+margin-top:45px;
+background:white;
+padding:30px;
+border-radius:24px;
+box-shadow:0 10px 30px rgba(0,0,0,0.08);
+border:1px solid #dbe7f5;
+}
+
+.status-panel h2{
+font-size:28px;
+color:#002855;
+margin-bottom:25px;
+}
+
+.status-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:20px;
+}
+
+.status-box{
+background:#f7faff;
+padding:25px;
+border-radius:18px;
+border:1px solid #dbe7f5;
+}
+
+.status-box h3{
+font-size:15px;
+color:#64748b;
+margin-bottom:10px;
+}
+
+.status-box p{
+font-size:34px;
+font-weight:700;
+color:#003366;
+}
+
+/* FOOTER */
+
+.footer{
+margin-top:40px;
+text-align:center;
+color:#64748b;
+font-size:14px;
+}
+
+/* MOBILE */
+
+@media(max-width:850px){
+
+.topbar{
+flex-direction:column;
+gap:18px;
+align-items:flex-start;
+padding:22px;
+}
+
+.main-container{
+padding:25px;
+}
+
+.page-title h1{
+font-size:30px;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- TOPBAR -->
+
+<div class="topbar">
+
+<div class="logo-area">
+
+<div class="logo-box">
+<img src="logo.jpg" alt="Logo">
+</div>
+
+<div class="logo-text">
+
+<h2>
+Acropolis Verification Dashboard
+</h2>
+
+<p>
+Digital Verification Management System
+</p>
+
+</div>
+
+</div>
+
+<div class="admin-badge">
+
+<i class="fa-solid fa-user-shield"></i>
+
+ SME / Mentor Access Panel
+
+</div>
+
+</div>
+
+<!-- MAIN -->
+
+<div class="main-container">
+
+<div class="page-title">
+
+<h1>
+Verification Management Center
+</h1>
+
+<p>
+
+Manage email verification requests, SMS approvals, completed student verifications and monitor the digital verification database professionally.
+
+</p>
+
+</div>
+
+<!-- CARDS -->
+
+<div class="cards-grid">
+
+<!-- EMAIL CARD -->
+
+<div class="dashboard-card">
+
+<div class="card-icon icon-email">
+
+<i class="fa-solid fa-envelope"></i>
+
+</div>
+
+<h2>
+Email Verification
+</h2>
+
+<p>
+
+Manage pending email verification requests and send personalized student verification codes manually.
+
+</p>
+
+<a href="email-verification.html" class="card-btn">
+
+Open Email Panel
+
+</a>
+
+</div>
+
+<!-- SMS CARD -->
+
+<div class="dashboard-card">
+
+<div class="card-icon icon-sms">
+
+<i class="fa-solid fa-mobile-screen-button"></i>
+
+</div>
+
+<h2>
+SMS Verification
+</h2>
+
+<p>
+
+Review student mobile verification requests and manually dispatch SMS verification codes.
+
+</p>
+
+<a href="sms-verification.html" class="card-btn">
+
+Open SMS Panel
+
+</a>
+
+</div>
+
+<!-- DONE CARD -->
+
+<div class="dashboard-card">
+
+<div class="card-icon icon-done">
+
+<i class="fa-solid fa-circle-check"></i>
+
+</div>
+
+<h2>
+Done Verifications
+</h2>
+
+<p>
+
+Access all successfully completed verification records and approved student identities.
+
+</p>
+
+<a href="done-verifications.html" class="card-btn">
+
+Open Done List
+
+</a>
+
+</div>
+
+<!-- DATABASE CARD -->
+
+<div class="dashboard-card">
+
+<div class="card-icon icon-db">
+
+<i class="fa-solid fa-database"></i>
+
+</div>
+
+<h2>
+Database Status
+</h2>
+
+<p>
+
+Monitor pending requests, verified students and total database verification activity.
+
+</p>
+
+<a href="#" class="card-btn" onclick="loadDatabaseStatus()">
+
+Refresh Status
+
+</a>
+
+</div>
+
+</div>
+
+<!-- STATUS PANEL -->
+
+<div class="status-panel">
+
+<h2>
+Live Verification Database Status
+</h2>
+
+<div class="status-grid">
+
+<div class="status-box">
+
+<h3>
+Pending Requests
+</h3>
+
+<p id="pendingCount">
+0
+</p>
+
+</div>
+
+<div class="status-box">
+
+<h3>
+Done Requests
+</h3>
+
+<p id="doneCount">
+0
+</p>
+
+</div>
+
+<div class="status-box">
+
+<h3>
+Verified Students
+</h3>
+
+<p id="verifiedCount">
+0
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+
+© 2026 Acropolis Digital Verification System • Powered By S&P Developments
+
+</div>
+
+</div>
+
+<script>
+
+/* LOAD DATABASE STATUS */
+
+async function loadDatabaseStatus(){
+
+try{
+
+const response = await fetch(
+
+"http://127.0.0.1:5000/api/cleanup/database-status"
+
+);
+
+const data = await response.json();
+
+if(data.success){
+
+document.getElementById("pendingCount").innerText =
+
+data.database.pendingRequests;
+
+document.getElementById("doneCount").innerText =
+
+data.database.doneRequests;
+
+document.getElementById("verifiedCount").innerText =
+
+data.database.verifiedStudents;
+
+}
+
+}catch(error){
+
+console.log(error);
+
+}
+
+}
+
+/* AUTO LOAD */
+
+loadDatabaseStatus();
+
+</script>
+
+</body>
+
+</html>

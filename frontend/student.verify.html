@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Student Verification - Acropolis Digital Campus</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+background:#edf3fb;
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:30px;
+overflow-x:hidden;
+}
+
+.main-container{
+width:100%;
+max-width:1150px;
+background:white;
+border-radius:28px;
+overflow:hidden;
+display:flex;
+box-shadow:0 18px 45px rgba(0,0,0,0.12);
+}
+
+/* LEFT PANEL */
+
+.left-panel{
+width:42%;
+background:linear-gradient(135deg,#001f4d,#003366,#004b8f);
+padding:55px 40px;
+color:white;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+position:relative;
+}
+
+.logo-box{
+width:220px;
+height:220px;
+background:white;
+border-radius:28px;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:22px;
+margin-bottom:35px;
+box-shadow:0 10px 30px rgba(0,0,0,0.25);
+}
+
+.logo-box img{
+width:100%;
+height:100%;
+object-fit:contain;
+}
+
+.left-panel h1{
+font-size:34px;
+font-weight:700;
+text-align:center;
+margin-bottom:18px;
+line-height:1.4;
+}
+
+.left-panel p{
+font-size:15px;
+line-height:1.9;
+text-align:center;
+color:#dbeafe;
+max-width:400px;
+}
+
+.process-box{
+margin-top:40px;
+width:100%;
+background:rgba(255,255,255,0.08);
+border:1px solid rgba(255,255,255,0.12);
+padding:22px;
+border-radius:18px;
+backdrop-filter:blur(8px);
+}
+
+.process-box h3{
+margin-bottom:15px;
+font-size:19px;
+}
+
+.process-box ul{
+padding-left:18px;
+line-height:2;
+font-size:14px;
+color:#e5efff;
+}
+
+/* RIGHT PANEL */
+
+.right-panel{
+width:58%;
+padding:50px 45px;
+background:white;
+overflow-y:auto;
+}
+
+.top-header{
+margin-bottom:35px;
+}
+
+.top-header h2{
+font-size:35px;
+color:#002855;
+margin-bottom:10px;
+}
+
+.top-header p{
+font-size:15px;
+color:#6b7280;
+line-height:1.7;
+}
+
+.verification-card{
+background:#f7faff;
+padding:30px;
+border-radius:22px;
+border:1px solid #dbe7f5;
+}
+
+.form-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
+}
+
+.input-box{
+display:flex;
+flex-direction:column;
+}
+
+.input-box label{
+font-size:14px;
+font-weight:600;
+margin-bottom:8px;
+color:#003366;
+}
+
+.input-box input{
+padding:15px;
+border:none;
+outline:none;
+border-radius:14px;
+background:white;
+border:2px solid #dbe7f5;
+font-size:15px;
+transition:0.3s;
+}
+
+.input-box input:focus{
+border-color:#003366;
+}
+
+.full-width{
+grid-column:1/3;
+}
+
+.verify-button{
+margin-top:28px;
+width:100%;
+padding:16px;
+background:linear-gradient(135deg,#002855,#004080);
+color:white;
+border:none;
+border-radius:16px;
+font-size:16px;
+font-weight:600;
+cursor:pointer;
+transition:0.3s;
+}
+
+.verify-button:hover{
+transform:translateY(-2px);
+box-shadow:0 10px 20px rgba(0,51,102,0.2);
+}
+
+.info-box{
+margin-top:30px;
+padding:22px;
+background:#eff6ff;
+border-left:5px solid #003366;
+border-radius:15px;
+}
+
+.info-box h3{
+color:#002855;
+margin-bottom:10px;
+}
+
+.info-box p{
+font-size:14px;
+line-height:1.8;
+color:#4b5563;
+}
+
+.success-box{
+margin-top:25px;
+padding:18px;
+background:#d1fae5;
+border-radius:15px;
+color:#065f46;
+display:none;
+}
+
+.error-box{
+margin-top:25px;
+padding:18px;
+background:#fee2e2;
+border-radius:15px;
+color:#991b1b;
+display:none;
+}
+
+.bottom-link{
+margin-top:25px;
+text-align:center;
+font-size:14px;
+}
+
+.bottom-link a{
+text-decoration:none;
+color:#003366;
+font-weight:600;
+}
+
+/* MOBILE */
+
+@media(max-width:950px){
+
+.main-container{
+flex-direction:column;
+}
+
+.left-panel,
+.right-panel{
+width:100%;
+}
+
+.left-panel{
+padding:40px 25px;
+}
+
+.right-panel{
+padding:35px 22px;
+}
+
+.form-grid{
+grid-template-columns:1fr;
+}
+
+.full-width{
+grid-column:auto;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="main-container">
+
+<!-- LEFT PANEL -->
+
+<div class="left-panel">
+
+<div class="logo-box">
+<img src="logo.jpg" alt="Acropolis Logo">
+</div>
+
+<h1>
+Student Verification Portal
+</h1>
+
+<p>
+Securely activate your digital student identity using the verification codes manually assigned by the Acropolis Verification Team.
+</p>
+
+<div class="process-box">
+
+<h3>Verification Instructions</h3>
+
+<ul>
+
+<li>Enter your registered email address</li>
+
+<li>Enter your registered mobile number</li>
+
+<li>Use the verification code sent manually</li>
+
+<li>Complete account activation securely</li>
+
+</ul>
+
+</div>
+
+</div>
+
+<!-- RIGHT PANEL -->
+
+<div class="right-panel">
+
+<div class="top-header">
+
+<h2>Verify Student Account</h2>
+
+<p>
+Already received your verification code? Enter your details carefully below to activate your student account.
+</p>
+
+</div>
+
+<div class="verification-card">
+
+<form id="verifyForm">
+
+<div class="form-grid">
+
+<div class="input-box">
+
+<label>Email Address</label>
+
+<input
+type="email"
+id="email"
+placeholder="Enter Registered Email"
+required
+>
+
+</div>
+
+<div class="input-box">
+
+<label>Mobile Number</label>
+
+<input
+type="tel"
+id="phone"
+placeholder="Enter Registered Mobile"
+required
+>
+
+</div>
+
+<div class="input-box">
+
+<label>Email Verification Code</label>
+
+<input
+type="text"
+id="emailOtp"
+placeholder="Enter Email Code"
+required
+>
+
+</div>
+
+<div class="input-box">
+
+<label>Mobile Verification Code</label>
+
+<input
+type="text"
+id="mobileOtp"
+placeholder="Enter Mobile Code"
+required
+>
+
+</div>
+
+</div>
+
+<button type="submit" class="verify-button">
+
+Activate Student Account
+
+</button>
+
+</form>
+
+<div class="success-box" id="successBox">
+
+Student verification completed successfully. Redirecting to your digital identity snapshot...
+
+</div>
+
+<div class="error-box" id="errorBox">
+
+Invalid verification details. Please check your code carefully.
+
+</div>
+
+<div class="info-box">
+
+<h3>
+Important Security Notice
+</h3>
+
+<p>
+Your verification code is uniquely generated for your registered email address and mobile number. Never share your code with anyone outside the official verification process.
+</p>
+
+</div>
+
+<div class="bottom-link">
+
+<a href="student-signup.html">
+
+Back To Signup Portal
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const verifyForm = document.getElementById("verifyForm");
+
+const successBox = document.getElementById("successBox");
+
+const errorBox = document.getElementById("errorBox");
+
+/* AUTO PREFILL */
+
+window.onload = () => {
+
+const savedEmail = localStorage.getItem("pendingEmail");
+
+const savedPhone = localStorage.getItem("pendingPhone");
+
+if(savedEmail){
+
+document.getElementById("email").value = savedEmail;
+
+}
+
+if(savedPhone){
+
+document.getElementById("phone").value = savedPhone;
+
+}
+
+};
+
+/* VERIFY FORM */
+
+verifyForm.addEventListener("submit", async function(e){
+
+e.preventDefault();
+
+errorBox.style.display = "none";
+
+const email = document.getElementById("email").value;
+
+const phone = document.getElementById("phone").value;
+
+const emailOtp = document.getElementById("emailOtp").value;
+
+const mobileOtp = document.getElementById("mobileOtp").value;
+
+/* BOTH OTP MATCH CHECK */
+
+if(emailOtp !== mobileOtp){
+
+errorBox.innerHTML = "Email OTP and Mobile OTP must match.";
+
+errorBox.style.display = "block";
+
+return;
+
+}
+
+try{
+
+const response = await fetch(
+
+"http://127.0.0.1:5000/api/verify/code",
+
+{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+email:email,
+
+phone:phone,
+
+verificationCode:emailOtp
+
+})
+
+}
+
+);
+
+const data = await response.json();
+
+if(data.success){
+
+localStorage.setItem(
+
+"verifiedStudent",
+
+JSON.stringify(data.student)
+
+);
+
+successBox.style.display = "block";
+
+localStorage.removeItem("verificationPending");
+
+setTimeout(()=>{
+
+window.location.href="student-success.html";
+
+},2500);
+
+}else{
+
+errorBox.innerHTML = data.message;
+
+errorBox.style.display = "block";
+
+}
+
+}catch(error){
+
+errorBox.innerHTML = "Server Error. Please try again later.";
+
+errorBox.style.display = "block";
+
+console.log(error);
+
+}
+
+});
+
+</script>
+
+</body>
+
+</html>
