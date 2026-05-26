@@ -428,10 +428,9 @@ Powered By S&P Developments
 <h4>Academic Year</h4>
 <p id="studentYear">Loading...</p>
 </div>
-
 <div class="detail-box">
 <h4>Password</h4>
-<p>••••••••••••</p>
+<p id="studentPassword">Loading...</p>
 </div>
 
 </div>
@@ -505,6 +504,8 @@ studentData.semester || "N/A";
 
 document.getElementById("studentYear").innerText =
 studentData.year || "N/A";
+document.getElementById("studentPassword").innerText =
+localStorage.getItem("studentPassword") || "N/A";
 
 /* OPTIONAL PHONE */
 
