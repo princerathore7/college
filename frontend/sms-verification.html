@@ -536,25 +536,20 @@ console.log(error);
 /* SEND SMS REDIRECTION */
 function sendSMS(phone, otp, name){
 
-phone = phone.replace(/\s+/g, '');
+phone = phone.replace(/\s+/g, '').replace('+91', '');
 
 const message =
-`Welcome to Acropolis Institute of Studies & Research
+"Welcome to Acropolis Institute of Studies & Research.\n\n" +
+"Dear " + name + ",\n\n" +
+"Your verification code is: " + otp + "\n\n" +
+"Please use this OTP to complete your mobile verification process.\n\n" +
+"Thank You,\n" +
+"Acropolis Digital Verification Team";
 
-Dear ${name},
+const smsURL =
+`sms:${phone}?body=${encodeURIComponent(message)}`;
 
-Your verification code is ${otp}.
-
-Please use this OTP to complete your mobile verification process.
-
-Thank You,
-Acropolis Digital Verification Team`;
-
-const encodedMessage = encodeURIComponent(message);
-
-/* ANDROID SAFE SMS OPEN */
-
-window.location.href = `sms:${phone};?&body=${encodedMessage}`;
+window.open(smsURL, "_self");
 
 }
 /* MARK DONE */
