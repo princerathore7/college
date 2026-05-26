@@ -90,7 +90,7 @@ async function createSME() {
   msg.innerHTML = "Processing...";
 
   try {
-    const res = await fetch("/api/sme/create", {
+    const res = await fetch("https://college-hwbb.onrender.com/api/sme/create", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
