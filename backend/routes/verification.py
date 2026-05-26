@@ -1,8 +1,10 @@
 from flask import Blueprint, request, jsonify
 from flask_cors import CORS
-from pymongo import MongoClient
+# from pymongo import MongoClient
 from datetime import datetime
 import os
+from db import db
+
 
 # ---------------- BLUEPRINT ----------------
 
@@ -16,13 +18,9 @@ CORS(verification_bp)
 
 # ---------------- MONGODB ----------------
 
-MONGO_URL = os.getenv("MONGO_URL")
-
-client = MongoClient(MONGO_URL)
-
-db = client["acropolis_db"]
-
 pending_collection = db["pending_verifications"]
+
+done_collection = db["done_verifications"]
 
 verified_collection = db["verified_students"]
 

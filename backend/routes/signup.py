@@ -2,25 +2,27 @@ from flask import Blueprint, request, jsonify
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash
 from datetime import datetime
-from pymongo import MongoClient
 import random
 import string
 import os
 
+from db import db
+
 # ---------------- BLUEPRINT ----------------
 
-signup_bp = Blueprint("signup_bp", __name__, url_prefix="/api/signup")
+signup_bp = Blueprint(
+    "signup_bp",
+    __name__,
+    url_prefix="/api/signup"
+)
+
 CORS(signup_bp)
 
-# ---------------- MONGODB ----------------
-
-MONGO_URL = os.getenv("MONGO_URL")
-
-client = MongoClient(MONGO_URL)
-
-db = client["acropolis_db"]
+# ---------------- DATABASE ----------------
 
 pending_collection = db["pending_verifications"]
+
+done_collection = db["done_verifications"]
 
 verified_collection = db["verified_students"]
 
@@ -30,7 +32,6 @@ pending_collection.create_index(
     "createdAt",
     expireAfterSeconds=518400
 )
-
 # ---------------- CODE GENERATOR ----------------
 
 def generate_verification_code():

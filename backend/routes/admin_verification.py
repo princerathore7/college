@@ -1,11 +1,11 @@
 from flask import Blueprint, request, jsonify
 from flask_cors import CORS
-from pymongo import MongoClient
+
 from bson import ObjectId
 from datetime import datetime
 import os
 import smtplib
-
+from db import db
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -19,17 +19,14 @@ admin_verification_bp = Blueprint(
 
 CORS(admin_verification_bp)
 
-# ---------------- MONGODB ----------------
 
-MONGO_URL = os.getenv("MONGO_URL")
-
-client = MongoClient(MONGO_URL)
-
-db = client["acropolis_db"]
+# ---------------- DATABASE ----------------
 
 pending_collection = db["pending_verifications"]
 
 done_collection = db["done_verifications"]
+
+verified_collection = db["verified_students"]
 
 # ---------------- EMAIL CONFIG ----------------
 

@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
 from flask_cors import CORS
-from pymongo import MongoClient
+from db import db
 from datetime import datetime, timedelta
 import os
 
@@ -14,20 +14,14 @@ cleanup_bp = Blueprint(
 
 CORS(cleanup_bp)
 
-# ---------------- MONGODB ----------------
 
-MONGO_URL = os.getenv("MONGO_URL")
-
-client = MongoClient(MONGO_URL)
-
-db = client["acropolis_db"]
+# ---------------- DATABASE ----------------
 
 pending_collection = db["pending_verifications"]
 
 done_collection = db["done_verifications"]
 
 verified_collection = db["verified_students"]
-
 # ---------------- AUTO CLEANUP FUNCTION ----------------
 
 def delete_old_data():
