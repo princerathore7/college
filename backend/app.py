@@ -48,6 +48,7 @@ from routes.verification import verification_bp
 from routes.admin_verification import admin_verification_bp
 
 from routes.cleanup import cleanup_bp
+
 # ---------------------------------------------
 # FLASK APP SETUP
 # ---------------------------------------------

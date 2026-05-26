@@ -5,8 +5,12 @@ from datetime import datetime
 import random
 import string
 import os
-
+from utils.email import send_verification_email
 from db import db
+
+# ---------------- IMPORT AUTO EMAIL FUNCTION ----------------
+
+from utils.email import send_verification_email
 
 # ---------------- BLUEPRINT ----------------
 
@@ -32,13 +36,18 @@ pending_collection.create_index(
     "createdAt",
     expireAfterSeconds=518400
 )
+
 # ---------------- CODE GENERATOR ----------------
 
 def generate_verification_code():
 
-    letters = ''.join(random.choices(string.ascii_uppercase, k=3))
+    letters = ''.join(
+        random.choices(string.ascii_uppercase, k=3)
+    )
 
-    numbers = ''.join(random.choices(string.digits, k=3))
+    numbers = ''.join(
+        random.choices(string.digits, k=3)
+    )
 
     return letters + numbers
 
@@ -54,8 +63,10 @@ def signup_request():
         student_name = data.get("studentName")
         enrollment = data.get("enrollment")
         password = data.get("password")
+
         email = data.get("email")
         phone = data.get("phone")
+
         branch = data.get("branch")
         semester = data.get("semester")
         year = data.get("year")
@@ -63,6 +74,7 @@ def signup_request():
         # ---------------- VALIDATION ----------------
 
         if not all([
+
             student_name,
             enrollment,
             password,
@@ -71,48 +83,63 @@ def signup_request():
             branch,
             semester,
             year
+
         ]):
 
             return jsonify({
+
                 "success": False,
                 "message": "All fields are required"
+
             }), 400
 
-        # ---------------- CHECK EXISTING VERIFIED USER ----------------
+        # ---------------- CHECK VERIFIED ----------------
 
         existing_verified = verified_collection.find_one({
+
             "$or": [
+
                 {"email": email},
                 {"phone": phone},
                 {"enrollment": enrollment}
+
             ]
+
         })
 
         if existing_verified:
 
             return jsonify({
+
                 "success": False,
                 "message": "Student already verified"
+
             }), 409
 
-        # ---------------- CHECK PENDING REQUEST ----------------
+        # ---------------- CHECK PENDING ----------------
 
         existing_pending = pending_collection.find_one({
+
             "$or": [
+
                 {"email": email},
                 {"phone": phone},
                 {"enrollment": enrollment}
+
             ]
+
         })
 
         if existing_pending:
 
             return jsonify({
+
                 "success": False,
                 "message": "Verification already pending"
+
             }), 409
 
-        # ---------------- GENERATE CODE ----------------
+        # ---------------- GENERATE VERIFICATION CODE ----------------
 
         verification_code = generate_verification_code()
 
@@ -120,7 +147,7 @@ def signup_request():
 
         hashed_password = generate_password_hash(password)
 
-        # ---------------- PHOTO ----------------
+        # ---------------- PHOTO UPLOAD ----------------
 
         photo = request.files.get("photo")
 
@@ -131,20 +158,25 @@ def signup_request():
             upload_folder = "uploads"
 
             if not os.path.exists(upload_folder):
+
                 os.makedirs(upload_folder)
 
             photo_filename = f"{enrollment}_{photo.filename}"
 
-            photo_path = os.path.join(upload_folder, photo_filename)
+            photo_path = os.path.join(
+                upload_folder,
+                photo_filename
+            )
 
             photo.save(photo_path)
 
-        # ---------------- SAVE TO DATABASE ----------------
+        # ---------------- SAVE DATA ----------------
 
         pending_data = {
 
             "studentName": student_name,
             "enrollment": enrollment,
+
             "password": hashed_password,
 
             "email": email,
@@ -164,9 +196,48 @@ def signup_request():
             "status": "pending",
 
             "createdAt": datetime.utcnow()
+
         }
 
         pending_collection.insert_one(pending_data)
+
+        # ---------------- AUTO EMAIL SEND ----------------
+
+        email_response = send_verification_email(
+
+            student_name=student_name,
+
+            student_email=email,
+
+            verification_code=verification_code,
+
+            enrollment=enrollment,
+
+            branch=branch,
+
+            semester=semester,
+
+            year=year,
+
+            phone=phone
+
+        )
+
+        # ---------------- UPDATE EMAIL STATUS ----------------
+
+        if email_response["success"]:
+
+            pending_collection.update_one(
+
+                {"email": email},
+
+                {
+                    "$set": {
+                        "emailSent": True
+                    }
+                }
+
+            )
 
         # ---------------- RESPONSE ----------------
 
@@ -174,9 +245,12 @@ def signup_request():
 
             "success": True,
 
-            "message": "Verification request submitted successfully",
+            "message": "Signup request submitted successfully",
 
-            "waitMessage": "Kindly wait 6-8 hours. Your personalized verification code will be sent to your registered email and mobile number."
+            "emailStatus": email_response,
+
+            "waitMessage":
+            "Verification code has been sent to your registered email."
 
         }), 201
 
