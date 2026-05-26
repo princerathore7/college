@@ -65,9 +65,18 @@ def cleanup_old_data():
 # =====================================================
 # DATABASE STATUS ROUTE
 # =====================================================
-
-@verification_bp.route("/database-status", methods=["GET"])
+@cleanup_bp.route("/database-status", methods=["GET"])
 def database_status():
+
+    token = request.headers.get("Authorization")
+
+    user = verify_sme_token(token)
+
+    if not user:
+        return jsonify({
+            "success": False,
+            "message": "Unauthorized"
+        }), 403
 
     try:
         pending_count = pending_collection.count_documents({})
@@ -77,16 +86,13 @@ def database_status():
             "success": True,
             "database": {
                 "pendingRequests": pending_count,
-                "verifiedStudents": verified_count
+                "verifiedStudents": verified_count,
+                "doneRequests": 0
             }
         }), 200
 
     except Exception as e:
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
-
+        return jsonify({"success": False, "message": str(e)}), 500
 
 # =====================================================
 # GET ALL VERIFIED STUDENTS

@@ -522,15 +522,20 @@ function getToken() {
 <script>
 
 /* LOAD DATABASE STATUS */
-
 async function loadDatabaseStatus(){
 
 try{
 
+const token = localStorage.getItem("sme_token");
+
 const response = await fetch(
-
-"http://127.0.0.1:5000/api/cleanup/database-status"
-
+    "https://college-hwbb.onrender.com/api/cleanup/database-status",
+    {
+        method: "GET",
+        headers: {
+            "Authorization": token
+        }
+    }
 );
 
 const data = await response.json();
@@ -538,27 +543,24 @@ const data = await response.json();
 if(data.success){
 
 document.getElementById("pendingCount").innerText =
-
 data.database.pendingRequests;
 
 document.getElementById("doneCount").innerText =
-
-data.database.doneRequests;
+data.database.doneRequests || 0;
 
 document.getElementById("verifiedCount").innerText =
-
 data.database.verifiedStudents;
 
+} else {
+    alert("Unauthorized access");
+    window.location.href = "/sme-login.html";
 }
 
 }catch(error){
-
 console.log(error);
-
 }
 
 }
-
 /* AUTO LOAD */
 
 loadDatabaseStatus();
