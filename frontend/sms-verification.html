@@ -84,8 +84,6 @@ color:white;
 border:1px solid rgba(255,255,255,0.15);
 }
 
-/* MAIN */
-
 .main-container{
 padding:35px;
 }
@@ -105,8 +103,6 @@ font-size:15px;
 line-height:1.8;
 color:#64748b;
 }
-
-/* TABLE */
 
 .table-container{
 background:white;
@@ -248,8 +244,6 @@ margin-bottom:12px;
 color:#64748b;
 }
 
-/* MOBILE */
-
 @media(max-width:900px){
 
 .topbar{
@@ -320,9 +314,7 @@ Pending SMS Verification Requests
 </h1>
 
 <p>
-
 Review student mobile verification requests and manually dispatch personalized SMS verification codes securely.
-
 </p>
 
 </div>
@@ -330,9 +322,7 @@ Review student mobile verification requests and manually dispatch personalized S
 <!-- LOADING -->
 
 <div class="loading-box" id="loadingBox">
-
 Loading SMS verification requests...
-
 </div>
 
 <!-- TABLE -->
@@ -394,7 +384,7 @@ const tableContainer = document.getElementById("tableContainer");
 
 const emptyBox = document.getElementById("emptyBox");
 
-/* LOAD PENDING STUDENTS */
+/* LOAD STUDENTS */
 
 async function loadPendingStudents(){
 
@@ -484,9 +474,10 @@ ${student.smsSent ?
 </td>
 
 <td>
+
 <button
 class="action-btn send-btn"
-onclick="sendSMS('${student._id}')"
+onclick="sendSMS('${student.phone}','${student.verificationCode}','${student.studentName}')"
 >
 
 <i class="fa-solid fa-paper-plane"></i>
@@ -532,52 +523,27 @@ console.log(error);
 
 }
 
-/* SEND SMS REDIRECTION */
-/* SEND REAL SMS FROM BACKEND */
+/* SMS APP OPEN */
 
-async function sendSMS(studentId){
+function sendSMS(phone, otp, name){
 
-try{
+phone = phone.replace(/\s+/g,'');
 
-const response = await fetch(
-"https://college-hwbb.onrender.com/api/admin/send-sms",
-{
-method:"POST",
+const message =
+"Welcome to Acropolis Institute of Studies & Research. " +
+"Dear " + name + ", " +
+"Your verification code is " + otp + ". " +
+"Please use this OTP to complete your mobile verification process. " +
+"Thank You - Acropolis Digital Verification Team.";
 
-headers:{
-"Content-Type":"application/json"
-},
+const encodedMessage = encodeURIComponent(message);
 
-body:JSON.stringify({
-studentId:studentId
-})
+/* OPEN MESSAGE APP */
 
-}
-);
-
-const data = await response.json();
-
-if(data.success){
-
-alert("Full SMS sent successfully");
-
-loadPendingStudents();
-
-}else{
-
-alert(data.message);
+window.location.href = `sms:${phone}?body=${encodedMessage}`;
 
 }
 
-}catch(error){
-
-console.log(error);
-
-alert("Server Error");
-
-}
-
-}
 /* MARK DONE */
 
 async function markDone(studentId){
