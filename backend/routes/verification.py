@@ -2,7 +2,8 @@ from flask import Blueprint, request, jsonify
 from flask_cors import CORS
 from datetime import datetime
 from db import db
-
+from pymongo import MongoClient
+import os
 # ---------------- BLUEPRINT ----------------
 
 verification_bp = Blueprint(
@@ -21,7 +22,13 @@ done_collection = db["done_verifications"]
 
 verified_collection = db["verified_students"]
 
-students_collection = db["students"]
+MONGO_URL = os.getenv("MONGO_URL")
+
+client = MongoClient(MONGO_URL)
+
+users_db = client["users"]
+
+students_collection = users_db["students"]
 
 # ---------------- VERIFY CODE ROUTE ----------------
 
