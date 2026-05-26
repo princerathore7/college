@@ -1,10 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_cors import CORS
-# from pymongo import MongoClient
 from datetime import datetime
-import os
 from db import db
-
 
 # ---------------- BLUEPRINT ----------------
 
@@ -16,13 +13,15 @@ verification_bp = Blueprint(
 
 CORS(verification_bp)
 
-# ---------------- MONGODB ----------------
+# ---------------- MONGODB COLLECTIONS ----------------
 
 pending_collection = db["pending_verifications"]
 
 done_collection = db["done_verifications"]
 
 verified_collection = db["verified_students"]
+
+students_collection = db["students"]
 
 # ---------------- VERIFY CODE ROUTE ----------------
 
@@ -65,16 +64,22 @@ def verify_code():
                 "message": "Invalid verification code"
             }), 401
 
-        # ---------------- CHECK STATUS ----------------
+        # ---------------- CHECK ALREADY VERIFIED ----------------
 
-        if pending_user.get("status") == "verified":
+        existing_student = students_collection.find_one({
+
+            "enrollment": pending_user.get("enrollment")
+
+        })
+
+        if existing_student:
 
             return jsonify({
                 "success": False,
-                "message": "Account already verified"
+                "message": "Student already verified"
             }), 409
 
-        # ---------------- CREATE VERIFIED USER ----------------
+        # ---------------- CREATE VERIFIED USER DATA ----------------
 
         verified_user_data = {
 
@@ -99,13 +104,44 @@ def verify_code():
             "verifiedAt": datetime.utcnow(),
 
             "status": "verified"
+
         }
 
-        # ---------------- INSERT VERIFIED USER ----------------
+        # ---------------- INSERT INTO VERIFIED COLLECTION ----------------
 
         verified_collection.insert_one(verified_user_data)
 
-        # ---------------- DELETE PENDING USER ----------------
+        # ---------------- INSERT INTO MAIN STUDENTS COLLECTION ----------------
+
+        student_login_data = {
+
+            "name": pending_user.get("studentName"),
+
+            "enrollment": pending_user.get("enrollment"),
+
+            "password": pending_user.get("password"),
+
+            "email": pending_user.get("email"),
+
+            "phone": pending_user.get("phone"),
+
+            "branch": pending_user.get("branch"),
+
+            "semester": pending_user.get("semester"),
+
+            "year": pending_user.get("year"),
+
+            "photo": pending_user.get("photo"),
+
+            "createdAt": datetime.utcnow(),
+
+            "status": "active"
+
+        }
+
+        students_collection.insert_one(student_login_data)
+
+        # ---------------- DELETE FROM PENDING ----------------
 
         pending_collection.delete_one({
             "_id": pending_user["_id"]
@@ -122,10 +158,15 @@ def verify_code():
             "student": {
 
                 "name": verified_user_data["studentName"],
+
                 "enrollment": verified_user_data["enrollment"],
+
                 "email": verified_user_data["email"],
+
                 "branch": verified_user_data["branch"],
+
                 "semester": verified_user_data["semester"],
+
                 "year": verified_user_data["year"]
 
             }
