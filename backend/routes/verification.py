@@ -1,260 +1,151 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify
 from flask_cors import CORS
-from datetime import datetime
 from db import db
-from pymongo import MongoClient
-import os
+from datetime import datetime, timedelta
+
 # ---------------- BLUEPRINT ----------------
 
-verification_bp = Blueprint(
-    "verification_bp",
+cleanup_bp = Blueprint(
+    "cleanup_bp",
     __name__,
-    url_prefix="/api/verify"
+    url_prefix="/api/cleanup"
 )
 
-CORS(verification_bp)
+CORS(cleanup_bp)
 
-# ---------------- MONGODB COLLECTIONS ----------------
+# ---------------- DATABASE ----------------
 
 pending_collection = db["pending_verifications"]
-
-done_collection = db["done_verifications"]
-
 verified_collection = db["verified_students"]
 
-MONGO_URL = os.getenv("MONGO_URL")
+# ---------------- AUTO CLEANUP FUNCTION ----------------
 
-client = MongoClient(MONGO_URL)
+def delete_old_data():
 
-users_db = client["users"]
+    six_days_ago = datetime.utcnow() - timedelta(days=6)
 
-students_collection = users_db["students"]
+    # Delete old pending requests
+    pending_result = pending_collection.delete_many({
+        "createdAt": {"$lt": six_days_ago}
+    })
 
-# ---------------- VERIFY CODE ROUTE ----------------
+    # Delete old verified students
+    verified_result = verified_collection.delete_many({
+        "verifiedAt": {"$lt": six_days_ago}
+    })
 
-@verification_bp.route("/code", methods=["POST"])
-def verify_code():
+    return {
+        "pendingDeleted": pending_result.deleted_count,
+        "verifiedDeleted": verified_result.deleted_count
+    }
+
+# ---------------- MANUAL CLEANUP ROUTE ----------------
+
+@cleanup_bp.route("/delete-old-data", methods=["DELETE"])
+def cleanup_old_data():
 
     try:
-
-        data = request.json
-
-        email = data.get("email")
-        phone = data.get("phone")
-        verification_code = data.get("verificationCode")
-
-        # ---------------- VALIDATION ----------------
-
-        if not all([email, phone, verification_code]):
-
-            return jsonify({
-                "success": False,
-                "message": "Email, phone and verification code are required"
-            }), 400
-
-        # ---------------- FIND PENDING USER ----------------
-
-        pending_user = pending_collection.find_one({
-
-            "email": email,
-            "phone": phone,
-            "verificationCode": verification_code
-
-        })
-
-        # ---------------- INVALID CODE ----------------
-
-        if not pending_user:
-
-            return jsonify({
-                "success": False,
-                "message": "Invalid verification code"
-            }), 401
-
-        # ---------------- CHECK ALREADY VERIFIED ----------------
-
-        existing_student = students_collection.find_one({
-
-            "enrollment": pending_user.get("enrollment")
-
-        })
-
-        if existing_student:
-
-            return jsonify({
-                "success": False,
-                "message": "Student already verified"
-            }), 409
-
-        # ---------------- CREATE VERIFIED USER DATA ----------------
-
-        verified_user_data = {
-
-            "studentName": pending_user.get("studentName"),
-
-            "enrollment": pending_user.get("enrollment"),
-
-            "password": pending_user.get("password"),
-
-            "email": pending_user.get("email"),
-
-            "phone": pending_user.get("phone"),
-
-            "branch": pending_user.get("branch"),
-
-            "semester": pending_user.get("semester"),
-
-            "year": pending_user.get("year"),
-
-            "photo": pending_user.get("photo"),
-
-            "verifiedAt": datetime.utcnow(),
-
-            "status": "verified"
-
-        }
-
-        # ---------------- INSERT INTO VERIFIED COLLECTION ----------------
-
-        verified_collection.insert_one(verified_user_data)
-
-        # ---------------- INSERT INTO MAIN STUDENTS COLLECTION ----------------
-
-        student_login_data = {
-
-            "name": pending_user.get("studentName"),
-
-            "enrollment": pending_user.get("enrollment"),
-
-            "password": pending_user.get("password"),
-
-            "email": pending_user.get("email"),
-
-            "phone": pending_user.get("phone"),
-
-            "branch": pending_user.get("branch"),
-
-            "semester": pending_user.get("semester"),
-
-            "year": pending_user.get("year"),
-
-            "photo": pending_user.get("photo"),
-
-            "createdAt": datetime.utcnow(),
-
-            "status": "active"
-
-        }
-
-        students_collection.insert_one(student_login_data)
-
-        # ---------------- DELETE FROM PENDING ----------------
-
-        pending_collection.delete_one({
-            "_id": pending_user["_id"]
-        })
-
-        # ---------------- RESPONSE ----------------
+        result = delete_old_data()
 
         return jsonify({
-
             "success": True,
-
-            "message": "Student account verified successfully",
-
-            "student": {
-
-                "name": verified_user_data["studentName"],
-
-                "enrollment": verified_user_data["enrollment"],
-
-                "email": verified_user_data["email"],
-
-                "branch": verified_user_data["branch"],
-
-                "semester": verified_user_data["semester"],
-
-                "year": verified_user_data["year"]
-
-            }
-
+            "message": "Old data cleaned successfully",
+            "deleted": result
         }), 200
 
     except Exception as e:
-
         return jsonify({
-
             "success": False,
             "message": str(e)
-
         }), 500
 
 
-# ---------------- CHECK VERIFICATION STATUS ----------------
+# ---------------- DATABASE STATUS ROUTE ----------------
 
-@verification_bp.route("/status", methods=["POST"])
-def check_status():
+@cleanup_bp.route("/database-status", methods=["GET"])
+def database_status():
+
+    try:
+        pending_count = pending_collection.count_documents({})
+        verified_count = verified_collection.count_documents({})
+
+        return jsonify({
+            "success": True,
+            "database": {
+                "pendingRequests": pending_count,
+                "verifiedStudents": verified_count
+            }
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
+
+
+# ---------------- GET ALL VERIFIED STUDENTS (NEW ROUTE) ----------------
+
+@cleanup_bp.route("/verified-students", methods=["GET"])
+def get_verified_students():
 
     try:
 
-        data = request.json
-
-        email = data.get("email")
-
-        if not email:
-
-            return jsonify({
-                "success": False,
-                "message": "Email is required"
-            }), 400
-
-        # ---------------- CHECK VERIFIED ----------------
-
-        verified_user = verified_collection.find_one({
-            "email": email
-        })
-
-        if verified_user:
-
-            return jsonify({
-
-                "success": True,
-                "status": "verified",
-                "message": "Account verified successfully"
-
-            }), 200
-
-        # ---------------- CHECK PENDING ----------------
-
-        pending_user = pending_collection.find_one({
-            "email": email
-        })
-
-        if pending_user:
-
-            return jsonify({
-
-                "success": True,
-                "status": "pending",
-                "message": "Verification pending"
-
-            }), 200
-
-        # ---------------- NOT FOUND ----------------
+        students = list(
+            verified_collection.find({}, {"_id": 0})
+            .sort("verifiedAt", -1)
+        )
 
         return jsonify({
-
-            "success": False,
-            "status": "not_found",
-            "message": "No account found"
-
-        }), 404
+            "success": True,
+            "count": len(students),
+            "students": students
+        }), 200
 
     except Exception as e:
-
         return jsonify({
-
             "success": False,
             "message": str(e)
+        }), 500
 
+
+# ---------------- FORCE DELETE ALL PENDING ----------------
+
+@cleanup_bp.route("/delete-all-pending", methods=["DELETE"])
+def delete_all_pending():
+
+    try:
+        result = pending_collection.delete_many({})
+
+        return jsonify({
+            "success": True,
+            "message": "All pending verification requests deleted",
+            "deletedCount": result.deleted_count
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
+
+
+# ---------------- FORCE DELETE ALL VERIFIED ----------------
+
+@cleanup_bp.route("/delete-all-verified", methods=["DELETE"])
+def delete_all_verified():
+
+    try:
+        result = verified_collection.delete_many({})
+
+        return jsonify({
+            "success": True,
+            "message": "All verified students deleted",
+            "deletedCount": result.deleted_count
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": str(e)
         }), 500

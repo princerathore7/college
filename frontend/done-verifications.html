@@ -416,7 +416,7 @@ try{
 
 const response = await fetch(
 
-"https://college-hwbb.onrender.com/api/admin/done-list"
+"https://college-hwbb.onrender.com/api/verify/done-list"
 
 );
 
@@ -463,7 +463,7 @@ const row = `
 <td>
 
 <img
-src="uploads/${student.photo}"
+src="${student.photo || 'default.png'}"
 class="student-photo"
 >
 
@@ -471,7 +471,7 @@ class="student-photo"
 
 <td>
 
-<b>${student.studentName}</b><br>
+<b>${student.name}</b><br>
 
 Enrollment: ${student.enrollment}
 
