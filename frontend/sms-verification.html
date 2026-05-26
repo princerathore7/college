@@ -303,7 +303,7 @@ Acropolis Digital Verification System
 
 <i class="fa-solid fa-arrow-left"></i>
 
- Dashboard
+Dashboard
 
 </a>
 
@@ -401,9 +401,7 @@ async function loadPendingStudents(){
 try{
 
 const response = await fetch(
-
 "https://college-hwbb.onrender.com/api/admin/pending"
-
 );
 
 const data = await response.json();
@@ -489,12 +487,12 @@ ${student.smsSent ?
 
 <button
 class="action-btn send-btn"
-onclick="sendSMS('${student._id}')"
+onclick="sendSMS('${student.phone}','${student.verificationCode}','${student.studentName}')"
 >
 
 <i class="fa-solid fa-paper-plane"></i>
 
- Send SMS
+Send SMS
 
 </button>
 
@@ -505,7 +503,7 @@ onclick="markDone('${student._id}')"
 
 <i class="fa-solid fa-check"></i>
 
- Mark Done
+Mark Done
 
 </button>
 
@@ -535,55 +533,32 @@ console.log(error);
 
 }
 
-/* SEND SMS */
+/* SEND SMS REDIRECTION */
 
-async function sendSMS(studentId){
+function sendSMS(phone, otp, name){
 
-try{
+const message = `Welcome to Acropolis Institute of Studies & Research.
 
-const response = await fetch(
+Dear ${name},
 
-"https://college-hwbb.onrender.com/api/admin/send-sms",
+Your mobile verification code is:
 
-{
+${otp}
 
-method:"POST",
+Please enter this OTP to complete your verification process.
 
-headers:{
-"Content-Type":"application/json"
-},
+Thank You
+Acropolis Digital Verification Team`;
 
-body:JSON.stringify({
+const encodedMessage = encodeURIComponent(message);
 
-studentId:studentId
+/* REMOVE +91 ISSUES */
 
-})
+phone = phone.replace(/\s+/g, '');
 
-}
+/* OPEN SMS APP */
 
-);
-
-const data = await response.json();
-
-if(data.success){
-
-alert("Verification SMS sent successfully");
-
-loadPendingStudents();
-
-}else{
-
-alert(data.message);
-
-}
-
-}catch(error){
-
-alert("Server Error");
-
-console.log(error);
-
-}
+window.location.href = `sms:${phone}?body=${encodedMessage}`;
 
 }
 
