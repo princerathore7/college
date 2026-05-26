@@ -618,8 +618,9 @@ alert("Email message copied successfully");
 }
 
 /* SEND EMAIL USING MAIL APP */
+/* SEND EMAIL FROM BACKEND */
 
-function sendEmail(
+async function sendEmail(
 email,
 name,
 otp,
@@ -631,39 +632,62 @@ year,
 studentId
 ){
 
-const subject =
-encodeURIComponent("Acropolis Verification Code");
+try{
 
-const body = encodeURIComponent(
+const response = await fetch(
 
-`Welcome to Acropolis Institute of Studies & Research.
+"https://college-hwbb.onrender.com/api/email/send",
 
-Dear ${name},
+{
 
-Your student verification request has been received successfully.
+method:"POST",
 
-Verification Details:
+headers:{
+"Content-Type":"application/json"
+},
 
-Student Name : ${name}
-Enrollment No : ${enrollment}
-Email Address : ${email}
-Phone Number : ${phone}
-Branch : ${branch}
-Semester : ${semester}
-Year : ${year}
+body:JSON.stringify({
 
-Your Verification Code is:
+email:email,
+studentName:name,
+verificationCode:otp,
+enrollment:enrollment,
+phone:phone,
+branch:branch,
+semester:semester,
+year:year
 
-${otp}
+})
 
-Please use this code to complete your verification process.
-
-Regards,
-Acropolis Digital Verification Team
-Powered By S&P Developments`
+}
 
 );
 
+const data = await response.json();
+
+/* AUTO COPY */
+
+copyMessage(studentId);
+
+if(data.success){
+
+alert("Verification Email Sent Successfully");
+
+}else{
+
+alert(data.message);
+
+}
+
+}catch(error){
+
+console.log(error);
+
+alert("Server Error");
+
+}
+
+}
 /* AUTO COPY */
 
 copyMessage(studentId);
@@ -673,7 +697,7 @@ copyMessage(studentId);
 window.location.href =
 `mailto:${email}?subject=${subject}&body=${body}`;
 
-}
+
 
 /* MARK DONE */
 
