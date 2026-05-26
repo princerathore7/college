@@ -484,10 +484,9 @@ ${student.smsSent ?
 </td>
 
 <td>
-
 <button
 class="action-btn send-btn"
-onclick="sendSMS('${student.phone}','${student.verificationCode}','${student.studentName}')"
+onclick="sendSMS('${student._id}')"
 >
 
 <i class="fa-solid fa-paper-plane"></i>
