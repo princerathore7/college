@@ -305,6 +305,40 @@ grid-template-columns:1fr;
 }
 
 }
+/* VERIFY REDIRECT BUTTON */
+
+.verify-redirect-box{
+margin-top:22px;
+width:100%;
+display:flex;
+justify-content:center;
+}
+
+.verify-redirect-btn{
+width:100%;
+text-decoration:none;
+background:linear-gradient(135deg,#0f766e,#115e59);
+color:white;
+padding:16px 20px;
+border-radius:16px;
+font-size:15px;
+font-weight:600;
+display:flex;
+justify-content:center;
+align-items:center;
+gap:12px;
+transition:0.3s;
+box-shadow:0 10px 20px rgba(15,118,110,0.18);
+}
+
+.verify-redirect-btn:hover{
+transform:translateY(-2px);
+box-shadow:0 14px 24px rgba(15,118,110,0.25);
+}
+
+.verify-redirect-btn i{
+font-size:18px;
+}
 
 </style>
 
@@ -460,7 +494,31 @@ Fill all details carefully to begin your verification process.
 <button type="submit" class="submit-btn">
 Submit Verification Request
 </button>
+<button class="verify-btn">
+Verify Student Account
+</button>
 
+<!-- VERIFY ACCOUNT BUTTON -->
+
+<div class="verify-redirect-box">
+
+<a href="student-verify.html" class="verify-redirect-btn">
+
+<i class="fa-solid fa-user-check"></i>
+
+Already Received Verification Code? Verify Account
+
+</a>
+
+</div>
+
+<div class="success-msg" id="successMsg">
+
+Verification request stored successfully.
+
+</div>
+
+</div>
 </form>
 
 <!-- VERIFICATION BOX -->
@@ -482,26 +540,29 @@ Kindly wait 6–8 hours. Your personalized verification code will be delivered m
 <input type="text" placeholder="Enter Mobile Verification Code">
 
 </div>
-
+<!-- 
 <button class="verify-btn">
 Verify Student Account
-</button>
+</button> -->
 
-<div class="already-link">
 
-<a href="student-verify.html">
-Already Applied & Received The Code?
+
+<!-- VERIFY ACCOUNT BUTTON -->
+
+<div class="verify-redirect-box">
+
+<a href="student-verify.html" class="verify-redirect-btn">
+
+<i class="fa-solid fa-shield-check"></i>
+
+Already Received Verification Code? Verify Account
+
 </a>
 
 </div>
-
-<div class="success-msg" id="successMsg">
-
-Verification request stored successfully.
-
 </div>
 
-</div>
+
 
 </div>
 
