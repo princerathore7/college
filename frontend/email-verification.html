@@ -120,7 +120,7 @@ border:1px solid #dbe7f5;
 table{
 width:100%;
 border-collapse:collapse;
-min-width:1200px;
+min-width:1400px;
 }
 
 thead{
@@ -171,6 +171,18 @@ letter-spacing:3px;
 display:inline-block;
 }
 
+.message-box{
+background:#f8fafc;
+border:1px solid #dbe7f5;
+padding:14px;
+border-radius:14px;
+font-size:13px;
+line-height:1.7;
+white-space:pre-line;
+min-width:320px;
+margin-top:10px;
+}
+
 .action-btn{
 padding:12px 18px;
 border:none;
@@ -185,6 +197,11 @@ width:100%;
 
 .send-btn{
 background:#003366;
+color:white;
+}
+
+.copy-btn{
+background:#0f766e;
 color:white;
 }
 
@@ -248,8 +265,6 @@ margin-bottom:12px;
 color:#64748b;
 }
 
-/* MOBILE */
-
 @media(max-width:900px){
 
 .topbar{
@@ -303,7 +318,7 @@ Acropolis Digital Verification System
 
 <i class="fa-solid fa-arrow-left"></i>
 
- Dashboard
+Dashboard
 
 </a>
 
@@ -320,9 +335,7 @@ Pending Email Verification Requests
 </h1>
 
 <p>
-
-Review student verification requests and manually send personalized verification codes to registered email addresses.
-
+Review student verification requests and manually send personalized verification emails securely.
 </p>
 
 </div>
@@ -330,9 +343,7 @@ Review student verification requests and manually send personalized verification
 <!-- LOADING -->
 
 <div class="loading-box" id="loadingBox">
-
 Loading verification requests...
-
 </div>
 
 <!-- TABLE -->
@@ -351,6 +362,7 @@ Loading verification requests...
 <th>Phone</th>
 <th>Academic</th>
 <th>Verification Code</th>
+<th>Email Preview</th>
 <th>Status</th>
 <th>Actions</th>
 
@@ -401,9 +413,7 @@ async function loadPendingStudents(){
 try{
 
 const response = await fetch(
-
 "https://college-hwbb.onrender.com/api/admin/pending"
-
 );
 
 const data = await response.json();
@@ -417,6 +427,35 @@ tableContainer.style.display = "block";
 tableBody.innerHTML = "";
 
 data.students.forEach(student => {
+
+const emailMessage =
+`Welcome to Acropolis Institute of Studies & Research.
+
+Dear ${student.studentName},
+
+Your student verification request has been received successfully.
+
+Verification Details:
+
+Student Name : ${student.studentName}
+Enrollment No : ${student.enrollment}
+Email Address : ${student.email}
+Phone Number : ${student.phone}
+Branch : ${student.branch}
+Semester : ${student.semester}
+Year : ${student.year}
+
+Your Verification Code is:
+
+${student.verificationCode}
+
+Please use this code to complete your verification process.
+
+Regards,
+Acropolis Digital Verification Team
+Powered By S&P Developments`;
+
+const safeMessage = emailMessage.replace(/`/g,'');
 
 const row = `
 
@@ -473,6 +512,16 @@ ${student.verificationCode}
 
 <td>
 
+<div class="message-box" id="message-${student._id}">
+
+${safeMessage}
+
+</div>
+
+</td>
+
+<td>
+
 ${student.emailSent ?
 
 '<span class="status-badge sent">EMAIL SENT</span>'
@@ -488,13 +537,34 @@ ${student.emailSent ?
 <td>
 
 <button
+class="action-btn copy-btn"
+onclick="copyMessage('${student._id}')"
+>
+
+<i class="fa-solid fa-copy"></i>
+
+Copy Message
+
+</button>
+
+<button
 class="action-btn send-btn"
-onclick="sendEmail('${student._id}')"
+onclick="sendEmail(
+'${student.email}',
+'${student.studentName}',
+'${student.verificationCode}',
+'${student.enrollment}',
+'${student.phone}',
+'${student.branch}',
+'${student.semester}',
+'${student.year}',
+'${student._id}'
+)"
 >
 
 <i class="fa-solid fa-envelope"></i>
 
- Send Email
+Send Email
 
 </button>
 
@@ -505,7 +575,7 @@ onclick="markDone('${student._id}')"
 
 <i class="fa-solid fa-check"></i>
 
- Mark Done
+Mark Done
 
 </button>
 
@@ -535,55 +605,73 @@ console.log(error);
 
 }
 
-/* SEND EMAIL */
+/* COPY MESSAGE */
 
-async function sendEmail(studentId){
+function copyMessage(studentId){
 
-try{
+const text = document.getElementById(`message-${studentId}`).innerText;
 
-const response = await fetch(
+navigator.clipboard.writeText(text);
 
-"https://college-hwbb.onrender.com/api/admin/send-email",
-
-{
-
-method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify({
-
-studentId:studentId
-
-})
+alert("Email message copied successfully");
 
 }
+
+/* SEND EMAIL USING MAIL APP */
+
+function sendEmail(
+email,
+name,
+otp,
+enrollment,
+phone,
+branch,
+semester,
+year,
+studentId
+){
+
+const subject =
+encodeURIComponent("Acropolis Verification Code");
+
+const body = encodeURIComponent(
+
+`Welcome to Acropolis Institute of Studies & Research.
+
+Dear ${name},
+
+Your student verification request has been received successfully.
+
+Verification Details:
+
+Student Name : ${name}
+Enrollment No : ${enrollment}
+Email Address : ${email}
+Phone Number : ${phone}
+Branch : ${branch}
+Semester : ${semester}
+Year : ${year}
+
+Your Verification Code is:
+
+${otp}
+
+Please use this code to complete your verification process.
+
+Regards,
+Acropolis Digital Verification Team
+Powered By S&P Developments`
 
 );
 
-const data = await response.json();
+/* AUTO COPY */
 
-if(data.success){
+copyMessage(studentId);
 
-alert("Verification email sent successfully");
+/* OPEN EMAIL APP */
 
-loadPendingStudents();
-
-}else{
-
-alert(data.message);
-
-}
-
-}catch(error){
-
-alert("Server Error");
-
-console.log(error);
-
-}
+window.location.href =
+`mailto:${email}?subject=${subject}&body=${body}`;
 
 }
 
