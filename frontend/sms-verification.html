@@ -534,22 +534,49 @@ console.log(error);
 }
 
 /* SEND SMS REDIRECTION */
-function sendSMS(phone, otp, name){
+/* SEND REAL SMS FROM BACKEND */
 
-phone = phone.replace(/\s+/g, '').replace('+91', '');
+async function sendSMS(studentId){
 
-const message =
-"Welcome to Acropolis Institute of Studies & Research.\n\n" +
-"Dear " + name + ",\n\n" +
-"Your verification code is: " + otp + "\n\n" +
-"Please use this OTP to complete your mobile verification process.\n\n" +
-"Thank You,\n" +
-"Acropolis Digital Verification Team";
+try{
 
-const smsURL =
-`sms:${phone}?body=${encodeURIComponent(message)}`;
+const response = await fetch(
+"https://college-hwbb.onrender.com/api/admin/send-sms",
+{
+method:"POST",
 
-window.open(smsURL, "_self");
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+studentId:studentId
+})
+
+}
+);
+
+const data = await response.json();
+
+if(data.success){
+
+alert("Full SMS sent successfully");
+
+loadPendingStudents();
+
+}else{
+
+alert(data.message);
+
+}
+
+}catch(error){
+
+console.log(error);
+
+alert("Server Error");
+
+}
 
 }
 /* MARK DONE */
