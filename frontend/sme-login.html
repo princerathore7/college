@@ -2,50 +2,83 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>SME Login</title>
+<title>SME Access Portal</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
+
 body {
   margin: 0;
-  font-family: Arial;
-  background: linear-gradient(135deg,#0f172a,#1e293b);
+  font-family: 'Poppins', sans-serif;
+  background: radial-gradient(circle at top,#0f172a,#020617);
   height: 100vh;
   display:flex;
   justify-content:center;
   align-items:center;
+  color:white;
 }
 
 /* LOGIN BOX */
 .container {
-  width: 360px;
-  background: white;
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  width: 420px;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 28px;
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
 }
 
 h2 {
   text-align:center;
-  color:#0f172a;
+  margin-bottom:5px;
+}
+
+.sub {
+  text-align:center;
+  font-size:13px;
+  color:#94a3b8;
+  margin-bottom:18px;
+}
+
+.badge {
+  text-align:center;
+  font-size:12px;
+  color:#22c55e;
+  margin-bottom:15px;
 }
 
 input {
   width:100%;
-  padding:12px;
+  padding:13px;
   margin:10px 0;
-  border:1px solid #ccc;
-  border-radius:8px;
+  border:1px solid rgba(255,255,255,0.2);
+  border-radius:10px;
+  background:rgba(255,255,255,0.05);
+  color:white;
+  outline:none;
 }
 
 button {
   width:100%;
-  padding:12px;
-  background:#2563eb;
+  padding:13px;
+  background:linear-gradient(135deg,#2563eb,#1d4ed8);
   color:white;
   border:none;
-  border-radius:8px;
+  border-radius:10px;
+  font-weight:600;
   cursor:pointer;
+  margin-top:10px;
+}
+
+/* INFO BOX */
+.info {
+  margin-top:15px;
+  font-size:12px;
+  color:#94a3b8;
+  line-height:1.6;
 }
 
 /* SUCCESS SCREEN */
@@ -56,8 +89,7 @@ button {
   left:0;
   width:100%;
   height:100%;
-  background:#16a34a;
-  color:white;
+  background:linear-gradient(135deg,#16a34a,#15803d);
   justify-content:center;
   align-items:center;
   flex-direction:column;
@@ -65,7 +97,7 @@ button {
 }
 
 .check {
-  font-size:80px;
+  font-size:90px;
   animation: pop 0.6s ease;
 }
 
@@ -74,26 +106,25 @@ button {
   100% {transform:scale(1);}
 }
 
-/* MOBILE ANIMATION */
 .phone {
-  width: 120px;
-  height: 200px;
+  width: 130px;
+  height: 220px;
   border:4px solid white;
-  border-radius:20px;
+  border-radius:25px;
   margin-top:20px;
   position:relative;
-  animation: float 1.5s infinite ease-in-out;
+  animation: float 1.6s infinite ease-in-out;
 }
 
 @keyframes float {
   0% {transform:translateY(0);}
-  50% {transform:translateY(-10px);}
+  50% {transform:translateY(-12px);}
   100% {transform:translateY(0);}
 }
 
 .dot {
-  width:10px;
-  height:10px;
+  width:12px;
+  height:12px;
   background:white;
   border-radius:50%;
   position:absolute;
@@ -105,14 +136,23 @@ button {
 
 @keyframes pulse {
   0% {transform:translate(-50%,-50%) scale(1);}
-  50% {transform:translate(-50%,-50%) scale(1.8);}
+  50% {transform:translate(-50%,-50%) scale(2);}
   100% {transform:translate(-50%,-50%) scale(1);}
 }
 
 .text {
   margin-top:20px;
   font-size:18px;
+  max-width:80%;
+  line-height:1.6;
 }
+
+.small {
+  font-size:13px;
+  margin-top:10px;
+  opacity:0.9;
+}
+
 </style>
 </head>
 
@@ -120,17 +160,36 @@ button {
 
 <!-- LOGIN -->
 <div class="container" id="loginBox">
-  <h2>SME Login</h2>
 
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Password">
+  <h2>SME Access Portal</h2>
 
-  <button onclick="loginSME()">Login</button>
+  <div class="badge">
+    ✔ Authorized & Verified by S&P Developments
+  </div>
+
+  <div class="sub">
+    “We are a team. We build. You grow.”
+  </div>
+
+  <input type="email" id="email" placeholder="Enter SME Email">
+  <input type="password" id="password" placeholder="Enter Password">
+
+  <button onclick="loginSME()">Authenticate & Login</button>
+
+  <div class="info">
+    <b>What is SME?</b><br>
+    A Subject Matter Expert (SME) is an authorized member who has
+    access to verification systems, admin tools and sensitive data
+    inside the Acropolis Digital Campus ecosystem.
+  </div>
+
 </div>
 
 <!-- SUCCESS SCREEN -->
 <div class="success-screen" id="successScreen">
+
   <div class="check">✔</div>
+
   <h1>Authenticated Successfully</h1>
 
   <div class="phone">
@@ -138,11 +197,16 @@ button {
   </div>
 
   <div class="text" id="welcomeText"></div>
+
+  <div class="small">
+    You are now an authorized SME member of S&P Developments ecosystem
+  </div>
+
 </div>
 
 <script>
 
-// ---------------- DEVICE ID ----------------
+// DEVICE ID
 function getDeviceId() {
   let id = localStorage.getItem("device_id");
   if (!id) {
@@ -152,7 +216,7 @@ function getDeviceId() {
   return id;
 }
 
-// ---------------- LOGIN ----------------
+// LOGIN
 async function loginSME() {
 
   const email = document.getElementById("email").value;
@@ -163,9 +227,7 @@ async function loginSME() {
 
     const res = await fetch("https://college-hwbb.onrender.com/api/sme/login", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: {"Content-Type":"application/json"},
       body: JSON.stringify({ email, password, device_id })
     });
 
@@ -179,17 +241,17 @@ async function loginSME() {
     // SAVE TOKEN
     localStorage.setItem("sme_token", data.token);
 
-    // SHOW SUCCESS SCREEN
+    // UI CHANGE
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("successScreen").style.display = "flex";
 
     document.getElementById("welcomeText").innerHTML =
-      "Welcome SME Member<br>We are excited to collaborate with you as a member of our team ❤️";
+      "Welcome SME Member ❤️<br><br>" +
+      "You are now part of S&P Developments.<br>" +
+      "We are excited to collaborate with you as a Subject Matter Expert in our system.";
 
-    // REDIRECT AFTER 3 SECONDS
     setTimeout(() => {
-      window.location.href =
-        "/verification-dashboard?token=" + data.token;
+      window.location.href = "/verification-dashboard?token=" + data.token;
     }, 3000);
 
   } catch (err) {
