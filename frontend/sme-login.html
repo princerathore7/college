@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SME Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: linear-gradient(135deg,#0f172a,#1e293b);
+  height: 100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+/* LOGIN BOX */
+.container {
+  width: 360px;
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+h2 {
+  text-align:center;
+  color:#0f172a;
+}
+
+input {
+  width:100%;
+  padding:12px;
+  margin:10px 0;
+  border:1px solid #ccc;
+  border-radius:8px;
+}
+
+button {
+  width:100%;
+  padding:12px;
+  background:#2563eb;
+  color:white;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+/* SUCCESS SCREEN */
+.success-screen {
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:#16a34a;
+  color:white;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  text-align:center;
+}
+
+.check {
+  font-size:80px;
+  animation: pop 0.6s ease;
+}
+
+@keyframes pop {
+  0% {transform:scale(0);}
+  100% {transform:scale(1);}
+}
+
+/* MOBILE ANIMATION */
+.phone {
+  width: 120px;
+  height: 200px;
+  border:4px solid white;
+  border-radius:20px;
+  margin-top:20px;
+  position:relative;
+  animation: float 1.5s infinite ease-in-out;
+}
+
+@keyframes float {
+  0% {transform:translateY(0);}
+  50% {transform:translateY(-10px);}
+  100% {transform:translateY(0);}
+}
+
+.dot {
+  width:10px;
+  height:10px;
+  background:white;
+  border-radius:50%;
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  animation:pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% {transform:translate(-50%,-50%) scale(1);}
+  50% {transform:translate(-50%,-50%) scale(1.8);}
+  100% {transform:translate(-50%,-50%) scale(1);}
+}
+
+.text {
+  margin-top:20px;
+  font-size:18px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div class="container" id="loginBox">
+  <h2>SME Login</h2>
+
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
+
+  <button onclick="loginSME()">Login</button>
+</div>
+
+<!-- SUCCESS SCREEN -->
+<div class="success-screen" id="successScreen">
+  <div class="check">✔</div>
+  <h1>Authenticated Successfully</h1>
+
+  <div class="phone">
+    <div class="dot"></div>
+  </div>
+
+  <div class="text" id="welcomeText"></div>
+</div>
+
+<script>
+
+// ---------------- DEVICE ID ----------------
+function getDeviceId() {
+  let id = localStorage.getItem("device_id");
+  if (!id) {
+    id = btoa(navigator.userAgent + screen.width + screen.height + Date.now());
+    localStorage.setItem("device_id", id);
+  }
+  return id;
+}
+
+// ---------------- LOGIN ----------------
+async function loginSME() {
+
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const device_id = getDeviceId();
+
+  try {
+
+    const res = await fetch("https://college-hwbb.onrender.com/api/sme/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email, password, device_id })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.error || data.message || "Login Failed");
+      return;
+    }
+
+    // SAVE TOKEN
+    localStorage.setItem("sme_token", data.token);
+
+    // SHOW SUCCESS SCREEN
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("successScreen").style.display = "flex";
+
+    document.getElementById("welcomeText").innerHTML =
+      "Welcome SME Member<br>We are excited to collaborate with you as a member of our team ❤️";
+
+    // REDIRECT AFTER 3 SECONDS
+    setTimeout(() => {
+      window.location.href =
+        "/verification-dashboard?token=" + data.token;
+    }, 3000);
+
+  } catch (err) {
+    alert("Server Error");
+  }
+}
+
+</script>
+
+</body>
+</html>
