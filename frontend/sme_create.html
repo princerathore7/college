@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create SME Account</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      width: 380px;
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #0f172a;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .msg {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .success { color: green; }
+    .error { color: red; }
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>Create SME ID</h2>
+
+  <input type="email" id="email" placeholder="Enter Email">
+  <input type="password" id="password" placeholder="Enter Password">
+
+  <button onclick="createSME()">Create Account</button>
+
+  <div class="msg" id="msg"></div>
+</div>
+
+<script>
+async function createSME() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const msg = document.getElementById("msg");
+
+  msg.innerHTML = "Processing...";
+
+  try {
+    const res = await fetch("/api/sme/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      msg.className = "msg success";
+      msg.innerHTML = "SME Created Successfully! ID: " + data.sme_id;
+    } else {
+      msg.className = "msg error";
+      msg.innerHTML = data.error || "Error occurred";
+    }
+
+  } catch (err) {
+    msg.className = "msg error";
+    msg.innerHTML = "Server error";
+  }
+}
+</script>
+
+</body>
+</html>
