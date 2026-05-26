@@ -373,7 +373,6 @@ All student SMS verification requests have been completed successfully.
 </div>
 
 </div>
-
 <script>
 
 const tableBody = document.getElementById("studentsTableBody");
@@ -405,6 +404,36 @@ tableContainer.style.display = "block";
 tableBody.innerHTML = "";
 
 data.students.forEach(student => {
+
+const fullMessage =
+`Welcome To Acropolis Institute Of Studies & Research
+
+Dear ${student.studentName},
+
+Your Student Verification Details:
+
+Enrollment Number: ${student.enrollment}
+
+Phone Number: ${student.phone}
+
+Email Address: ${student.email}
+
+Branch: ${student.branch}
+
+Semester: ${student.semester}
+
+Academic Year: ${student.year}
+
+Your Verification Code Is:
+
+${student.verificationCode}
+
+Please use this OTP to complete your mobile verification process securely.
+
+Powered By S&P Developments
+
+Thank You,
+Acropolis Digital Verification Team`;
 
 const row = `
 
@@ -457,6 +486,25 @@ ${student.verificationCode}
 
 </div>
 
+<br><br>
+
+<textarea
+id="msg-${student._id}"
+readonly
+style="
+width:100%;
+height:220px;
+padding:12px;
+border-radius:14px;
+border:1px solid #cbd5e1;
+font-size:13px;
+line-height:1.7;
+resize:none;
+background:#f8fafc;
+color:#0f172a;
+"
+>${fullMessage}</textarea>
+
 </td>
 
 <td>
@@ -477,7 +525,10 @@ ${student.smsSent ?
 
 <button
 class="action-btn send-btn"
-onclick="sendSMS('${student.phone}','${student.verificationCode}','${student.studentName}')"
+onclick="sendSMS(
+'${student.phone}',
+document.getElementById('msg-${student._id}').value
+)"
 >
 
 <i class="fa-solid fa-paper-plane"></i>
@@ -488,6 +539,18 @@ Send SMS
 
 <button
 class="action-btn done-btn"
+onclick="copyMessage('msg-${student._id}')"
+>
+
+<i class="fa-solid fa-copy"></i>
+
+Copy Message
+
+</button>
+
+<button
+class="action-btn"
+style="background:#2563eb;color:white;"
 onclick="markDone('${student._id}')"
 >
 
@@ -523,24 +586,47 @@ console.log(error);
 
 }
 
-/* SMS APP OPEN */
+/* COPY MESSAGE */
 
-function sendSMS(phone, otp, name){
+function copyMessage(textareaId){
+
+const textarea = document.getElementById(textareaId);
+
+textarea.select();
+
+textarea.setSelectionRange(0, 99999);
+
+navigator.clipboard.writeText(textarea.value);
+
+alert("Full message copied successfully");
+
+}
+
+/* SEND SMS */
+
+function sendSMS(phone, message){
 
 phone = phone.replace(/\s+/g,'');
 
-const message =
-"Welcome to Acropolis Institute of Studies & Research. " +
-"Dear " + name + ", " +
-"Your verification code is " + otp + ". " +
-"Please use this OTP to complete your mobile verification process. " +
-"Thank You - Acropolis Digital Verification Team.";
+/* COPY AUTOMATICALLY */
+
+navigator.clipboard.writeText(message);
+
+/* ENCODE MESSAGE */
 
 const encodedMessage = encodeURIComponent(message);
 
-/* OPEN MESSAGE APP */
+/* OPEN SMS APP */
 
 window.location.href = `sms:${phone}?body=${encodedMessage}`;
+
+/* ALERT */
+
+setTimeout(() => {
+
+alert("Message copied successfully. Just paste inside SMS app if full message is not auto-filled.");
+
+}, 1000);
 
 }
 
@@ -601,7 +687,6 @@ console.log(error);
 loadPendingStudents();
 
 </script>
-
 </body>
 
 </html>
