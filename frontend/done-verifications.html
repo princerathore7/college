@@ -2,650 +2,201 @@
 <html lang="en">
 
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verified Students</title>
 
-<title>Done Verifications - Acropolis Digital Campus</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Poppins',sans-serif;
-}
-
 body{
-background:#edf3fb;
-min-height:100vh;
-overflow-x:hidden;
+margin:0;
+font-family:Poppins;
+background:#f1f5f9;
 }
 
-/* TOPBAR */
-
-.topbar{
-width:100%;
-background:linear-gradient(135deg,#001f4d,#003366,#004080);
-padding:20px 35px;
-display:flex;
-justify-content:space-between;
-align-items:center;
+.header{
+background:#0f172a;
 color:white;
-box-shadow:0 5px 20px rgba(0,0,0,0.1);
-}
-
-.logo-area{
-display:flex;
-align-items:center;
-gap:15px;
-}
-
-.logo-box{
-width:65px;
-height:65px;
-background:white;
-border-radius:16px;
-padding:8px;
-display:flex;
-justify-content:center;
-align-items:center;
-}
-
-.logo-box img{
-width:100%;
-height:100%;
-object-fit:contain;
-}
-
-.logo-text h2{
-font-size:24px;
+padding:20px;
+text-align:center;
+font-size:22px;
 font-weight:700;
 }
 
-.logo-text p{
-font-size:13px;
-color:#dbeafe;
-}
-
-.back-btn{
-background:rgba(255,255,255,0.12);
-padding:12px 18px;
-border-radius:14px;
-font-size:14px;
-text-decoration:none;
-color:white;
-border:1px solid rgba(255,255,255,0.15);
-}
-
-/* MAIN */
-
-.main-container{
-padding:35px;
-}
-
-.page-title{
-margin-bottom:30px;
-}
-
-.page-title h1{
-font-size:36px;
-color:#002855;
-margin-bottom:10px;
-}
-
-.page-title p{
-font-size:15px;
-line-height:1.8;
-color:#64748b;
-}
-
-/* SEARCH BAR */
-
-.search-box{
-background:white;
+.container{
 padding:20px;
-border-radius:22px;
-margin-bottom:25px;
-box-shadow:0 10px 25px rgba(0,0,0,0.08);
-border:1px solid #dbe7f5;
 }
 
-.search-box input{
+input{
 width:100%;
-padding:16px;
-border:none;
-outline:none;
-border-radius:14px;
-background:#f7faff;
-font-size:15px;
-border:2px solid transparent;
-transition:0.3s;
-}
-
-.search-box input:focus{
-border-color:#003366;
-background:white;
-}
-
-/* TABLE */
-
-.table-container{
-background:white;
-border-radius:24px;
-padding:25px;
-overflow-x:auto;
-box-shadow:0 10px 30px rgba(0,0,0,0.08);
-border:1px solid #dbe7f5;
+padding:12px;
+border-radius:10px;
+border:1px solid #ccc;
+margin-bottom:20px;
+font-size:14px;
 }
 
 table{
 width:100%;
 border-collapse:collapse;
-min-width:1300px;
-}
-
-thead{
-background:#003366;
-color:white;
-}
-
-thead th{
-padding:18px;
-font-size:14px;
-font-weight:600;
-text-align:left;
-}
-
-tbody tr{
-border-bottom:1px solid #e2e8f0;
-transition:0.3s;
-}
-
-tbody tr:hover{
-background:#f8fbff;
-}
-
-tbody td{
-padding:18px;
-font-size:14px;
-color:#334155;
-line-height:1.8;
-vertical-align:top;
-}
-
-.student-photo{
-width:70px;
-height:70px;
-border-radius:14px;
-object-fit:cover;
-border:2px solid #dbe7f5;
-}
-
-.status-badge{
-padding:8px 14px;
-border-radius:30px;
-font-size:12px;
-font-weight:600;
-display:inline-block;
-background:#dcfce7;
-color:#166534;
-}
-
-.delete-btn{
-padding:12px 18px;
-border:none;
+background:white;
 border-radius:12px;
-font-size:14px;
-font-weight:600;
-cursor:pointer;
-background:#dc2626;
+overflow:hidden;
+box-shadow:0 10px 20px rgba(0,0,0,0.08);
+}
+
+th{
+background:#1e293b;
 color:white;
-transition:0.3s;
+padding:12px;
+text-align:left;
+font-size:14px;
 }
 
-.delete-btn:hover{
-transform:translateY(-2px);
+td{
+padding:12px;
+border-bottom:1px solid #eee;
+font-size:13px;
 }
 
-.loading-box{
-background:white;
-padding:40px;
+tr:hover{
+background:#f8fafc;
+}
+
+.badge{
+padding:5px 10px;
+background:#22c55e;
+color:white;
 border-radius:20px;
+font-size:12px;
+}
+
+img{
+width:45px;
+height:45px;
+border-radius:8px;
+object-fit:cover;
+}
+
+.loading{
 text-align:center;
-font-size:18px;
-color:#003366;
-box-shadow:0 10px 25px rgba(0,0,0,0.08);
-}
-
-.empty-box{
-background:white;
-padding:50px;
-border-radius:24px;
-text-align:center;
-box-shadow:0 10px 25px rgba(0,0,0,0.08);
-}
-
-.empty-box i{
-font-size:70px;
-color:#16a34a;
-margin-bottom:20px;
-}
-
-.empty-box h2{
-color:#002855;
-margin-bottom:12px;
-}
-
-.empty-box p{
-color:#64748b;
-}
-
-/* MOBILE */
-
-@media(max-width:900px){
-
-.topbar{
-flex-direction:column;
-gap:18px;
-align-items:flex-start;
-padding:22px;
-}
-
-.main-container{
 padding:20px;
+font-weight:600;
 }
-
-.page-title h1{
-font-size:30px;
-}
-
-}
-
 </style>
 
 </head>
 
 <body>
 
-<!-- TOPBAR -->
-
-<div class="topbar">
-
-<div class="logo-area">
-
-<div class="logo-box">
-<img src="logo.jpg" alt="Logo">
+<div class="header">
+Verified Students List
 </div>
 
-<div class="logo-text">
+<div class="container">
 
-<h2>
-Done Verification Records
-</h2>
+<input type="text" id="search" placeholder="Search by name, enrollment, email..." onkeyup="filterData()">
 
-<p>
-Acropolis Digital Verification System
-</p>
+<div class="loading" id="loading">Loading data...</div>
 
-</div>
-
-</div>
-
-<a href="verification-dashboard.html" class="back-btn">
-
-<i class="fa-solid fa-arrow-left"></i>
-
- Dashboard
-
-</a>
-
-</div>
-
-<!-- MAIN -->
-
-<div class="main-container">
-
-<div class="page-title">
-
-<h1>
-Verified Student Records
-</h1>
-
-<p>
-
-Access all completed verification records and successfully activated student digital identities.
-
-</p>
-
-</div>
-
-<!-- SEARCH -->
-
-<div class="search-box">
-
-<input
-type="text"
-id="searchInput"
-placeholder="Search by student name, enrollment, email or phone..."
-onkeyup="searchStudents()"
->
-
-</div>
-
-<!-- LOADING -->
-
-<div class="loading-box" id="loadingBox">
-
-Loading completed verification records...
-
-</div>
-
-<!-- TABLE -->
-
-<div class="table-container" id="tableContainer" style="display:none;">
-
-<table>
-
+<table id="table" style="display:none;">
 <thead>
-
 <tr>
-
 <th>Photo</th>
-<th>Student Info</th>
-<th>Contact</th>
-<th>Academic</th>
-<th>Verification Code</th>
+<th>Name</th>
+<th>Enrollment</th>
+<th>Email</th>
+<th>Phone</th>
+<th>Branch</th>
 <th>Status</th>
 <th>Verified At</th>
-<th>Actions</th>
-
 </tr>
-
 </thead>
 
-<tbody id="studentsTableBody">
-
-</tbody>
-
+<tbody id="tbody"></tbody>
 </table>
-
-</div>
-
-<!-- EMPTY -->
-
-<div class="empty-box" id="emptyBox" style="display:none;">
-
-<i class="fa-solid fa-circle-check"></i>
-
-<h2>
-No Completed Verifications
-</h2>
-
-<p>
-No student verification records are currently available.
-</p>
-
-</div>
 
 </div>
 
 <script>
 
-const tableBody = document.getElementById("studentsTableBody");
+let allData = [];
 
-const loadingBox = document.getElementById("loadingBox");
-
-const tableContainer = document.getElementById("tableContainer");
-
-const emptyBox = document.getElementById("emptyBox");
-
-let allStudents = [];
-
-/* LOAD DONE LIST */
-
-async function loadDoneStudents(){
+async function loadData(){
 
 try{
 
-const response = await fetch(
+const res = await fetch("https://college-hwbb.onrender.com/api/cleanup/verified-students");
+const data = await res.json();
 
-fetch("https://college-hwbb.onrender.com/api/cleanup/verified-students")
-
-);
-
-const data = await response.json();
-
-loadingBox.style.display = "none";
-
-if(data.success && data.students.length > 0){
-
-allStudents = data.students;
-
-tableContainer.style.display = "block";
-
-renderStudents(allStudents);
-
-}else{
-
-emptyBox.style.display = "block";
-
-}
-
-}catch(error){
-
-loadingBox.innerHTML = "Failed to load records";
-
-console.log(error);
-
-}
-
-}
-
-/* RENDER STUDENTS */
-
-function renderStudents(students){
-
-tableBody.innerHTML = "";
-
-students.forEach(student => {
-
-const row = `
-
-<tr>
-
-<td>
-
-<img
-src="${student.photo || 'default.png'}"
-class="student-photo"
->
-
-</td>
-
-<td>
-
-<b>${student.name}</b><br>
-
-Enrollment: ${student.enrollment}
-
-</td>
-
-<td>
-
-Email: ${student.email}<br>
-
-Phone: ${student.phone}
-
-</td>
-
-<td>
-
-Branch: ${student.branch}<br>
-
-Semester: ${student.semester}<br>
-
-Year: ${student.year}
-
-</td>
-
-<td>
-
-<b>${student.verificationCode}</b>
-
-</td>
-
-<td>
-
-<span class="status-badge">
-
-VERIFIED
-
-</span>
-
-</td>
-
-<td>
-
-${student.verifiedAt || "N/A"}
-
-</td>
-
-<td>
-
-<button
-class="delete-btn"
-onclick="deleteStudent('${student._id}')"
->
-
-<i class="fa-solid fa-trash"></i>
-
- Delete
-
-</button>
-
-</td>
-
-</tr>
-
-`;
-
-tableBody.innerHTML += row;
-
-});
-
-}
-
-/* SEARCH */
-
-function searchStudents(){
-
-const query = document.getElementById("searchInput")
-.value
-.toLowerCase();
-
-const filtered = allStudents.filter(student => {
-
-return (
-
-student.studentName.toLowerCase().includes(query)
-
-||
-
-student.enrollment.toLowerCase().includes(query)
-
-||
-
-student.email.toLowerCase().includes(query)
-
-||
-
-student.phone.toLowerCase().includes(query)
-
-);
-
-});
-
-renderStudents(filtered);
-
-}
-
-/* DELETE */
-
-async function deleteStudent(studentId){
-
-const confirmDelete = confirm(
-
-"Are you sure you want to delete this verification record?"
-
-);
-
-if(!confirmDelete){
-
-return;
-
-}
-
-try{
-
-const response = await fetch(
-
-"https://college-hwbb.onrender.com/api/admin/delete-done-student",
-
-{
-
-method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify({
-
-studentId:studentId
-
-})
-
-}
-
-);
-
-const data = await response.json();
+document.getElementById("loading").style.display = "none";
 
 if(data.success){
 
-alert("Verification record deleted successfully");
+allData = data.students;
 
-loadDoneStudents();
+document.getElementById("table").style.display = "table";
+
+render(allData);
 
 }else{
 
-alert(data.message);
+document.getElementById("loading").innerText = "No data found";
 
 }
 
-}catch(error){
+}catch(err){
 
-alert("Server Error");
-
-console.log(error);
-
-}
+console.log(err);
+document.getElementById("loading").innerText = "Server error";
 
 }
 
-/* AUTO LOAD */
+}
 
-loadDoneStudents();
+function render(data){
+
+const tbody = document.getElementById("tbody");
+tbody.innerHTML = "";
+
+data.forEach(s => {
+
+tbody.innerHTML += `
+<tr>
+<td><img src="${s.photo || 'https://via.placeholder.com/50'}"></td>
+<td>${s.studentName || s.name}</td>
+<td>${s.enrollment}</td>
+<td>${s.email || "-"}</td>
+<td>${s.phone || "-"}</td>
+<td>${s.branch || "-"}</td>
+<td><span class="badge">${s.status || "VERIFIED"}</span></td>
+<td>${s.verifiedAt ? new Date(s.verifiedAt).toLocaleString() : "-"}</td>
+</tr>
+`;
+
+});
+
+}
+
+function filterData(){
+
+const q = document.getElementById("search").value.toLowerCase();
+
+const filtered = allData.filter(s =>
+(s.studentName || s.name || "").toLowerCase().includes(q) ||
+(s.enrollment || "").toLowerCase().includes(q) ||
+(s.email || "").toLowerCase().includes(q) ||
+(s.phone || "").toLowerCase().includes(q)
+);
+
+render(filtered);
+
+}
+
+loadData();
 
 </script>
 
 </body>
-
 </html>
