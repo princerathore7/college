@@ -4,21 +4,21 @@ from db import db
 from datetime import datetime, timedelta
 
 # ---------------- BLUEPRINT ----------------
-
-cleanup_bp = Blueprint(
-    "cleanup_bp",
+verification_bp = Blueprint(
+    "verification_bp",
     __name__,
-    url_prefix="/api/cleanup"
+    url_prefix="/api/verification"
 )
 
-CORS(cleanup_bp)
+CORS(verification_bp)
 
 # ---------------- DATABASE ----------------
-
 pending_collection = db["pending_verifications"]
 verified_collection = db["verified_students"]
 
-# ---------------- AUTO CLEANUP FUNCTION ----------------
+# =====================================================
+# AUTO CLEANUP FUNCTION
+# =====================================================
 
 def delete_old_data():
 
@@ -39,9 +39,11 @@ def delete_old_data():
         "verifiedDeleted": verified_result.deleted_count
     }
 
-# ---------------- MANUAL CLEANUP ROUTE ----------------
+# =====================================================
+# MANUAL CLEANUP ROUTE
+# =====================================================
 
-@cleanup_bp.route("/delete-old-data", methods=["DELETE"])
+@verification_bp.route("/delete-old-data", methods=["DELETE"])
 def cleanup_old_data():
 
     try:
@@ -60,9 +62,11 @@ def cleanup_old_data():
         }), 500
 
 
-# ---------------- DATABASE STATUS ROUTE ----------------
+# =====================================================
+# DATABASE STATUS ROUTE
+# =====================================================
 
-@cleanup_bp.route("/database-status", methods=["GET"])
+@verification_bp.route("/database-status", methods=["GET"])
 def database_status():
 
     try:
@@ -84,16 +88,17 @@ def database_status():
         }), 500
 
 
-# ---------------- GET ALL VERIFIED STUDENTS (NEW ROUTE) ----------------
+# =====================================================
+# GET ALL VERIFIED STUDENTS
+# =====================================================
 
-@cleanup_bp.route("/verified-students", methods=["GET"])
+@verification_bp.route("/verified-students", methods=["GET"])
 def get_verified_students():
 
     try:
 
         students = list(
-            verified_collection.find({}, {"_id": 0})
-            .sort("verifiedAt", -1)
+            verified_collection.find({}, {"_id": 0}).sort("verifiedAt", -1)
         )
 
         return jsonify({
@@ -109,9 +114,11 @@ def get_verified_students():
         }), 500
 
 
-# ---------------- FORCE DELETE ALL PENDING ----------------
+# =====================================================
+# DELETE ALL PENDING
+# =====================================================
 
-@cleanup_bp.route("/delete-all-pending", methods=["DELETE"])
+@verification_bp.route("/delete-all-pending", methods=["DELETE"])
 def delete_all_pending():
 
     try:
@@ -130,9 +137,11 @@ def delete_all_pending():
         }), 500
 
 
-# ---------------- FORCE DELETE ALL VERIFIED ----------------
+# =====================================================
+# DELETE ALL VERIFIED
+# =====================================================
 
-@cleanup_bp.route("/delete-all-verified", methods=["DELETE"])
+@verification_bp.route("/delete-all-verified", methods=["DELETE"])
 def delete_all_verified():
 
     try:
