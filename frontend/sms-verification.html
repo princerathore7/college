@@ -534,34 +534,29 @@ console.log(error);
 }
 
 /* SEND SMS REDIRECTION */
-
 function sendSMS(phone, otp, name){
 
-const message = `Welcome to Acropolis Institute of Studies & Research.
+phone = phone.replace(/\s+/g, '');
+
+const message =
+`Welcome to Acropolis Institute of Studies & Research.
 
 Dear ${name},
 
-Your mobile verification code is:
+Your verification code is ${otp}.
 
-${otp}
+Please use this OTP to complete your mobile verification process.
 
-Please enter this OTP to complete your verification process.
-
-Thank You
+Thank You,
 Acropolis Digital Verification Team`;
 
 const encodedMessage = encodeURIComponent(message);
 
-/* REMOVE +91 ISSUES */
+/* ANDROID SAFE SMS OPEN */
 
-phone = phone.replace(/\s+/g, '');
-
-/* OPEN SMS APP */
-
-window.location.href = `sms:${phone}?body=${encodedMessage}`;
+window.location.href = `sms:${phone};?&body=${encodedMessage}`;
 
 }
-
 /* MARK DONE */
 
 async function markDone(studentId){
