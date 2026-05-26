@@ -11,7 +11,7 @@ gunicorn==21.2.0
 firebase-admin==7.1.0
 pywebpush==2.1.2
 razorpay==1.4.2
-setuptools>=68.0.0
+twilio==9.3.0
 pdfplumber==0.11.4
 pdfminer.six==20231228
 setuptools==69.5.1
