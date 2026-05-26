@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Device Approval Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin:0;
+  font-family: Arial;
+  background:#0f172a;
+  color:white;
+}
+
+.header {
+  padding:20px;
+  text-align:center;
+  background:#111827;
+  font-size:22px;
+  font-weight:bold;
+}
+
+.container {
+  padding:20px;
+  display:grid;
+  grid-template-columns: repeat(auto-fit,minmax(300px,1fr));
+  gap:15px;
+}
+
+.card {
+  background:#1e293b;
+  padding:15px;
+  border-radius:10px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.3);
+}
+
+.status {
+  padding:5px 10px;
+  border-radius:5px;
+  font-size:12px;
+  display:inline-block;
+  margin-bottom:10px;
+}
+
+.pending { background:orange; }
+.approved { background:green; }
+.rejected { background:red; }
+
+button {
+  padding:8px 12px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  margin-right:5px;
+}
+
+.approve { background:#22c55e; color:white; }
+.reject { background:#ef4444; color:white; }
+
+.refresh {
+  background:#3b82f6;
+  color:white;
+  padding:10px 15px;
+  border-radius:8px;
+  margin:15px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  🔐 SME Device Approval Panel
+</div>
+
+<div style="text-align:center;">
+  <button class="refresh" onclick="loadDevices()">Refresh Devices</button>
+</div>
+
+<div class="container" id="deviceList"></div>
+
+<script>
+
+const API = "https://college-hwbb.onrender.com";
+
+// ---------------- LOAD DEVICES ----------------
+async function loadDevices() {
+  const container = document.getElementById("deviceList");
+  container.innerHTML = "Loading...";
+
+  try {
+
+    // ⚠️ Backend endpoint should return all devices
+    const res = await fetch(API + "/api/sme/all-devices");
+    const data = await res.json();
+
+    container.innerHTML = "";
+
+    if (!data.devices || data.devices.length === 0) {
+      container.innerHTML = "<p>No devices found</p>";
+      return;
+    }
+
+    data.devices.forEach(d => {
+
+      const card = document.createElement("div");
+      card.className = "card";
+
+      card.innerHTML = `
+        <div class="status ${d.status}">${d.status}</div>
+        <p><b>SME ID:</b> ${d.sme_id}</p>
+        <p><b>Device:</b> ${d.device_id}</p>
+        <p><b>Date:</b> ${new Date(d.created_at).toLocaleString()}</p>
+
+        <button class="approve" onclick="approveDevice('${d.sme_id}','${d.device_id}')">
+          Approve
+        </button>
+
+        <button class="reject" onclick="rejectDevice('${d.sme_id}','${d.device_id}')">
+          Reject
+        </button>
+      `;
+
+      container.appendChild(card);
+    });
+
+  } catch (err) {
+    container.innerHTML = "Error loading devices";
+  }
+}
+
+// ---------------- APPROVE ----------------
+async function approveDevice(sme_id, device_id) {
+
+  await fetch(API + "/api/sme/approve-device", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ sme_id, device_id })
+  });
+
+  loadDevices();
+}
+
+// ---------------- REJECT ----------------
+async function rejectDevice(sme_id, device_id) {
+
+  await fetch(API + "/api/sme/reject-device", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ sme_id, device_id })
+  });
+
+  loadDevices();
+}
+
+// initial load
+loadDevices();
+
+</script>
+
+</body>
+</html>

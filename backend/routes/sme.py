@@ -185,7 +185,23 @@ def dashboard():
         "sme_id": user["sme_id"]
     })
 
+@sme_bp.route("/all-devices", methods=["GET"])
+def all_devices():
+    devices = list(sme_devices.find({}, {"_id": 0}))
+    return jsonify({"devices": devices})
+@sme_bp.route("/reject-device", methods=["POST"])
+def reject_device():
+    data = request.json
 
+    sme_id = data.get("sme_id")
+    device_id = data.get("device_id")
+
+    sme_devices.update_one(
+        {"sme_id": sme_id, "device_id": device_id},
+        {"$set": {"status": "rejected"}}
+    )
+
+    return jsonify({"message": "Device rejected"})
 # =====================================================
 # 6. DELETE SME ACCOUNT
 # =====================================================
@@ -202,3 +218,4 @@ def delete_sme(sme_id):
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
