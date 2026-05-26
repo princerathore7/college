@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 import jwt
 import os
-
+from db import db
 # ---------------- BLUEPRINT ----------------
 sme_bp = Blueprint("sme_bp", __name__, url_prefix="/api/sme")
 
