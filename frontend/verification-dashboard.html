@@ -501,7 +501,24 @@ Verified Students
 </div>
 
 </div>
+<script>
 
+// ================= TOKEN CHECK =================
+function getToken() {
+    return localStorage.getItem("sme_token");
+}
+
+// ================= REDIRECT IF NO TOKEN =================
+(function protectPage() {
+    const token = getToken();
+
+    if (!token) {
+        alert("Unauthorized Access! Please login first.");
+        window.location.href = "/sme-login.html";
+    }
+})();
+
+</script>
 <script>
 
 /* LOAD DATABASE STATUS */
