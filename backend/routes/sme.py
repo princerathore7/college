@@ -472,41 +472,62 @@ def all_devices():
 # =====================================================
 # 6. SME DASHBOARD
 # =====================================================
+# =====================================================
+# 5. SME DASHBOARD (PROTECTED)
+# =====================================================
 
 @sme_bp.route("/dashboard", methods=["GET"])
 def dashboard():
 
     try:
 
+        # ---------------- GET TOKEN ----------------
+
         token = request.headers.get("Authorization")
 
         if not token:
 
             return jsonify({
+                "success": False,
                 "error": "Token missing"
             }), 401
+
+        # ---------------- VERIFY TOKEN ----------------
 
         user = verify_sme_token(token)
 
         if not user:
 
             return jsonify({
+                "success": False,
                 "error": "Unauthorized device"
             }), 403
 
-        # ---------------- GET STATS ----------------
+        # ---------------- SME STATS ----------------
 
         stats = sme_stats.find_one({
             "sme_id": user["sme_id"]
         })
 
+        # ---------------- SME INFO ----------------
+
         sme = sme_users.find_one({
             "_id": ObjectId(user["sme_id"])
         })
 
+        # ---------------- DEFAULT EMPTY STATS ----------------
+
         if not stats:
 
-            stats = {}
+            stats = {
+                "total_email_verifications": 0,
+                "total_sms_verifications": 0,
+                "total_done_verifications": 0,
+                "today_verifications": 0,
+                "daily_target": 50
+            }
+
+        # ---------------- SUCCESS RESPONSE ----------------
 
         return jsonify({
 
@@ -518,7 +539,7 @@ def dashboard():
 
                 "sme_id": user["sme_id"],
 
-                "name": sme.get("name", "SME"),
+                "name": sme.get("name", "SME Member"),
 
                 "email": user["email"]
 
@@ -543,14 +564,14 @@ def dashboard():
 
             }
 
-        })
+        }), 200
 
     except Exception as e:
 
         return jsonify({
+            "success": False,
             "error": str(e)
         }), 500
-
 # =====================================================
 # 7. UPDATE SME VERIFICATION COUNTS
 # =====================================================
