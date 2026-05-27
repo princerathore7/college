@@ -1,7 +1,10 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from flask_cors import CORS
 from db import db
 from datetime import datetime, timedelta
+
+# IMPORT SME TOKEN VERIFY
+from routes.sme import verify_sme_token
 
 # ---------------- BLUEPRINT ----------------
 verification_bp = Blueprint(
@@ -47,6 +50,7 @@ def delete_old_data():
 def cleanup_old_data():
 
     try:
+
         result = delete_old_data()
 
         return jsonify({
@@ -56,43 +60,68 @@ def cleanup_old_data():
         }), 200
 
     except Exception as e:
+
         return jsonify({
             "success": False,
             "message": str(e)
         }), 500
 
-
 # =====================================================
 # DATABASE STATUS ROUTE
 # =====================================================
-@cleanup_bp.route("/database-status", methods=["GET"])
+
+@verification_bp.route("/database-status", methods=["GET"])
 def database_status():
 
-    token = request.headers.get("Authorization")
-
-    user = verify_sme_token(token)
-
-    if not user:
-        return jsonify({
-            "success": False,
-            "message": "Unauthorized"
-        }), 403
-
     try:
+
+        # ---------------- TOKEN ----------------
+
+        token = request.headers.get("Authorization")
+
+        if not token:
+            return jsonify({
+                "success": False,
+                "message": "Token missing"
+            }), 401
+
+        # ---------------- VERIFY SME ----------------
+
+        user = verify_sme_token(token)
+
+        if not user:
+            return jsonify({
+                "success": False,
+                "message": "Unauthorized"
+            }), 403
+
+        # ---------------- COUNTS ----------------
+
         pending_count = pending_collection.count_documents({})
         verified_count = verified_collection.count_documents({})
 
         return jsonify({
+
             "success": True,
+
             "database": {
+
                 "pendingRequests": pending_count,
+
                 "verifiedStudents": verified_count,
+
                 "doneRequests": 0
+
             }
+
         }), 200
 
     except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500
+
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
 
 # =====================================================
 # GET ALL VERIFIED STUDENTS
@@ -114,11 +143,11 @@ def get_verified_students():
         }), 200
 
     except Exception as e:
+
         return jsonify({
             "success": False,
             "message": str(e)
         }), 500
-
 
 # =====================================================
 # DELETE ALL PENDING
@@ -128,6 +157,7 @@ def get_verified_students():
 def delete_all_pending():
 
     try:
+
         result = pending_collection.delete_many({})
 
         return jsonify({
@@ -137,11 +167,11 @@ def delete_all_pending():
         }), 200
 
     except Exception as e:
+
         return jsonify({
             "success": False,
             "message": str(e)
         }), 500
-
 
 # =====================================================
 # DELETE ALL VERIFIED
@@ -151,6 +181,7 @@ def delete_all_pending():
 def delete_all_verified():
 
     try:
+
         result = verified_collection.delete_many({})
 
         return jsonify({
@@ -160,6 +191,7 @@ def delete_all_verified():
         }), 200
 
     except Exception as e:
+
         return jsonify({
             "success": False,
             "message": str(e)
