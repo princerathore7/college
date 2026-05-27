@@ -452,16 +452,22 @@ Acropolis Digital Verification Team`;
 const row = `
 
 <tr>
-
 <td>
 
 <img
-src="uploads/${student.photo}"
+src="https://college-hwbb.onrender.com/uploads/${student.photo}"
 class="student-photo"
+onerror="this.src='default-user.png'"
+style="
+width:70px;
+height:70px;
+object-fit:cover;
+border-radius:14px;
+border:2px solid #dbeafe;
+"
 >
 
 </td>
-
 <td>
 
 <b>${student.studentName}</b><br>
