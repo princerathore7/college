@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Verification Dashboard - Acropolis Digital Campus</title>
+<title>SME Verification Dashboard</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -28,7 +28,7 @@ min-height:100vh;
 overflow-x:hidden;
 }
 
-/* HEADER */
+/* ================= TOPBAR ================= */
 
 .topbar{
 width:100%;
@@ -38,7 +38,7 @@ display:flex;
 justify-content:space-between;
 align-items:center;
 color:white;
-box-shadow:0 5px 20px rgba(0,0,0,0.1);
+box-shadow:0 5px 20px rgba(0,0,0,0.15);
 }
 
 .logo-area{
@@ -52,16 +52,12 @@ width:65px;
 height:65px;
 background:white;
 border-radius:16px;
-padding:8px;
 display:flex;
 justify-content:center;
 align-items:center;
-}
-
-.logo-box img{
-width:100%;
-height:100%;
-object-fit:contain;
+font-size:28px;
+color:#003366;
+font-weight:bold;
 }
 
 .logo-text h2{
@@ -83,34 +79,163 @@ backdrop-filter:blur(8px);
 border:1px solid rgba(255,255,255,0.15);
 }
 
-/* MAIN */
+/* ================= MAIN ================= */
 
 .main-container{
-padding:40px;
+padding:35px;
 }
 
-.page-title{
+/* ================= HERO ================= */
+
+.hero{
+background:linear-gradient(135deg,#0f172a,#1e3a8a);
+padding:35px;
+border-radius:28px;
+color:white;
 margin-bottom:35px;
+position:relative;
+overflow:hidden;
+box-shadow:0 15px 40px rgba(0,0,0,0.15);
 }
 
-.page-title h1{
-font-size:36px;
-color:#002855;
+.hero::before{
+content:"";
+position:absolute;
+right:-80px;
+top:-80px;
+width:220px;
+height:220px;
+background:rgba(255,255,255,0.08);
+border-radius:50%;
+}
+
+.hero h1{
+font-size:38px;
+margin-bottom:12px;
+}
+
+.hero p{
+max-width:750px;
+line-height:1.8;
+font-size:15px;
+color:#dbeafe;
+}
+
+.hero span{
+font-weight:700;
+color:#93c5fd;
+}
+
+/* ================= SME INFO ================= */
+
+.sme-info-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+gap:20px;
+margin-top:30px;
+}
+
+.info-card{
+background:white;
+padding:25px;
+border-radius:22px;
+box-shadow:0 10px 30px rgba(0,0,0,0.08);
+border:1px solid #dbe7f5;
+transition:0.3s;
+}
+
+.info-card:hover{
+transform:translateY(-5px);
+}
+
+.info-icon{
+width:70px;
+height:70px;
+border-radius:18px;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:28px;
+margin-bottom:18px;
+color:white;
+}
+
+.blue{
+background:linear-gradient(135deg,#2563eb,#1d4ed8);
+}
+
+.green{
+background:linear-gradient(135deg,#16a34a,#22c55e);
+}
+
+.orange{
+background:linear-gradient(135deg,#ea580c,#f97316);
+}
+
+.purple{
+background:linear-gradient(135deg,#7c3aed,#8b5cf6);
+}
+
+.info-card h3{
+font-size:15px;
+color:#64748b;
 margin-bottom:10px;
 }
 
-.page-title p{
-color:#64748b;
-font-size:15px;
-line-height:1.8;
+.info-card p{
+font-size:28px;
+font-weight:700;
+color:#002855;
+word-break:break-word;
 }
 
-/* CARDS */
+/* ================= PROGRESS ================= */
+
+.progress-section{
+margin-top:35px;
+background:white;
+padding:30px;
+border-radius:25px;
+box-shadow:0 10px 30px rgba(0,0,0,0.08);
+border:1px solid #dbe7f5;
+}
+
+.progress-section h2{
+font-size:28px;
+color:#002855;
+margin-bottom:20px;
+}
+
+.progress-bar{
+width:100%;
+height:30px;
+background:#dbeafe;
+border-radius:50px;
+overflow:hidden;
+margin-top:15px;
+}
+
+.progress-fill{
+height:100%;
+width:0%;
+background:linear-gradient(135deg,#16a34a,#22c55e);
+border-radius:50px;
+transition:1s;
+display:flex;
+align-items:center;
+justify-content:center;
+color:white;
+font-weight:700;
+font-size:14px;
+}
+
+/* ================= CARDS ================= */
 
 .cards-grid{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
 gap:25px;
+margin-top:35px;
 }
 
 .dashboard-card{
@@ -196,58 +321,17 @@ transition:0.3s;
 background:#002855;
 }
 
-/* STATUS PANEL */
-
-.status-panel{
-margin-top:45px;
-background:white;
-padding:30px;
-border-radius:24px;
-box-shadow:0 10px 30px rgba(0,0,0,0.08);
-border:1px solid #dbe7f5;
-}
-
-.status-panel h2{
-font-size:28px;
-color:#002855;
-margin-bottom:25px;
-}
-
-.status-grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:20px;
-}
-
-.status-box{
-background:#f7faff;
-padding:25px;
-border-radius:18px;
-border:1px solid #dbe7f5;
-}
-
-.status-box h3{
-font-size:15px;
-color:#64748b;
-margin-bottom:10px;
-}
-
-.status-box p{
-font-size:34px;
-font-weight:700;
-color:#003366;
-}
-
-/* FOOTER */
+/* ================= FOOTER ================= */
 
 .footer{
-margin-top:40px;
+margin-top:45px;
 text-align:center;
 color:#64748b;
 font-size:14px;
+padding-bottom:30px;
 }
 
-/* MOBILE */
+/* ================= MOBILE ================= */
 
 @media(max-width:850px){
 
@@ -259,10 +343,10 @@ padding:22px;
 }
 
 .main-container{
-padding:25px;
+padding:20px;
 }
 
-.page-title h1{
+.hero h1{
 font-size:30px;
 }
 
@@ -274,24 +358,24 @@ font-size:30px;
 
 <body>
 
-<!-- TOPBAR -->
+<!-- ================= TOPBAR ================= -->
 
 <div class="topbar">
 
 <div class="logo-area">
 
 <div class="logo-box">
-<img src="logo.jpg" alt="Logo">
+SP
 </div>
 
 <div class="logo-text">
 
 <h2>
-Acropolis Verification Dashboard
+S&P SME Verification Dashboard
 </h2>
 
 <p>
-Digital Verification Management System
+Secure Digital Verification Management System
 </p>
 
 </div>
@@ -302,35 +386,180 @@ Digital Verification Management System
 
 <i class="fa-solid fa-user-shield"></i>
 
- SME / Mentor Access Panel
+ Authorized SME Access
 
 </div>
 
 </div>
 
-<!-- MAIN -->
+<!-- ================= MAIN ================= -->
 
 <div class="main-container">
 
-<div class="page-title">
+<!-- ================= HERO ================= -->
+
+<div class="hero">
 
 <h1>
-Verification Management Center
+Welcome Subject Matter Expert 🚀
 </h1>
 
 <p>
 
-Manage email verification requests, SMS approvals, completed student verifications and monitor the digital verification database professionally.
+You are officially authenticated and approved by 
+<span>S&P Developments</span>.
+
+We build systems. You build trust. Together we create a faster and more secure digital verification ecosystem.
+
+As a Subject Matter Expert (SME), your responsibility is to manage and process student verification workflows professionally.
 
 </p>
 
 </div>
 
-<!-- CARDS -->
+<!-- ================= SME INFO ================= -->
+
+<div class="sme-info-grid">
+
+<div class="info-card">
+
+<div class="info-icon blue">
+<i class="fa-solid fa-user"></i>
+</div>
+
+<h3>
+SME Email
+</h3>
+
+<p id="smeEmail">
+Loading...
+</p>
+
+</div>
+
+<div class="info-card">
+
+<div class="info-icon purple">
+<i class="fa-solid fa-id-card"></i>
+</div>
+
+<h3>
+SME ID
+</h3>
+
+<p id="smeId">
+Loading...
+</p>
+
+</div>
+
+<div class="info-card">
+
+<div class="info-icon green">
+<i class="fa-solid fa-calendar-check"></i>
+</div>
+
+<h3>
+Today's Count
+</h3>
+
+<p id="todayCount">
+0
+</p>
+
+</div>
+
+<div class="info-card">
+
+<div class="info-icon orange">
+<i class="fa-solid fa-chart-line"></i>
+</div>
+
+<h3>
+Total Count
+</h3>
+
+<p id="totalCount">
+0
+</p>
+
+</div>
+
+<div class="info-card">
+
+<div class="info-icon blue">
+<i class="fa-solid fa-envelope"></i>
+</div>
+
+<h3>
+Email Count
+</h3>
+
+<p id="emailCount">
+0
+</p>
+
+</div>
+
+<div class="info-card">
+
+<div class="info-icon green">
+<i class="fa-solid fa-mobile-screen"></i>
+</div>
+
+<h3>
+SMS Count
+</h3>
+
+<p id="smsCount">
+0
+</p>
+
+</div>
+
+<div class="info-card">
+
+<div class="info-icon purple">
+<i class="fa-solid fa-bullseye"></i>
+</div>
+
+<h3>
+Daily Target
+</h3>
+
+<p id="dailyTarget">
+0
+</p>
+
+</div>
+
+</div>
+
+<!-- ================= PROGRESS ================= -->
+
+<div class="progress-section">
+
+<h2>
+Today's Performance Progress
+</h2>
+
+<p style="color:#64748b;font-size:15px;">
+Track your daily verification target completion progress in real time.
+</p>
+
+<div class="progress-bar">
+
+<div class="progress-fill" id="progressFill">
+0%
+</div>
+
+</div>
+
+</div>
+
+<!-- ================= ACTION CARDS ================= -->
 
 <div class="cards-grid">
-
-<!-- EMAIL CARD -->
 
 <div class="dashboard-card">
 
@@ -346,7 +575,7 @@ Email Verification
 
 <p>
 
-Manage pending email verification requests and send personalized student verification codes manually.
+Manage pending email verification requests and send personalized verification codes.
 
 </p>
 
@@ -357,8 +586,6 @@ Open Email Panel
 </a>
 
 </div>
-
-<!-- SMS CARD -->
 
 <div class="dashboard-card">
 
@@ -374,7 +601,7 @@ SMS Verification
 
 <p>
 
-Review student mobile verification requests and manually dispatch SMS verification codes.
+Review and dispatch SMS verification requests securely.
 
 </p>
 
@@ -385,8 +612,6 @@ Open SMS Panel
 </a>
 
 </div>
-
-<!-- DONE CARD -->
 
 <div class="dashboard-card">
 
@@ -402,7 +627,7 @@ Done Verifications
 
 <p>
 
-Access all successfully completed verification records and approved student identities.
+View completed verification records processed by your SME account.
 
 </p>
 
@@ -414,8 +639,6 @@ Open Done List
 
 </div>
 
-<!-- DATABASE CARD -->
-
 <div class="dashboard-card">
 
 <div class="card-icon icon-db">
@@ -425,18 +648,18 @@ Open Done List
 </div>
 
 <h2>
-Database Status
+Database Analytics
 </h2>
 
 <p>
 
-Monitor pending requests, verified students and total database verification activity.
+Monitor your live verification performance and activity analytics.
 
 </p>
 
-<a href="#" class="card-btn" onclick="loadDatabaseStatus()">
+<a href="#" class="card-btn" onclick="loadDashboard()">
 
-Refresh Status
+Refresh Analytics
 
 </a>
 
@@ -444,92 +667,47 @@ Refresh Status
 
 </div>
 
-<!-- STATUS PANEL -->
-
-<div class="status-panel">
-
-<h2>
-Live Verification Database Status
-</h2>
-
-<div class="status-grid">
-
-<div class="status-box">
-
-<h3>
-Pending Requests
-</h3>
-
-<p id="pendingCount">
-0
-</p>
-
-</div>
-
-<div class="status-box">
-
-<h3>
-Done Requests
-</h3>
-
-<p id="doneCount">
-0
-</p>
-
-</div>
-
-<div class="status-box">
-
-<h3>
-Verified Students
-</h3>
-
-<p id="verifiedCount">
-0
-</p>
-
-</div>
-
-</div>
-
-</div>
-
 <div class="footer">
 
-© 2026 Acropolis Digital Verification System • Powered By S&P Developments
+© 2026 S&P Developments • SME Verification System
 
 </div>
 
 </div>
+
 <script>
 
-// ================= TOKEN CHECK =================
+/* ================= TOKEN CHECK ================= */
+
 function getToken() {
     return localStorage.getItem("sme_token");
 }
 
-// ================= REDIRECT IF NO TOKEN =================
+/* ================= PAGE PROTECTION ================= */
+
 (function protectPage() {
+
     const token = getToken();
 
     if (!token) {
-        alert("Unauthorized Access! Please login first.");
+
+        alert("Unauthorized Access");
+
         window.location.href = "/sme-login.html";
     }
+
 })();
 
-</script>
-<script>
+/* ================= LOAD DASHBOARD ================= */
 
-/* LOAD DATABASE STATUS */
-async function loadDatabaseStatus(){
+async function loadDashboard() {
 
-try{
+try {
 
 const token = localStorage.getItem("sme_token");
 
 const response = await fetch(
-    "https://college-hwbb.onrender.com/api/cleanup/database-status",
+    "https://college-hwbb.onrender.com/api/sme/dashboard",
     {
         method: "GET",
         headers: {
@@ -542,28 +720,75 @@ const data = await response.json();
 
 if(data.success){
 
-document.getElementById("pendingCount").innerText =
-data.database.pendingRequests;
+/* SME INFO */
 
-document.getElementById("doneCount").innerText =
-data.database.doneRequests || 0;
+document.getElementById("smeEmail").innerText =
+data.sme.email;
 
-document.getElementById("verifiedCount").innerText =
-data.database.verifiedStudents;
+document.getElementById("smeId").innerText =
+data.sme.sme_id;
 
-} else {
-    alert("Unauthorized access");
-    window.location.href = "/sme-login.html";
+/* COUNTS */
+
+document.getElementById("todayCount").innerText =
+data.stats.todayVerifications;
+
+document.getElementById("totalCount").innerText =
+data.stats.totalDoneVerifications;
+
+document.getElementById("emailCount").innerText =
+data.stats.totalEmailVerifications;
+
+document.getElementById("smsCount").innerText =
+data.stats.totalSMSVerifications;
+
+document.getElementById("dailyTarget").innerText =
+data.stats.dailyTarget;
+
+/* PROGRESS */
+
+const today = data.stats.todayVerifications;
+const target = data.stats.dailyTarget;
+
+let percentage = 0;
+
+if(target > 0){
+percentage = (today / target) * 100;
 }
 
-}catch(error){
+if(percentage > 100){
+percentage = 100;
+}
+
+document.getElementById("progressFill").style.width =
+percentage + "%";
+
+document.getElementById("progressFill").innerText =
+Math.floor(percentage) + "%";
+
+}
+else{
+
+alert("Session expired");
+
+window.location.href = "/sme-login.html";
+
+}
+
+}
+catch(error){
+
 console.log(error);
+
+alert("Server Error");
+
 }
 
 }
-/* AUTO LOAD */
 
-loadDatabaseStatus();
+/* ================= AUTO LOAD ================= */
+
+loadDashboard();
 
 </script>
 
