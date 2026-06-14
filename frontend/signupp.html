@@ -103,9 +103,89 @@ async function verifyPhoneOTP(){
  }
 }
 
-async function sendEmailOTP(){ alert("Use your existing email OTP route."); }
-function verifyEmailOTP(){ window.emailVerified=true; }
 
+async function sendEmailOTP() {
+
+    const email = document.getElementById("email").value.trim();
+
+    if (!email) {
+        alert("Enter Email Address First");
+        return;
+    }
+
+    // 6 digit OTP
+    window.generatedEmailOTP =
+        Math.floor(100000 + Math.random() * 900000).toString();
+
+    try {
+
+        const response = await fetch(
+            `${API_BASE}/send-email`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: email,
+                    subject: "Email Verification OTP",
+                    html: `
+                        <div style="font-family:Poppins,sans-serif">
+                            <h2>Acropolis Campus Verification</h2>
+                            <p>Your OTP is:</p>
+                            <h1>${window.generatedEmailOTP}</h1>
+                            <p>Do not share this OTP with anyone.</p>
+                        </div>
+                    `
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+
+            document.getElementById("emailStatus").innerHTML =
+                '<div class="success">OTP Sent To Email</div>';
+
+        } else {
+
+            document.getElementById("emailStatus").innerHTML =
+                '<div class="error">Failed To Send Email OTP</div>';
+
+        }
+
+    } catch (err) {
+
+        console.error(err);
+
+        document.getElementById("emailStatus").innerHTML =
+            '<div class="error">Email Service Error</div>';
+
+    }
+}
+
+function verifyEmailOTP() {
+
+    const enteredOTP =
+        document.getElementById("emailOtp").value.trim();
+
+    if (enteredOTP === window.generatedEmailOTP) {
+
+        window.emailVerified = true;
+
+        document.getElementById("emailStatus").innerHTML =
+            '<div class="success">Email Verified Successfully</div>';
+
+    } else {
+
+        window.emailVerified = false;
+
+        document.getElementById("emailStatus").innerHTML =
+            '<div class="error">Invalid Email OTP</div>';
+
+    }
+}
 async function signup(){
  if(!window.emailVerified){ alert("Verify Email First"); return; }
  if(!window.phoneVerified){ alert("Verify Mobile Number First"); return; }
