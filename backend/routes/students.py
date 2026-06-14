@@ -343,3 +343,75 @@ def get_login_stats():
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+@students_bp.route('/bulk-promote', methods=['PUT'])
+def bulk_promote_students():
+
+    data = request.json
+
+    current_year = data.get("current_year")
+    current_branch = data.get("current_branch")
+
+    target_year = data.get("target_year")
+    target_branch = data.get("target_branch")
+
+    section = data.get("section")   # optional
+
+    if not current_year or not current_branch:
+        return jsonify({
+            "success": False,
+            "message": "Current year and branch required"
+        }), 400
+
+    if not target_year or not target_branch:
+        return jsonify({
+            "success": False,
+            "message": "Target year and branch required"
+        }), 400
+
+    query = {
+        "year": current_year,
+        "branch": current_branch
+    }
+
+    # section optional hai
+    if section:
+        query["section"] = section
+
+    result = students_collection.update_many(
+        query,
+        {
+            "$set": {
+                "year": target_year,
+                "branch": target_branch
+            }
+        }
+    )
+
+    return jsonify({
+        "success": True,
+        "updated_students": result.modified_count,
+        "message": f"{result.modified_count} students promoted successfully"
+    }), 200
+@students_bp.route('/class-strength', methods=['POST'])
+def class_strength():
+
+    data = request.json
+
+    year = data.get("year")
+    branch = data.get("branch")
+    section = data.get("section")
+
+    query = {
+        "year": year,
+        "branch": branch
+    }
+
+    if section:
+        query["section"] = section
+
+    count = students_collection.count_documents(query)
+
+    return jsonify({
+        "success": True,
+        "total_students": count
+    })

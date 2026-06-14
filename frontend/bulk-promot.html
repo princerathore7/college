@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulk Student Promotion System | Acropolis</title>
+    <style>
+        /* --- CSS VARIABLES & RESET --- */
+        :root {
+            --primary-blue: #0f4c81; /* Acropolis Academic Blue */
+            --light-blue: #e6f0fa;
+            --accent-blue: #1ba0e2;
+            --danger-red: #e63946;
+            --danger-hover: #c1121f;
+            --success-green: #2a9d8f;
+            --text-dark: #2b2d42;
+            --text-light: #8d99ae;
+            --bg-gradient: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- TYPOGRAPHY & UTILITIES --- */
+        h1, h2, h3, h4 { color: var(--primary-blue); }
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
+
+        /* --- NAVBAR --- */
+        .navbar {
+            background: var(--primary-blue);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar img {
+            height: 50px;
+            margin-right: 1.5rem;
+            background: white;
+            padding: 5px;
+            border-radius: 8px;
+        }
+
+        .nav-titles h1 {
+            color: white;
+            font-size: 1.4rem;
+            margin-bottom: 0.2rem;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-titles p {
+            color: #b0c4de;
+            font-size: 0.9rem;
+        }
+
+        /* --- MAIN LAYOUT --- */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* --- GLASSMORPHISM CARDS --- */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
+            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.15);
+        }
+
+        .section-title {
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid var(--light-blue);
+            padding-bottom: 0.5rem;
+        }
+
+        /* --- FORM GRIDS --- */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--primary-blue);
+        }
+
+        .form-group select {
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+            background: white;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .form-group select:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(27, 160, 226, 0.2);
+        }
+
+        /* --- BUTTONS --- */
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0b3a63;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--danger-red);
+            color: white;
+            padding: 1.2rem 2rem;
+            font-size: 1.2rem;
+            width: 100%;
+            margin-top: 1rem;
+            box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: var(--danger-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(230, 57, 70, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--text-light);
+            color: var(--text-dark);
+        }
+        .btn-outline:hover { background: #f1f3f5; }
+
+        /* --- STATS & PREVIEW --- */
+        .stats-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            margin-top: 1rem;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @media (min-width: 768px) {
+            .stats-container {
+                grid-template-columns: 1fr 2fr;
+            }
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary-blue), #1a65a3);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 20px rgba(15, 76, 129, 0.2);
+        }
+
+        .stat-number {
+            font-size: 4rem;
+            font-weight: 700;
+            margin: 1rem 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            animation: pulse 2s infinite;
+        }
+
+        .preview-box {
+            background: var(--light-blue);
+            border-left: 5px solid var(--primary-blue);
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .preview-box strong { color: var(--primary-blue); }
+
+        /* --- MODALS & OVERLAYS --- */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .overlay.active .modal { transform: translateY(0); }
+
+        .modal h2 { margin-bottom: 1rem; }
+        .modal p { margin-bottom: 2rem; color: #555; }
+        
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        .modal-actions .btn { flex: 1; }
+
+        /* --- SPINNER --- */
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem auto;
+        }
+
+        /* --- ALERTS --- */
+        .alert-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .alert {
+            min-width: 250px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideInRight 0.4s ease forwards;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .alert.error { background: var(--danger-red); }
+        .alert.success { background: var(--success-green); }
+        .alert.info { background: var(--accent-blue); }
+
+        .alert-close {
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 15px;
+        }
+
+        /* --- SUCCESS SCREEN --- */
+        .success-card {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+        .success-icon {
+            font-size: 5rem;
+            color: var(--success-green);
+            margin-bottom: 1rem;
+            animation: bounceIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes bounceIn { 0% { transform: scale(0); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        @keyframes fadeOut { to { opacity: 0; transform: translateX(100%); } }
+
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <img src="logo.png" alt="Acropolis Logo" onerror="this.style.display='none'">
+        <div class="nav-titles">
+            <h1>Bulk Student Promotion System</h1>
+            <p>Academic Class Reassignment Panel</p>
+        </div>
+    </nav>
+
+    <div class="container" id="mainApp">
+
+        <div class="glass-card">
+            <h2 class="section-title">📤 Source Class (Current)</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="srcYear">Current Year *</label>
+                    <select id="srcYear">
+                        <option value="">Select Year...</option>
+                        <option value="1st Year">1st Year</option>
+                        <option value="2nd Year">2nd Year</option>
+                        <option value="3rd Year">3rd Year</option>
+                        <option value="4th Year">4th Year</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="srcBranch">Current Branch *</label>
+                    <select id="srcBranch">
+                        <option value="">Select Branch...</option>
+                        <option value="IT">IT</option>
+                        <option value="CSE">CSE</option>
+                        <option value="CSE-AIML">CSE-AIML</option>
+                        <option value="CSE-DS">CSE-DS</option>
+                        <option value="AIDS">AIDS</option>
+                        <option value="CSD">CSD</option>
+                        <option value="CIVIL">CIVIL</option>
+                        <option value="MECHANICAL">MECHANICAL</option>
+                        <option value="EC">EC</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="srcSection">Current Section (Optional)</label>
+                    <select id="srcSection">
+                        <option value="">All Sections</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                        <option value="E">E</option>
+                    </select>
+                </div>
+            </div>
+            <div style="margin-top: 1.5rem; text-align: right;">
+                <button class="btn btn-primary" onclick="findStudents()">
+                    🔍 Find Students
+                </button>
+            </div>
+        </div>
+
+        <div id="targetSection" class="glass-card hidden">
+            <h2 class="section-title">📥 Target Class (New)</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="tgtYear">New Year *</label>
+                    <select id="tgtYear" onchange="updatePreview()">
+                        <option value="">Select Year...</option>
+                        <option value="1st Year">1st Year</option>
+                        <option value="2nd Year">2nd Year</option>
+                        <option value="3rd Year">3rd Year</option>
+                        <option value="4th Year">4th Year</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tgtBranch">New Branch *</label>
+                    <select id="tgtBranch" onchange="updatePreview()">
+                        <option value="">Select Branch...</option>
+                        <option value="IT">IT</option>
+                        <option value="CSE">CSE</option>
+                        <option value="CSE-AIML">CSE-AIML</option>
+                        <option value="CSE-DS">CSE-DS</option>
+                        <option value="AIDS">AIDS</option>
+                        <option value="CSD">CSD</option>
+                        <option value="CIVIL">CIVIL</option>
+                        <option value="MECHANICAL">MECHANICAL</option>
+                        <option value="EC">EC</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tgtSection">New Section (Optional)</label>
+                    <select id="tgtSection" onchange="updatePreview()">
+                        <option value="">No Change / Empty</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                        <option value="E">E</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div id="statsSection" class="stats-container hidden">
+            <div class="stat-card">
+                <h3>Students Found</h3>
+                <div class="stat-number" id="studentCountDisplay">0</div>
+                <p>Ready for promotion</p>
+            </div>
+            
+            <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <h2 class="section-title">📝 Promotion Preview</h2>
+                    <div class="preview-box">
+                        <p><strong>From:</strong> <span id="previewFrom">-</span></p>
+                        <p style="margin: 10px 0; color: #888;">⬇️ Will be moved to ⬇️</p>
+                        <p><strong>To:</strong> <span id="previewTo">Select target details...</span></p>
+                    </div>
+                </div>
+                <button class="btn btn-danger" onclick="triggerPromoteModal()">
+                    ⚠️ PROMOTE STUDENTS
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="container hidden" id="successScreen">
+        <div class="glass-card success-card">
+            <div class="success-icon">✅</div>
+            <h1 style="color: var(--success-green); margin-bottom: 1rem;">Promotion Completed</h1>
+            <h3 id="successMessage" style="margin-bottom: 2rem; color: #555;">Students promoted successfully</h3>
+            
+            <div style="display: inline-block; text-align: left; background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 2rem;">
+                <p style="font-size: 1.2rem; margin-bottom: 0.5rem;"><strong>Matched Students:</strong> <span id="successMatched">0</span></p>
+                <p style="font-size: 1.2rem;"><strong>Updated Students:</strong> <span id="successUpdated">0</span></p>
+            </div>
+            <br>
+            <button class="btn btn-primary" onclick="location.reload()">Process Another Batch</button>
+        </div>
+    </div>
+
+    <div id="alertsContainer" class="alert-container"></div>
+
+    <div id="loaderOverlay" class="overlay">
+        <div class="modal" style="background: transparent; box-shadow: none;">
+            <div class="spinner"></div>
+            <h2 style="color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.5);" id="loaderText">Processing...</h2>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="overlay">
+        <div class="modal">
+            <h2 style="color: var(--danger-red);">Confirm Promotion</h2>
+            <p>You are about to promote <strong id="modalCount">0</strong> students.<br><br><strong>This action cannot be easily reversed.</strong> Are you absolutely sure you want to proceed?</p>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModal('confirmModal')">Cancel</button>
+                <button class="btn btn-danger" style="margin-top: 0;" onclick="executePromotion()">Yes, Promote</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://college-hwbb.onrender.com';
+        let currentFoundCount = 0;
+
+        // Utility: Show Toast Alerts
+        function showAlert(message, type = 'info') {
+            const container = document.getElementById('alertsContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert ${type}`;
+            alert.innerHTML = `
+                <span>${message}</span>
+                <span class="alert-close" onclick="this.parentElement.style.animation='fadeOut 0.3s forwards'; setTimeout(()=>this.parentElement.remove(), 300)">×</span>
+            `;
+            container.appendChild(alert);
+
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (alert.parentElement) {
+                    alert.style.animation = 'fadeOut 0.3s forwards';
+                    setTimeout(() => alert.remove(), 300);
+                }
+            }, 5000);
+        }
+
+        // Utility: Loader
+        function toggleLoader(show, text = 'Processing...') {
+            const overlay = document.getElementById('loaderOverlay');
+            document.getElementById('loaderText').innerText = text;
+            if (show) overlay.classList.add('active');
+            else overlay.classList.remove('active');
+        }
+
+        // Utility: Modals
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        // Core: Find Students (Count API)
+        async function findStudents() {
+            const year = document.getElementById('srcYear').value;
+            const branch = document.getElementById('srcBranch').value;
+            const section = document.getElementById('srcSection').value;
+
+            if (!year || !branch) {
+                showAlert('Please select both Current Year and Branch.', 'error');
+                return;
+            }
+
+            const payload = { current_year: year, current_branch: branch };
+            if (section) payload.current_section = section;
+
+            toggleLoader(true, 'Finding Students...');
+
+            try {
+                const response = await fetch(`${API_BASE}/bulk-promote/count`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('API Error: ' + response.status);
+                
+                const data = await response.json();
+                
+                toggleLoader(false);
+
+                // Assuming API returns { count: X } or similar. Adjusting defensively:
+                currentFoundCount = data.count !== undefined ? data.count : (data.students_found || 0);
+
+                if (currentFoundCount === 0) {
+                    showAlert('No students found for the selected criteria.', 'info');
+                    document.getElementById('targetSection').classList.add('hidden');
+                    document.getElementById('statsSection').classList.add('hidden');
+                    return;
+                }
+
+                // Show target and stats
+                document.getElementById('targetSection').classList.remove('hidden');
+                document.getElementById('statsSection').classList.remove('hidden');
+                
+                // Animate count up
+                animateValue('studentCountDisplay', 0, currentFoundCount, 1000);
+                
+                updatePreview();
+                showAlert(`Found ${currentFoundCount} students!`, 'success');
+
+            } catch (error) {
+                toggleLoader(false);
+                showAlert('Network failure or API error while fetching count.', 'error');
+                console.error(error);
+            }
+        }
+
+        // Core: Update UI Preview dynamically
+        function updatePreview() {
+            const sy = document.getElementById('srcYear').value;
+            const sb = document.getElementById('srcBranch').value;
+            const ss = document.getElementById('srcSection').value;
+            
+            const ty = document.getElementById('tgtYear').value;
+            const tb = document.getElementById('tgtBranch').value;
+            const ts = document.getElementById('tgtSection').value;
+
+            const fromStr = `${sy} - ${sb}${ss ? ' - Sec ' + ss : ''}`;
+            let toStr = "Select target details...";
+
+            if (ty && tb) {
+                toStr = `${ty} - ${tb}${ts ? ' - Sec ' + ts : ''}`;
+            }
+
+            document.getElementById('previewFrom').innerText = fromStr;
+            document.getElementById('previewTo').innerText = toStr;
+        }
+
+        // Core: Show Confirmation
+        function triggerPromoteModal() {
+            const ty = document.getElementById('tgtYear').value;
+            const tb = document.getElementById('tgtBranch').value;
+
+            if (!ty || !tb) {
+                showAlert('Please select New Year and New Branch before promoting.', 'error');
+                return;
+            }
+
+            document.getElementById('modalCount').innerText = currentFoundCount;
+            openModal('confirmModal');
+        }
+
+        // Core: Execute Promotion API
+        async function executePromotion() {
+            closeModal('confirmModal');
+
+            // Source
+            const sy = document.getElementById('srcYear').value;
+            const sb = document.getElementById('srcBranch').value;
+            const ss = document.getElementById('srcSection').value;
+            // Target
+            const ty = document.getElementById('tgtYear').value;
+            const tb = document.getElementById('tgtBranch').value;
+            const ts = document.getElementById('tgtSection').value;
+
+            const payload = {
+                current_year: sy,
+                current_branch: sb,
+                new_year: ty,
+                new_branch: tb
+            };
+            if (ss) payload.current_section = ss;
+            if (ts) payload.new_section = ts;
+
+            toggleLoader(true, 'Promoting Students...');
+
+            try {
+                const response = await fetch(`${API_BASE}/bulk-promote`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                toggleLoader(false);
+
+                if (response.ok && data.success) {
+                    showSuccessScreen(data);
+                } else {
+                    showAlert(data.message || 'Failed to promote students. Check input.', 'error');
+                }
+
+            } catch (error) {
+                toggleLoader(false);
+                showAlert('Network failure or API error during promotion.', 'error');
+                console.error(error);
+            }
+        }
+
+        // Core: Success Handling
+        function showSuccessScreen(data) {
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('successScreen').classList.remove('hidden');
+            
+            document.getElementById('successMessage').innerText = data.message || 'Students promoted successfully';
+            
+            // Animate final numbers
+            animateValue('successMatched', 0, data.matched_students || currentFoundCount, 1500);
+            animateValue('successUpdated', 0, data.modified_students || currentFoundCount, 1500);
+        }
+
+        // Utility: Number Counter Animation
+        function animateValue(id, start, end, duration) {
+            if (start === end) {
+                document.getElementById(id).innerHTML = end;
+                return;
+            }
+            let obj = document.getElementById(id);
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = Math.floor(progress * (end - start) + start);
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+    </script>
+</body>
+</html>

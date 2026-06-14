@@ -1,0 +1,71 @@
+from pathlib import Path
+
+html = r"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Student Signup</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f7fb;margin:0;padding:30px}
+.container{max-width:900px;margin:auto;background:#fff;padding:25px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.1)}
+h1{text-align:center}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+input,select,button{padding:12px;width:100%;box-sizing:border-box}
+.row{display:flex;gap:10px}
+.btn{background:#0b57d0;color:#fff;border:none;cursor:pointer}
+.status{margin-top:5px;font-size:14px}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Student Signup</h1>
+<div class="grid">
+<input id="name" placeholder="Full Name">
+<input id="enrollment" placeholder="Enrollment Number">
+<input id="email" placeholder="Email">
+<div>
+<div class="row">
+<input id="emailOtp" placeholder="Email OTP">
+<button class="btn" onclick="sendEmailOTP()">Send Email OTP</button>
+</div>
+<div id="emailStatus" class="status"></div>
+</div>
+<input id="phone" placeholder="Mobile Number">
+<div>
+<div class="row">
+<input id="phoneOtp" placeholder="Mobile OTP">
+<button class="btn" onclick="sendPhoneOTP()">Send Mobile OTP</button>
+</div>
+<div id="phoneStatus" class="status"></div>
+</div>
+<input id="password" type="password" placeholder="Password">
+<input id="repassword" type="password" placeholder="Re-enter Password">
+<select id="branch"><option>IT</option><option>CSE</option><option>AIDS</option></select>
+<select id="year"><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option></select>
+<select id="section"><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option></select>
+</div>
+<br>
+<button class="btn" onclick="signup()">Create Account</button>
+</div>
+
+<script>
+const API_BASE="https://college-hwbb.onrender.com";
+let emailVerified=false;
+let phoneVerified=false;
+
+function sendEmailOTP(){document.getElementById("emailStatus").innerHTML="OTP send logic here";}
+function sendPhoneOTP(){document.getElementById("phoneStatus").innerHTML="OTP send logic here";}
+
+function signup(){
+ if(!emailVerified){alert("Verify Email First");return;}
+ if(!phoneVerified){alert("Verify Mobile First");return;}
+ alert("Ready for signup API integration");
+}
+</script>
+</body>
+</html>"""
+
+path = "/mnt/data/student-signup.html"
+Path(path).write_text(html, encoding="utf-8")
+print(path)
