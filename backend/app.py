@@ -49,7 +49,7 @@ from routes.admin_verification import admin_verification_bp
 
 from routes.cleanup import cleanup_bp
 from routes.sme import sme_bp
-
+from routes.email import email_bp
 # ---------------------------------------------
 # FLASK APP SETUP
 # ---------------------------------------------
@@ -112,7 +112,7 @@ for bp in [
       forms_bp, bus_track_bp, per_message_bp, razorpay_bp,
     missing_bp, receipt_bp, canteen_bp, auth_bp, timetable_bp,  signup_bp,
 verification_bp, sme_bp, otp_bp,
-admin_verification_bp,
+admin_verification_bp, email_bp,
 cleanup_bp
 ]:
     app.register_blueprint(bp)
