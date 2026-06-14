@@ -561,7 +561,7 @@
             toggleLoader(true, 'Finding Students...');
 
             try {
-                const response = await fetch(`${API_BASE}/bulk-promote/count`, {
+                const response = await fetch(`${API_BASE}/class-strength`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
