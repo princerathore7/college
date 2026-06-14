@@ -25,7 +25,7 @@
 from flask import Blueprint, request, jsonify
 from twilio.rest import Client
 import os
-
+from flask_cors import cross_origin
 otp_bp = Blueprint("otp_bp", __name__)
 
 account_sid = os.getenv("TWILIO_ACCOUNT_SID")
@@ -37,6 +37,7 @@ SERVICE_SID = "VAbd04c0eb835458fa9cdf00ecd0a0910e"
 
 
 @otp_bp.route("/send-phone-otp", methods=["POST"])
+@cross_origin(origins="https://acropoliss.netlify.app")
 def send_phone_otp():
 
     data = request.json
@@ -68,6 +69,7 @@ def send_phone_otp():
 
 
 @otp_bp.route("/verify-phone-otp", methods=["POST"])
+@cross_origin(origins="https://acropoliss.netlify.app")
 def verify_phone_otp():
 
     data = request.json
