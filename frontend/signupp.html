@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Signup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
+body{min-height:100vh;background:linear-gradient(135deg,#001f4d,#003c8f,#005bea);display:flex;justify-content:center;align-items:center;padding:30px}
+.signup-box{width:100%;max-width:500px;background:#fff;border-radius:22px;padding:35px;box-shadow:0 15px 40px rgba(0,0,0,.25)}
+.logo{width:90px;height:90px;object-fit:cover;border-radius:50%;display:block;margin:auto auto 18px;border:4px solid #0b57d0}
+h1{text-align:center;color:#002b6b;margin-bottom:8px}
+.subtext{text-align:center;color:#666;margin-bottom:28px}
+.input-group{margin-bottom:18px}
+label{display:block;margin-bottom:8px;color:#002b6b;font-weight:600}
+input{width:100%;padding:14px;border-radius:12px;border:2px solid #dfe7ff}
+.otp-row{display:flex;gap:10px;margin-top:10px}
+.otp-row input{flex:1}
+.otp-btn,.main-btn{border:none;background:#0b57d0;color:#fff;border-radius:10px;cursor:pointer}
+.otp-btn{padding:12px 16px}
+.main-btn{width:100%;padding:15px;margin-top:20px}
+.success{color:green}.error{color:red}
+</style>
+</head>
+<body>
+<div class="signup-box">
+<img src="logo.jpg" class="logo">
+<h1>Student Signup</h1>
+<p class="subtext">Create your student account securely</p>
+
+<div class="input-group">
+<label>Full Name</label>
+<input type="text" id="name">
+</div>
+
+<div class="input-group">
+<label>Email Address</label>
+<input type="email" id="email">
+<div class="otp-row">
+<input type="text" id="emailOtp" placeholder="Enter Email OTP">
+<button class="otp-btn" onclick="sendEmailOTP()">Send OTP</button>
+</div>
+<button class="otp-btn" style="margin-top:10px;width:100%" onclick="verifyEmailOTP()">Verify Email OTP</button>
+<div id="emailStatus"></div>
+</div>
+
+<div class="input-group">
+<label>Mobile Number</label>
+<input type="text" id="phone" placeholder="+919876543210">
+<div class="otp-row">
+<input type="text" id="phoneOtp" placeholder="Enter Mobile OTP">
+<button class="otp-btn" onclick="sendPhoneOTP()">Send OTP</button>
+</div>
+<button class="otp-btn" style="margin-top:10px;width:100%" onclick="verifyPhoneOTP()">Verify Mobile OTP</button>
+<div id="phoneStatus"></div>
+</div>
+
+<div class="input-group">
+<label>Password</label>
+<input type="password" id="password">
+</div>
+
+<button class="main-btn" onclick="signup()">Create Account</button>
+</div>
+
+<script>
+window.emailVerified=false;
+window.phoneVerified=false;
+window.generatedEmailOTP="";
+
+async function sendPhoneOTP(){
+ const phone=document.getElementById("phone").value.trim();
+ const response=await fetch("/send-phone-otp",{
+  method:"POST",
+  headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({phone})
+ });
+ const data=await response.json();
+ document.getElementById("phoneStatus").innerHTML=data.success?
+ '<div class="success">OTP Sent Successfully</div>':
+ '<div class="error">'+(data.message||'Failed')+'</div>';
+}
+
+async function verifyPhoneOTP(){
+ const phone=document.getElementById("phone").value.trim();
+ const otp=document.getElementById("phoneOtp").value.trim();
+ const response=await fetch("/verify-phone-otp",{
+  method:"POST",
+  headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({phone,otp})
+ });
+ const data=await response.json();
+ if(data.success){
+   window.phoneVerified=true;
+   document.getElementById("phoneStatus").innerHTML='<div class="success">Mobile Number Verified</div>';
+ }else{
+   document.getElementById("phoneStatus").innerHTML='<div class="error">Invalid Mobile OTP</div>';
+ }
+}
+
+async function sendEmailOTP(){ alert("Use your existing email OTP route."); }
+function verifyEmailOTP(){ window.emailVerified=true; }
+
+async function signup(){
+ if(!window.emailVerified){ alert("Verify Email First"); return; }
+ if(!window.phoneVerified){ alert("Verify Mobile Number First"); return; }
+ alert("Ready for signup API call");
+}
+</script>
+</body>
+</html>
