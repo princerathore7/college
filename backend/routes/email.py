@@ -44,12 +44,13 @@
 from flask import Blueprint, request, jsonify
 import requests
 import os
-
+from flask_cors import cross_origin
 email_bp = Blueprint("email_bp", __name__)
 
 RESEND_API_KEY = os.getenv("EMAIL_API")
 
 @email_bp.route("/send-email", methods=["POST"])
+@cross_origin(origins="https://acropoliss.netlify.app")
 def send_email():
 
     data = request.json
