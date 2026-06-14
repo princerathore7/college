@@ -397,9 +397,9 @@ def class_strength():
 
     data = request.json
 
-    year = data.get("year")
-    branch = data.get("branch")
-    section = data.get("section")
+    year = data.get("current_year")
+    branch = data.get("current_branch")
+    section = data.get("current_section")
 
     query = {
         "year": year,
@@ -413,5 +413,5 @@ def class_strength():
 
     return jsonify({
         "success": True,
-        "total_students": count
+        "count": count
     })

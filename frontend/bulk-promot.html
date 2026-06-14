@@ -555,13 +555,18 @@
                 return;
             }
 
-            const payload = { current_year: year, current_branch: branch };
-            if (section) payload.current_section = section;
+const payload = {
+    year: year,
+    branch: branch
+};
+
+if(section)
+    payload.section = section;
 
             toggleLoader(true, 'Finding Students...');
 
             try {
-                const response = await fetch(`${API_BASE}/class-strength`, {
+const response = await fetch(`${API_BASE}/api/students/class-strength`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -660,7 +665,7 @@
             toggleLoader(true, 'Promoting Students...');
 
             try {
-                const response = await fetch(`${API_BASE}/bulk-promote`, {
+const response = await fetch(`${API_BASE}/api/students/bulk-promote`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -691,7 +696,7 @@
             
             // Animate final numbers
             animateValue('successMatched', 0, data.matched_students || currentFoundCount, 1500);
-            animateValue('successUpdated', 0, data.modified_students || currentFoundCount, 1500);
+            animateValue('successUpdated', 0, data.updated_students || currentFoundCount, 1500);
         }
 
         // Utility: Number Counter Animation
