@@ -40,7 +40,7 @@ from routes.receipt import receipt_bp
 from routes.canteen import canteen_bp
 from routes.auth import auth_bp
 from routes.timetable import timetable_bp
-# from routes.otp import otp_bp
+from routes.otp import otp_bp
 from routes.signup import signup_bp
 
 from routes.verification import verification_bp
