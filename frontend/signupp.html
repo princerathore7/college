@@ -88,7 +88,8 @@ async function sendPhoneOTP(){
 async function verifyPhoneOTP(){
  const phone=document.getElementById("phone").value.trim();
  const otp=document.getElementById("phoneOtp").value.trim();
- const response=await fetch("/verify-phone-otp",{
+ const response=await fetch(
+   `${API_BASE}/verify-phone-otp`,{
   method:"POST",
   headers:{"Content-Type":"application/json"},
   body:JSON.stringify({phone,otp})
