@@ -67,13 +67,14 @@ input{width:100%;padding:14px;border-radius:12px;border:2px solid #dfe7ff}
 </div>
 
 <script>
+    const API_BASE = "https://college-hwbb.onrender.com";
 window.emailVerified=false;
 window.phoneVerified=false;
 window.generatedEmailOTP="";
 
 async function sendPhoneOTP(){
  const phone=document.getElementById("phone").value.trim();
- const response=await fetch("/send-phone-otp",{
+ const response=await fetch(`${API_BASE}/send-phone-otp`,{
   method:"POST",
   headers:{"Content-Type":"application/json"},
   body:JSON.stringify({phone})
