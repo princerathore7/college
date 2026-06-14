@@ -35,6 +35,48 @@ input{width:100%;padding:14px;border-radius:12px;border:2px solid #dfe7ff}
 <label>Full Name</label>
 <input type="text" id="name">
 </div>
+<div class="input-group">
+<label>Enrollment Number</label>
+<input type="text" id="enrollment" required>
+</div>
+
+<div class="input-group">
+<label>Year</label>
+<select id="year" required>
+<option value="">Select Year</option>
+<option value="1st Year">1st Year</option>
+<option value="2nd Year">2nd Year</option>
+<option value="3rd Year">3rd Year</option>
+<option value="4th Year">4th Year</option>
+</select>
+</div>
+
+<div class="input-group">
+<label>Branch</label>
+<select id="branch" required>
+<option value="">Select Branch</option>
+<option value="IT">IT</option>
+<option value="CSE">CSE</option>
+<option value="AIDS">AIDS</option>
+<option value="CSD">CSD</option>
+<option value="CSIT">CSIT</option>
+<option value="ME">ME</option>
+<option value="CE">CE</option>
+</select>
+</div>
+
+<div class="input-group">
+<label>Section</label>
+<select id="section" required>
+<option value="">Select Section</option>
+<option value="A">A</option>
+<option value="B">B</option>
+<option value="C">C</option>
+<option value="D">D</option>
+<option value="E">E</option>
+</select>
+</div>
+
 
 <div class="input-group">
 <label>Email Address</label>
@@ -61,6 +103,10 @@ input{width:100%;padding:14px;border-radius:12px;border:2px solid #dfe7ff}
 <div class="input-group">
 <label>Password</label>
 <input type="password" id="password">
+</div>
+<div class="input-group">
+<label>Re-enter Password</label>
+<input type="password" id="confirmPassword" required>
 </div>
 
 <button class="main-btn" onclick="signup()">Create Account</button>
@@ -187,9 +233,99 @@ function verifyEmailOTP() {
     }
 }
 async function signup(){
- if(!window.emailVerified){ alert("Verify Email First"); return; }
- if(!window.phoneVerified){ alert("Verify Mobile Number First"); return; }
- alert("Ready for signup API call");
+
+    if(!window.emailVerified){
+        alert("Verify Email First");
+        return;
+    }
+
+    if(!window.phoneVerified){
+        alert("Verify Mobile Number First");
+        return;
+    }
+
+    const name = document.getElementById("name").value.trim();
+    const enrollment = document.getElementById("enrollment").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+
+    const year = document.getElementById("year").value;
+    const branch = document.getElementById("branch").value;
+    const section = document.getElementById("section").value;
+
+    const password = document.getElementById("password").value;
+    const confirmPassword =
+        document.getElementById("confirmPassword").value;
+
+    if(
+        !name ||
+        !enrollment ||
+        !email ||
+        !phone ||
+        !year ||
+        !branch ||
+        !section ||
+        !password
+    ){
+        alert("Please fill all fields");
+        return;
+    }
+
+    if(password !== confirmPassword){
+        alert("Passwords do not match");
+        return;
+    }
+
+    try{
+
+        const response = await fetch(
+            `${API_BASE}/api/students/signup`,
+            {
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({
+                    name:name,
+                    enrollment:enrollment,
+                    password:password,
+                    email:email,
+                    phone:phone,
+
+                    // Branch field me year + section combine
+                    // kyunki backend get_collection_name()
+                    // branch field hi use kar raha hai
+
+                    branch:`${year}-${branch}-${section}`,
+
+                    year:year,
+                    section:section
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if(data.success){
+
+            alert("Signup Successful");
+
+            window.location.href =
+                "student-login.html";
+
+        }else{
+
+            alert(data.message || "Signup Failed");
+
+        }
+
+    }catch(err){
+
+        console.error(err);
+
+        alert("Server Error");
+
+    }
 }
 </script>
 </body>
