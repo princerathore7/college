@@ -368,7 +368,7 @@
                     <select id="srcYear">
                         <option value="">Select Year...</option>
                         <option value="1st Year">1st Year</option>
-                        <option value="2">2nd Year</option>
+                        <option value="2nd Year">2nd Year</option>
                         <option value="3rd Year">3rd Year</option>
                         <option value="4th Year">4th Year</option>
                     </select>
@@ -556,13 +556,12 @@
             }
 
 const payload = {
-    year: year,
-    branch: branch
+    current_year: year,
+    current_branch: branch
 };
 
 if(section)
-    payload.section = section;
-
+    payload.current_section = section;
             toggleLoader(true, 'Finding Students...');
 
             try {
@@ -653,12 +652,12 @@ const response = await fetch(`${API_BASE}/api/students/class-strength`, {
             const tb = document.getElementById('tgtBranch').value;
             const ts = document.getElementById('tgtSection').value;
 
-            const payload = {
-                current_year: sy,
-                current_branch: sb,
-                new_year: ty,
-                new_branch: tb
-            };
+const payload = {
+    current_year: sy,
+    current_branch: sb,
+    target_year: ty,
+    target_branch: tb
+};
             if (ss) payload.current_section = ss;
             if (ts) payload.new_section = ts;
 
@@ -666,7 +665,7 @@ const response = await fetch(`${API_BASE}/api/students/class-strength`, {
 
             try {
 const response = await fetch(`${API_BASE}/api/students/bulk-promote`, {
-                    method: 'POST',
+                    method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
