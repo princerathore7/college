@@ -228,9 +228,9 @@ async function sendEmailOTP() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 email: email,
-                subject: "Acropolis Campus Email Verification OTP",
+                subject: "Acropolis Campus ",
                 html: `<div style="font-family:Poppins,sans-serif">
-                            <h2>Hey Student We are so Happy to welcome you to  Acropolis campus digital poral</h2>
+                            <h2>Campus Verification</h2>
                             <p>Your OTP is:</p>
                             <h1>${window.generatedEmailOTP}</h1>
                             <p>Do not share this OTP with anyone.</p>
