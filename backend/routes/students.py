@@ -415,3 +415,28 @@ def class_strength():
         "success": True,
         "count": count
     })
+# ----------------- CHECK UNIQUE EMAIL / PHONE -----------------
+@students_bp.route("/check-unique", methods=["POST"])
+def check_unique():
+    try:
+        data = request.get_json()
+        email = data.get("email")
+        phone = data.get("phone")
+
+        # Check if email exists
+        if email:
+            existing_email = students_collection.find_one({"email": email})
+            if existing_email:
+                return jsonify({"success": False, "message": "This Email is already registered."}), 200
+
+        # Check if phone exists
+        if phone:
+            existing_phone = students_collection.find_one({"phone": phone})
+            if existing_phone:
+                return jsonify({"success": False, "message": "This Mobile Number is already registered."}), 200
+
+        # If neither exists
+        return jsonify({"success": True, "message": "Unique"}), 200
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500

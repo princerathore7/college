@@ -69,11 +69,11 @@ input{width:100%;padding:14px;border-radius:12px;border:2px solid #dfe7ff}
 <label>Section</label>
 <select id="section" required>
 <option value="">Select Section</option>
-<option value="A">A</option>
-<option value="B">B</option>
-<option value="C">C</option>
-<option value="D">D</option>
-<option value="E">E</option>
+<option value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option>
 </select>
 </div>
 
@@ -82,8 +82,8 @@ input{width:100%;padding:14px;border-radius:12px;border:2px solid #dfe7ff}
 <label>Email Address</label>
 <input type="email" id="email">
 <div class="otp-row">
-<input type="text" id="emailOtp" placeholder="Enter Email OTP">
-<button class="otp-btn" onclick="sendEmailOTP()">Send OTP</button>
+    <input type="text" id="emailOtp" placeholder="Enter Email OTP">
+    <button class="otp-btn" id="emailOtpBtn" onclick="sendEmailOTP()">Send OTP</button>
 </div>
 <button class="otp-btn" style="margin-top:10px;width:100%" onclick="verifyEmailOTP()">Verify Email OTP</button>
 <div id="emailStatus"></div>
@@ -93,8 +93,8 @@ input{width:100%;padding:14px;border-radius:12px;border:2px solid #dfe7ff}
 <label>Mobile Number</label>
 <input type="text" id="phone" placeholder="+919876543210">
 <div class="otp-row">
-<input type="text" id="phoneOtp" placeholder="Enter Mobile OTP">
-<button class="otp-btn" onclick="sendPhoneOTP()">Send OTP</button>
+    <input type="text" id="phoneOtp" placeholder="Enter Mobile OTP">
+    <button class="otp-btn" id="phoneOtpBtn" onclick="sendPhoneOTP()">Send OTP</button>
 </div>
 <button class="otp-btn" style="margin-top:10px;width:100%" onclick="verifyPhoneOTP()">Verify Mobile OTP</button>
 <div id="phoneStatus"></div>
@@ -117,20 +117,67 @@ input{width:100%;padding:14px;border-radius:12px;border:2px solid #dfe7ff}
 window.emailVerified=false;
 window.phoneVerified=false;
 window.generatedEmailOTP="";
+// ✅ NEW: Timer Function
+function startOtpTimer(buttonId, durationInSeconds) {
+    const btn = document.getElementById(buttonId);
+    btn.disabled = true;
+    let time = durationInSeconds;
+    
+    // Original button background store kar lo taaki disable hone pe color change dikhe
+    btn.style.backgroundColor = "#cccccc"; 
+    btn.style.cursor = "not-allowed";
 
-async function sendPhoneOTP(){
- const phone=document.getElementById("phone").value.trim();
- const response=await fetch(`${API_BASE}/send-phone-otp`,{
-  method:"POST",
-  headers:{"Content-Type":"application/json"},
-  body:JSON.stringify({phone})
- });
- const data=await response.json();
- document.getElementById("phoneStatus").innerHTML=data.success?
- '<div class="success">OTP Sent Successfully</div>':
- '<div class="error">'+(data.message||'Failed')+'</div>';
+    const timer = setInterval(() => {
+        let minutes = Math.floor(time / 60);
+        let seconds = time % 60;
+        seconds = seconds < 10 ? '0' + seconds : seconds;
+        
+        btn.innerText = `Wait ${minutes}:${seconds}`;
+        time--;
+
+        if (time < 0) {
+            clearInterval(timer);
+            btn.disabled = false;
+            btn.innerText = "Resend OTP";
+            btn.style.backgroundColor = "#0b57d0";
+            btn.style.cursor = "pointer";
+        }
+    }, 1000);
 }
+async function sendPhoneOTP() {
+    const phone = document.getElementById("phone").value.trim();
+    if (!phone) {
+        alert("Enter Mobile Number First");
+        return;
+    }
 
+    // 1. Check if phone is unique
+    const checkRes = await fetch(`${API_BASE}/api/students/check-unique`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: phone })
+    });
+    const checkData = await checkRes.json();
+
+    if (!checkData.success) {
+        document.getElementById("phoneStatus").innerHTML = `<div class="error">${checkData.message}</div>`;
+        return; // Stop here if duplicate
+    }
+
+    // 2. Start 5 Minutes (300 seconds) Timer
+    startOtpTimer("phoneOtpBtn", 300);
+
+    // 3. Send OTP
+    const response = await fetch(`${API_BASE}/send-phone-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone })
+    });
+    const data = await response.json();
+    document.getElementById("phoneStatus").innerHTML = data.success ?
+        '<div class="success">OTP Sent Successfully</div>' :
+        '<div class="error">' + (data.message || 'Failed') + '</div>';
+}
 async function verifyPhoneOTP(){
  const phone=document.getElementById("phone").value.trim();
  const otp=document.getElementById("phoneOtp").value.trim();
@@ -151,66 +198,58 @@ async function verifyPhoneOTP(){
 
 
 async function sendEmailOTP() {
-
     const email = document.getElementById("email").value.trim();
-
     if (!email) {
         alert("Enter Email Address First");
         return;
     }
 
-    // 6 digit OTP
-    window.generatedEmailOTP =
-        Math.floor(100000 + Math.random() * 900000).toString();
+    // 1. Check if email is unique
+    const checkRes = await fetch(`${API_BASE}/api/students/check-unique`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email })
+    });
+    const checkData = await checkRes.json();
 
+    if (!checkData.success) {
+        document.getElementById("emailStatus").innerHTML = `<div class="error">${checkData.message}</div>`;
+        return; // Stop here if duplicate
+    }
+
+    // 2. Start 5 Minutes (300 seconds) Timer
+    startOtpTimer("emailOtpBtn", 300);
+
+    // 3. Send OTP
+    window.generatedEmailOTP = Math.floor(100000 + Math.random() * 900000).toString();
     try {
-
-        const response = await fetch(
-            `${API_BASE}/send-email`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    email: email,
-                    subject: "Email Verification OTP",
-                    html: `
-                        <div style="font-family:Poppins,sans-serif">
-                            <h2>Acropolis Campus Verification</h2>
+        const response = await fetch(`${API_BASE}/send-email`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                email: email,
+                subject: "Acropolis Campus Email Verification OTP",
+                html: `<div style="font-family:Poppins,sans-serif">
+                            <h2>Hey Student We are so Happy to welcome you to  Acropolis campus digital poral</h2>
                             <p>Your OTP is:</p>
                             <h1>${window.generatedEmailOTP}</h1>
                             <p>Do not share this OTP with anyone.</p>
-                        </div>
-                    `
-                })
-            }
-        );
+                       </div>`
+            })
+        });
 
         const data = await response.json();
-
         if (data.success) {
-
-            document.getElementById("emailStatus").innerHTML =
-                '<div class="success">OTP Sent To Email</div>';
-
+            document.getElementById("emailStatus").innerHTML = '<div class="success">OTP Sent To Email</div>';
         } else {
-
-            document.getElementById("emailStatus").innerHTML =
-                '<div class="error">Failed To Send Email OTP</div>';
-
+            document.getElementById("emailStatus").innerHTML = '<div class="error">Failed To Send Email OTP</div>';
+            // Agar email fail ho jaye, toh chahein toh timer reset kar sakte hain, par UI consistency ke liye chalne dena theek hai.
         }
-
     } catch (err) {
-
         console.error(err);
-
-        document.getElementById("emailStatus").innerHTML =
-            '<div class="error">Email Service Error</div>';
-
+        document.getElementById("emailStatus").innerHTML = '<div class="error">Email Service Error</div>';
     }
 }
-
 function verifyEmailOTP() {
 
     const enteredOTP =
