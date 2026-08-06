@@ -153,8 +153,18 @@ def populate_timetable_faculties(timetable):
             lec["faculty"] = resolve_faculty(faculty_ids)
 
     return timetable
-
-
+def lecture_request_exists(class_name, target_mentor_id, day, start_time):
+    """
+    Helper function to prevent duplicate pending lecture requests.
+    """
+    existing = db.lecture_requests.find_one({
+        "className": class_name,
+        "targetMentorId": target_mentor_id,
+        "day": day,
+        "startTime": start_time,
+        "status": "pending"
+    })
+    return bool(existing)
 def find_conflicts(faculty_ids, day, start_mins, end_mins, current_class):
     """
     Checks if any faculty is already scheduled in an overlapping time
@@ -188,6 +198,7 @@ def find_conflicts(faculty_ids, day, start_mins, end_mins, current_class):
 
         if conflict_doc:
             for lec in conflict_doc.get("weeklySchedule", {}).get(day, []):
+                # Apply overlap logic: newStart < existingEnd AND newEnd > existingStart
                 if (
                     fid in clean_id_list(lec.get("facultyIds", [])) and
                     lec.get("status") == "approved" and
@@ -208,8 +219,6 @@ def find_conflicts(faculty_ids, day, start_mins, end_mins, current_class):
                     })
 
     return conflicts
-
-
 # =========================================================
 # MENTOR SEARCH API
 # =========================================================
@@ -300,7 +309,6 @@ def get_approval_mode(mentor_id):
 # =========================================================
 # LECTURE REQUESTS APIs
 # =========================================================
-
 @timetable_bp.route("/request-lecture", methods=["POST"])
 def request_lecture():
     try:
@@ -309,18 +317,28 @@ def request_lecture():
         target_id = data.get("targetMentorId")
         day = data.get("day")
         start_time = data.get("startTime")
+        end_time = data.get("endTime")
         class_name = data.get("className")
         
-        existing = db.lecture_requests.find_one({
-            "className": class_name,
-            "targetMentorId": target_id,
-            "day": day,
-            "startTime": start_time,
-            "status": "pending"
-        })
-        
-        if existing:
+        if lecture_request_exists(class_name, target_id, day, start_time):
             return jsonify({"success": True, "message": "Request already exists", "requestCreated": False})
+
+        try:
+            start_mins = time_to_minutes(start_time)
+            end_mins = time_to_minutes(end_time)
+        except ValueError as ve:
+            return jsonify({"success": False, "message": str(ve)}), 400
+
+        # Verify conflict first. Never create request if no occupied lecture exists
+        conflicts = find_conflicts([target_id], day, start_mins, end_mins, class_name)
+        
+        if not conflicts:
+            return jsonify({
+                "success": False, 
+                "message": "No conflict found. Cannot request a lecture when the mentor is free."
+            }), 400
+
+        conflict = conflicts[0]
             
         req_doc = {
             "requesterMentorId": data.get("requesterMentorId", ""),
@@ -328,15 +346,15 @@ def request_lecture():
             "requesterName": data.get("requesterName", ""),
             "targetName": data.get("targetName", ""),
             "className": class_name,
-            "existingClass": data.get("existingClass", ""),
+            "existingClass": conflict.get("class", data.get("existingClass", "")),
             "day": day,
             "startTime": start_time,
-            "endTime": data.get("endTime", ""),
+            "endTime": end_time,
             "subject": data.get("subject", ""),
             "room": data.get("room", ""),
             "facultyIds": data.get("facultyIds", []),
             "newLecture": data.get("newLecture", {}),
-            "oldLecture": data.get("oldLecture", {}),
+            "oldLecture": conflict.get("lecture", data.get("oldLecture", {})),
             "status": "pending",
             "createdAt": datetime.utcnow(),
             "updatedAt": datetime.utcnow()
@@ -348,8 +366,6 @@ def request_lecture():
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
-
-
 @timetable_bp.route("/lecture-requests/<mentor_id>", methods=["GET"])
 def get_lecture_requests(mentor_id):
     try:
@@ -369,7 +385,6 @@ def get_lecture_requests(mentor_id):
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
-
 @timetable_bp.route("/lecture-request/approve", methods=["PUT"])
 def approve_lecture_request():
     try:
@@ -379,6 +394,7 @@ def approve_lecture_request():
         if not req_id:
             return jsonify({"success": False, "message": "requestId required"}), 400
 
+        # Verify pending request
         req = db.lecture_requests.find_one({"_id": ObjectId(req_id), "status": "pending"})
         
         if not req:
@@ -387,13 +403,12 @@ def approve_lecture_request():
                 "message": "Request not found or already processed"
             }), 404
 
-        # 1. Find timetable
         existing_class = req.get("existingClass")
         day = req.get("day")
         old_lecture = req.get("oldLecture", {})
         
+        # Remove old lecture
         if existing_class and day and old_lecture:
-            # 3. Remove old lecture
             db.timetables.update_one(
                 {"className": existing_class},
                 {
@@ -411,28 +426,36 @@ def approve_lecture_request():
         new_lecture = req.get("newLecture", {})
         new_lecture["status"] = "approved"
 
+        # Insert new lecture and avoid duplicate lectures
         if new_class and day and new_lecture:
             existing_tt = db.timetables.find_one({"className": new_class})
             
-            # 4. Insert new lecture
+            is_duplicate = False
             if existing_tt:
-                db.timetables.update_one(
-                    {"className": new_class},
-                    {
-                        "$push": {f"weeklySchedule.{day}": new_lecture},
-                        "$set": {"updatedAt": datetime.utcnow()}
-                    }
-                )
-            else:
-                db.timetables.insert_one({
-                    "className": new_class,
-                    "weeklySchedule": {day: [new_lecture]},
-                    "createdAt": datetime.utcnow(),
-                    "updatedAt": datetime.utcnow()
-                })
+                day_schedule = existing_tt.get("weeklySchedule", {}).get(day, [])
+                for lec in day_schedule:
+                    if lec.get("startTimeMins") == new_lecture.get("startTimeMins") and lec.get("endTimeMins") == new_lecture.get("endTimeMins"):
+                        is_duplicate = True
+                        break
 
-        # 5. Mark request approved
-        # 6. Store updatedAt
+            if not is_duplicate:
+                if existing_tt:
+                    db.timetables.update_one(
+                        {"className": new_class},
+                        {
+                            "$push": {f"weeklySchedule.{day}": new_lecture},
+                            "$set": {"updatedAt": datetime.utcnow()}
+                        }
+                    )
+                else:
+                    db.timetables.insert_one({
+                        "className": new_class,
+                        "weeklySchedule": {day: [new_lecture]},
+                        "createdAt": datetime.utcnow(),
+                        "updatedAt": datetime.utcnow()
+                    })
+
+        # Update request status
         db.lecture_requests.update_one(
             {"_id": ObjectId(req_id)},
             {"$set": {"status": "approved", "updatedAt": datetime.utcnow()}}
@@ -445,8 +468,6 @@ def approve_lecture_request():
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
-
-
 @timetable_bp.route("/lecture-request/reject", methods=["PUT"])
 def reject_lecture_request():
     try:
@@ -456,6 +477,7 @@ def reject_lecture_request():
         if not req_id:
             return jsonify({"success": False, "message": "requestId required"}), 400
 
+        # Only change status to rejected
         result = db.lecture_requests.update_one(
             {"_id": ObjectId(req_id)},
             {"$set": {"status": "rejected", "updatedAt": datetime.utcnow()}}
@@ -474,12 +496,9 @@ def reject_lecture_request():
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
-
-
 # =========================================================
 # 1. CREATE / UPDATE COMPLETE WEEKLY TIMETABLE
 # =========================================================
-
 @timetable_bp.route("/set-weekly", methods=["POST"])
 def set_weekly_timetable():
     try:
@@ -532,6 +551,7 @@ def set_weekly_timetable():
 
                 conflicts = []
 
+                # Before ANY lecture is saved, ALWAYS call find_conflicts()
                 if faculty_ids:
                     conflicts = find_conflicts(
                         faculty_ids,
@@ -541,21 +561,15 @@ def set_weekly_timetable():
                         class_name
                     )
 
-                actual_conflicts = [c for c in conflicts if c.get("approvalMode") == True]
+                # Filter conflicts where approvalMode is true
+                actual_conflicts = [c for c in conflicts if c.get("approvalMode") is True]
 
                 if actual_conflicts:
                     has_conflict = True
 
                     for conflict in actual_conflicts:
-                        existing_req = db.lecture_requests.find_one({
-                            "className": class_name,
-                            "targetMentorId": conflict["mentorId"],
-                            "day": day,
-                            "startTime": lec.get("startTime"),
-                            "status": "pending"
-                        })
-                        
-                        if not existing_req:
+                        # Prevent duplicate pending requests
+                        if not lecture_request_exists(class_name, conflict["mentorId"], day, start_time):
                             db.lecture_requests.insert_one({
                                 "requesterMentorId": mentor_id,
                                 "targetMentorId": conflict["mentorId"],
@@ -564,11 +578,11 @@ def set_weekly_timetable():
                                 "className": class_name,
                                 "existingClass": conflict["class"],
                                 "day": day,
-                                "startTime": lec.get("startTime"),
-                                "endTime": lec.get("endTime"),
+                                "startTime": start_time,
+                                "endTime": end_time,
                                 "subject": lec.get("subject", ""),
                                 "room": lec.get("room", ""),
-                                "facultyIds": lec.get("facultyIds", []),
+                                "facultyIds": faculty_ids,
                                 "newLecture": lec,
                                 "oldLecture": conflict["lecture"],
                                 "status": "pending",
@@ -585,7 +599,9 @@ def set_weekly_timetable():
                                 "existingStart": conflict["start"],
                                 "existingEnd": conflict["end"]
                             }
+                    # DO NOT save lecture to schedule since it requires approval
                 else:
+                    # If no conflict exists, OR conflict exists but approvalMode == false: save normally
                     lec["status"] = "approved"
                     lec["faculty"] = resolve_faculty(faculty_ids)
                     valid_schedule[day].append(lec)
@@ -619,18 +635,20 @@ def set_weekly_timetable():
                 "existingSubject": conflict_return_info["existingSubject"],
                 "existingStart": conflict_return_info["existingStart"],
                 "existingEnd": conflict_return_info["existingEnd"],
-                "message": "Timetable saved partially. Conflicts were routed to lecture_requests."
-            })
+                "message": "Timetable partially saved. Conflicts detected and lecture requests have been sent for approval."
+            }), 200
 
         return jsonify({
             "success": True,
-            "message": "Weekly timetable saved successfully"
-        })
+            "conflict": False,
+            "message": "Weekly timetable saved successfully."
+        }), 200
 
     except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500
-
-
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
 # =========================================================
 # 2. GET COMPLETE TIMETABLE CLASS-WISE
 # =========================================================
@@ -689,6 +707,401 @@ def get_day_timetable(class_name, day):
 # =========================================================
 # 4. UPDATE SINGLE DAY ONLY
 # =========================================================
+def lecture_request_exists(class_name, target_mentor_id, day, start_time):
+    """
+    Helper function to prevent duplicate pending lecture requests.
+    """
+    existing = db.lecture_requests.find_one({
+        "className": class_name,
+        "targetMentorId": target_mentor_id,
+        "day": day,
+        "startTime": start_time,
+        "status": "pending"
+    })
+    return bool(existing)
+
+
+def find_conflicts(faculty_ids, day, start_mins, end_mins, current_class):
+    """
+    Checks if any faculty is already scheduled in an overlapping time
+    on the given day for a different class, returning comprehensive details.
+    """
+    conflicts = []
+    faculty_ids = clean_id_list(faculty_ids)
+
+    for fid in faculty_ids:
+        mentor = db.mentors.find_one({"mentorId": fid})
+        approval_mode = False
+        mentor_name = "Unknown Faculty"
+        
+        if mentor:
+            approval_mode = mentor.get("approvalMode", False)
+            mentor_name = mentor.get("name", "Unknown Faculty")
+
+        query = {
+            "className": {"$ne": current_class},
+            f"weeklySchedule.{day}": {
+                "$elemMatch": {
+                    "facultyIds": fid,
+                    "startTimeMins": {"$lt": end_mins},
+                    "endTimeMins": {"$gt": start_mins},
+                    "status": "approved"
+                }
+            }
+        }
+
+        conflict_doc = db.timetables.find_one(query)
+
+        if conflict_doc:
+            for lec in conflict_doc.get("weeklySchedule", {}).get(day, []):
+                # Apply overlap logic: newStart < existingEnd AND newEnd > existingStart
+                if (
+                    fid in clean_id_list(lec.get("facultyIds", [])) and
+                    lec.get("status") == "approved" and
+                    lec.get("startTimeMins", 0) < end_mins and
+                    lec.get("endTimeMins", 0) > start_mins
+                ):
+                    conflicts.append({
+                        "mentorId": fid,
+                        "mentorName": mentor_name,
+                        "approvalMode": approval_mode,
+                        "class": conflict_doc.get("className"),
+                        "subject": lec.get("subject", ""),
+                        "day": day,
+                        "room": lec.get("room", ""),
+                        "lecture": lec,
+                        "start": lec.get("startTime"),
+                        "end": lec.get("endTime")
+                    })
+
+    return conflicts
+
+
+@timetable_bp.route("/request-lecture", methods=["POST"])
+def request_lecture():
+    try:
+        data = request.get_json() or {}
+        
+        target_id = data.get("targetMentorId")
+        day = data.get("day")
+        start_time = data.get("startTime")
+        end_time = data.get("endTime")
+        class_name = data.get("className")
+        
+        if lecture_request_exists(class_name, target_id, day, start_time):
+            return jsonify({"success": True, "message": "Request already exists", "requestCreated": False})
+
+        try:
+            start_mins = time_to_minutes(start_time)
+            end_mins = time_to_minutes(end_time)
+        except ValueError as ve:
+            return jsonify({"success": False, "message": str(ve)}), 400
+
+        # Verify conflict first. Never create request if no occupied lecture exists
+        conflicts = find_conflicts([target_id], day, start_mins, end_mins, class_name)
+        
+        if not conflicts:
+            return jsonify({
+                "success": False, 
+                "message": "No conflict found. Cannot request a lecture when the mentor is free."
+            }), 400
+
+        conflict = conflicts[0]
+            
+        req_doc = {
+            "requesterMentorId": data.get("requesterMentorId", ""),
+            "targetMentorId": target_id,
+            "requesterName": data.get("requesterName", ""),
+            "targetName": data.get("targetName", ""),
+            "className": class_name,
+            "existingClass": conflict.get("class", data.get("existingClass", "")),
+            "day": day,
+            "startTime": start_time,
+            "endTime": end_time,
+            "subject": data.get("subject", ""),
+            "room": data.get("room", ""),
+            "facultyIds": data.get("facultyIds", []),
+            "newLecture": data.get("newLecture", {}),
+            "oldLecture": conflict.get("lecture", data.get("oldLecture", {})),
+            "status": "pending",
+            "createdAt": datetime.utcnow(),
+            "updatedAt": datetime.utcnow()
+        }
+        
+        db.lecture_requests.insert_one(req_doc)
+        
+        return jsonify({"success": True, "message": "Lecture request created", "requestCreated": True})
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@timetable_bp.route("/lecture-request/approve", methods=["PUT"])
+def approve_lecture_request():
+    try:
+        data = request.get_json() or {}
+        req_id = data.get("requestId")
+
+        if not req_id:
+            return jsonify({"success": False, "message": "requestId required"}), 400
+
+        # Verify pending request
+        req = db.lecture_requests.find_one({"_id": ObjectId(req_id), "status": "pending"})
+        
+        if not req:
+            return jsonify({
+                "success": False,
+                "message": "Request not found or already processed"
+            }), 404
+
+        existing_class = req.get("existingClass")
+        day = req.get("day")
+        old_lecture = req.get("oldLecture", {})
+        
+        # Remove old lecture
+        if existing_class and day and old_lecture:
+            db.timetables.update_one(
+                {"className": existing_class},
+                {
+                    "$pull": {
+                        f"weeklySchedule.{day}": {
+                            "startTimeMins": old_lecture.get("startTimeMins"),
+                            "endTimeMins": old_lecture.get("endTimeMins")
+                        }
+                    },
+                    "$set": {"updatedAt": datetime.utcnow()}
+                }
+            )
+
+        new_class = req.get("className")
+        new_lecture = req.get("newLecture", {})
+        new_lecture["status"] = "approved"
+
+        # Insert new lecture and avoid duplicate lectures
+        if new_class and day and new_lecture:
+            existing_tt = db.timetables.find_one({"className": new_class})
+            
+            is_duplicate = False
+            if existing_tt:
+                day_schedule = existing_tt.get("weeklySchedule", {}).get(day, [])
+                for lec in day_schedule:
+                    if lec.get("startTimeMins") == new_lecture.get("startTimeMins") and lec.get("endTimeMins") == new_lecture.get("endTimeMins"):
+                        is_duplicate = True
+                        break
+
+            if not is_duplicate:
+                if existing_tt:
+                    db.timetables.update_one(
+                        {"className": new_class},
+                        {
+                            "$push": {f"weeklySchedule.{day}": new_lecture},
+                            "$set": {"updatedAt": datetime.utcnow()}
+                        }
+                    )
+                else:
+                    db.timetables.insert_one({
+                        "className": new_class,
+                        "weeklySchedule": {day: [new_lecture]},
+                        "createdAt": datetime.utcnow(),
+                        "updatedAt": datetime.utcnow()
+                    })
+
+        # Update request status
+        db.lecture_requests.update_one(
+            {"_id": ObjectId(req_id)},
+            {"$set": {"status": "approved", "updatedAt": datetime.utcnow()}}
+        )
+
+        return jsonify({
+            "success": True,
+            "message": "Lecture request approved"
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@timetable_bp.route("/lecture-request/reject", methods=["PUT"])
+def reject_lecture_request():
+    try:
+        data = request.get_json() or {}
+        req_id = data.get("requestId")
+
+        if not req_id:
+            return jsonify({"success": False, "message": "requestId required"}), 400
+
+        # Only change status to rejected
+        result = db.lecture_requests.update_one(
+            {"_id": ObjectId(req_id)},
+            {"$set": {"status": "rejected", "updatedAt": datetime.utcnow()}}
+        )
+
+        if result.modified_count == 0:
+            return jsonify({
+                "success": False,
+                "message": "Request not found or already processed"
+            }), 404
+
+        return jsonify({
+            "success": True,
+            "message": "Lecture request rejected"
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@timetable_bp.route("/set-weekly", methods=["POST"])
+def set_weekly_timetable():
+    try:
+        data = request.get_json() or {}
+
+        class_name = data.get("className")
+        mentor_id = data.get("mentorID")
+        weekly_schedule = data.get("weeklySchedule")
+
+        if not class_name or not weekly_schedule:
+            return jsonify({
+                "success": False,
+                "message": "className and weeklySchedule are required"
+            }), 400
+
+        has_conflict = False
+        conflict_return_info = {}
+        valid_schedule = {}
+
+        for day, lectures in weekly_schedule.items():
+            valid_schedule[day] = []
+
+            if not isinstance(lectures, list):
+                continue
+
+            for lec in lectures:
+                start_time = lec.get("startTime")
+                end_time = lec.get("endTime")
+
+                if start_time and end_time:
+                    try:
+                        lec["startTimeMins"] = time_to_minutes(start_time)
+                        lec["endTimeMins"] = time_to_minutes(end_time)
+                    except ValueError as ve:
+                        return jsonify({"success": False, "message": str(ve)}), 400
+                else:
+                    return jsonify({
+                        "success": False,
+                        "message": f"startTime and endTime required for {day}"
+                    }), 400
+
+                if lec["startTimeMins"] >= lec["endTimeMins"]:
+                    return jsonify({
+                        "success": False,
+                        "message": f"Invalid time range in {day}"
+                    }), 400
+
+                faculty_ids = clean_id_list(lec.get("facultyIds", []))
+                lec["facultyIds"] = faculty_ids
+
+                conflicts = []
+
+                # Before ANY lecture is saved, ALWAYS call find_conflicts()
+                if faculty_ids:
+                    conflicts = find_conflicts(
+                        faculty_ids,
+                        day,
+                        lec["startTimeMins"],
+                        lec["endTimeMins"],
+                        class_name
+                    )
+
+                # Filter conflicts where approvalMode is true
+                actual_conflicts = [c for c in conflicts if c.get("approvalMode") is True]
+
+                if actual_conflicts:
+                    has_conflict = True
+
+                    for conflict in actual_conflicts:
+                        # Prevent duplicate pending requests
+                        if not lecture_request_exists(class_name, conflict["mentorId"], day, start_time):
+                            db.lecture_requests.insert_one({
+                                "requesterMentorId": mentor_id,
+                                "targetMentorId": conflict["mentorId"],
+                                "requesterName": "",
+                                "targetName": conflict["mentorName"],
+                                "className": class_name,
+                                "existingClass": conflict["class"],
+                                "day": day,
+                                "startTime": start_time,
+                                "endTime": end_time,
+                                "subject": lec.get("subject", ""),
+                                "room": lec.get("room", ""),
+                                "facultyIds": faculty_ids,
+                                "newLecture": lec,
+                                "oldLecture": conflict["lecture"],
+                                "status": "pending",
+                                "createdAt": datetime.utcnow(),
+                                "updatedAt": datetime.utcnow()
+                            })
+                        
+                        if not conflict_return_info:
+                            conflict_return_info = {
+                                "conflictFacultyName": conflict["mentorName"],
+                                "conflictFacultyId": conflict["mentorId"],
+                                "existingClass": conflict["class"],
+                                "existingSubject": conflict["subject"],
+                                "existingStart": conflict["start"],
+                                "existingEnd": conflict["end"]
+                            }
+                    # DO NOT save lecture to schedule since it requires approval
+                else:
+                    # If no conflict exists, OR conflict exists but approvalMode == false: save normally
+                    lec["status"] = "approved"
+                    lec["faculty"] = resolve_faculty(faculty_ids)
+                    valid_schedule[day].append(lec)
+
+        timetable_data = {
+            "className": class_name,
+            "mentorID": mentor_id,
+            "weeklySchedule": valid_schedule,
+            "updatedAt": datetime.utcnow()
+        }
+
+        existing = db.timetables.find_one({"className": class_name})
+
+        if existing:
+            db.timetables.update_one(
+                {"className": class_name},
+                {"$set": timetable_data}
+            )
+        else:
+            timetable_data["createdAt"] = datetime.utcnow()
+            db.timetables.insert_one(timetable_data)
+
+        if has_conflict and conflict_return_info:
+            return jsonify({
+                "success": True,
+                "conflict": True,
+                "requestCreated": True,
+                "conflictFacultyName": conflict_return_info["conflictFacultyName"],
+                "conflictFacultyId": conflict_return_info["conflictFacultyId"],
+                "existingClass": conflict_return_info["existingClass"],
+                "existingSubject": conflict_return_info["existingSubject"],
+                "existingStart": conflict_return_info["existingStart"],
+                "existingEnd": conflict_return_info["existingEnd"],
+                "message": "Timetable partially saved. Conflicts detected and lecture requests have been sent for approval."
+            }), 200
+
+        return jsonify({
+            "success": True,
+            "conflict": False,
+            "message": "Weekly timetable saved successfully."
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
+
 
 @timetable_bp.route("/update-day", methods=["PUT"])
 def update_single_day():
@@ -737,6 +1150,7 @@ def update_single_day():
 
             conflicts = []
 
+            # Before ANY lecture is saved, ALWAYS call find_conflicts()
             if faculty_ids:
                 conflicts = find_conflicts(
                     faculty_ids,
@@ -746,21 +1160,15 @@ def update_single_day():
                     class_name
                 )
 
-            actual_conflicts = [c for c in conflicts if c.get("approvalMode") == True]
+            # Filter conflicts where approvalMode is true
+            actual_conflicts = [c for c in conflicts if c.get("approvalMode") is True]
 
             if actual_conflicts:
                 has_conflict = True
 
                 for conflict in actual_conflicts:
-                    existing_req = db.lecture_requests.find_one({
-                        "className": class_name,
-                        "targetMentorId": conflict["mentorId"],
-                        "day": day,
-                        "startTime": lec.get("startTime"),
-                        "status": "pending"
-                    })
-                    
-                    if not existing_req:
+                    # Prevent duplicate pending requests
+                    if not lecture_request_exists(class_name, conflict["mentorId"], day, start_time):
                         db.lecture_requests.insert_one({
                             "requesterMentorId": mentor_id,
                             "targetMentorId": conflict["mentorId"],
@@ -769,11 +1177,11 @@ def update_single_day():
                             "className": class_name,
                             "existingClass": conflict["class"],
                             "day": day,
-                            "startTime": lec.get("startTime"),
-                            "endTime": lec.get("endTime"),
+                            "startTime": start_time,
+                            "endTime": end_time,
                             "subject": lec.get("subject", ""),
                             "room": lec.get("room", ""),
-                            "facultyIds": lec.get("facultyIds", []),
+                            "facultyIds": faculty_ids,
                             "newLecture": lec,
                             "oldLecture": conflict["lecture"],
                             "status": "pending",
@@ -790,7 +1198,9 @@ def update_single_day():
                             "existingStart": conflict["start"],
                             "existingEnd": conflict["end"]
                         }
+                # DO NOT save lecture to schedule since it requires approval
             else:
+                # If no conflict exists, OR conflict exists but approvalMode == false: save normally
                 lec["status"] = "approved"
                 lec["faculty"] = resolve_faculty(faculty_ids)
                 valid_schedule.append(lec)
@@ -829,16 +1239,14 @@ def update_single_day():
                 "existingStart": conflict_return_info["existingStart"],
                 "existingEnd": conflict_return_info["existingEnd"],
                 "message": f"{day} timetable updated partially due to conflicts."
-            })
-
+            }), 200
         return jsonify({
             "success": True,
             "message": f"{day} timetable updated successfully"
-        })
+        }), 200
 
     except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500
-
+        return jsonify({"success": False, "message": str(e)}),
 
 # =========================================================
 # 5. DELETE TIMETABLE
