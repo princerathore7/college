@@ -1,10 +1,12 @@
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from bson import ObjectId
 from datetime import datetime
 import os
 import re
+
+from db import db
 
 # ---------------- Blueprint ----------------
 timetable_bp = Blueprint(
@@ -14,9 +16,6 @@ timetable_bp = Blueprint(
 )
 
 CORS(timetable_bp)
-
-# ---------------- MongoDB ----------------
-from db import db
 
 # ---------------- Upload Config ----------------
 UPLOAD_FOLDER = "uploads/timetables"
@@ -32,101 +31,142 @@ ALLOWED_EXTENSIONS = {"pdf"}
 # =========================================================
 
 def allowed_file(filename):
-    return "." in filename and \
-           filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 def serialize_doc(doc):
     if not doc:
         return None
+
     if "_id" in doc:
         doc["_id"] = str(doc["_id"])
+
     return doc
 
+
+def serialize_many(items):
+    return [serialize_doc(item) for item in items]
+
+
+def clean_id_list(ids):
+    if not ids:
+        return []
+
+    cleaned = []
+
+    for item in ids:
+        if item is None:
+            continue
+
+        value = str(item).strip()
+
+        if value and value not in cleaned:
+            cleaned.append(value)
+
+    return cleaned
+
+
 def time_to_minutes(time_str):
-    """Converts a time string like '08:00 AM' to total minutes from midnight."""
+    """
+    Converts a time string like '08:00 AM' to total minutes from midnight.
+    """
     try:
         dt = datetime.strptime(time_str.strip(), "%I:%M %p")
         return dt.hour * 60 + dt.minute
     except ValueError:
-        raise ValueError(f"Invalid time format: {time_str}. Expected format: 'hh:mm AM/PM'")
+        raise ValueError(
+            f"Invalid time format: {time_str}. Expected format: 'hh:mm AM/PM'"
+        )
 
-def resolve_faculty(mentorId):
-    """Fetches mentor details for a list of mentor IDs."""
-    if not mentorId:
+
+def resolve_faculty(faculty_ids):
+    """
+    Fetch mentor details for a list of mentor IDs.
+    """
+    faculty_ids = clean_id_list(faculty_ids)
+
+    if not faculty_ids:
         return []
-    
-    mentors = list(db.mentors.find({"mentorId": {"$in": mentorId}}))
+
+    mentors = list(
+        db.mentors.find(
+            {"mentorId": {"$in": faculty_ids}},
+            {
+                "_id": 0,
+                "mentorId": 1,
+                "name": 1,
+                "subject": 1,
+                "branch": 1
+            }
+        )
+    )
+
+    mentor_map = {
+        mentor.get("mentorId"): mentor
+        for mentor in mentors
+    }
+
     resolved = []
-    for mentor in mentors:
-        resolved.append({
-            "mentorId": mentor.get("mentorId"),
-            "name": mentor.get("name"),
-            "subject": mentor.get("subject")
-        })
+
+    for faculty_id in faculty_ids:
+        mentor = mentor_map.get(faculty_id)
+
+        if mentor:
+            resolved.append({
+                "mentorId": mentor.get("mentorId"),
+                "name": mentor.get("name"),
+                "subject": mentor.get("subject"),
+                "branch": mentor.get("branch")
+            })
+        else:
+            resolved.append({
+                "mentorId": faculty_id,
+                "name": "Unknown Faculty",
+                "subject": ""
+            })
+
     return resolved
 
-def populate_timetable_faculties(timetable):
 
+def populate_timetable_faculties(timetable):
+    """
+    Adds faculty details inside every lecture using facultyIds.
+    """
     if not timetable or "weeklySchedule" not in timetable:
         return timetable
 
-
-    for day, schedule in timetable["weeklySchedule"].items():
+    for day, schedule in timetable.get("weeklySchedule", {}).items():
+        if not isinstance(schedule, list):
+            continue
 
         for lec in schedule:
+            faculty_ids = clean_id_list(lec.get("facultyIds", []))
 
-
-            faculty_ids = lec.get("facultyIds", [])
-
-
-            # fallback if faculty already stored
-            if not faculty_ids and "faculty" in lec:
-
-                faculty_ids = [
+            if not faculty_ids and isinstance(lec.get("faculty"), list):
+                faculty_ids = clean_id_list([
                     f.get("mentorId")
-                    for f in lec["faculty"]
-                    if f.get("mentorId")
-                ]
+                    for f in lec.get("faculty", [])
+                    if isinstance(f, dict)
+                ])
 
-
-            if faculty_ids:
-
-                mentors = list(
-                    db.mentors.find(
-                        {
-                            "mentorId":{
-                                "$in":faculty_ids
-                            }
-                        }
-                    )
-                )
-
-
-                lec["faculty"] = [
-                    {
-                    "mentorId":m.get("mentorId"),
-                    "name":m.get("name"),
-                    "subject":m.get("subject")
-                    }
-                    for m in mentors
-                ]
-
-            else:
-
-                lec["faculty"] = []
-
+            lec["facultyIds"] = faculty_ids
+            lec["faculty"] = resolve_faculty(faculty_ids)
 
     return timetable
 
-def find_conflicts(mentorId, day, start_mins, end_mins, current_class):
+
+def find_conflicts(faculty_ids, day, start_mins, end_mins, current_class):
     """
-    Checks if any of the mentorId are already scheduled in an overlapping time 
-    on the given day for a DIFFERENT class.
-    Overlap condition: newStart < oldEnd AND newEnd > oldStart
+    Checks if any faculty is already scheduled in an overlapping time
+    on the given day for a different class.
+
+    Overlap condition:
+    newStart < oldEnd AND newEnd > oldStart
     """
     conflicts = []
-    for fid in mentorId:
-        # Check if this faculty is busy in another class
+    faculty_ids = clean_id_list(faculty_ids)
+
+    for fid in faculty_ids:
         query = {
             "className": {"$ne": current_class},
             f"weeklySchedule.{day}": {
@@ -138,24 +178,25 @@ def find_conflicts(mentorId, day, start_mins, end_mins, current_class):
                 }
             }
         }
-        
+
         conflict_doc = db.timetables.find_one(query)
+
         if conflict_doc:
-            # Extract specific lecture details causing the conflict
             for lec in conflict_doc.get("weeklySchedule", {}).get(day, []):
                 if (
-                    fid in lec.get("facultyIds", []) and
+                    fid in clean_id_list(lec.get("facultyIds", [])) and
                     lec.get("status") == "approved" and
                     lec.get("startTimeMins", 0) < end_mins and
                     lec.get("endTimeMins", 0) > start_mins
                 ):
                     conflicts.append({
                         "targetFaculty": fid,
-                        "existingClass": conflict_doc["className"],
+                        "existingClass": conflict_doc.get("className"),
                         "existingSubject": lec.get("subject", ""),
                         "existingStart": lec.get("startTime"),
                         "existingEnd": lec.get("endTime")
                     })
+
     return conflicts
 
 
@@ -165,29 +206,44 @@ def find_conflicts(mentorId, day, start_mins, end_mins, current_class):
 
 @timetable_bp.route("/mentor/search", methods=["GET"])
 def search_mentors():
-    """Search mentors by mentorId or name using regex."""
+    """
+    Search mentors by mentorId or name.
+    Returns same structure as /api/mentor/search.
+    """
     query = request.args.get("q", "").strip()
+
     if not query:
-        return jsonify([])
+        return jsonify({
+            "success": True,
+            "mentors": []
+        })
 
     try:
-        regex = re.compile(query, re.IGNORECASE)
-        mentors = list(db.mentors.find({
-            "$or": [
-                {"mentorId": regex},
-                {"name": regex}
-            ]
-        }).limit(15))
+        regex = re.compile(re.escape(query), re.IGNORECASE)
 
-        result = []
-        for mentor in mentors:
-            result.append({
-                "mentorId": mentor.get("mentorId"),
-                "name": mentor.get("name"),
-                "subject": mentor.get("subject")
-            })
+        mentors = list(
+            db.mentors.find(
+                {
+                    "$or": [
+                        {"mentorId": regex},
+                        {"name": regex}
+                    ]
+                },
+                {
+                    "_id": 0,
+                    "mentorId": 1,
+                    "name": 1,
+                    "subject": 1,
+                    "branch": 1
+                }
+            ).limit(15)
+        )
 
-        return jsonify(result)
+        return jsonify({
+            "success": True,
+            "mentors": mentors
+        })
+
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
@@ -199,50 +255,74 @@ def search_mentors():
 @timetable_bp.route("/lecture-requests/<mentor_id>", methods=["GET"])
 def get_lecture_requests(mentor_id):
     try:
-        requests = list(db.lecture_requests.find({
+        requests_data = list(db.lecture_requests.find({
             "targetFaculty": mentor_id,
             "status": "pending"
         }))
+
         return jsonify({
             "success": True,
-            "requests": [serialize_doc(r) for r in requests]
+            "requests": serialize_many(requests_data)
         })
+
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+
 
 @timetable_bp.route("/lecture-request/approve", methods=["PUT"])
 def approve_lecture_request():
     try:
-        req_id = request.json.get("requestId")
+        data = request.get_json() or {}
+        req_id = data.get("requestId")
+
         if not req_id:
             return jsonify({"success": False, "message": "requestId required"}), 400
-        
+
         result = db.lecture_requests.update_one(
             {"_id": ObjectId(req_id)},
             {"$set": {"status": "approved", "updatedAt": datetime.utcnow()}}
         )
+
         if result.modified_count == 0:
-            return jsonify({"success": False, "message": "Request not found or already processed"}), 404
-            
-        return jsonify({"success": True, "message": "Lecture request approved"})
+            return jsonify({
+                "success": False,
+                "message": "Request not found or already processed"
+            }), 404
+
+        return jsonify({
+            "success": True,
+            "message": "Lecture request approved"
+        })
+
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+
 
 @timetable_bp.route("/lecture-request/reject", methods=["PUT"])
 def reject_lecture_request():
     try:
-        req_id = request.json.get("requestId")
+        data = request.get_json() or {}
+        req_id = data.get("requestId")
+
         if not req_id:
             return jsonify({"success": False, "message": "requestId required"}), 400
-        
+
         result = db.lecture_requests.update_one(
             {"_id": ObjectId(req_id)},
             {"$set": {"status": "rejected", "updatedAt": datetime.utcnow()}}
         )
+
         if result.modified_count == 0:
-            return jsonify({"success": False, "message": "Request not found or already processed"}), 404
-            
-        return jsonify({"success": True, "message": "Lecture request rejected"})
+            return jsonify({
+                "success": False,
+                "message": "Request not found or already processed"
+            }), 404
+
+        return jsonify({
+            "success": True,
+            "message": "Lecture request rejected"
+        })
+
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
@@ -254,67 +334,85 @@ def reject_lecture_request():
 @timetable_bp.route("/set-weekly", methods=["POST"])
 def set_weekly_timetable():
     try:
-        data = request.json
+        data = request.get_json() or {}
+
         class_name = data.get("className")
         mentor_id = data.get("mentorID")
         weekly_schedule = data.get("weeklySchedule")
 
         if not class_name or not weekly_schedule:
-            return jsonify({"success": False, "message": "className and weeklySchedule are required"}), 400
+            return jsonify({
+                "success": False,
+                "message": "className and weeklySchedule are required"
+            }), 400
 
         has_conflict = False
         valid_schedule = {}
 
         for day, lectures in weekly_schedule.items():
             valid_schedule[day] = []
-            
+
+            if not isinstance(lectures, list):
+                continue
+
             for lec in lectures:
-                # Add validation and minute calculations
-                if "startTime" in lec and "endTime" in lec:
+                start_time = lec.get("startTime")
+                end_time = lec.get("endTime")
+
+                if start_time and end_time:
                     try:
-                        lec["startTimeMins"] = time_to_minutes(lec["startTime"])
-                        lec["endTimeMins"] = time_to_minutes(lec["endTime"])
+                        lec["startTimeMins"] = time_to_minutes(start_time)
+                        lec["endTimeMins"] = time_to_minutes(end_time)
                     except ValueError as ve:
                         return jsonify({"success": False, "message": str(ve)}), 400
-                        
-                mentorId = lec.get("facultyIds", [])
-                
-                # # Verify faculties actually exist
-                # if mentorId:
-                #     existing_faculties = db.mentors.count_documents({"mentorId": {"$in": mentorId}})
-                #     if existing_faculties != len(mentorId):
-                #         return jsonify({"success": False, "message": f"One or more faculty IDs are invalid in {day}"}), 400
+                else:
+                    return jsonify({
+                        "success": False,
+                        "message": f"startTime and endTime required for {day}"
+                    }), 400
 
-                # Detect Conflicts for subjects with assigned faculty
+                if lec["startTimeMins"] >= lec["endTimeMins"]:
+                    return jsonify({
+                        "success": False,
+                        "message": f"Invalid time range in {day}"
+                    }), 400
+
+                faculty_ids = clean_id_list(lec.get("facultyIds", []))
+                lec["facultyIds"] = faculty_ids
+
                 conflicts = []
-                if mentorId and "startTimeMins" in lec:
+
+                if faculty_ids:
                     conflicts = find_conflicts(
-                        mentorId, 
-                        day, 
-                        lec["startTimeMins"], 
-                        lec["endTimeMins"], 
+                        faculty_ids,
+                        day,
+                        lec["startTimeMins"],
+                        lec["endTimeMins"],
                         class_name
                     )
 
                 if conflicts:
                     has_conflict = True
+
                     for conflict in conflicts:
                         db.lecture_requests.insert_one({
                             "className": class_name,
                             "targetFaculty": conflict["targetFaculty"],
                             "existingClass": conflict["existingClass"],
                             "day": day,
-                            "startTime": lec["startTime"],
-                            "endTime": lec["endTime"],
+                            "startTime": lec.get("startTime"),
+                            "endTime": lec.get("endTime"),
                             "subject": lec.get("subject", ""),
+                            "type": lec.get("type", ""),
+                            "room": lec.get("room", ""),
                             "status": "pending",
                             "createdAt": datetime.utcnow()
                         })
                 else:
                     lec["status"] = "approved"
+                    lec["faculty"] = resolve_faculty(faculty_ids)
                     valid_schedule[day].append(lec)
 
-        # Upsert valid timetable
         timetable_data = {
             "className": class_name,
             "mentorID": mentor_id,
@@ -323,8 +421,12 @@ def set_weekly_timetable():
         }
 
         existing = db.timetables.find_one({"className": class_name})
+
         if existing:
-            db.timetables.update_one({"className": class_name}, {"$set": timetable_data})
+            db.timetables.update_one(
+                {"className": class_name},
+                {"$set": timetable_data}
+            )
         else:
             timetable_data["createdAt"] = datetime.utcnow()
             db.timetables.insert_one(timetable_data)
@@ -336,8 +438,11 @@ def set_weekly_timetable():
                 "requestCreated": True,
                 "message": "Timetable saved partially. Conflicts were routed to lecture_requests."
             })
-            
-        return jsonify({"success": True, "message": "Weekly timetable saved successfully"})
+
+        return jsonify({
+            "success": True,
+            "message": "Weekly timetable saved successfully"
+        })
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
@@ -353,9 +458,13 @@ def get_class_timetable(class_name):
         timetable = db.timetables.find_one({"className": class_name})
 
         if not timetable:
-            return jsonify({"success": False, "message": "Timetable not found"}), 404
+            return jsonify({
+                "success": False,
+                "message": "Timetable not found"
+            }), 404
 
         populated_timetable = populate_timetable_faculties(timetable)
+
         return jsonify({
             "success": True,
             "timetable": serialize_doc(populated_timetable)
@@ -375,7 +484,10 @@ def get_day_timetable(class_name, day):
         timetable = db.timetables.find_one({"className": class_name})
 
         if not timetable:
-            return jsonify({"success": False, "message": "Timetable not found"}), 404
+            return jsonify({
+                "success": False,
+                "message": "Timetable not found"
+            }), 404
 
         populated_timetable = populate_timetable_faculties(timetable)
         day_schedule = populated_timetable.get("weeklySchedule", {}).get(day, [])
@@ -398,57 +510,82 @@ def get_day_timetable(class_name, day):
 @timetable_bp.route("/update-day", methods=["PUT"])
 def update_single_day():
     try:
-        data = request.json
+        data = request.get_json() or {}
+
         class_name = data.get("className")
         day = data.get("day")
         schedule = data.get("schedule")
 
         if not class_name or not day or schedule is None:
-            return jsonify({"success": False, "message": "className, day, and schedule required"}), 400
+            return jsonify({
+                "success": False,
+                "message": "className, day, and schedule required"
+            }), 400
 
         has_conflict = False
         valid_schedule = []
 
         for lec in schedule:
-            if "startTime" in lec and "endTime" in lec:
+            start_time = lec.get("startTime")
+            end_time = lec.get("endTime")
+
+            if start_time and end_time:
                 try:
-                    lec["startTimeMins"] = time_to_minutes(lec["startTime"])
-                    lec["endTimeMins"] = time_to_minutes(lec["endTime"])
+                    lec["startTimeMins"] = time_to_minutes(start_time)
+                    lec["endTimeMins"] = time_to_minutes(end_time)
                 except ValueError as ve:
                     return jsonify({"success": False, "message": str(ve)}), 400
-                    
-            mentorId = lec.get("facultyIds", [])
+            else:
+                return jsonify({
+                    "success": False,
+                    "message": f"startTime and endTime required for {day}"
+                }), 400
+
+            if lec["startTimeMins"] >= lec["endTimeMins"]:
+                return jsonify({
+                    "success": False,
+                    "message": f"Invalid time range in {day}"
+                }), 400
+
+            faculty_ids = clean_id_list(lec.get("facultyIds", []))
+            lec["facultyIds"] = faculty_ids
+
             conflicts = []
-            
-            if mentorId and "startTimeMins" in lec:
+
+            if faculty_ids:
                 conflicts = find_conflicts(
-                    mentorId, 
-                    day, 
-                    lec["startTimeMins"], 
-                    lec["endTimeMins"], 
+                    faculty_ids,
+                    day,
+                    lec["startTimeMins"],
+                    lec["endTimeMins"],
                     class_name
                 )
 
             if conflicts:
                 has_conflict = True
+
                 for conflict in conflicts:
                     db.lecture_requests.insert_one({
                         "className": class_name,
                         "targetFaculty": conflict["targetFaculty"],
                         "existingClass": conflict["existingClass"],
                         "day": day,
-                        "startTime": lec["startTime"],
-                        "endTime": lec["endTime"],
+                        "startTime": lec.get("startTime"),
+                        "endTime": lec.get("endTime"),
                         "subject": lec.get("subject", ""),
+                        "type": lec.get("type", ""),
+                        "room": lec.get("room", ""),
                         "status": "pending",
                         "createdAt": datetime.utcnow()
                     })
             else:
                 lec["status"] = "approved"
+                lec["faculty"] = resolve_faculty(faculty_ids)
                 valid_schedule.append(lec)
 
         update_field = f"weeklySchedule.{day}"
-        db.timetables.update_one(
+
+        result = db.timetables.update_one(
             {"className": class_name},
             {
                 "$set": {
@@ -457,6 +594,16 @@ def update_single_day():
                 }
             }
         )
+
+        if result.matched_count == 0:
+            db.timetables.insert_one({
+                "className": class_name,
+                "weeklySchedule": {
+                    day: valid_schedule
+                },
+                "createdAt": datetime.utcnow(),
+                "updatedAt": datetime.utcnow()
+            })
 
         if has_conflict:
             return jsonify({
@@ -485,9 +632,15 @@ def delete_timetable(class_name):
         result = db.timetables.delete_one({"className": class_name})
 
         if result.deleted_count == 0:
-            return jsonify({"success": False, "message": "Timetable not found"}), 404
+            return jsonify({
+                "success": False,
+                "message": "Timetable not found"
+            }), 404
 
-        return jsonify({"success": True, "message": "Timetable deleted successfully"})
+        return jsonify({
+            "success": True,
+            "message": "Timetable deleted successfully"
+        })
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
@@ -543,7 +696,7 @@ def upload_timetable_pdf():
         filename = secure_filename(file.filename)
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         final_filename = f"{class_name}_{timestamp}_{filename}"
-        
+
         file_path = os.path.join(UPLOAD_FOLDER, final_filename)
         file.save(file_path)
 
@@ -576,11 +729,10 @@ def upload_timetable_pdf():
 def get_timetable_pdfs(class_name):
     try:
         pdfs = list(db.timetable_pdfs.find({"className": class_name}))
-        result = [serialize_doc(pdf) for pdf in pdfs]
 
         return jsonify({
             "success": True,
-            "pdfs": result
+            "pdfs": serialize_many(pdfs)
         })
 
     except Exception as e:
@@ -594,10 +746,13 @@ def get_timetable_pdfs(class_name):
 @timetable_bp.route("/holiday/add", methods=["POST"])
 def add_holiday():
     try:
-        data = request.json
-        
+        data = request.get_json() or {}
+
         if not data.get("date") or not data.get("title"):
-            return jsonify({"success": False, "message": "date and title are required"}), 400
+            return jsonify({
+                "success": False,
+                "message": "date and title are required"
+            }), 400
 
         holiday_data = {
             "date": data.get("date"),
@@ -625,11 +780,10 @@ def add_holiday():
 def get_holidays():
     try:
         holidays = list(db.holidays.find())
-        result = [serialize_doc(holiday) for holiday in holidays]
 
         return jsonify({
             "success": True,
-            "holidays": result
+            "holidays": serialize_many(holidays)
         })
 
     except Exception as e:
