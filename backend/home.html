@@ -1,0 +1,164 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI Chatbot</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Chat Box */
+.chat-container {
+    width: 400px;
+    background: #1e293b;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+/* Messages */
+#chat-box {
+    height: 300px;
+    overflow-y: auto;
+    border: 1px solid #334155;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.message {
+    margin: 5px 0;
+}
+
+.user {
+    text-align: right;
+    color: #38bdf8;
+}
+
+.ai {
+    text-align: left;
+    color: #22c55e;
+}
+
+/* Input */
+input[type="text"] {
+    width: 70%;
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+}
+
+button {
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    background: #3b82f6;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #2563eb;
+}
+
+/* Upload */
+.upload {
+    margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="chat-container">
+    <h2>🤖 AI Chatbot</h2>
+
+    <div id="chat-box"></div>
+
+    <input type="text" id="message" placeholder="Type message...">
+    <button onclick="sendMessage()">Send</button>
+
+    <div class="upload">
+        <input type="file" id="imageInput">
+        <button onclick="uploadImage()">Upload</button>
+    </div>
+</div>
+
+<script>
+async function sendMessage() {
+    let msgInput = document.getElementById("message");
+    let msg = msgInput.value;
+
+    if (msg === "") return;
+
+    let chatBox = document.getElementById("chat-box");
+
+    chatBox.innerHTML += `<div class="message user">You: ${msg}</div>`;
+
+    msgInput.value = "";
+
+    try {
+        let res = await fetch("http://127.0.0.1:5000/api/chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ message: msg })
+        });
+
+        let data = await res.json();
+
+        chatBox.innerHTML += `<div class="message ai">AI: ${data.reply}</div>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+    } catch (error) {
+        chatBox.innerHTML += `<div class="message ai">Error connecting to server</div>`;
+    }
+}
+
+
+// IMAGE UPLOAD
+async function uploadImage() {
+    let fileInput = document.getElementById("imageInput");
+
+    if (fileInput.files.length === 0) {
+        alert("Select an image first!");
+        return;
+    }
+
+    let formData = new FormData();
+    formData.append("image", fileInput.files[0]);
+
+    try {
+        let res = await fetch("http://127.0.0.1:5000/upload", {
+            method: "POST",
+            body: formData
+        });
+
+        let data = await res.json();
+        alert(data.message);
+
+    } catch (error) {
+        alert("Upload failed!");
+    }
+}
+</script>
+
+</body>
+</html>
+```

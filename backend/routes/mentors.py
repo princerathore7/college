@@ -236,5 +236,28 @@ def track_login(user_type):
 
     except Exception as e:
         print("Login tracking error:", e)
+@mentors_bp.route("/mentor/search", methods=["GET"])
+def search_mentor():
 
-        
+    query = request.args.get("q", "").strip()
+
+    mentors = list(db.mentors.find(
+        {
+            "$or": [
+                {"mentorId": {"$regex": query, "$options": "i"}},
+                {"name": {"$regex": query, "$options": "i"}}
+            ]
+        },
+        {
+            "_id": 0,
+            "mentorId": 1,
+            "name": 1,
+            "subject": 1,
+            "branch": 1
+        }
+    ).limit(15))
+
+    return jsonify({
+        "success": True,
+        "mentors": mentors
+    })
