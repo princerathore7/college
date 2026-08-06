@@ -50,12 +50,12 @@ def time_to_minutes(time_str):
     except ValueError:
         raise ValueError(f"Invalid time format: {time_str}. Expected format: 'hh:mm AM/PM'")
 
-def resolve_faculty(faculty_ids):
+def resolve_faculty(mentorId):
     """Fetches mentor details for a list of mentor IDs."""
-    if not faculty_ids:
+    if not mentorId:
         return []
     
-    mentors = list(db.mentors.find({"mentorId": {"$in": faculty_ids}}))
+    mentors = list(db.mentors.find({"mentorId": {"$in": mentorId}}))
     resolved = []
     for mentor in mentors:
         resolved.append({
@@ -71,16 +71,16 @@ def populate_timetable_faculties(timetable):
         return timetable
 
     # Gather all unique faculty IDs
-    unique_faculty_ids = set()
+    unique_mentorId = set()
     for day, schedule in timetable.get("weeklySchedule", {}).items():
         for lec in schedule:
             if "facultyIds" in lec and isinstance(lec["facultyIds"], list):
                 for fid in lec["facultyIds"]:
-                    unique_faculty_ids.add(fid)
+                    unique_mentorId.add(fid)
 
     # Fetch all needed faculties at once
     resolved_faculties_map = { 
-        f["mentorId"]: f for f in resolve_faculty(list(unique_faculty_ids)) 
+        f["mentorId"]: f for f in resolve_faculty(list(unique_mentorId)) 
     }
 
     # Populate the timetable
@@ -96,14 +96,14 @@ def populate_timetable_faculties(timetable):
 
     return timetable
 
-def find_conflicts(faculty_ids, day, start_mins, end_mins, current_class):
+def find_conflicts(mentorId, day, start_mins, end_mins, current_class):
     """
-    Checks if any of the faculty_ids are already scheduled in an overlapping time 
+    Checks if any of the mentorId are already scheduled in an overlapping time 
     on the given day for a DIFFERENT class.
     Overlap condition: newStart < oldEnd AND newEnd > oldStart
     """
     conflicts = []
-    for fid in faculty_ids:
+    for fid in mentorId:
         # Check if this faculty is busy in another class
         query = {
             "className": {"$ne": current_class},
@@ -255,19 +255,19 @@ def set_weekly_timetable():
                     except ValueError as ve:
                         return jsonify({"success": False, "message": str(ve)}), 400
                         
-                faculty_ids = lec.get("facultyIds", [])
+                mentorId = lec.get("facultyIds", [])
                 
                 # Verify faculties actually exist
-                if faculty_ids:
-                    existing_faculties = db.mentors.count_documents({"mentorId": {"$in": faculty_ids}})
-                    if existing_faculties != len(faculty_ids):
+                if mentorId:
+                    existing_faculties = db.mentors.count_documents({"mentorId": {"$in": mentorId}})
+                    if existing_faculties != len(mentorId):
                         return jsonify({"success": False, "message": f"One or more faculty IDs are invalid in {day}"}), 400
 
                 # Detect Conflicts for subjects with assigned faculty
                 conflicts = []
-                if faculty_ids and "startTimeMins" in lec:
+                if mentorId and "startTimeMins" in lec:
                     conflicts = find_conflicts(
-                        faculty_ids, 
+                        mentorId, 
                         day, 
                         lec["startTimeMins"], 
                         lec["endTimeMins"], 
@@ -395,12 +395,12 @@ def update_single_day():
                 except ValueError as ve:
                     return jsonify({"success": False, "message": str(ve)}), 400
                     
-            faculty_ids = lec.get("facultyIds", [])
+            mentorId = lec.get("facultyIds", [])
             conflicts = []
             
-            if faculty_ids and "startTimeMins" in lec:
+            if mentorId and "startTimeMins" in lec:
                 conflicts = find_conflicts(
-                    faculty_ids, 
+                    mentorId, 
                     day, 
                     lec["startTimeMins"], 
                     lec["endTimeMins"], 
