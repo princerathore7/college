@@ -706,16 +706,32 @@ function addPeriod(day) {
 
   periodDiv.innerHTML = `
     <div class="grid">
+
+      <!-- Start Time -->
       <div class="form-group">
         <label>Start Time</label>
-        <input type="time" class="startTime" required>
+        <div style="display:flex;gap:8px;">
+          <input type="time" class="startTime" required style="flex:1;">
+          <select class="startMeridian" style="width:80px;">
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
+          </select>
+        </div>
       </div>
 
+      <!-- End Time -->
       <div class="form-group">
         <label>End Time</label>
-        <input type="time" class="endTime" required>
+        <div style="display:flex;gap:8px;">
+          <input type="time" class="endTime" required style="flex:1;">
+          <select class="endMeridian" style="width:80px;">
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
+          </select>
+        </div>
       </div>
 
+      <!-- Type -->
       <div class="form-group">
         <label>Type</label>
         <select class="type-select periodType">
@@ -730,35 +746,55 @@ function addPeriod(day) {
         </select>
       </div>
 
+      <!-- Subject -->
       <div class="form-group subject-group">
         <label class="subject-label">Subject Name</label>
-        <input type="text" class="subject" placeholder="e.g. Mathematics" required>
+        <input
+          type="text"
+          class="subject"
+          placeholder="e.g. Mathematics"
+          required
+        >
       </div>
 
+      <!-- Faculty -->
       <div class="form-group faculty-group">
         <label>Faculty</label>
+
         <div class="search-container">
-          <input type="text" class="faculty-search" placeholder="Search Faculty ID or Name...">
+          <input
+            type="text"
+            class="faculty-search"
+            placeholder="Search Faculty ID or Name..."
+          >
           <div class="suggestions-dropdown"></div>
         </div>
+
         <div class="selected-faculties"></div>
       </div>
 
+      <!-- Room -->
       <div class="form-group room-group">
         <label>Room Number</label>
-        <input type="text" class="room" placeholder="e.g. A-101">
+        <input
+          type="text"
+          class="room"
+          placeholder="e.g. A-101"
+        >
       </div>
+
     </div>
+
     <button class="btn remove-btn">
-      <i class="fa-solid fa-trash"></i> Remove
+      <i class="fa-solid fa-trash"></i>
+      Remove
     </button>
   `;
 
-  // Attach dynamic event listeners to this specific period card
   attachPeriodListeners(periodDiv);
+
   container.appendChild(periodDiv);
 }
-
 // =======================================================
 // PERIOD CARD INTERACTIVITY
 // =======================================================
@@ -901,85 +937,202 @@ function selectFaculty(id, name, card) {
 // =======================================================
 // VALIDATION & SUBMISSION
 // =======================================================
-function validateTime(start, end) {
+function convertTo12Hour(time, meridian) {
+
+    if (!time) return "";
+
+    let [hour, minute] = time.split(":").map(Number);
+
+    if (meridian === "AM") {
+        if (hour === 12) hour = 0;
+    } else {
+        if (hour < 12) hour += 12;
+    }
+
+    const date = new Date();
+    date.setHours(hour);
+    date.setMinutes(minute);
+
+    return date.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+    });
+}
+
+function getMinutes(timeStr, meridian) {
+  if (!timeStr) return 0;
+  let [hour, minute] = timeStr.split(":").map(Number);
+  if (meridian === "AM") {
+    if (hour === 12) hour = 0;
+  } else {
+    if (hour < 12) hour += 12;
+  }
+  return hour * 60 + minute;
+}
+
+function validateTime(start, end, startMeridian, endMeridian) {
   if (!start || !end) return false;
-  // Format string comparison works safely for HH:MM 24h format
-  return start < end;
+  const startMins = getMinutes(start, startMeridian);
+  const endMins = getMinutes(end, endMeridian);
+  return startMins < endMins;
 }
 
 async function handleTimetableSubmit() {
-  const selectedYear = document.getElementById("year").value;
-  const selectedClass = document.getElementById("className").value;
 
-  if (!selectedYear) return showErrorModal("Missing Detail", "Please select a Year.");
-  if (!selectedClass) return showErrorModal("Missing Detail", "Please select a Class.");
+    const selectedYear = document.getElementById("year").value;
+    const selectedClass = document.getElementById("className").value;
 
-  const finalClassName = `${selectedYear} ${selectedClass}`;
-  const weeklySchedule = {};
-  let hasValidationError = false;
+    if (!selectedYear)
+        return showErrorModal("Missing Detail", "Please select a Year.");
 
-  days.forEach(day => {
-    weeklySchedule[day] = [];
-    const periodCards = document.querySelectorAll(`#${day}-periods .period-card`);
+    if (!selectedClass)
+        return showErrorModal("Missing Detail", "Please select a Class.");
 
-    periodCards.forEach(card => {
-      const startTime = card.querySelector(".startTime").value;
-      const endTime = card.querySelector(".endTime").value;
-      const type = card.querySelector(".periodType").value;
-      const subject = card.querySelector(".subject").value;
-      const room = card.querySelector(".room").value;
-      
-      const facultyChips = card.querySelectorAll('.chip');
-      const facultyIds = Array.from(facultyChips).map(c => c.dataset.id);
+    const finalClassName = `${selectedYear} ${selectedClass}`;
 
-      // Validation Rules
-      if (!startTime || !endTime) {
-        showErrorModal("Invalid Time", `Please specify start and end times for all periods on ${day}.`);
-        hasValidationError = true;
-        return;
-      }
-      
-      if (!validateTime(startTime, endTime)) {
-        showErrorModal("Invalid Time", `End time must be greater than start time (Found: ${startTime} - ${endTime}).`);
-        hasValidationError = true;
-        return;
-      }
+    const weeklySchedule = {};
 
-      if (!subject) {
-        showErrorModal("Missing Detail", `Please specify the subject/break name for periods on ${day}.`);
-        hasValidationError = true;
-        return;
-      }
+    let hasValidationError = false;
 
-      if (type !== 'Break' && facultyIds.length === 0) {
-        showErrorModal("Missing Faculty", `Please select at least one faculty for ${subject} on ${day}.`);
-        hasValidationError = true;
-        return;
-      }
+    days.forEach(day => {
 
-      weeklySchedule[day].push({
-        startTime,
-        endTime,
-        type: type.toLowerCase(),
-        subject,
-        facultyIds, // NEW: Sending strictly facultyIds array
-        room: type === 'Break' ? '' : room
-      });
+        weeklySchedule[day] = [];
+
+        const periodCards =
+            document.querySelectorAll(`#${day}-periods .period-card`);
+
+        periodCards.forEach(card => {
+
+            // Raw HH:MM values
+            const rawStart =
+                card.querySelector(".startTime").value;
+
+            const rawEnd =
+                card.querySelector(".endTime").value;
+
+            // AM / PM
+            const startMeridian =
+                card.querySelector(".startMeridian").value;
+
+            const endMeridian =
+                card.querySelector(".endMeridian").value;
+
+            // Convert for backend
+            const startTime =
+                convertTo12Hour(rawStart, startMeridian);
+
+            const endTime =
+                convertTo12Hour(rawEnd, endMeridian);
+
+            const type =
+                card.querySelector(".periodType").value;
+
+            const subject =
+                card.querySelector(".subject").value.trim();
+
+            const room =
+                card.querySelector(".room").value.trim();
+
+            const facultyChips =
+                card.querySelectorAll(".chip");
+
+            const facultyIds =
+                Array.from(facultyChips).map(
+                    chip => chip.dataset.id
+                );
+
+            // Validation
+
+            if (!rawStart || !rawEnd) {
+
+                showErrorModal(
+                    "Invalid Time",
+                    `Please specify start and end times for all periods on ${day}.`
+                );
+
+                hasValidationError = true;
+                return;
+
+            }
+
+            // Compare time values using AM/PM correctly
+            if (!validateTime(rawStart, rawEnd, startMeridian, endMeridian)) {
+
+                showErrorModal(
+                    "Invalid Time",
+                    `End time must be greater than start time.`
+                );
+
+                hasValidationError = true;
+                return;
+
+            }
+
+            if (!subject) {
+
+                showErrorModal(
+                    "Missing Detail",
+                    `Please specify subject/break name for ${day}.`
+                );
+
+                hasValidationError = true;
+                return;
+
+            }
+
+            if (type !== "Break" && facultyIds.length === 0) {
+
+                showErrorModal(
+                    "Missing Faculty",
+                    `Please select at least one faculty for ${subject}.`
+                );
+
+                hasValidationError = true;
+                return;
+
+            }
+
+            weeklySchedule[day].push({
+
+                startTime: startTime,
+
+                endTime: endTime,
+
+                type: type.toLowerCase(),
+
+                subject: subject,
+
+                facultyIds: facultyIds,
+
+                room: type === "Break" ? "" : room
+
+            });
+
+        });
+
     });
-  });
 
-  if (hasValidationError) return;
+    if (hasValidationError) return;
 
-  const finalData = {
-    year: selectedYear,
-    className: finalClassName,
-    mentorID: localStorage.getItem("mentorID") || "MENTOR001",
-    weeklySchedule
-  };
+    const finalData = {
 
-  await executeUpload(finalData);
+        year: selectedYear,
+
+        className: finalClassName,
+
+        mentorID:
+            localStorage.getItem("mentorID") || "MENTOR001",
+
+        weeklySchedule
+
+    };
+
+    console.log(finalData);
+
+    await executeUpload(finalData);
+
 }
-
 async function executeUpload(payload) {
   // Update Button State
   const originalBtnText = submitBtn.innerHTML;
