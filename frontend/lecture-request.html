@@ -817,27 +817,16 @@ toggle.addEventListener("change",async()=>{
     try{
 
 
-        const res = await fetch(
-        "https://college-hwbb.onrender.com/api/timetable/toggle-approval-mode",
-        {
-
-        method:"PUT",
-
-        headers:{
-            "Content-Type":"application/json"
-        },
-
-
-        body:JSON.stringify({
-
-            mentorId:mentorId,
-
-            approvalMode:status
-
-        })
-
-
-        });
+        const res = await fetch("https://college-hwbb.onrender.com/api/timetable/toggle-approval-mode", {
+    method: "PUT",
+    headers: {
+        "Content-Type": "application/json"
+    },
+  body: JSON.stringify({
+    mentorId: mentorId,
+    approvalMode: toggle.checked
+})
+});
 
 
         const data = await res.json();
