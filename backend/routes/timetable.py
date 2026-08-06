@@ -257,11 +257,11 @@ def set_weekly_timetable():
                         
                 mentorId = lec.get("facultyIds", [])
                 
-                # Verify faculties actually exist
-                if mentorId:
-                    existing_faculties = db.mentors.count_documents({"mentorId": {"$in": mentorId}})
-                    if existing_faculties != len(mentorId):
-                        return jsonify({"success": False, "message": f"One or more faculty IDs are invalid in {day}"}), 400
+                # # Verify faculties actually exist
+                # if mentorId:
+                #     existing_faculties = db.mentors.count_documents({"mentorId": {"$in": mentorId}})
+                #     if existing_faculties != len(mentorId):
+                #         return jsonify({"success": False, "message": f"One or more faculty IDs are invalid in {day}"}), 400
 
                 # Detect Conflicts for subjects with assigned faculty
                 conflicts = []
