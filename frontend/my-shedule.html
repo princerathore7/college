@@ -195,7 +195,7 @@
         Loading...
       </h2>
 
-      <p id="studentYear"></p>
+      <!-- <p id="studentYear"></p> -->
 
     </div>
 
@@ -409,7 +409,11 @@ function renderSchedule(day){
 
           <span>Faculty</span>
 
-          ${item.faculty || "N/A"}
+${
+item.faculty && item.faculty.length
+? item.faculty.map(f => f.name).join(", ")
+: "N/A"
+}
 
         </div>
 
