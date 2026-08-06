@@ -338,32 +338,23 @@ async function fetchTimetable(){
 // ============================================
 // RENDER SCHEDULE
 // ============================================
+function renderSchedule(day) {
 
-function renderSchedule(day){
-
-  const container =
-  document.getElementById("scheduleContainer");
+  const container = document.getElementById("scheduleContainer");
 
   const schedule = fullSchedule[day] || [];
 
-  if(schedule.length === 0){
+  if (schedule.length === 0) {
 
     container.innerHTML = `
-
       <div class="empty">
-
         <i class="fa-solid fa-calendar-xmark"></i>
-
         <br><br>
-
         No schedule available for ${day}
-
       </div>
-
     `;
 
     return;
-
   }
 
   container.innerHTML = "";
@@ -372,33 +363,25 @@ function renderSchedule(day){
 
     const isBreak = item.type === "break";
 
+    // Faculty names
+    const facultyNames =
+      item.faculty && Array.isArray(item.faculty) && item.faculty.length
+        ? item.faculty.map(f => f.name).join(", ")
+        : "N/A";
+
     const card = document.createElement("div");
 
-    card.className =
-    `period-card ${isBreak ? "break-card" : ""}`;
+    card.className = `period-card ${isBreak ? "break-card" : ""}`;
 
     card.innerHTML = `
-
       <div class="period-top">
 
-        <div class="${
-          isBreak ? "break-title" : "subject"
-        }">
-
-          ${
-            item.subject ||
-            item.title ||
-            "Untitled"
-          }
-
+        <div class="${isBreak ? "break-title" : "subject"}">
+          ${item.subject || item.title || "Untitled"}
         </div>
 
         <div class="time">
-
-          ${item.startTime}
-          -
-          ${item.endTime}
-
+          ${item.startTime} - ${item.endTime}
         </div>
 
       </div>
@@ -406,35 +389,21 @@ function renderSchedule(day){
       <div class="details">
 
         <div class="detail-box">
-
           <span>Faculty</span>
-
-${
-item.faculty && item.faculty.length
-? item.faculty.map(f => f.name).join(", ")
-: "N/A"
-}
-
+          ${facultyNames}
         </div>
 
         <div class="detail-box">
-
           <span>Room</span>
-
           ${item.room || "N/A"}
-
         </div>
 
         <div class="detail-box">
-
           <span>Type</span>
-
-          ${item.type || "subject"}
-
+          ${item.type || "Subject"}
         </div>
 
       </div>
-
     `;
 
     container.appendChild(card);
