@@ -550,6 +550,73 @@
                 min-width: 0;
             }
         }
+        .approval-card{
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.1);
+    width:300px;
+    margin:20px;
+}
+
+
+.approval-card h3{
+    margin-bottom:10px;
+}
+
+
+#modeText{
+    font-size:14px;
+    margin-bottom:15px;
+}
+
+
+/* Toggle */
+
+.switch{
+    position:relative;
+    display:inline-block;
+    width:60px;
+    height:30px;
+}
+
+
+.switch input{
+    display:none;
+}
+
+
+.slider{
+    position:absolute;
+    cursor:pointer;
+    inset:0;
+    background:#ccc;
+    border-radius:30px;
+    transition:.3s;
+}
+
+
+.slider:before{
+    content:"";
+    position:absolute;
+    height:22px;
+    width:22px;
+    left:4px;
+    bottom:4px;
+    background:white;
+    border-radius:50%;
+    transition:.3s;
+}
+
+
+input:checked + .slider{
+    background:#2563eb;
+}
+
+
+input:checked + .slider:before{
+    transform:translateX(30px);
+}
     </style>
 </head>
 <body>
@@ -573,7 +640,20 @@
 
     <!-- Main Content -->
     <main class="main-container">
-        
+        <div class="approval-card">
+
+    <h3>Lecture Approval Mode</h3>
+
+    <p id="modeText">
+        Checking status...
+    </p>
+
+    <label class="switch">
+        <input type="checkbox" id="approvalToggle">
+        <span class="slider"></span>
+    </label>
+
+</div>
         <!-- Toolbar -->
         <div class="toolbar">
             <div class="search-box">
@@ -687,7 +767,131 @@
             // Set auto refresh every 30 seconds
             refreshInterval = setInterval(() => fetchRequests(false), 30000);
         });
+// const mentorId = localStorage.getItem("mentorId");
 
+const toggle = document.getElementById("approvalToggle");
+const modeText = document.getElementById("modeText");
+
+
+// Load current mode
+
+async function loadApprovalMode(){
+
+    try{
+
+        const res = await fetch(
+        `https://college-hwbb.onrender.com/api/timetable/approval-mode/${mentorId}`
+        );
+
+
+        const data = await res.json();
+
+
+        if(data.success){
+
+            toggle.checked = data.approvalMode;
+
+            updateText(data.approvalMode);
+
+        }
+
+
+    }catch(err){
+
+        console.log(err);
+
+    }
+
+}
+
+
+
+// Change mode
+
+toggle.addEventListener("change",async()=>{
+
+
+    const status = toggle.checked;
+
+
+    try{
+
+
+        const res = await fetch(
+        "https://college-hwbb.onrender.com/api/timetable/toggle-approval-mode",
+        {
+
+        method:"PUT",
+
+        headers:{
+            "Content-Type":"application/json"
+        },
+
+
+        body:JSON.stringify({
+
+            mentorId:mentorId,
+
+            approvalMode:status
+
+        })
+
+
+        });
+
+
+        const data = await res.json();
+
+
+        if(data.success){
+
+            updateText(status);
+
+            alert(
+            status
+            ?
+            "Approval Mode ON"
+            :
+            "Neutral Mode ON"
+            );
+
+        }
+
+
+    }catch(err){
+
+        console.log(err);
+
+    }
+
+
+
+});
+
+
+
+
+function updateText(status){
+
+    if(status){
+
+        modeText.innerHTML =
+        "🟢 Approval Mode ON<br>Conflicting lectures require approval.";
+
+    }
+
+    else{
+
+        modeText.innerHTML =
+        "⚪ Neutral Mode ON<br>Lectures can be assigned directly.";
+
+    }
+
+}
+
+
+
+loadApprovalMode();
         // Fetch API Data
         async function fetchRequests(showLoader = true) {
             if (showLoader) {
