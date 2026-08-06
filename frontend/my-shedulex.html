@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Schedule</title>
+
+  <link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial,sans-serif;
+    }
+
+    body{
+      background:#f4f7fb;
+      padding:20px;
+    }
+
+    .container{
+      max-width:1400px;
+      margin:auto;
+    }
+
+    .topbar{
+      background:#0d47a1;
+      color:white;
+      padding:20px;
+      border-radius:14px;
+      margin-bottom:25px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:15px;
+    }
+
+    .topbar h1{
+      font-size:30px;
+    }
+
+    .student-info{
+      text-align:right;
+    }
+
+    .student-info p{
+      font-size:15px;
+      margin-top:5px;
+    }
+
+    .days-tabs{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:25px;
+    }
+
+    .day-btn{
+      border:none;
+      padding:12px 18px;
+      border-radius:10px;
+      cursor:pointer;
+      background:white;
+      font-weight:bold;
+      box-shadow:0 2px 10px rgba(0,0,0,0.08);
+      transition:0.3s;
+    }
+
+    .day-btn.active{
+      background:#0d47a1;
+      color:white;
+    }
+
+    .schedule-container{
+      display:grid;
+      gap:18px;
+    }
+
+    .period-card{
+      background:white;
+      border-radius:14px;
+      padding:18px;
+      box-shadow:0 4px 15px rgba(0,0,0,0.08);
+      border-left:6px solid #0d47a1;
+    }
+
+    .period-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+
+    .subject{
+      font-size:22px;
+      font-weight:bold;
+      color:#0d47a1;
+    }
+
+    .time{
+      background:#e3f2fd;
+      color:#0d47a1;
+      padding:8px 14px;
+      border-radius:8px;
+      font-weight:bold;
+    }
+
+    .details{
+      margin-top:15px;
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+      gap:12px;
+    }
+
+    .detail-box{
+      background:#f8f9fa;
+      padding:12px;
+      border-radius:10px;
+    }
+
+    .detail-box span{
+      display:block;
+      color:#777;
+      font-size:13px;
+      margin-bottom:5px;
+    }
+
+    .break-card{
+      border-left:6px solid #ff9800;
+    }
+
+    .break-title{
+      color:#ff9800;
+    }
+
+    .loading{
+      text-align:center;
+      font-size:20px;
+      margin-top:40px;
+      color:#555;
+    }
+
+    .empty{
+      text-align:center;
+      padding:50px;
+      background:white;
+      border-radius:15px;
+      font-size:20px;
+      color:#777;
+    }
+
+    @media(max-width:768px){
+
+      .topbar{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .student-info{
+        text-align:left;
+      }
+
+      .subject{
+        font-size:19px;
+      }
+
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- TOPBAR -->
+
+  <div class="topbar">
+
+    <div>
+      <h1>
+        <i class="fa-solid fa-calendar-days"></i>
+        My Schedule
+      </h1>
+    </div>
+
+    <div class="student-info">
+
+      <h2 id="studentClass">
+        Loading...
+      </h2>
+
+      <p id="studentYear"></p>
+
+    </div>
+
+  </div>
+
+  <!-- DAY TABS -->
+
+  <div class="days-tabs" id="daysTabs"></div>
+
+  <!-- SCHEDULE -->
+
+  <div class="schedule-container" id="scheduleContainer">
+
+    <div class="loading">
+      Loading Timetable...
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+const API_BASE =
+"https://college-hwbb.onrender.com/api/timetable";
+
+const days = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday"
+];
+
+let fullSchedule = {};
+let currentDay = getTodayName();
+
+
+// ============================================
+// LOAD STUDENT DATA
+// ============================================
+
+const profile =
+JSON.parse(localStorage.getItem("studentProfile")) || {};
+
+const studentClass =
+profile.class ||
+profile.branch ||
+localStorage.getItem("studentClass") ||
+localStorage.getItem("className") ||
+localStorage.getItem("class_assigned") ||
+"1IT1";
+console.log("Using class:", studentClass);
+const studentYear =
+localStorage.getItem("studentYear")
+|| localStorage.getItem("year")
+|| "1st Year";
+
+document.getElementById("studentClass").innerText =
+`Class: ${studentClass}`;
+
+document.getElementById("studentYear").innerText =
+studentYear;
+
+
+// ============================================
+// CREATE DAY BUTTONS
+// ============================================
+
+const tabsContainer =
+document.getElementById("daysTabs");
+
+days.forEach(day => {
+
+  const btn = document.createElement("button");
+
+  btn.className =
+  `day-btn ${day === currentDay ? "active" : ""}`;
+
+  btn.innerText = day;
+
+  btn.onclick = () => {
+
+    document
+    .querySelectorAll(".day-btn")
+    .forEach(b => b.classList.remove("active"));
+
+    btn.classList.add("active");
+
+    currentDay = day;
+
+    renderSchedule(day);
+
+  };
+
+  tabsContainer.appendChild(btn);
+
+});
+
+
+// ============================================
+// FETCH TIMETABLE
+// ============================================
+
+async function fetchTimetable(){
+
+  try{
+
+    const response = await fetch(
+      `${API_BASE}/class/${studentClass}`
+    );
+
+    const data = await response.json();
+
+    if(data.success){
+
+      fullSchedule =
+      data.timetable.weeklySchedule || {};
+
+      renderSchedule(currentDay);
+
+    }else{
+
+      showEmpty();
+
+    }
+
+  }catch(error){
+
+    console.error(error);
+
+    showEmpty();
+
+  }
+
+}
+
+
+// ============================================
+// RENDER SCHEDULE
+// ============================================
+
+function renderSchedule(day){
+
+  const container =
+  document.getElementById("scheduleContainer");
+
+  const schedule = fullSchedule[day] || [];
+
+  if(schedule.length === 0){
+
+    container.innerHTML = `
+
+      <div class="empty">
+
+        <i class="fa-solid fa-calendar-xmark"></i>
+
+        <br><br>
+
+        No schedule available for ${day}
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+  container.innerHTML = "";
+
+  schedule.forEach(item => {
+
+    const isBreak = item.type === "break";
+
+    const card = document.createElement("div");
+
+    card.className =
+    `period-card ${isBreak ? "break-card" : ""}`;
+
+    card.innerHTML = `
+
+      <div class="period-top">
+
+        <div class="${
+          isBreak ? "break-title" : "subject"
+        }">
+
+          ${
+            item.subject ||
+            item.title ||
+            "Untitled"
+          }
+
+        </div>
+
+        <div class="time">
+
+          ${item.startTime}
+          -
+          ${item.endTime}
+
+        </div>
+
+      </div>
+
+      <div class="details">
+
+        <div class="detail-box">
+
+          <span>Faculty</span>
+
+${
+item.faculty && item.faculty.length
+? item.faculty.map(f => f.name).join(", ")
+: "N/A"
+}
+
+        </div>
+
+        <div class="detail-box">
+
+          <span>Room</span>
+
+          ${item.room || "N/A"}
+
+        </div>
+
+        <div class="detail-box">
+
+          <span>Type</span>
+
+          ${item.type || "subject"}
+
+        </div>
+
+      </div>
+
+    `;
+
+    container.appendChild(card);
+
+  });
+
+}
+
+
+// ============================================
+// EMPTY STATE
+// ============================================
+
+function showEmpty(){
+
+  document.getElementById(
+    "scheduleContainer"
+  ).innerHTML = `
+
+    <div class="empty">
+
+      <i class="fa-solid fa-triangle-exclamation"></i>
+
+      <br><br>
+
+      Timetable Not Available
+
+    </div>
+
+  `;
+
+}
+
+
+// ============================================
+// GET TODAY NAME
+// ============================================
+
+function getTodayName(){
+
+  const dayIndex = new Date().getDay();
+
+  const map = {
+    1:"Monday",
+    2:"Tuesday",
+    3:"Wednesday",
+    4:"Thursday",
+    5:"Friday",
+    6:"Saturday"
+  };
+
+  return map[dayIndex] || "Monday";
+
+}
+
+
+// ============================================
+// INITIAL LOAD
+// ============================================
+
+fetchTimetable();
+
+</script>
+
+</body>
+</html>

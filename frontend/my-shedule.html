@@ -1,503 +1,751 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Schedule</title>
-
-  <link rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-
+  
+  <!-- Font Awesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
   <style>
-
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-      font-family:Arial,sans-serif;
+    /* =======================================================
+       CSS RESETS & VARIABLES
+       ======================================================= */
+    :root {
+      --primary: #0d47a1;
+      --primary-light: #1565c0;
+      --primary-bg: #e3f2fd;
+      --bg-color: #f4f7fb;
+      --text-main: #333333;
+      --text-muted: #6b7280;
+      --break-color: #f57c00;
+      --break-bg: #fff3e0;
+      --success: #10b981;
+      --white: #ffffff;
+      --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 15px rgba(0,0,0,0.08);
+      --radius: 12px;
     }
 
-    body{
-      background:#f4f7fb;
-      padding:20px;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    .container{
-      max-width:1400px;
-      margin:auto;
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 20px;
+      line-height: 1.6;
     }
 
-    .topbar{
-      background:#0d47a1;
-      color:white;
-      padding:20px;
-      border-radius:14px;
-      margin-bottom:25px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      flex-wrap:wrap;
-      gap:15px;
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
     }
 
-    .topbar h1{
-      font-size:30px;
+    /* =======================================================
+       HEADER
+       ======================================================= */
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: var(--white);
+      padding: 24px;
+      border-radius: var(--radius);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 25px;
     }
 
-    .student-info{
-      text-align:right;
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
-    .student-info p{
-      font-size:15px;
-      margin-top:5px;
+    .header-title h1 {
+      font-size: 24px;
+      font-weight: 700;
     }
 
-    .days-tabs{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-bottom:25px;
+    .header-info {
+      text-align: right;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 10px 18px;
+      border-radius: 8px;
+      backdrop-filter: blur(5px);
     }
 
-    .day-btn{
-      border:none;
-      padding:12px 18px;
-      border-radius:10px;
-      cursor:pointer;
-      background:white;
-      font-weight:bold;
-      box-shadow:0 2px 10px rgba(0,0,0,0.08);
-      transition:0.3s;
+    .header-info .class-name {
+      font-size: 18px;
+      font-weight: bold;
+      display: block;
     }
 
-    .day-btn.active{
-      background:#0d47a1;
-      color:white;
+    .header-info .year-name {
+      font-size: 13px;
+      opacity: 0.9;
     }
 
-    .schedule-container{
-      display:grid;
-      gap:18px;
+    /* =======================================================
+       STATUS BAR (COUNTDOWN)
+       ======================================================= */
+    .status-bar {
+      background: var(--white);
+      border-radius: 8px;
+      padding: 15px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow-sm);
+      border-left: 4px solid var(--primary);
+      font-weight: 600;
+      color: var(--primary);
+      transition: all 0.3s ease;
     }
 
-    .period-card{
-      background:white;
-      border-radius:14px;
-      padding:18px;
-      box-shadow:0 4px 15px rgba(0,0,0,0.08);
-      border-left:6px solid #0d47a1;
+    .status-bar.hidden {
+      display: none;
     }
 
-    .period-top{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      flex-wrap:wrap;
-      gap:10px;
+    .status-bar i {
+      font-size: 18px;
+      animation: pulse 2s infinite;
     }
 
-    .subject{
-      font-size:22px;
-      font-weight:bold;
-      color:#0d47a1;
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.7; }
+      100% { transform: scale(1); opacity: 1; }
     }
 
-    .time{
-      background:#e3f2fd;
-      color:#0d47a1;
-      padding:8px 14px;
-      border-radius:8px;
-      font-weight:bold;
+    /* =======================================================
+       DAY TABS
+       ======================================================= */
+    .tabs-container {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
+    
+    .tabs-container::-webkit-scrollbar {
+      display: none;
     }
 
-    .details{
-      margin-top:15px;
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-      gap:12px;
+    .tab-btn {
+      padding: 12px 24px;
+      background: var(--white);
+      border: 1px solid #e5e7eb;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-sm);
     }
 
-    .detail-box{
-      background:#f8f9fa;
-      padding:12px;
-      border-radius:10px;
+    .tab-btn:hover {
+      background: var(--primary-bg);
+      color: var(--primary);
+      border-color: #bbdefb;
     }
 
-    .detail-box span{
-      display:block;
-      color:#777;
-      font-size:13px;
-      margin-bottom:5px;
+    .tab-btn.active {
+      background: var(--primary);
+      color: var(--white);
+      border-color: var(--primary);
+      box-shadow: 0 4px 10px rgba(13, 71, 161, 0.3);
     }
 
-    .break-card{
-      border-left:6px solid #ff9800;
+    /* =======================================================
+       SCHEDULE CARDS
+       ======================================================= */
+    .schedule-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
 
-    .break-title{
-      color:#ff9800;
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .loading{
-      text-align:center;
-      font-size:20px;
-      margin-top:40px;
-      color:#555;
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
     }
 
-    .empty{
-      text-align:center;
-      padding:50px;
-      background:white;
-      border-radius:15px;
-      font-size:20px;
-      color:#777;
+    /* Type specific styling */
+    .card.subject-card {
+      border-left: 6px solid var(--primary);
+    }
+    
+    .card.break-card {
+      border-left: 6px solid var(--break-color);
+      background: var(--break-bg);
     }
 
-    @media(max-width:768px){
+    .card.running {
+      border: 2px solid var(--success);
+      border-left: 6px solid var(--success);
+    }
 
-      .topbar{
-        flex-direction:column;
-        align-items:flex-start;
+    /* Card Layout */
+    .card-left {
+      flex: 1;
+    }
+
+    .card-right {
+      text-align: right;
+      min-width: 120px;
+    }
+
+    /* Typography inside card */
+    .subject-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .time-slot {
+      font-size: 15px;
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: inline-block;
+      background: var(--primary-bg);
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+
+    .break-card .time-slot {
+      color: var(--break-color);
+      background: rgba(245, 124, 0, 0.1);
+    }
+
+    .meta-info {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-type {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+      background: #f3f4f6;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .running-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--success);
+      color: var(--white);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* =======================================================
+       UTILITIES & STATES
+       ======================================================= */
+    .loader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 50px 0;
+      color: var(--primary);
+    }
+
+    .loader i {
+      font-size: 40px;
+      margin-bottom: 15px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .empty-state i {
+      font-size: 60px;
+      color: #d1d5db;
+      margin-bottom: 15px;
+    }
+
+    .empty-state h3 {
+      color: var(--text-muted);
+      font-size: 18px;
+    }
+
+    .hidden { display: none !important; }
+
+    /* =======================================================
+       RESPONSIVE DESIGN
+       ======================================================= */
+    @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
       }
-
-      .student-info{
-        text-align:left;
+      .header-info {
+        text-align: left;
+        width: 100%;
       }
-
-      .subject{
-        font-size:19px;
+      .card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
       }
-
+      .card-right {
+        text-align: left;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid #f3f4f6;
+        padding-top: 12px;
+      }
+      .meta-info {
+        flex-direction: column;
+        gap: 8px;
+      }
     }
-
   </style>
 </head>
 <body>
 
-<div class="container">
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-title">
+        <i class="fa-solid fa-calendar-days fa-2x"></i>
+        <h1>My Schedule</h1>
+      </div>
+      <div class="header-info" id="headerInfo">
+        <span class="class-name" id="displayClassName">Loading...</span>
+        <span class="year-name" id="displayYearName"></span>
+      </div>
+    </header>
 
-  <!-- TOPBAR -->
-
-  <div class="topbar">
-
-    <div>
-      <h1>
-        <i class="fa-solid fa-calendar-days"></i>
-        My Schedule
-      </h1>
+    <!-- Status Bar (Next Class / Current Class) -->
+    <div class="status-bar hidden" id="statusBar">
+      <i class="fa-solid fa-clock"></i>
+      <span id="statusMessage"></span>
     </div>
 
-    <div class="student-info">
-
-      <h2 id="studentClass">
-        Loading...
-      </h2>
-
-      <p id="studentYear"></p>
-
+    <!-- Day Tabs -->
+    <div class="tabs-container" id="dayTabs">
+      <!-- Tabs generated via JS -->
     </div>
 
+    <!-- Loader -->
+    <div class="loader" id="loader">
+      <i class="fa-solid fa-circle-notch fa-spin"></i>
+      <h3>Fetching Timetable...</h3>
+    </div>
+
+    <!-- Schedule Container -->
+    <div class="schedule-container" id="scheduleContainer">
+      <!-- Cards generated via JS -->
+    </div>
   </div>
 
-  <!-- DAY TABS -->
+  <script>
+    /* =======================================================
+       GLOBAL VARIABLES
+       ======================================================= */
+    const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    let weeklyScheduleData = null;
+    let currentSelectedDay = "";
+    let timerInterval = null;
 
-  <div class="days-tabs" id="daysTabs"></div>
+    // DOM Elements
+    const displayClassName = document.getElementById('displayClassName');
+    const displayYearName = document.getElementById('displayYearName');
+    const dayTabsContainer = document.getElementById('dayTabs');
+    const scheduleContainer = document.getElementById('scheduleContainer');
+    const loader = document.getElementById('loader');
+    const statusBar = document.getElementById('statusBar');
+    const statusMessage = document.getElementById('statusMessage');
 
-  <!-- SCHEDULE -->
+    /* =======================================================
+       INITIALIZATION
+       ======================================================= */
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Read Class strictly according to priority logic
+      const studentClass = getStudentClass();
+      
+      if (!studentClass) {
+        showEmptyState("Class information not found in profile.");
+        if (loader) loader.classList.add('hidden');
+        return;
+      }
 
-  <div class="schedule-container" id="scheduleContainer">
+      // 2. Setup Header
+      if (displayClassName) displayClassName.innerText = studentClass;
+      
+      // Try to extract year if possible (e.g., "2nd Year IT2" -> "2nd Year")
+      const yearMatch = studentClass.match(/(\d+(st|nd|rd|th)\s+Year)/i);
+      if (yearMatch && displayYearName) {
+        displayYearName.innerText = yearMatch[1];
+      }
 
-    <div class="loading">
-      Loading Timetable...
-    </div>
+      // 3. Setup Tabs (Select current day by default)
+      setupTabs();
 
-  </div>
+      // 4. Fetch Timetable API
+      fetchTimetable(studentClass);
+    });
 
-</div>
+    /* =======================================================
+       CLASS READING LOGIC (STRICT PRIORITY)
+       ======================================================= */
+    function getStudentClass() {
+      try {
+        const profileStr = localStorage.getItem("studentProfile");
+        const profile = profileStr ? JSON.parse(profileStr) : {};
+        
+        const studentClass = 
+          profile.class || 
+          profile.branch || 
+          localStorage.getItem("studentClass") || 
+          localStorage.getItem("className") || 
+          localStorage.getItem("class_assigned");
 
-<script>
-
-const API_BASE =
-"https://college-hwbb.onrender.com/api/timetable";
-
-const days = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday"
-];
-
-let fullSchedule = {};
-let currentDay = getTodayName();
-
-
-// ============================================
-// LOAD STUDENT DATA
-// ============================================
-
-const profile =
-JSON.parse(localStorage.getItem("studentProfile")) || {};
-
-const studentClass =
-profile.class ||
-profile.branch ||
-localStorage.getItem("studentClass") ||
-localStorage.getItem("className") ||
-localStorage.getItem("class_assigned") ||
-"1IT1";
-console.log("Using class:", studentClass);
-const studentYear =
-localStorage.getItem("studentYear")
-|| localStorage.getItem("year")
-|| "1st Year";
-
-document.getElementById("studentClass").innerText =
-`Class: ${studentClass}`;
-
-document.getElementById("studentYear").innerText =
-studentYear;
-
-
-// ============================================
-// CREATE DAY BUTTONS
-// ============================================
-
-const tabsContainer =
-document.getElementById("daysTabs");
-
-days.forEach(day => {
-
-  const btn = document.createElement("button");
-
-  btn.className =
-  `day-btn ${day === currentDay ? "active" : ""}`;
-
-  btn.innerText = day;
-
-  btn.onclick = () => {
-
-    document
-    .querySelectorAll(".day-btn")
-    .forEach(b => b.classList.remove("active"));
-
-    btn.classList.add("active");
-
-    currentDay = day;
-
-    renderSchedule(day);
-
-  };
-
-  tabsContainer.appendChild(btn);
-
-});
-
-
-// ============================================
-// FETCH TIMETABLE
-// ============================================
-
-async function fetchTimetable(){
-
-  try{
-
-    const response = await fetch(
-      `${API_BASE}/class/${studentClass}`
-    );
-
-    const data = await response.json();
-
-    if(data.success){
-
-      fullSchedule =
-      data.timetable.weeklySchedule || {};
-
-      renderSchedule(currentDay);
-
-    }else{
-
-      showEmpty();
-
+        return studentClass;
+      } catch (error) {
+        console.error("Error parsing student profile:", error);
+        // Fallback to direct localstorage keys if parse fails
+        return localStorage.getItem("studentClass") || 
+               localStorage.getItem("className") || 
+               localStorage.getItem("class_assigned");
+      }
     }
 
-  }catch(error){
+    /* =======================================================
+       API FETCH & DATA HANDLING
+       ======================================================= */
+    async function fetchTimetable(className) {
+      try {
+        const url = `https://college-hwbb.onrender.com/api/timetable/class/${encodeURIComponent(className)}`;
+        const response = await fetch(url);
+        const data = await response.json();
 
-    console.error(error);
+        if (loader) loader.classList.add('hidden');
 
-    showEmpty();
+        if (data.success && data.timetable && data.timetable.weeklySchedule) {
+          weeklyScheduleData = data.timetable.weeklySchedule;
+          renderSchedule(currentSelectedDay);
+          
+          // Start the timer to update running class and countdowns every minute
+          if (timerInterval) clearInterval(timerInterval);
+          timerInterval = setInterval(() => {
+            updateDynamicStatus();
+          }, 60000); // 1 minute
+        } else {
+          showEmptyState("Timetable not yet configured for your class.");
+        }
+      } catch (error) {
+        console.error("Failed to fetch timetable:", error);
+        if (loader) loader.classList.add('hidden');
+        showEmptyState("Network error. Could not load schedule.");
+      }
+    }
 
-  }
+    /* =======================================================
+       UI RENDERING
+       ======================================================= */
+    function setupTabs() {
+      // Determine today (0 = Sunday, 1 = Monday, etc.)
+      const todayNum = new Date().getDay();
+      // Map JS day to our days array. If Sunday(0), default to Monday
+      let currentDayName = "Monday"; 
+      if (todayNum >= 1 && todayNum <= 6) {
+        currentDayName = daysOfWeek[todayNum - 1];
+      }
 
-}
+      currentSelectedDay = currentDayName;
 
+      if (!dayTabsContainer) return;
+      dayTabsContainer.innerHTML = '';
 
-// ============================================
-// RENDER SCHEDULE
-// ============================================
+      daysOfWeek.forEach(day => {
+        const btn = document.createElement('button');
+        btn.className = `tab-btn ${day === currentSelectedDay ? 'active' : ''}`;
+        btn.innerText = day;
+        btn.onclick = () => {
+          // Update active style
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentSelectedDay = day;
+          renderSchedule(day);
+        };
+        dayTabsContainer.appendChild(btn);
+      });
+    }
 
-function renderSchedule(day){
+    function renderSchedule(day) {
+      if (!scheduleContainer) return;
+      scheduleContainer.innerHTML = '';
 
-  const container =
-  document.getElementById("scheduleContainer");
+      // Check if data exists for the day
+      if (!weeklyScheduleData || !weeklyScheduleData[day] || weeklyScheduleData[day].length === 0) {
+        showEmptyState(`No Schedule Available for ${day}`);
+        hideStatusBar();
+        return;
+      }
 
-  const schedule = fullSchedule[day] || [];
+      const lectures = [...weeklyScheduleData[day]];
 
-  if(schedule.length === 0){
+      // Sort lectures based on start time
+      lectures.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
 
-    container.innerHTML = `
+      lectures.forEach(lecture => {
+        const card = createCardHTML(lecture);
+        scheduleContainer.appendChild(card);
+      });
 
-      <div class="empty">
+      // Update the dynamic status immediately after render
+      updateDynamicStatus();
+    }
 
-        <i class="fa-solid fa-calendar-xmark"></i>
+    function createCardHTML(lecture) {
+      const isBreak = lecture.type && lecture.type.toLowerCase() === 'break';
+      
+      const card = document.createElement('div');
+      card.className = `card ${isBreak ? 'break-card' : 'subject-card'}`;
+      card.dataset.startTime = lecture.startTime;
+      card.dataset.endTime = lecture.endTime;
 
-        <br><br>
+      // Extract faculty names safely
+      let facultyNames = "N/A";
+      if (lecture.faculty && Array.isArray(lecture.faculty)) {
+        facultyNames = lecture.faculty.map(f => f.name || "Unknown").join(', ');
+      } else if (typeof lecture.faculty === 'string') {
+        facultyNames = lecture.faculty;
+      }
 
-        No schedule available for ${day}
+      const subjectName = lecture.subject || (isBreak ? "Break" : "Unknown Subject");
+      const roomNumber = lecture.room || "N/A";
+      const displayType = isBreak ? "Break" : (lecture.type || "Subject");
 
-      </div>
+      // Build Inner HTML
+      let html = `
+        <div class="card-left">
+          <div class="subject-name">
+            ${isBreak ? '<i class="fa-solid fa-mug-hot"></i>' : '<i class="fa-solid fa-book-open"></i>'}
+            ${subjectName}
+            <span class="running-indicator hidden" id="badge-${lecture.startTime}"><i class="fa-solid fa-circle-play"></i> Running Now</span>
+          </div>
+          <div class="time-slot">
+            <i class="fa-regular fa-clock"></i> ${lecture.startTime} - ${lecture.endTime}
+          </div>
+          ${!isBreak ? `
+            <div class="meta-info">
+              <div class="meta-item">
+                <i class="fa-solid fa-user-tie"></i> 
+                <span><strong>Faculty:</strong> ${facultyNames}</span>
+              </div>
+              <div class="meta-item">
+                <i class="fa-solid fa-door-open"></i> 
+                <span><strong>Room:</strong> ${roomNumber}</span>
+              </div>
+            </div>
+          ` : ''}
+        </div>
+        <div class="card-right">
+          <div class="badge-type">${displayType}</div>
+        </div>
+      `;
 
-    `;
+      card.innerHTML = html;
+      return card;
+    }
 
-    return;
+    function showEmptyState(message) {
+      if (!scheduleContainer) return;
+      scheduleContainer.innerHTML = `
+        <div class="empty-state">
+          <i class="fa-regular fa-calendar-xmark"></i>
+          <h3>${message}</h3>
+        </div>
+      `;
+    }
 
-  }
+    /* =======================================================
+       TIME CALCULATION & DYNAMIC STATUS
+       ======================================================= */
+    
+    // Convert "09:00 AM" to minutes since midnight for easy comparison
+    function timeToMinutes(timeStr) {
+      if (!timeStr) return 0;
+      
+      const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+      if (!match) return 0;
 
-  container.innerHTML = "";
+      let hours = parseInt(match[1], 10);
+      const minutes = parseInt(match[2], 10);
+      const period = match[3].toUpperCase();
 
-  schedule.forEach(item => {
+      if (period === "AM" && hours === 12) {
+        hours = 0;
+      } else if (period === "PM" && hours !== 12) {
+        hours += 12;
+      }
 
-    const isBreak = item.type === "break";
+      return (hours * 60) + minutes;
+    }
 
-    const card = document.createElement("div");
+    function updateDynamicStatus() {
+      // Get real current day and time
+      const now = new Date();
+      const todayNum = now.getDay();
+      
+      let realTodayName = "";
+      if (todayNum >= 1 && todayNum <= 6) {
+        realTodayName = daysOfWeek[todayNum - 1];
+      }
 
-    card.className =
-    `period-card ${isBreak ? "break-card" : ""}`;
+      // Only show live countdowns/running status if the viewed tab is TODAY
+      if (currentSelectedDay !== realTodayName) {
+        hideStatusBar();
+        clearAllRunningBadges();
+        return;
+      }
 
-    card.innerHTML = `
+      const currentMins = (now.getHours() * 60) + now.getMinutes();
+      
+      if (!weeklyScheduleData || !weeklyScheduleData[currentSelectedDay]) {
+        hideStatusBar();
+        return;
+      }
 
-      <div class="period-top">
+      const lectures = weeklyScheduleData[currentSelectedDay];
+      let runningLecture = null;
+      let nextLecture = null;
 
-        <div class="${
-          isBreak ? "break-title" : "subject"
-        }">
+      // Reset all cards styling before checking
+      clearAllRunningBadges();
 
-          ${
-            item.subject ||
-            item.title ||
-            "Untitled"
+      // Find running and next lectures
+      for (const lecture of lectures) {
+        const start = timeToMinutes(lecture.startTime);
+        const end = timeToMinutes(lecture.endTime);
+
+        if (currentMins >= start && currentMins < end) {
+          runningLecture = lecture;
+        }
+
+        // The first lecture whose start time is in the future
+        if (start > currentMins) {
+          if (!nextLecture || start < timeToMinutes(nextLecture.startTime)) {
+            nextLecture = lecture;
           }
+        }
+      }
 
-        </div>
+      // 1. Highlight Running Lecture
+      if (runningLecture) {
+        const cards = scheduleContainer.querySelectorAll('.card');
+        cards.forEach(card => {
+          if (card.dataset.startTime === runningLecture.startTime) {
+            card.classList.add('running');
+            const badge = card.querySelector('.running-indicator');
+            if (badge) badge.classList.remove('hidden');
+          }
+        });
+      }
 
-        <div class="time">
+      // 2. Update Status Bar
+      if (statusBar && statusMessage) {
+        if (runningLecture) {
+          statusMessage.innerText = `Currently Running: ${runningLecture.subject || 'Break'} (Ends at ${runningLecture.endTime})`;
+          statusBar.classList.remove('hidden');
+        } else if (nextLecture) {
+          const diff = timeToMinutes(nextLecture.startTime) - currentMins;
+          const hrs = Math.floor(diff / 60);
+          const mins = diff % 60;
+          
+          let timeText = "";
+          if (hrs > 0) timeText += `${hrs} hr${hrs > 1 ? 's' : ''} `;
+          timeText += `${mins} min${mins !== 1 ? 's' : ''}`;
+          
+          statusMessage.innerText = `Next class starts in: ${timeText}`;
+          statusBar.classList.remove('hidden');
+        } else {
+          // Classes are over for today or haven't started (and none left)
+          statusMessage.innerText = "No more classes scheduled for today.";
+          statusBar.classList.remove('hidden');
+        }
+      }
+    }
 
-          ${item.startTime}
-          -
-          ${item.endTime}
+    function clearAllRunningBadges() {
+      if (!scheduleContainer) return;
+      const cards = scheduleContainer.querySelectorAll('.card');
+      cards.forEach(card => {
+        card.classList.remove('running');
+        const badge = card.querySelector('.running-indicator');
+        if (badge) badge.classList.add('hidden');
+      });
+    }
 
-        </div>
+    function hideStatusBar() {
+      if (statusBar) statusBar.classList.add('hidden');
+    }
 
-      </div>
-
-      <div class="details">
-
-        <div class="detail-box">
-
-          <span>Faculty</span>
-
-${
-item.faculty && item.faculty.length
-? item.faculty.map(f => f.name).join(", ")
-: "N/A"
-}
-
-        </div>
-
-        <div class="detail-box">
-
-          <span>Room</span>
-
-          ${item.room || "N/A"}
-
-        </div>
-
-        <div class="detail-box">
-
-          <span>Type</span>
-
-          ${item.type || "subject"}
-
-        </div>
-
-      </div>
-
-    `;
-
-    container.appendChild(card);
-
-  });
-
-}
-
-
-// ============================================
-// EMPTY STATE
-// ============================================
-
-function showEmpty(){
-
-  document.getElementById(
-    "scheduleContainer"
-  ).innerHTML = `
-
-    <div class="empty">
-
-      <i class="fa-solid fa-triangle-exclamation"></i>
-
-      <br><br>
-
-      Timetable Not Available
-
-    </div>
-
-  `;
-
-}
-
-
-// ============================================
-// GET TODAY NAME
-// ============================================
-
-function getTodayName(){
-
-  const dayIndex = new Date().getDay();
-
-  const map = {
-    1:"Monday",
-    2:"Tuesday",
-    3:"Wednesday",
-    4:"Thursday",
-    5:"Friday",
-    6:"Saturday"
-  };
-
-  return map[dayIndex] || "Monday";
-
-}
-
-
-// ============================================
-// INITIAL LOAD
-// ============================================
-
-fetchTimetable();
-
-</script>
-
+  </script>
 </body>
 </html>
