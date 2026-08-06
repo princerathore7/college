@@ -66,33 +66,55 @@ def resolve_faculty(mentorId):
     return resolved
 
 def populate_timetable_faculties(timetable):
-    """Replaces facultyIds with resolved faculty objects in a timetable document."""
+
     if not timetable or "weeklySchedule" not in timetable:
         return timetable
 
-    # Gather all unique faculty IDs
-    unique_mentorId = set()
-    for day, schedule in timetable.get("weeklySchedule", {}).items():
-        for lec in schedule:
-            if "facultyIds" in lec and isinstance(lec["facultyIds"], list):
-                for fid in lec["facultyIds"]:
-                    unique_mentorId.add(fid)
 
-    # Fetch all needed faculties at once
-    resolved_faculties_map = { 
-        f["mentorId"]: f for f in resolve_faculty(list(unique_mentorId)) 
-    }
+    for day, schedule in timetable["weeklySchedule"].items():
 
-    # Populate the timetable
-    for day, schedule in timetable.get("weeklySchedule", {}).items():
         for lec in schedule:
-            if "facultyIds" in lec and isinstance(lec["facultyIds"], list):
+
+
+            faculty_ids = lec.get("facultyIds", [])
+
+
+            # fallback if faculty already stored
+            if not faculty_ids and "faculty" in lec:
+
+                faculty_ids = [
+                    f.get("mentorId")
+                    for f in lec["faculty"]
+                    if f.get("mentorId")
+                ]
+
+
+            if faculty_ids:
+
+                mentors = list(
+                    db.mentors.find(
+                        {
+                            "mentorId":{
+                                "$in":faculty_ids
+                            }
+                        }
+                    )
+                )
+
+
+                lec["faculty"] = [
+                    {
+                    "mentorId":m.get("mentorId"),
+                    "name":m.get("name"),
+                    "subject":m.get("subject")
+                    }
+                    for m in mentors
+                ]
+
+            else:
+
                 lec["faculty"] = []
-                for fid in lec["facultyIds"]:
-                    if fid in resolved_faculties_map:
-                        lec["faculty"].append(resolved_faculties_map[fid])
-                # Optionally remove facultyIds from response to strictly follow format
-                # del lec["facultyIds"]
+
 
     return timetable
 
