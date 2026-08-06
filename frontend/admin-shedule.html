@@ -883,7 +883,7 @@ function renderSuggestions(results, dropdown, card) {
 
   results.forEach(faculty => {
     // Safely extract properties
-    const id = faculty.id || faculty.mentorID || faculty._id || faculty.facultyId || "UNKNOWN";
+   const id = faculty.id || faculty.mentorId || faculty.mentorID || faculty._id || faculty.facultyId || "UNKNOWN";
     const name = faculty.name || faculty.mentorName || faculty.facultyName || "Unknown Name";
     const dept = faculty.subject || faculty.department || "Faculty";
 
