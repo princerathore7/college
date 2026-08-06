@@ -158,15 +158,20 @@ def populate_timetable_faculties(timetable):
 def find_conflicts(faculty_ids, day, start_mins, end_mins, current_class):
     """
     Checks if any faculty is already scheduled in an overlapping time
-    on the given day for a different class.
-
-    Overlap condition:
-    newStart < oldEnd AND newEnd > oldStart
+    on the given day for a different class, returning comprehensive details.
     """
     conflicts = []
     faculty_ids = clean_id_list(faculty_ids)
 
     for fid in faculty_ids:
+        mentor = db.mentors.find_one({"mentorId": fid})
+        approval_mode = False
+        mentor_name = "Unknown Faculty"
+        
+        if mentor:
+            approval_mode = mentor.get("approvalMode", False)
+            mentor_name = mentor.get("name", "Unknown Faculty")
+
         query = {
             "className": {"$ne": current_class},
             f"weeklySchedule.{day}": {
@@ -190,11 +195,16 @@ def find_conflicts(faculty_ids, day, start_mins, end_mins, current_class):
                     lec.get("endTimeMins", 0) > start_mins
                 ):
                     conflicts.append({
-                        "targetFaculty": fid,
-                        "existingClass": conflict_doc.get("className"),
-                        "existingSubject": lec.get("subject", ""),
-                        "existingStart": lec.get("startTime"),
-                        "existingEnd": lec.get("endTime")
+                        "mentorId": fid,
+                        "mentorName": mentor_name,
+                        "approvalMode": approval_mode,
+                        "class": conflict_doc.get("className"),
+                        "subject": lec.get("subject", ""),
+                        "day": day,
+                        "room": lec.get("room", ""),
+                        "lecture": lec,
+                        "start": lec.get("startTime"),
+                        "end": lec.get("endTime")
                     })
 
     return conflicts
@@ -249,14 +259,105 @@ def search_mentors():
 
 
 # =========================================================
+# APPROVAL MODE APIs
+# =========================================================
+
+@timetable_bp.route("/toggle-approval-mode", methods=["PUT"])
+def toggle_approval_mode():
+    try:
+        data = request.get_json() or {}
+        mentor_id = data.get("mentorId")
+        approval_mode = data.get("approvalMode")
+
+        if not mentor_id or approval_mode is None:
+            return jsonify({"success": False, "message": "mentorId and approvalMode required"}), 400
+
+        db.mentors.update_one(
+            {"mentorId": mentor_id},
+            {"$set": {"approvalMode": bool(approval_mode)}}
+        )
+
+        return jsonify({"success": True, "message": "Approval mode updated"})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@timetable_bp.route("/approval-mode/<mentor_id>", methods=["GET"])
+def get_approval_mode(mentor_id):
+    try:
+        mentor = db.mentors.find_one({"mentorId": mentor_id})
+        if not mentor:
+            return jsonify({"success": False, "message": "Mentor not found"}), 404
+            
+        return jsonify({
+            "success": True,
+            "approvalMode": mentor.get("approvalMode", False)
+        })
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+# =========================================================
 # LECTURE REQUESTS APIs
 # =========================================================
+
+@timetable_bp.route("/request-lecture", methods=["POST"])
+def request_lecture():
+    try:
+        data = request.get_json() or {}
+        
+        target_id = data.get("targetMentorId")
+        day = data.get("day")
+        start_time = data.get("startTime")
+        class_name = data.get("className")
+        
+        existing = db.lecture_requests.find_one({
+            "className": class_name,
+            "targetMentorId": target_id,
+            "day": day,
+            "startTime": start_time,
+            "status": "pending"
+        })
+        
+        if existing:
+            return jsonify({"success": True, "message": "Request already exists", "requestCreated": False})
+            
+        req_doc = {
+            "requesterMentorId": data.get("requesterMentorId", ""),
+            "targetMentorId": target_id,
+            "requesterName": data.get("requesterName", ""),
+            "targetName": data.get("targetName", ""),
+            "className": class_name,
+            "existingClass": data.get("existingClass", ""),
+            "day": day,
+            "startTime": start_time,
+            "endTime": data.get("endTime", ""),
+            "subject": data.get("subject", ""),
+            "room": data.get("room", ""),
+            "facultyIds": data.get("facultyIds", []),
+            "newLecture": data.get("newLecture", {}),
+            "oldLecture": data.get("oldLecture", {}),
+            "status": "pending",
+            "createdAt": datetime.utcnow(),
+            "updatedAt": datetime.utcnow()
+        }
+        
+        db.lecture_requests.insert_one(req_doc)
+        
+        return jsonify({"success": True, "message": "Lecture request created", "requestCreated": True})
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
 
 @timetable_bp.route("/lecture-requests/<mentor_id>", methods=["GET"])
 def get_lecture_requests(mentor_id):
     try:
         requests_data = list(db.lecture_requests.find({
-            "targetFaculty": mentor_id,
+            "$or": [
+                {"targetMentorId": mentor_id},
+                {"targetFaculty": mentor_id}
+            ],
             "status": "pending"
         }))
 
@@ -278,16 +379,64 @@ def approve_lecture_request():
         if not req_id:
             return jsonify({"success": False, "message": "requestId required"}), 400
 
-        result = db.lecture_requests.update_one(
-            {"_id": ObjectId(req_id)},
-            {"$set": {"status": "approved", "updatedAt": datetime.utcnow()}}
-        )
-
-        if result.modified_count == 0:
+        req = db.lecture_requests.find_one({"_id": ObjectId(req_id), "status": "pending"})
+        
+        if not req:
             return jsonify({
                 "success": False,
                 "message": "Request not found or already processed"
             }), 404
+
+        # 1. Find timetable
+        existing_class = req.get("existingClass")
+        day = req.get("day")
+        old_lecture = req.get("oldLecture", {})
+        
+        if existing_class and day and old_lecture:
+            # 3. Remove old lecture
+            db.timetables.update_one(
+                {"className": existing_class},
+                {
+                    "$pull": {
+                        f"weeklySchedule.{day}": {
+                            "startTimeMins": old_lecture.get("startTimeMins"),
+                            "endTimeMins": old_lecture.get("endTimeMins")
+                        }
+                    },
+                    "$set": {"updatedAt": datetime.utcnow()}
+                }
+            )
+
+        new_class = req.get("className")
+        new_lecture = req.get("newLecture", {})
+        new_lecture["status"] = "approved"
+
+        if new_class and day and new_lecture:
+            existing_tt = db.timetables.find_one({"className": new_class})
+            
+            # 4. Insert new lecture
+            if existing_tt:
+                db.timetables.update_one(
+                    {"className": new_class},
+                    {
+                        "$push": {f"weeklySchedule.{day}": new_lecture},
+                        "$set": {"updatedAt": datetime.utcnow()}
+                    }
+                )
+            else:
+                db.timetables.insert_one({
+                    "className": new_class,
+                    "weeklySchedule": {day: [new_lecture]},
+                    "createdAt": datetime.utcnow(),
+                    "updatedAt": datetime.utcnow()
+                })
+
+        # 5. Mark request approved
+        # 6. Store updatedAt
+        db.lecture_requests.update_one(
+            {"_id": ObjectId(req_id)},
+            {"$set": {"status": "approved", "updatedAt": datetime.utcnow()}}
+        )
 
         return jsonify({
             "success": True,
@@ -347,6 +496,7 @@ def set_weekly_timetable():
             }), 400
 
         has_conflict = False
+        conflict_return_info = {}
         valid_schedule = {}
 
         for day, lectures in weekly_schedule.items():
@@ -391,23 +541,50 @@ def set_weekly_timetable():
                         class_name
                     )
 
-                if conflicts:
+                actual_conflicts = [c for c in conflicts if c.get("approvalMode") == True]
+
+                if actual_conflicts:
                     has_conflict = True
 
-                    for conflict in conflicts:
-                        db.lecture_requests.insert_one({
+                    for conflict in actual_conflicts:
+                        existing_req = db.lecture_requests.find_one({
                             "className": class_name,
-                            "targetFaculty": conflict["targetFaculty"],
-                            "existingClass": conflict["existingClass"],
+                            "targetMentorId": conflict["mentorId"],
                             "day": day,
                             "startTime": lec.get("startTime"),
-                            "endTime": lec.get("endTime"),
-                            "subject": lec.get("subject", ""),
-                            "type": lec.get("type", ""),
-                            "room": lec.get("room", ""),
-                            "status": "pending",
-                            "createdAt": datetime.utcnow()
+                            "status": "pending"
                         })
+                        
+                        if not existing_req:
+                            db.lecture_requests.insert_one({
+                                "requesterMentorId": mentor_id,
+                                "targetMentorId": conflict["mentorId"],
+                                "requesterName": "",
+                                "targetName": conflict["mentorName"],
+                                "className": class_name,
+                                "existingClass": conflict["class"],
+                                "day": day,
+                                "startTime": lec.get("startTime"),
+                                "endTime": lec.get("endTime"),
+                                "subject": lec.get("subject", ""),
+                                "room": lec.get("room", ""),
+                                "facultyIds": lec.get("facultyIds", []),
+                                "newLecture": lec,
+                                "oldLecture": conflict["lecture"],
+                                "status": "pending",
+                                "createdAt": datetime.utcnow(),
+                                "updatedAt": datetime.utcnow()
+                            })
+                        
+                        if not conflict_return_info:
+                            conflict_return_info = {
+                                "conflictFacultyName": conflict["mentorName"],
+                                "conflictFacultyId": conflict["mentorId"],
+                                "existingClass": conflict["class"],
+                                "existingSubject": conflict["subject"],
+                                "existingStart": conflict["start"],
+                                "existingEnd": conflict["end"]
+                            }
                 else:
                     lec["status"] = "approved"
                     lec["faculty"] = resolve_faculty(faculty_ids)
@@ -431,11 +608,17 @@ def set_weekly_timetable():
             timetable_data["createdAt"] = datetime.utcnow()
             db.timetables.insert_one(timetable_data)
 
-        if has_conflict:
+        if has_conflict and conflict_return_info:
             return jsonify({
                 "success": True,
                 "conflict": True,
                 "requestCreated": True,
+                "conflictFacultyName": conflict_return_info["conflictFacultyName"],
+                "conflictFacultyId": conflict_return_info["conflictFacultyId"],
+                "existingClass": conflict_return_info["existingClass"],
+                "existingSubject": conflict_return_info["existingSubject"],
+                "existingStart": conflict_return_info["existingStart"],
+                "existingEnd": conflict_return_info["existingEnd"],
                 "message": "Timetable saved partially. Conflicts were routed to lecture_requests."
             })
 
@@ -515,6 +698,7 @@ def update_single_day():
         class_name = data.get("className")
         day = data.get("day")
         schedule = data.get("schedule")
+        mentor_id = data.get("mentorID", "")
 
         if not class_name or not day or schedule is None:
             return jsonify({
@@ -524,6 +708,7 @@ def update_single_day():
 
         has_conflict = False
         valid_schedule = []
+        conflict_return_info = {}
 
         for lec in schedule:
             start_time = lec.get("startTime")
@@ -561,23 +746,50 @@ def update_single_day():
                     class_name
                 )
 
-            if conflicts:
+            actual_conflicts = [c for c in conflicts if c.get("approvalMode") == True]
+
+            if actual_conflicts:
                 has_conflict = True
 
-                for conflict in conflicts:
-                    db.lecture_requests.insert_one({
+                for conflict in actual_conflicts:
+                    existing_req = db.lecture_requests.find_one({
                         "className": class_name,
-                        "targetFaculty": conflict["targetFaculty"],
-                        "existingClass": conflict["existingClass"],
+                        "targetMentorId": conflict["mentorId"],
                         "day": day,
                         "startTime": lec.get("startTime"),
-                        "endTime": lec.get("endTime"),
-                        "subject": lec.get("subject", ""),
-                        "type": lec.get("type", ""),
-                        "room": lec.get("room", ""),
-                        "status": "pending",
-                        "createdAt": datetime.utcnow()
+                        "status": "pending"
                     })
+                    
+                    if not existing_req:
+                        db.lecture_requests.insert_one({
+                            "requesterMentorId": mentor_id,
+                            "targetMentorId": conflict["mentorId"],
+                            "requesterName": "",
+                            "targetName": conflict["mentorName"],
+                            "className": class_name,
+                            "existingClass": conflict["class"],
+                            "day": day,
+                            "startTime": lec.get("startTime"),
+                            "endTime": lec.get("endTime"),
+                            "subject": lec.get("subject", ""),
+                            "room": lec.get("room", ""),
+                            "facultyIds": lec.get("facultyIds", []),
+                            "newLecture": lec,
+                            "oldLecture": conflict["lecture"],
+                            "status": "pending",
+                            "createdAt": datetime.utcnow(),
+                            "updatedAt": datetime.utcnow()
+                        })
+                    
+                    if not conflict_return_info:
+                        conflict_return_info = {
+                            "conflictFacultyName": conflict["mentorName"],
+                            "conflictFacultyId": conflict["mentorId"],
+                            "existingClass": conflict["class"],
+                            "existingSubject": conflict["subject"],
+                            "existingStart": conflict["start"],
+                            "existingEnd": conflict["end"]
+                        }
             else:
                 lec["status"] = "approved"
                 lec["faculty"] = resolve_faculty(faculty_ids)
@@ -605,11 +817,17 @@ def update_single_day():
                 "updatedAt": datetime.utcnow()
             })
 
-        if has_conflict:
+        if has_conflict and conflict_return_info:
             return jsonify({
                 "success": True,
                 "conflict": True,
                 "requestCreated": True,
+                "conflictFacultyName": conflict_return_info["conflictFacultyName"],
+                "conflictFacultyId": conflict_return_info["conflictFacultyId"],
+                "existingClass": conflict_return_info["existingClass"],
+                "existingSubject": conflict_return_info["existingSubject"],
+                "existingStart": conflict_return_info["existingStart"],
+                "existingEnd": conflict_return_info["existingEnd"],
                 "message": f"{day} timetable updated partially due to conflicts."
             })
 

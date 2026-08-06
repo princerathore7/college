@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture Requests - Mentor Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --navy-blue: #0A2540;
+            --navy-light: #153B5D;
+            --white: #ffffff;
+            --bg-light: #f4f6f8;
+            --text-dark: #2d3748;
+            --text-gray: #718096;
+            --border-color: #e2e8f0;
+            --success: #38a169;
+            --success-light: #c6f6d5;
+            --success-text: #22543d;
+            --danger: #e53e3e;
+            --danger-light: #fed7d7;
+            --danger-text: #742a2a;
+            --info: #3182ce;
+            --warning: #d69e2e;
+            --warning-light: #feebc8;
+            --warning-text: #744210;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --border-radius: 8px;
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: var(--navy-blue);
+            color: var(--white);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-brand {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .navbar-brand i {
+            font-size: 1.5rem;
+        }
+
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .badge-container {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .badge {
+            background-color: var(--danger);
+            color: var(--white);
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .btn {
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-refresh {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+        }
+
+        .btn-refresh:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-primary {
+            background-color: var(--navy-blue);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--navy-light);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: var(--white);
+        }
+
+        .btn-success:hover {
+            background-color: #2f855a;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: var(--white);
+        }
+
+        .btn-danger:hover {
+            background-color: #c53030;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-dark);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--bg-light);
+        }
+
+        /* Main Content */
+        .main-container {
+            padding: 2rem;
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            background: var(--white);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: var(--bg-light);
+            border-radius: var(--border-radius);
+            padding: 0.5rem 1rem;
+            flex: 1;
+            min-width: 250px;
+            max-width: 400px;
+            border: 1px solid var(--border-color);
+        }
+
+        .search-box i {
+            color: var(--text-gray);
+            margin-right: 0.75rem;
+        }
+
+        .search-box input {
+            border: none;
+            background: transparent;
+            outline: none;
+            width: 100%;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+        }
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .select-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        select {
+            padding: 0.5rem 2rem 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background-color: var(--white);
+            color: var(--text-dark);
+            outline: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23718096' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        /* Grid */
+        .requests-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            transition: var(--transition);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid var(--bg-light);
+            padding-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--navy-blue);
+            margin-bottom: 0.25rem;
+        }
+
+        .card-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-gray);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background-color: var(--warning-light);
+            color: var(--warning-text);
+        }
+
+        .status-approved {
+            background-color: var(--success-light);
+            color: var(--success-text);
+        }
+
+        .status-rejected {
+            background-color: var(--danger-light);
+            color: var(--danger-text);
+        }
+
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .info-row i {
+            color: var(--text-gray);
+            width: 16px;
+            margin-top: 3px;
+        }
+
+        .info-label {
+            font-weight: 500;
+            color: var(--text-gray);
+            width: 80px;
+        }
+
+        .info-value {
+            color: var(--text-dark);
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .card-footer {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid var(--bg-light);
+            display: flex;
+            gap: 1rem;
+        }
+
+        .card-footer .btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        /* States */
+        .state-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            text-align: center;
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            grid-column: 1 / -1;
+            min-height: 400px;
+        }
+
+        .state-icon {
+            font-size: 4rem;
+            color: var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .state-title {
+            font-size: 1.5rem;
+            color: var(--navy-blue);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .state-desc {
+            color: var(--text-gray);
+            max-width: 400px;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--bg-light);
+            border-top: 4px solid var(--navy-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 400px;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--navy-blue);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+
+        .modal-footer {
+            padding: 1.25rem 1.5rem;
+            background: var(--bg-light);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+        }
+
+        /* Toasts */
+        .toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            z-index: 1100;
+        }
+
+        .toast {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            min-width: 300px;
+            transform: translateX(120%);
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border-left: 4px solid;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast-icon {
+            font-size: 1.25rem;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .toast-msg {
+            font-size: 0.85rem;
+            color: var(--text-gray);
+        }
+
+        .toast-success { border-left-color: var(--success); }
+        .toast-success .toast-icon { color: var(--success); }
+        .toast-success .toast-title { color: var(--success-text); }
+
+        .toast-error { border-left-color: var(--danger); }
+        .toast-error .toast-icon { color: var(--danger); }
+        .toast-error .toast-title { color: var(--danger-text); }
+
+        .toast-info { border-left-color: var(--info); }
+        .toast-info .toast-icon { color: var(--info); }
+        .toast-info .toast-title { color: #2a4365; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-box {
+                max-width: none;
+            }
+            .filters {
+                flex-direction: column;
+            }
+            .select-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .toast-container {
+                bottom: 1rem;
+                right: 1rem;
+                left: 1rem;
+            }
+            .toast {
+                min-width: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <i class="fas fa-calendar-check"></i>
+            Lecture Requests
+        </div>
+        <div class="navbar-actions">
+            <div class="badge-container">
+                <span>Pending Requests</span>
+                <span class="badge" id="pendingBadge">0</span>
+            </div>
+            <button class="btn btn-refresh" onclick="fetchRequests()">
+                <i class="fas fa-sync-alt" id="refreshIcon"></i> Refresh
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search faculty, class, or subject...">
+            </div>
+            <div class="filters">
+                <div class="select-group">
+                    <label for="statusFilter" style="font-size: 0.9rem; color: var(--text-gray); font-weight: 500;">Status:</label>
+                    <select id="statusFilter">
+                        <option value="all">All Requests</option>
+                        <option value="pending" selected>Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+                <div class="select-group">
+                    <label for="sortOrder" style="font-size: 0.9rem; color: var(--text-gray); font-weight: 500;">Sort:</label>
+                    <select id="sortOrder">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid Container -->
+        <div class="requests-grid" id="requestsGrid">
+            <!-- Dynamic Content Injected Here -->
+        </div>
+
+    </main>
+
+    <!-- Modals -->
+    <!-- Approve Modal -->
+    <div class="modal-overlay" id="approveModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title">Approve Lecture Request</h3>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to approve this lecture request? This will automatically replace the existing schedule.
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('approveModal')">Cancel</button>
+                <button class="btn btn-success" id="btnConfirmApprove">
+                    <i class="fas fa-check"></i> Approve
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div class="modal-overlay" id="rejectModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title" style="color: var(--danger);">Reject Lecture Request</h3>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to reject this lecture request? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('rejectModal')">Cancel</button>
+                <button class="btn btn-danger" id="btnConfirmReject">
+                    <i class="fas fa-times"></i> Reject
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- JavaScript -->
+    <script>
+        // State management
+        let allRequests = [];
+        let currentRequestId = null;
+        let mentorId = localStorage.getItem("mentorId");
+        let refreshInterval;
+
+        // API Base URL (Adjust if needed based on exact deployment)
+        const API_BASE = '/api/timetable';
+
+        // DOM Elements
+        const grid = document.getElementById('requestsGrid');
+        const badge = document.getElementById('pendingBadge');
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const sortOrder = document.getElementById('sortOrder');
+        const refreshIcon = document.getElementById('refreshIcon');
+
+        // Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!mentorId) {
+                renderError("Mentor ID not found. Please login via Mentor Dashboard.");
+                return;
+            }
+
+            // Event Listeners
+            searchInput.addEventListener('input', applyFilters);
+            statusFilter.addEventListener('change', applyFilters);
+            sortOrder.addEventListener('change', applyFilters);
+
+            document.getElementById('btnConfirmApprove').addEventListener('click', confirmApprove);
+            document.getElementById('btnConfirmReject').addEventListener('click', confirmReject);
+
+            // Fetch initial data
+            fetchRequests();
+
+            // Set auto refresh every 30 seconds
+            refreshInterval = setInterval(() => fetchRequests(false), 30000);
+        });
+
+        // Fetch API Data
+        async function fetchRequests(showLoader = true) {
+            if (showLoader) {
+                renderLoading();
+            }
+            refreshIcon.classList.add('fa-spin');
+
+            try {
+                const response = await fetch(`${API_BASE}/lecture-requests/${mentorId}`);
+                if (!response.ok) throw new Error('Failed to fetch requests');
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    allRequests = data.requests || [];
+                    applyFilters();
+                    
+                    if (!showLoader) {
+                        showToast('Data refreshed successfully', 'info');
+                    }
+                } else {
+                    throw new Error(data.message || 'API returned an error');
+                }
+            } catch (error) {
+                console.error(error);
+                if (showLoader) {
+                    renderError(error.message);
+                } else {
+                    showToast('Failed to refresh data', 'error');
+                }
+            } finally {
+                setTimeout(() => refreshIcon.classList.remove('fa-spin'), 500);
+            }
+        }
+
+        // Filtering and Sorting Logic
+        function applyFilters() {
+            const query = searchInput.value.toLowerCase().trim();
+            const status = statusFilter.value;
+            const sort = sortOrder.value;
+
+            // Filter
+            let filtered = allRequests.filter(req => {
+                // Status match
+                if (status !== 'all' && req.status !== status) return false;
+
+                // Search match
+                if (query) {
+                    const searchableText = `
+                        ${req.requestByName || ''} 
+                        ${req.targetFacultyName || ''} 
+                        ${req.className || ''} 
+                        ${req.subject || ''} 
+                        ${req.room || ''}
+                    `.toLowerCase();
+                    if (!searchableText.includes(query)) return false;
+                }
+                
+                return true;
+            });
+
+            // Sort
+            filtered.sort((a, b) => {
+                const dateA = new Date(a.createdAt || 0);
+                const dateB = new Date(b.createdAt || 0);
+                return sort === 'newest' ? dateB - dateA : dateA - dateB;
+            });
+
+            // Update Badge
+            const pendingCount = allRequests.filter(r => r.status === 'pending').length;
+            badge.textContent = pendingCount;
+            if (pendingCount === 0) {
+                badge.style.backgroundColor = 'var(--text-gray)';
+            } else {
+                badge.style.backgroundColor = 'var(--danger)';
+            }
+
+            // Render
+            renderGrid(filtered);
+        }
+
+        // Render Functions
+        function renderGrid(requests) {
+            if (requests.length === 0) {
+                renderEmpty();
+                return;
+            }
+
+            grid.innerHTML = requests.map(req => {
+                const date = req.createdAt ? new Date(req.createdAt).toLocaleString() : 'N/A';
+                const statusConfig = getStatusConfig(req.status);
+                
+                let actionButtons = '';
+                if (req.status === 'pending') {
+                    actionButtons = `
+                        <div class="card-footer">
+                            <button class="btn btn-outline" style="color: var(--danger); border-color: var(--danger);" onclick="openRejectModal('${req._id}')">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                            <button class="btn btn-success" onclick="openApproveModal('${req._id}')">
+                                <i class="fas fa-check"></i> Approve
+                            </button>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">${req.subject} <span style="font-size:0.9rem; color:var(--text-gray)">(${req.className})</span></div>
+                                <div class="card-subtitle"><i class="fas fa-calendar-alt"></i> ${date}</div>
+                            </div>
+                            <span class="status-badge status-${statusConfig.class}">${statusConfig.label}</span>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="info-row">
+                                <i class="fas fa-user"></i>
+                                <span class="info-label">Requested:</span>
+                                <span class="info-value">${req.requestByName || req.requestBy || 'N/A'}</span>
+                            </div>
+                            <div class="info-row">
+                                <i class="fas fa-chalkboard-teacher"></i>
+                                <span class="info-label">Faculty:</span>
+                                <span class="info-value">${req.targetFacultyName || req.targetFaculty || 'N/A'}</span>
+                            </div>
+                            <div class="info-row">
+                                <i class="fas fa-clock"></i>
+                                <span class="info-label">Time:</span>
+                                <span class="info-value">${req.day}, ${req.startTime} - ${req.endTime}</span>
+                            </div>
+                            <div class="info-row">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span class="info-label">Room:</span>
+                                <span class="info-value">${req.room || 'N/A'}</span>
+                            </div>
+                        </div>
+                        
+                        ${actionButtons}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getStatusConfig(status) {
+            switch(status) {
+                case 'approved': return { label: 'Approved', class: 'approved' };
+                case 'rejected': return { label: 'Rejected', class: 'rejected' };
+                default: return { label: 'Pending', class: 'pending' };
+            }
+        }
+
+        function renderLoading() {
+            grid.innerHTML = `
+                <div class="state-container">
+                    <div class="spinner"></div>
+                    <div class="state-title">Loading Requests</div>
+                    <div class="state-desc">Please wait while we fetch the latest lecture requests.</div>
+                </div>
+            `;
+        }
+
+        function renderEmpty() {
+            grid.innerHTML = `
+                <div class="state-container">
+                    <i class="fas fa-inbox state-icon"></i>
+                    <div class="state-title">No Lecture Requests Found</div>
+                    <div class="state-desc">You don't have any requests matching the current filters. Enjoy your day!</div>
+                </div>
+            `;
+        }
+
+        function renderError(message) {
+            grid.innerHTML = `
+                <div class="state-container">
+                    <i class="fas fa-exclamation-triangle state-icon" style="color: var(--danger);"></i>
+                    <div class="state-title">Oops! Something went wrong</div>
+                    <div class="state-desc">${message}</div>
+                    <button class="btn btn-primary" onclick="fetchRequests()">
+                        <i class="fas fa-redo"></i> Retry Fetching
+                    </button>
+                </div>
+            `;
+        }
+
+        // Modal Logic
+        function openApproveModal(id) {
+            currentRequestId = id;
+            document.getElementById('approveModal').classList.add('active');
+        }
+
+        function openRejectModal(id) {
+            currentRequestId = id;
+            document.getElementById('rejectModal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            currentRequestId = null;
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Action Logic
+        async function confirmApprove() {
+            if (!currentRequestId) return;
+            
+            const btn = document.getElementById('btnConfirmApprove');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE}/lecture-request/approve`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ requestId: currentRequestId })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast('Lecture request approved successfully!', 'success');
+                    updateLocalStatus(currentRequestId, 'approved');
+                } else {
+                    throw new Error(data.message || 'Approval failed');
+                }
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                closeModal('approveModal');
+            }
+        }
+
+        async function confirmReject() {
+            if (!currentRequestId) return;
+            
+            const btn = document.getElementById('btnConfirmReject');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE}/lecture-request/reject`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ requestId: currentRequestId })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast('Lecture request rejected successfully.', 'success');
+                    updateLocalStatus(currentRequestId, 'rejected');
+                } else {
+                    throw new Error(data.message || 'Rejection failed');
+                }
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                closeModal('rejectModal');
+            }
+        }
+
+        function updateLocalStatus(id, newStatus) {
+            const index = allRequests.findIndex(r => r._id === id);
+            if (index !== -1) {
+                // If filter is set to pending, just remove it from view
+                if (statusFilter.value === 'pending') {
+                    allRequests.splice(index, 1);
+                } else {
+                    allRequests[index].status = newStatus;
+                }
+                applyFilters();
+            }
+        }
+
+        // Toast Notification System
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            toast.className = `toast toast-${type}`;
+            
+            let iconClass = 'fa-info-circle';
+            let title = 'Notification';
+            
+            if (type === 'success') {
+                iconClass = 'fa-check-circle';
+                title = 'Success';
+            } else if (type === 'error') {
+                iconClass = 'fa-exclamation-circle';
+                title = 'Error';
+            }
+
+            toast.innerHTML = `
+                <i class="fas ${iconClass} toast-icon"></i>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-msg">${message}</div>
+                </div>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
