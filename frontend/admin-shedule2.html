@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2307,64 +2307,6 @@ function renderTimetable() {
    CREATE LECTURE ROW
 ========================================================= */
 
-function normalizeMentorId(value) {
-    return String(value ?? "").trim().toLowerCase();
-}
-
-function getLectureFacultyIds(lecture) {
-    if (!lecture || typeof lecture !== "object") return [];
-
-    let ids = cleanArray(lecture.facultyIds || []);
-
-    if (ids.length) return ids;
-
-    if (Array.isArray(lecture.faculty)) {
-        ids = cleanArray(
-            lecture.faculty.map(f => {
-                if (!f || typeof f !== "object") return "";
-                return f.mentorId || f.facultyId || f.id || "";
-            })
-        );
-    }
-
-    return ids;
-}
-
-function isLectureOwnedByCurrentMentor(lecture) {
-    const currentId = normalizeMentorId(getCurrentMentorId());
-    if (!currentId) return false;
-
-    return getLectureFacultyIds(lecture).some(
-        id => normalizeMentorId(id) === currentId
-    );
-}
-
-function getPrimaryAssignedMentor(lecture) {
-    const ids = getLectureFacultyIds(lecture);
-    const faculty = Array.isArray(lecture?.faculty) ? lecture.faculty : [];
-
-    for (const id of ids) {
-        const match = faculty.find(f =>
-            normalizeMentorId(f?.mentorId || f?.facultyId || f?.id) === normalizeMentorId(id)
-        );
-        if (match) {
-            return {
-                mentorId: id,
-                name: match.name || id
-            };
-        }
-    }
-
-    return {
-        mentorId: ids[0] || "",
-        name: ids[0] || "Assigned Faculty"
-    };
-}
-
-function isPersistedLecture(lecture) {
-    return !(lecture && lecture._isNew === true);
-}
-
 function createLectureRow(
     day,
     index,
@@ -2539,43 +2481,16 @@ function createLectureRow(
                     id="actions_${rowId}"
                 >
 
-                    ${isPersistedLecture(lecture)
-                        ? (isLectureOwnedByCurrentMentor(lecture)
-                            ? `
-                                <span class="ownership-badge owner">
-                                    <i class="fa-solid fa-user-check"></i>
-                                    Your Lecture
-                                </span>
-                                <button
-                                    class="btn btn-danger"
-                                    onclick="removeLectureRow('${rowId}')"
-                                >
-                                    <i class="fa-solid fa-trash"></i>
-                                    Remove Lecture
-                                </button>
-                              `
-                            : `
-                                <span class="ownership-badge other">
-                                    <i class="fa-solid fa-user-lock"></i>
-                                    Assigned to ${escapeHtml(getPrimaryAssignedMentor(lecture).name)}
-                                </span>
-                                <button
-                                    class="btn btn-request"
-                                    onclick="requestLectureFromRow('${rowId}')"
-                                >
-                                    <i class="fa-solid fa-paper-plane"></i>
-                                    Request Lecture
-                                </button>
-                              `)
-                        : `
-                            <button
-                                class="btn btn-danger"
-                                onclick="removeLectureRow('${rowId}')"
-                            >
-                                <i class="fa-solid fa-trash"></i>
-                                Remove Lecture
-                            </button>
-                          `}
+                    <button
+                        class="btn btn-danger"
+                        onclick="removeLectureRow('${rowId}')"
+                    >
+
+                        <i class="fa-solid fa-trash"></i>
+
+                        Remove
+
+                    </button>
 
                 </div>
 
@@ -3140,10 +3055,7 @@ function addLectureForDay(
             [],
 
         status:
-            "approved",
-
-        _isNew:
-            true
+            "approved"
 
     });
 
@@ -3207,173 +3119,57 @@ function removeLectureRow(
 ) {
 
     const row =
-        document.getElementById(rowId);
-
-    if (!row) return;
-
-    const day = row.dataset.day;
-    const index = Number(row.dataset.index);
-    const lecture = currentWeeklySchedule?.[day]?.[index];
-
-    if (!lecture) {
-        showStatus("Lecture not found. Please reload the timetable.", "error");
-        return;
-    }
-
-    // SECURITY UX: a mentor can remove only a lecture assigned to them.
-    if (isPersistedLecture(lecture) && !isLectureOwnedByCurrentMentor(lecture)) {
-        showStatus(
-            "You cannot remove another faculty member's lecture. Use Request Lecture instead.",
-            "error"
+        document.getElementById(
+            rowId
         );
+
+
+    if (!row) {
         return;
     }
 
-    if (!confirm(`Remove this lecture from ${day}?`)) return;
 
-    if (currentWeeklySchedule[day]) {
-        currentWeeklySchedule[day].splice(index, 1);
+    const day =
+        row.dataset.day;
+
+    const index =
+        Number(
+            row.dataset.index
+        );
+
+
+    if (
+        !confirm(
+            `Remove this lecture from ${day}?`
+        )
+    ) {
+
+        return;
+
     }
+
+
+    if (
+        currentWeeklySchedule[day]
+    ) {
+
+        currentWeeklySchedule[day]
+            .splice(
+                index,
+                1
+            );
+
+    }
+
 
     renderTimetable();
 
+
     showStatus(
-        "Lecture removed locally. Click Save Changes to apply the removal.",
+        "Lecture removed locally. Click Save Changes to apply it.",
         "warning"
     );
-}
 
-
-/* =========================================================
-   REQUEST ANOTHER FACULTY'S LECTURE
-========================================================= */
-
-async function requestLectureFromRow(rowId) {
-
-    const row = document.getElementById(rowId);
-    if (!row) return;
-
-    const day = row.dataset.day;
-    const index = Number(row.dataset.index);
-    const lecture = currentWeeklySchedule?.[day]?.[index];
-
-    if (!lecture) {
-        showStatus("Lecture not found. Please reload the timetable.", "error");
-        return;
-    }
-
-    const currentMentorId = getCurrentMentorId();
-    if (!currentMentorId) {
-        showStatus("Logged-in mentor ID was not found.", "error");
-        return;
-    }
-
-    if (isLectureOwnedByCurrentMentor(lecture)) {
-        showStatus("This lecture is assigned to you. You can remove it directly.", "info");
-        return;
-    }
-
-    const assigned = getPrimaryAssignedMentor(lecture);
-    if (!assigned.mentorId) {
-        showStatus("Assigned faculty ID is missing. Cannot send request.", "error");
-        return;
-    }
-
-    const startTime = lecture.startTime;
-    const endTime = lecture.endTime;
-
-    if (!startTime || !endTime) {
-        showStatus("Lecture time is missing. Reload the timetable.", "error");
-        return;
-    }
-
-    const payload = {
-        requesterMentorId: currentMentorId,
-        requesterName: getCurrentMentorName(),
-        targetMentorId: assigned.mentorId,
-        targetName: assigned.name,
-        className: selectedClass,
-        existingClass: selectedClass,
-        day,
-        startTime,
-        endTime,
-        subject: lecture.subject || "",
-        room: lecture.room || "",
-        facultyIds: getLectureFacultyIds(lecture),
-        oldLecture: {
-            ...lecture,
-            facultyIds: getLectureFacultyIds(lecture),
-            className: selectedClass
-        },
-        newLecture: {
-            ...lecture,
-            facultyIds: getLectureFacultyIds(lecture),
-            status: "pending"
-        }
-    };
-
-    showLoading("Verifying occupied lecture...");
-
-    try {
-        /*
-         * First verify the exact occupied lecture. This prevents the UI
-         * from sending a request for a free slot or a stale lecture.
-         */
-        const verifyResponse = await fetch(`${API_BASE}/verify-conflict`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                existingClass: selectedClass,
-                day,
-                startTimeMins: timeToMinutes(startTime),
-                endTimeMins: timeToMinutes(endTime),
-                mentorId: assigned.mentorId
-            })
-        });
-
-        const verifyData = await verifyResponse.json();
-
-        if (!verifyResponse.ok || !verifyData.success) {
-            throw new Error(verifyData.message || "Unable to verify lecture occupancy.");
-        }
-
-        if (!verifyData.exists) {
-            throw new Error("This lecture is no longer occupied by the assigned faculty. Please reload the timetable.");
-        }
-
-        payload.oldLecture = verifyData.oldLecture || payload.oldLecture;
-
-        /*
-         * IMPORTANT: the backend must validate this request again.
-         * Frontend verification is only a UX guard and is not security.
-         */
-        const response = await fetch(`${API_BASE}/request-lecture`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
-
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-            throw new Error(data.message || "Failed to send lecture request.");
-        }
-
-        showStatus(
-            data.requestCreated === false
-                ? "A lecture request for this slot already exists."
-                : `Lecture request sent to ${assigned.name || assigned.mentorId}.`,
-            data.requestCreated === false ? "warning" : "success"
-        );
-
-        await reloadAfterSave();
-
-    } catch (error) {
-        console.error("Request lecture error:", error);
-        showStatus(error.message || "Unable to send lecture request.", "error");
-    } finally {
-        hideLoading();
-    }
 }
 
 
@@ -3614,28 +3410,6 @@ async function saveAllChanges() {
 
     const schedule =
         collectWeeklySchedule();
-
-    // Never allow an edited existing lecture owned by another mentor
-    // to reach /set-weekly. The only allowed action is Request Lecture.
-    const foreignModifiedRows = [];
-
-    document.querySelectorAll("#timetableBody tr.lecture-row.modified").forEach(row => {
-        const day = row.dataset.day;
-        const index = Number(row.dataset.index);
-        const original = currentWeeklySchedule?.[day]?.[index];
-
-        if (original && isPersistedLecture(original) && !isLectureOwnedByCurrentMentor(original)) {
-            foreignModifiedRows.push(row);
-        }
-    });
-
-    if (foreignModifiedRows.length) {
-        showStatus(
-            "One or more lectures belong to another faculty member. Use Request Lecture on that row; they cannot be directly saved or overwritten.",
-            "error"
-        );
-        return;
-    }
 
 
     /*
@@ -5965,3 +5739,4 @@ window.addEventListener(
 
 </body>
 </html>
+```
