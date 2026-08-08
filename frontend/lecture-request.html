@@ -1096,7 +1096,10 @@ loadApprovalMode();
                 const response = await fetch(`${API_BASE}/lecture-request/approve`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ requestId: currentRequestId })
+                    body: JSON.stringify({
+    requestId: currentRequestId,
+    mentorId: mentorId
+})
                 });
 
                 const data = await response.json();
@@ -1128,7 +1131,10 @@ loadApprovalMode();
                 const response = await fetch(`${API_BASE}/lecture-request/reject`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ requestId: currentRequestId })
+                    body: JSON.stringify({
+    requestId: currentRequestId,
+    mentorId: mentorId
+})
                 });
 
                 const data = await response.json();
