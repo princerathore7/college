@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Teacher Timetable Panel</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+  <style>
+    /* =======================================================
+       CSS RESETS & BASE
+       ======================================================= */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f4f7fb;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: auto;
+    }
+
+    /* =======================================================
+       HEADER & MAIN LAYOUT
+       ======================================================= */
+    .topbar {
+      background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);
+      color: white;
+      padding: 20px 25px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 15px rgba(13, 71, 161, 0.2);
+    }
+
+    .topbar h1 {
+      font-size: 26px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .main-card {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+    }
+
+    .section-title {
+      margin-bottom: 25px;
+      color: #0d47a1;
+      font-size: 22px;
+      font-weight: 700;
+      border-bottom: 2px solid #e3f2fd;
+      padding-bottom: 10px;
+    }
+
+    /* =======================================================
+       FORM CONTROLS
+       ======================================================= */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #444;
+      font-size: 14px;
+    }
+
+    select, input[type="text"], input[type="time"] {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      outline: none;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      background: #fafafa;
+    }
+
+    select:focus, input[type="text"]:focus, input[type="time"]:focus {
+      border-color: #0d47a1;
+      box-shadow: 0 0 0 3px rgba(13, 71, 161, 0.1);
+      background: #ffffff;
+    }
+
+    /* =======================================================
+       DAYS & PERIOD CARDS
+       ======================================================= */
+    .day-section {
+      margin-top: 35px;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 25px;
+      background: #ffffff;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+      transition: box-shadow 0.3s ease;
+    }
+
+    .day-section:hover {
+      box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+    }
+
+    .day-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #1565c0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 15px;
+    }
+
+    .period-card {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-left: 6px solid #0d47a1;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+
+    .period-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+    }
+
+    /* =======================================================
+       FACULTY SEARCH & CHIPS
+       ======================================================= */
+    .search-container {
+      position: relative;
+    }
+
+    .suggestions-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      max-height: 250px;
+      overflow-y: auto;
+      z-index: 100;
+      display: none;
+      margin-top: 4px;
+    }
+
+    .suggestion-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f3f4f6;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      transition: background 0.2s;
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    .suggestion-item:hover {
+      background: #f0f7ff;
+    }
+
+    .sugg-name { font-weight: 600; color: #1f2937; }
+    .sugg-details { font-size: 12px; color: #6b7280; margin-top: 4px; }
+
+    .selected-faculties {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .chip {
+      background: #e3f2fd;
+      color: #0d47a1;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #bbdefb;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .chip-close {
+      cursor: pointer;
+      color: #1976d2;
+      transition: color 0.2s;
+    }
+
+    .chip-close:hover {
+      color: #d32f2f;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* =======================================================
+       BUTTONS
+       ======================================================= */
+    .btn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .add-btn {
+      background: #e3f2fd;
+      color: #0d47a1;
+    }
+
+    .add-btn:hover {
+      background: #0d47a1;
+      color: white;
+    }
+
+    .remove-btn {
+      background: #ffebee;
+      color: #d32f2f;
+      margin-top: 15px;
+    }
+
+    .remove-btn:hover {
+      background: #d32f2f;
+      color: white;
+    }
+
+    .submit-btn {
+      background: #1b5e20;
+      color: white;
+      width: 100%;
+      margin-top: 40px;
+      padding: 16px;
+      font-size: 18px;
+      box-shadow: 0 4px 15px rgba(27, 94, 32, 0.2);
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      background: #2e7d32;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(27, 94, 32, 0.3);
+    }
+
+    .submit-btn:disabled {
+      background: #9e9e9e;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .type-select {
+      background: #fff8e1;
+    }
+
+    /* =======================================================
+       MODALS
+       ======================================================= */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(5px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-box {
+      background: white;
+      padding: 40px 30px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 450px;
+      text-align: center;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+      animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes scaleIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-icon {
+      font-size: 50px;
+      margin-bottom: 20px;
+    }
+
+    .modal-icon.success { color: #2e7d32; }
+    .modal-icon.error { color: #d32f2f; }
+    .modal-icon.conflict { color: #f57c00; }
+
+    .modal-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 10px;
+    }
+
+    .modal-desc {
+      color: #6b7280;
+      font-size: 15px;
+      line-height: 1.5;
+      margin-bottom: 25px;
+    }
+
+    .modal-btn {
+      width: 100%;
+      padding: 12px;
+      background: #0d47a1;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .modal-btn:hover { background: #1565c0; }
+
+    /* =======================================================
+       UTILITIES & RESPONSIVE
+       ======================================================= */
+    .hidden { display: none !important; }
+
+    @media (max-width: 768px) {
+      .topbar {
+        flex-direction: column;
+        text-align: center;
+        padding: 15px;
+      }
+      .day-title {
+        flex-direction: column;
+        gap: 15px;
+      }
+      .add-btn { width: 100%; }
+    }
+    .existing-schedule-box {
+    margin: 20px 0;
+    padding: 18px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.existing-schedule-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.existing-schedule-header h3 {
+    margin: 0;
+}
+
+.existing-schedule-header p {
+    margin: 5px 0 0;
+    color: #777;
+}
+
+#existingScheduleStatus {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.existing-schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.existing-schedule-table th,
+.existing-schedule-table td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+}
+
+.existing-schedule-table th {
+    background: #f5f7fa;
+}
+
+.existing-empty {
+    text-align: center;
+    padding: 20px;
+    color: #777;
+}
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="topbar">
+    <h1><i class="fa-solid fa-calendar-days"></i> Teacher Timetable Panel</h1>
+    <div>Manage Weekly Class Schedule</div>
+  </div>
+
+  <div class="main-card">
+    <div class="section-title">Create Weekly Timetable</div>
+
+    <!-- YEAR + CLASS SELECTION -->
+    <div class="grid">
+      <!-- YEAR -->
+      <div class="form-group">
+        <label>Select Year</label>
+        <select id="year">
+          <option value="">Choose Year</option>
+          <option value="1st Year">1st Year</option>
+          <option value="2nd Year">2nd Year</option>
+          <option value="3rd Year">3rd Year</option>
+          <option value="4th Year">4th Year</option>
+        </select>
+      </div>
+
+      <!-- CLASS -->
+      <div class="form-group">
+        <label>Select Class</label>
+               <select id="className">
+
+          <option value="">Select Class</option>
+<!-- ================= CSE ================= -->
+
+      <option value="CSE1">CSE1</option>
+      <option value="CSE2">CSE2</option>
+      <option value="CSE3">CSE3</option>
+      <option value="CSE4">CSE4</option>
+      <option value="CSE5">CSE5</option>
+
+      <!-- ================= IT ================= -->
+
+      <option value="IT1">IT1</option>
+      <option value="IT2">IT2</option>
+      <option value="IT3">IT3</option>
+      <option value="IT4">IT4</option>
+      <option value="IT5">IT5</option>
+
+      <!-- ================= AIML ================= -->
+
+      <option value="AIML1">AIML1</option>
+      <option value="AIML2">AIML2</option>
+      <option value="AIML3">AIML3</option>
+      <option value="AIML4">AIML4</option>
+      <option value="AIML5">AIML5</option>
+
+      <!-- ================= AIDS ================= -->
+
+      <option value="AIDS1">AIDS1</option>
+      <option value="AIDS2">AIDS2</option>
+      <option value="AIDS3">AIDS3</option>
+      <option value="AIDS4">AIDS4</option>
+      <option value="AIDS5">AIDS5</option>
+
+      <!-- ================= CSBS ================= -->
+
+      <option value="CSBS1">CSBS1</option>
+      <option value="CSBS2">CSBS2</option>
+      <option value="CSBS3">CSBS3</option>
+      <option value="CSBS4">CSBS4</option>
+      <option value="CSBS5">CSBS5</option>
+
+      <!-- ================= IOT ================= -->
+
+      <option value="IOT1">IOT1</option>
+      <option value="IOT2">IOT2</option>
+      <option value="IOT3">IOT3</option>
+      <option value="IOT4">IOT4</option>
+      <option value="IOT5">IOT5</option>
+
+      <!-- ================= ECE ================= -->
+
+      <option value="ECE1">ECE1</option>
+      <option value="ECE2">ECE2</option>
+      <option value="ECE3">ECE3</option>
+      <option value="ECE4">ECE4</option>
+      <option value="ECE5">ECE5</option>
+
+      <!-- ================= EEE ================= -->
+
+      <option value="EEE1">EEE1</option>
+      <option value="EEE2">EEE2</option>
+      <option value="EEE3">EEE3</option>
+      <option value="EEE4">EEE4</option>
+      <option value="EEE5">EEE5</option>
+
+      <!-- ================= EE ================= -->
+
+      <option value="EE1">EE1</option>
+      <option value="EE2">EE2</option>
+      <option value="EE3">EE3</option>
+      <option value="EE4">EE4</option>
+      <option value="EE5">EE5</option>
+
+      <!-- ================= ME ================= -->
+
+      <option value="ME1">ME1</option>
+      <option value="ME2">ME2</option>
+      <option value="ME3">ME3</option>
+      <option value="ME4">ME4</option>
+      <option value="ME5">ME5</option>
+
+      <!-- ================= AU ================= -->
+
+      <option value="AU1">AU1</option>
+      <option value="AU2">AU2</option>
+      <option value="AU3">AU3</option>
+      <option value="AU4">AU4</option>
+      <option value="AU5">AU5</option>
+
+      <!-- ================= MT ================= -->
+
+      <option value="MT1">MT1</option>
+      <option value="MT2">MT2</option>
+      <option value="MT3">MT3</option>
+      <option value="MT4">MT4</option>
+      <option value="MT5">MT5</option>
+
+      <!-- ================= CE ================= -->
+
+      <option value="CE1">CE1</option>
+      <option value="CE2">CE2</option>
+      <option value="CE3">CE3</option>
+      <option value="CE4">CE4</option>
+      <option value="CE5">CE5</option>
+
+      <!-- ================= CHE ================= -->
+
+      <option value="CHE1">CHE1</option>
+      <option value="CHE2">CHE2</option>
+      <option value="CHE3">CHE3</option>
+      <option value="CHE4">CHE4</option>
+      <option value="CHE5">CHE5</option>
+
+      <!-- ================= MIN ================= -->
+
+      <option value="MIN1">MIN1</option>
+      <option value="MIN2">MIN2</option>
+      <option value="MIN3">MIN3</option>
+      <option value="MIN4">MIN4</option>
+      <option value="MIN5">MIN5</option>
+
+      <!-- ================= PET ================= -->
+
+      <option value="PET1">PET1</option>
+      <option value="PET2">PET2</option>
+      <option value="PET3">PET3</option>
+      <option value="PET4">PET4</option>
+      <option value="PET5">PET5</option>
+
+      <!-- ================= BT ================= -->
+
+      <option value="BT1">BT1</option>
+      <option value="BT2">BT2</option>
+      <option value="BT3">BT3</option>
+      <option value="BT4">BT4</option>
+      <option value="BT5">BT5</option>
+
+      <!-- ================= BME ================= -->
+
+      <option value="BME1">BME1</option>
+      <option value="BME2">BME2</option>
+      <option value="BME3">BME3</option>
+      <option value="BME4">BME4</option>
+      <option value="BME5">BME5</option>
+
+      <!-- ================= FT ================= -->
+
+      <option value="FT1">FT1</option>
+      <option value="FT2">FT2</option>
+      <option value="FT3">FT3</option>
+      <option value="FT4">FT4</option>
+      <option value="FT5">FT5</option>
+
+      <!-- ================= AG ================= -->
+
+      <option value="AG1">AG1</option>
+      <option value="AG2">AG2</option>
+      <option value="AG3">AG3</option>
+      <option value="AG4">AG4</option>
+      <option value="AG5">AG5</option>
+
+      <!-- ================= ENV ================= -->
+
+      <option value="ENV1">ENV1</option>
+      <option value="ENV2">ENV2</option>
+      <option value="ENV3">ENV3</option>
+      <option value="ENV4">ENV4</option>
+      <option value="ENV5">ENV5</option>
+
+      <!-- ================= TX ================= -->
+
+      <option value="TX1">TX1</option>
+      <option value="TX2">TX2</option>
+      <option value="TX3">TX3</option>
+      <option value="TX4">TX4</option>
+      <option value="TX5">TX5</option>
+
+      <!-- ================= PIE ================= -->
+
+      <option value="PIE1">PIE1</option>
+      <option value="PIE2">PIE2</option>
+      <option value="PIE3">PIE3</option>
+      <option value="PIE4">PIE4</option>
+      <option value="PIE5">PIE5</option>
+
+      <!-- ================= IM ================= -->
+
+      <option value="IM1">IM1</option>
+      <option value="IM2">IM2</option>
+      <option value="IM3">IM3</option>
+      <option value="IM4">IM4</option>
+      <option value="IM5">IM5</option>
+
+      <!-- ================= Alumni ================= -->
+
+      <option value="Alumni">Alumni</option>
+
+    </select>
+      </div>
+    </div>
+
+    <!-- DAYS CONTAINER -->
+    <div id="daysContainer"></div>
+
+    <!-- SUBMIT BUTTON -->
+    <button id="submitTimetableBtn" class="btn submit-btn">
+      <i class="fa-solid fa-paper-plane"></i> Post Weekly Timetable
+    </button>
+  </div>
+</div>
+
+<!-- =======================================================
+     MODALS
+     ======================================================= -->
+<div id="modalOverlay" class="modal-overlay">
+  <div class="modal-box" id="modalBox">
+    <div id="modalIcon" class="modal-icon"></div>
+    <h2 id="modalTitle" class="modal-title"></h2>
+    <p id="modalDesc" class="modal-desc"></p>
+    <button id="modalCloseBtn" class="modal-btn">Okay</button>
+  </div>
+</div>
+
+<script>
+// =======================================================
+// GLOBAL CONSTANTS & STATE
+// =======================================================
+const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const daysContainer = document.getElementById("daysContainer");
+const submitBtn = document.getElementById("submitTimetableBtn");
+const modalOverlay = document.getElementById("modalOverlay");
+const modalIcon = document.getElementById("modalIcon");
+const modalTitle = document.getElementById("modalTitle");
+const modalDesc = document.getElementById("modalDesc");
+const modalCloseBtn = document.getElementById("modalCloseBtn");
+
+// =======================================================
+// UTILITY: DEBOUNCE
+// =======================================================
+const debounce = (func, delay) => {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func.apply(null, args);
+    }, delay);
+  };
+};
+
+// =======================================================
+// INITIALIZATION
+// =======================================================
+document.addEventListener("DOMContentLoaded", () => {
+  renderDays();
+  setupEventListeners();
+});
+
+function setupEventListeners() {
+  submitBtn.addEventListener("click", handleTimetableSubmit);
+  modalCloseBtn.addEventListener("click", closeModal);
+}
+
+// =======================================================
+// RENDER UI STRUCTURE
+// =======================================================
+function renderDays() {
+  days.forEach(day => {
+    const dayDiv = document.createElement("div");
+    dayDiv.className = "day-section";
+    dayDiv.innerHTML = `
+      <div class="day-title">
+        <span>${day}</span>
+        <button class="btn add-btn" data-day="${day}">
+          <i class="fa-solid fa-plus"></i> Add Period
+        </button>
+      </div>
+      <div id="${day}-periods"></div>
+    `;
+    daysContainer.appendChild(dayDiv);
+
+    // Attach Add Period Listener
+    const addBtn = dayDiv.querySelector('.add-btn');
+    addBtn.addEventListener('click', () => addPeriod(day));
+  });
+}
+
+function addPeriod(day) {
+  const container = document.getElementById(`${day}-periods`);
+  const periodDiv = document.createElement("div");
+  periodDiv.className = "period-card";
+
+  periodDiv.innerHTML = `
+    <div class="grid">
+
+      <!-- Start Time -->
+      <div class="form-group">
+        <label>Start Time</label>
+        <div style="display:flex;gap:8px;">
+          <input type="time" class="startTime" required style="flex:1;">
+          <select class="startMeridian" style="width:80px;">
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- End Time -->
+      <div class="form-group">
+        <label>End Time</label>
+        <div style="display:flex;gap:8px;">
+          <input type="time" class="endTime" required style="flex:1;">
+          <select class="endMeridian" style="width:80px;">
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Type -->
+      <div class="form-group">
+        <label>Type</label>
+        <select class="type-select periodType">
+          <option value="Subject">Subject</option>
+          <option value="Break">Break</option>
+          <option value="Lab">Lab</option>
+          <option value="Seminar">Seminar</option>
+          <option value="Workshop">Workshop</option>
+          <option value="Tutorial">Tutorial</option>
+          <option value="Sports">Sports</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <!-- Subject -->
+      <div class="form-group subject-group">
+        <label class="subject-label">Subject Name</label>
+        <input
+          type="text"
+          class="subject"
+          placeholder="e.g. Mathematics"
+          required
+        >
+      </div>
+
+      <!-- Faculty -->
+      <div class="form-group faculty-group">
+        <label>Faculty</label>
+
+        <div class="search-container">
+          <input
+            type="text"
+            class="faculty-search"
+            placeholder="Search Faculty ID or Name..."
+          >
+          <div class="suggestions-dropdown"></div>
+        </div>
+
+        <div class="selected-faculties"></div>
+      </div>
+
+      <!-- Room -->
+      <div class="form-group room-group">
+        <label>Room Number</label>
+        <input
+          type="text"
+          class="room"
+          placeholder="e.g. A-101"
+        >
+      </div>
+
+    </div>
+<div id="existingScheduleBox" class="existing-schedule-box" style="display:none;">
+    <div class="existing-schedule-header">
+        <div>
+            <h3>Existing Timetable</h3>
+            <p id="existingScheduleTitle">Selected Class</p>
+        </div>
+
+        <span id="existingScheduleStatus">Loading...</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="existing-schedule-table">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Subject</th>
+                    <th>Faculty</th>
+                    <th>Room</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody id="existingScheduleBody">
+            </tbody>
+        </table>
+    </div>
+</div>
+    <button class="btn remove-btn">
+      <i class="fa-solid fa-trash"></i>
+      Remove
+    </button>
+  `;
+
+  attachPeriodListeners(periodDiv);
+
+  container.appendChild(periodDiv);
+}
+// =======================================================
+// PERIOD CARD INTERACTIVITY
+// =======================================================
+function attachPeriodListeners(card) {
+  // Remove button
+  const removeBtn = card.querySelector('.remove-btn');
+  removeBtn.addEventListener('click', () => card.remove());
+
+  // Type Selector Toggle
+  const typeSelect = card.querySelector('.periodType');
+  typeSelect.addEventListener('change', (e) => handleTypeChange(e.target.value, card));
+
+  // Faculty Search Input
+  const searchInput = card.querySelector('.faculty-search');
+  const dropdown = card.querySelector('.suggestions-dropdown');
+  
+  const debouncedSearch = debounce((query) => executeFacultySearch(query, dropdown, card), 300);
+  
+  searchInput.addEventListener('input', (e) => {
+    const query = e.target.value.trim();
+    if (!query) {
+      dropdown.style.display = 'none';
+      dropdown.innerHTML = '';
+      return;
+    }
+    debouncedSearch(query);
+  });
+
+  // Close dropdown on outside click
+  document.addEventListener('click', (e) => {
+    if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+      dropdown.style.display = 'none';
+    }
+  });
+}
+// =======================================================
+// EXISTING CLASS TIMETABLE
+// =======================================================
+
+let selectedExistingClassTimetable = null;
+
+
+// Fetch complete timetable of selected class
+async function fetchExistingClassTimetable(className) {
+
+    const box = document.getElementById("existingScheduleBox");
+    const body = document.getElementById("existingScheduleBody");
+    const title = document.getElementById("existingScheduleTitle");
+    const status = document.getElementById("existingScheduleStatus");
+
+    if (!className) {
+        box.style.display = "none";
+        return;
+    }
+
+    box.style.display = "block";
+
+    title.textContent = className;
+    status.textContent = "Loading...";
+    body.innerHTML = `
+        <tr>
+            <td colspan="5" class="existing-empty">
+                Loading timetable...
+            </td>
+        </tr>
+    `;
+
+    try {
+
+        const response = await fetch(
+            `https://college-hwbb.onrender.com/api/timetable/class/${encodeURIComponent(className)}`
+        );
+
+        const data = await response.json();
+
+        if (!data.success || !data.timetable) {
+
+            selectedExistingClassTimetable = null;
+
+            body.innerHTML = `
+                <tr>
+                    <td colspan="5" class="existing-empty">
+                        No timetable found for this class.
+                    </td>
+                </tr>
+            `;
+
+            status.textContent = "No timetable";
+            return;
+        }
+
+        // Save complete timetable locally in JS state
+        selectedExistingClassTimetable = data.timetable;
+
+        status.textContent = "Loaded";
+
+        // Show currently selected day
+        renderExistingDaySchedule("Monday");
+
+    } catch (error) {
+
+        console.error(
+            "Existing timetable fetch error:",
+            error
+        );
+
+        selectedExistingClassTimetable = null;
+
+        body.innerHTML = `
+            <tr>
+                <td colspan="5" class="existing-empty">
+                    Could not load existing timetable.
+                </td>
+            </tr>
+        `;
+
+        status.textContent = "Error";
+    }
+}
+
+
+// Render selected day's timetable
+function renderExistingDaySchedule(day) {
+
+    const body =
+        document.getElementById("existingScheduleBody");
+
+    if (!selectedExistingClassTimetable) {
+        body.innerHTML = `
+            <tr>
+                <td colspan="5" class="existing-empty">
+                    No timetable loaded.
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    const schedule =
+        selectedExistingClassTimetable.weeklySchedule?.[day] || [];
+
+    if (schedule.length === 0) {
+
+        body.innerHTML = `
+            <tr>
+                <td colspan="5" class="existing-empty">
+                    No lectures scheduled on ${day}.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+    body.innerHTML = "";
+
+    schedule.forEach(lecture => {
+
+        const facultyText =
+            Array.isArray(lecture.faculty)
+                ? lecture.faculty
+                    .map(f => `${f.name || "Unknown"} (${f.mentorId || ""})`)
+                    .join(", ")
+                : "Unknown Faculty";
+
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td>
+                <strong>
+                    ${lecture.startTime || "--"}
+                    -
+                    ${lecture.endTime || "--"}
+                </strong>
+            </td>
+
+            <td>
+                ${lecture.subject || "--"}
+            </td>
+
+            <td>
+                ${facultyText}
+            </td>
+
+            <td>
+                ${lecture.room || "--"}
+            </td>
+
+            <td>
+                ${lecture.status || "approved"}
+            </td>
+        `;
+
+        body.appendChild(row);
+    });
+}
+function handleTypeChange(type, card) {
+  const facultyGroup = card.querySelector('.faculty-group');
+  const roomGroup = card.querySelector('.room-group');
+  const subjectLabel = card.querySelector('.subject-label');
+  const subjectInput = card.querySelector('.subject');
+
+  if (type === 'Break') {
+    facultyGroup.classList.add('hidden');
+    roomGroup.classList.add('hidden');
+    subjectLabel.textContent = 'Break Name';
+    subjectInput.placeholder = 'e.g. Lunch Break';
+    // Clear faculty requirements if break
+    card.querySelector('.selected-faculties').innerHTML = '';
+  } else {
+    facultyGroup.classList.remove('hidden');
+    roomGroup.classList.remove('hidden');
+    subjectLabel.textContent = 'Subject Name';
+    subjectInput.placeholder = 'e.g. Mathematics';
+  }
+}
+
+// =======================================================
+// API: FACULTY SEARCH
+// =======================================================
+async function executeFacultySearch(query, dropdown, card) {
+  try {
+    const response = await fetch(`https://college-hwbb.onrender.com/api/mentor/search?q=${encodeURIComponent(query)}`);
+    const data = await response.json();
+    
+    // Handle different possible backend response structures safely
+    let results = [];
+    if (Array.isArray(data)) results = data;
+    else if (data.data && Array.isArray(data.data)) results = data.data;
+    else if (data.mentors && Array.isArray(data.mentors)) results = data.mentors;
+
+    renderSuggestions(results, dropdown, card);
+  } catch (error) {
+    console.error("Search API Error:", error);
+  }
+}
+
+function renderSuggestions(results, dropdown, card) {
+  dropdown.innerHTML = '';
+  
+  if (results.length === 0) {
+    dropdown.innerHTML = `<div class="suggestion-item"><span class="sugg-details">No faculty found</span></div>`;
+    dropdown.style.display = 'block';
+    return;
+  }
+
+  results.forEach(faculty => {
+    // Safely extract properties
+   const id = faculty.id || faculty.mentorId || faculty.mentorID || faculty._id || faculty.facultyId || "UNKNOWN";
+    const name = faculty.name || faculty.mentorName || faculty.facultyName || "Unknown Name";
+    const dept = faculty.subject || faculty.department || "Faculty";
+
+    const item = document.createElement("div");
+    item.className = "suggestion-item";
+    item.innerHTML = `
+      <span class="sugg-name">${name}</span>
+      <span class="sugg-details">${id} • ${dept}</span>
+    `;
+
+    item.addEventListener('click', () => {
+      selectFaculty(id, name, card);
+      dropdown.style.display = 'none';
+      card.querySelector('.faculty-search').value = '';
+    });
+
+    dropdown.appendChild(item);
+  });
+
+  dropdown.style.display = 'block';
+}
+
+function selectFaculty(id, name, card) {
+  const container = card.querySelector('.selected-faculties');
+  
+  // Check Duplicate
+  const existingIds = Array.from(container.querySelectorAll('.chip')).map(chip => chip.dataset.id);
+  if (existingIds.includes(id)) {
+    showErrorModal("Faculty Already Selected", `${name} is already assigned to this period.`);
+    return;
+  }
+
+  // Create Chip
+  const chip = document.createElement("div");
+  chip.className = "chip";
+  chip.dataset.id = id;
+  chip.innerHTML = `
+    <i class="fa-solid fa-check"></i> 
+    ${name} (${id}) 
+    <i class="fa-solid fa-xmark chip-close"></i>
+  `;
+
+  // Remove Chip Logic
+  chip.querySelector('.chip-close').addEventListener('click', () => {
+    chip.remove();
+  });
+
+  container.appendChild(chip);
+}
+
+// =======================================================
+// VALIDATION & SUBMISSION
+// =======================================================
+function convertTo12Hour(time, meridian) {
+
+    if (!time) return "";
+
+    let [hour, minute] = time.split(":").map(Number);
+
+    if (meridian === "AM") {
+        if (hour === 12) hour = 0;
+    } else {
+        if (hour < 12) hour += 12;
+    }
+
+    const date = new Date();
+    date.setHours(hour);
+    date.setMinutes(minute);
+
+    return date.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+    });
+}
+
+function getMinutes(timeStr, meridian) {
+  if (!timeStr) return 0;
+  let [hour, minute] = timeStr.split(":").map(Number);
+  if (meridian === "AM") {
+    if (hour === 12) hour = 0;
+  } else {
+    if (hour < 12) hour += 12;
+  }
+  return hour * 60 + minute;
+}
+
+function validateTime(start, end, startMeridian, endMeridian) {
+  if (!start || !end) return false;
+  const startMins = getMinutes(start, startMeridian);
+  const endMins = getMinutes(end, endMeridian);
+  return startMins < endMins;
+}
+// --- NEW HELPER: Convert time to minutes for the backend ---
+function timeToMinutes(rawTime, meridian) {
+    let [hours, minutes] = rawTime.split(':').map(Number);
+    if (meridian === "PM" && hours !== 12) hours += 12;
+    if (meridian === "AM" && hours === 12) hours = 0;
+    return (hours * 60) + minutes;
+}
+
+// --- NEW HELPER: Verify existing conflict ---
+async function verifyConflict(existingClass, day, startTimeMins, endTimeMins, mentorId) {
+    try {
+        const response = await fetch(
+            "https://college-hwbb.onrender.com/api/timetable/verify-conflict",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    existingClass,
+                    day,
+                    startTimeMins,
+                    endTimeMins,
+                    mentorId
+                })
+            }
+        );
+
+        return await response.json();
+
+    } catch (error) {
+        console.error("Verification API Error:", error);
+
+        return {
+            success: false,
+            exists: false
+        };
+    }
+}
+// --- UPDATED: handleTimetableSubmit ---
+async function handleTimetableSubmit() {
+    const selectedYear = document.getElementById("year").value;
+    const selectedClass = document.getElementById("className").value;
+
+    if (!selectedYear)
+        return showErrorModal("Missing Detail", "Please select a Year.");
+
+    if (!selectedClass)
+        return showErrorModal("Missing Detail", "Please select a Class.");
+
+    const finalClassName = `${selectedYear} ${selectedClass}`;
+    const weeklySchedule = {};
+    let hasValidationError = false;
+
+    // Use for...of instead of forEach so we can safely 'await' the verification calls
+    for (const day of days) {
+        weeklySchedule[day] = [];
+        const periodCards = document.querySelectorAll(`#${day}-periods .period-card`);
+
+        for (const card of periodCards) {
+            // Raw HH:MM values
+            const rawStart = card.querySelector(".startTime").value;
+            const rawEnd = card.querySelector(".endTime").value;
+
+            // AM / PM
+            const startMeridian = card.querySelector(".startMeridian").value;
+            const endMeridian = card.querySelector(".endMeridian").value;
+
+            // Convert for backend
+            const startTime = convertTo12Hour(rawStart, startMeridian);
+            const endTime = convertTo12Hour(rawEnd, endMeridian);
+            const type = card.querySelector(".periodType").value;
+            const subject = card.querySelector(".subject").value.trim();
+            const room = card.querySelector(".room").value.trim();
+            
+            const facultyChips = card.querySelectorAll(".chip");
+            const facultyIds = Array.from(facultyChips).map(chip => chip.dataset.id);
+
+            // Validation
+            if (!rawStart || !rawEnd) {
+                showErrorModal(
+                    "Invalid Time",
+                    `Please specify start and end times for all periods on ${day}.`
+                );
+                hasValidationError = true;
+                break;
+            }
+
+            // Compare time values using AM/PM correctly
+            if (!validateTime(rawStart, rawEnd, startMeridian, endMeridian)) {
+                showErrorModal(
+                    "Invalid Time",
+                    `End time must be greater than start time.`
+                );
+                hasValidationError = true;
+                break;
+            }
+
+            if (!subject) {
+                showErrorModal(
+                    "Missing Detail",
+                    `Please specify subject/break name for ${day}.`
+                );
+                hasValidationError = true;
+                break;
+            }
+
+            if (type !== "Break" && facultyIds.length === 0) {
+                showErrorModal(
+                    "Missing Faculty",
+                    `Please select at least one faculty for ${subject}.`
+                );
+                hasValidationError = true;
+                break;
+            }
+
+            // ==========================================
+            // NEW: Verification Logic for existing lectures
+            // ==========================================
+            if (facultyIds.length > 0 && type !== "Break") {
+                const startTimeMins = timeToMinutes(rawStart, startMeridian);
+                const endTimeMins = timeToMinutes(rawEnd, endMeridian);
+
+                for (const chip of facultyChips) {
+                    // Check if the UI has attached an 'existingClass' to this override
+                    // (Requires frontend state update as explained above)
+                    const existingClass = chip.dataset.existingClass || card.dataset.existingClass;
+                    const mentorId = chip.dataset.id;
+
+                    if (existingClass) {
+                        const verifyRes = await verifyConflict(
+                            existingClass, 
+                            day, 
+                            startTimeMins, 
+                            endTimeMins, 
+                            mentorId
+                        );
+
+                        if (!verifyRes.success || !verifyRes.exists) {
+                            showErrorModal(
+                                "Verification Failed",
+                                `The existing lecture for mentor ${mentorId} in class ${existingClass} is no longer available in this time slot. Please refresh the timetable.`
+                            );
+                            hasValidationError = true;
+                            return; // Stop execution entirely
+                        }
+                    }
+                }
+            }
+
+            weeklySchedule[day].push({
+                startTime: startTime,
+                endTime: endTime,
+                type: type.toLowerCase(),
+                subject: subject,
+                facultyIds: facultyIds,
+                room: type === "Break" ? "" : room
+            });
+        }
+        
+        // Stop processing further days if an error was found
+        if (hasValidationError) break; 
+    }
+
+    if (hasValidationError) return;
+
+    const finalData = {
+        year: selectedYear,
+        className: finalClassName,
+        mentorID: localStorage.getItem("mentorId"),
+        weeklySchedule
+    };
+
+    console.log(finalData);
+    await executeUpload(finalData);
+}
+// --- UPDATED: executeUpload --- 
+// (Maintained exactly as requested, though logic remains identical)
+async function executeUpload(payload) {
+    // Update Button State
+    const originalBtnText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Posting Timetable...`;
+
+    try {
+        const response = await fetch("https://college-hwbb.onrender.com/api/timetable/set-weekly", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            if (data.conflict && data.requestCreated) {
+                showConflictModal();
+            } else {
+                showSuccessModal();
+            }
+            resetForm();
+        } else {
+            showErrorModal("Upload Failed", data.message || "An error occurred while saving the timetable.");
+        }
+    } catch (error) {
+        console.error("API Error:", error);
+        showErrorModal("Server Error", "Could not connect to the server. Please try again later.");
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+    }
+}
+// =======================================================
+// UI MODALS & RESET
+// =======================================================
+function showSuccessModal() {
+  modalIcon.className = "modal-icon success fa-solid fa-circle-check";
+  modalTitle.textContent = "Success!";
+  modalDesc.textContent = "Weekly timetable has been posted successfully.";
+  modalOverlay.style.display = "flex";
+}
+
+function showConflictModal() {
+  modalIcon.className = "modal-icon conflict fa-solid fa-triangle-exclamation";
+  modalTitle.textContent = "Faculty Conflict Detected";
+  modalDesc.textContent = "Lecture request has been sent to the faculty. Waiting for approval.";
+  modalOverlay.style.display = "flex";
+}
+
+function showErrorModal(title, message) {
+  modalIcon.className = "modal-icon error fa-solid fa-circle-xmark";
+  modalTitle.textContent = title;
+  modalDesc.textContent = message;
+  modalOverlay.style.display = "flex";
+}
+
+function closeModal() {
+  modalOverlay.style.display = "none";
+}
+
+function resetForm() {
+  document.getElementById("year").value = "";
+  document.getElementById("className").value = "";
+  
+  // Remove all periods
+  document.querySelectorAll('.period-card').forEach(card => card.remove());
+}
+</script>
+</body>
+</html>
