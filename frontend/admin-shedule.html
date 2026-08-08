@@ -4950,13 +4950,11 @@ async function rejectRequest(
                             "application/json"
                     },
 
-                    body:
-                        JSON.stringify({
-                            requestId
-                        })
-
-                }
-            );
+                     body: JSON.stringify({
+        requestId: request._id,
+        mentorId: loggedInMentorId
+    })
+});
 
 
         const data =

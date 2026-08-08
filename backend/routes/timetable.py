@@ -1953,145 +1953,126 @@ def get_lecture_requests(
 def approve_lecture_request():
 
     try:
-
         data = request.get_json() or {}
 
-        req_id = data.get(
-            "requestId"
-        )
+        req_id = data.get("requestId")
 
+        # -------------------------------------------------
+        # Accept both names for frontend compatibility
+        # -------------------------------------------------
         approver_id = (
-            data.get(
-                "mentorId"
-            )
+            data.get("mentorId")
             or
-            data.get(
-                "approverMentorId"
-            )
+            data.get("approverMentorId")
         )
 
         if not req_id:
-
             return jsonify({
                 "success": False,
-                "message":
-                    "requestId required"
+                "message": "requestId required"
             }), 400
 
+        if not approver_id:
+            return jsonify({
+                "success": False,
+                "message": "mentorId is required to approve this request."
+            }), 400
+
+        approver_id = str(approver_id).strip()
+
+        # -------------------------------------------------
+        # Validate ObjectId
+        # -------------------------------------------------
         try:
-
-            object_id = ObjectId(
-                str(req_id)
-            )
-
+            object_id = ObjectId(str(req_id))
         except Exception:
-
             return jsonify({
                 "success": False,
-                "message":
-                    "Invalid requestId"
+                "message": "Invalid requestId"
             }), 400
 
-        req = db.lecture_requests.find_one(
-            {
-                "_id":
-                    object_id,
-
-                "status":
-                    "pending"
-            }
-        )
+        # -------------------------------------------------
+        # Find pending request
+        # -------------------------------------------------
+        req = db.lecture_requests.find_one({
+            "_id": object_id,
+            "status": "pending"
+        })
 
         if not req:
-
             return jsonify({
                 "success": False,
-                "message":
-                    "Request not found or already processed"
+                "message": "Request not found or already processed"
             }), 404
 
+        # -------------------------------------------------
+        # Assigned faculty
+        # -------------------------------------------------
         target_mentor_id = str(
-            req.get(
-                "targetMentorId",
-                ""
-            )
+            req.get("targetMentorId", "")
         ).strip()
 
-        # =================================================
+        if not target_mentor_id:
+            return jsonify({
+                "success": False,
+                "message": "Assigned faculty is missing from this request."
+            }), 409
+
+        # -------------------------------------------------
         # BACKEND AUTHORIZATION
-        # =================================================
         #
-        # Only the assigned faculty can approve.
-        #
-        # Frontend button hiding is NOT enough.
-        #
-        # =================================================
-
-        if approver_id:
-
-            approver_id = str(
-                approver_id
-            ).strip()
-
-            if approver_id != target_mentor_id:
-
-                return jsonify({
-                    "success": False,
-                    "message":
-                        "Unauthorized. Only the assigned faculty can approve this lecture request."
-                }), 403
-
-        else:
+        # Only the faculty whose lecture is occupied
+        # can approve the request.
+        # -------------------------------------------------
+        if approver_id != target_mentor_id:
 
             return jsonify({
                 "success": False,
-                "message":
-                    "mentorId is required to approve this request."
-            }), 400
+                "message": (
+                    "Unauthorized. Only the assigned faculty "
+                    "can approve this lecture request."
+                )
+            }), 403
 
-        target_mentor = db.mentors.find_one(
-            {
-                "mentorId":
-                    target_mentor_id
-            }
-        )
+        # -------------------------------------------------
+        # Verify mentor still exists
+        # -------------------------------------------------
+        target_mentor = db.mentors.find_one({
+            "mentorId": target_mentor_id
+        })
 
         if not target_mentor:
 
             return jsonify({
                 "success": False,
-                "message":
-                    "Assigned faculty no longer exists."
+                "message": "Assigned faculty no longer exists."
             }), 404
 
+        # -------------------------------------------------
+        # Approval mode must still be enabled
+        # -------------------------------------------------
         if not bool(
-            target_mentor.get(
-                "approvalMode",
-                False
-            )
+            target_mentor.get("approvalMode", False)
         ):
 
             return jsonify({
                 "success": False,
-                "message":
-                    "Approval mode is currently disabled for the assigned faculty."
+                "message": (
+                    "Approval mode is currently disabled "
+                    "for the assigned faculty."
+                )
             }), 409
 
-        existing_class = req.get(
-            "existingClass"
-        )
-
-        day = req.get(
-            "day"
-        )
+        # -------------------------------------------------
+        # Request data
+        # -------------------------------------------------
+        existing_class = req.get("existingClass")
+        new_class = req.get("className")
+        day = req.get("day")
 
         old_lecture = req.get(
             "oldLecture",
             {}
-        )
-
-        new_class = req.get(
-            "className"
         )
 
         new_lecture = req.get(
@@ -2099,59 +2080,84 @@ def approve_lecture_request():
             {}
         )
 
-        if not isinstance(
-            old_lecture,
-            dict
-        ):
+        if not existing_class:
+            return jsonify({
+                "success": False,
+                "message": "existingClass is missing from request."
+            }), 409
+
+        if not new_class:
+            return jsonify({
+                "success": False,
+                "message": "className is missing from request."
+            }), 409
+
+        if not day:
+            return jsonify({
+                "success": False,
+                "message": "day is missing from request."
+            }), 409
+
+        if not isinstance(old_lecture, dict):
             old_lecture = {}
 
-        if not isinstance(
-            new_lecture,
-            dict
-        ):
+        if not isinstance(new_lecture, dict):
             new_lecture = {}
 
-        normalize_lecture(
-            old_lecture
-        )
-
-        normalize_lecture(
-            new_lecture
-        )
+        # -------------------------------------------------
+        # Normalize old/new lecture
+        # -------------------------------------------------
+        normalize_lecture(old_lecture)
+        normalize_lecture(new_lecture)
 
         # =================================================
         # STEP 1
-        # VERIFY OLD LECTURE STILL EXISTS
+        # VERIFY OLD OCCUPIED LECTURE STILL EXISTS
         # =================================================
 
-        old_tt = None
-        old_schedule = []
+        old_tt = db.timetables.find_one({
+            "className": existing_class
+        })
 
-        if existing_class:
+        if not old_tt:
 
-            old_tt = db.timetables.find_one(
-                {
-                    "className":
-                        existing_class
-                }
-            )
-
-            if old_tt:
-
-                old_schedule = (
-                    old_tt
-                    .get(
-                        "weeklySchedule",
-                        {}
-                    )
-                    .get(
-                        day,
-                        []
-                    )
+            return jsonify({
+                "success": False,
+                "message": (
+                    "The occupied timetable no longer exists. "
+                    "Please reload the timetable."
                 )
+            }), 409
+
+        old_schedule = (
+            old_tt
+            .get("weeklySchedule", {})
+            .get(day, [])
+        )
+
+        if not isinstance(old_schedule, list):
+            old_schedule = []
 
         old_lecture_index = -1
 
+        # Faculty assigned to request
+        requested_old_faculty_ids = (
+            get_lecture_faculty_ids(
+                old_lecture
+            )
+        )
+
+        old_start = old_lecture.get(
+            "startTimeMins"
+        )
+
+        old_end = old_lecture.get(
+            "endTimeMins"
+        )
+
+        # -------------------------------------------------
+        # Find the exact currently occupied lecture
+        # -------------------------------------------------
         for index, lecture in enumerate(
             old_schedule
         ):
@@ -2172,65 +2178,78 @@ def approve_lecture_request():
                 )
             )
 
-            old_faculty_ids = (
-                get_lecture_faculty_ids(
-                    old_lecture
-                )
-            )
-
-            same_faculty = (
+            # Faculty must match
+            faculty_match = (
                 target_mentor_id
                 in lecture_faculty_ids
-                and
-                target_mentor_id
-                in old_faculty_ids
             )
 
-            same_time = (
-                lecture.get(
-                    "startTimeMins"
+            # If oldLecture contains facultyIds,
+            # make sure they also overlap.
+            requested_faculty_match = True
+
+            if requested_old_faculty_ids:
+
+                requested_faculty_match = bool(
+                    set(requested_old_faculty_ids)
+                    &
+                    set(lecture_faculty_ids)
                 )
-                ==
-                old_lecture.get(
-                    "startTimeMins"
-                )
+
+            # Time must match
+            time_match = (
+                lecture.get("startTimeMins")
+                == old_start
                 and
-                lecture.get(
-                    "endTimeMins"
-                )
-                ==
-                old_lecture.get(
-                    "endTimeMins"
-                )
+                lecture.get("endTimeMins")
+                == old_end
+            )
+
+            # Only approved/active lectures count
+            active_match = lecture_is_active(
+                lecture
             )
 
             if (
-                same_faculty
+                faculty_match
                 and
-                same_time
+                requested_faculty_match
                 and
-                lecture_is_active(
-                    lecture
-                )
+                time_match
+                and
+                active_match
             ):
 
-                old_lecture_index = (
-                    index
-                )
-
+                old_lecture_index = index
                 break
 
+        # -------------------------------------------------
+        # Old lecture disappeared/changed
+        # -------------------------------------------------
         if old_lecture_index == -1:
 
             return jsonify({
                 "success": False,
-                "message":
-                    "This lecture is no longer occupied by the assigned faculty. The timetable may have changed. Please reload the timetable."
+                "message": (
+                    "This lecture is no longer occupied by "
+                    "the assigned faculty. The timetable may "
+                    "have changed. Please reload the timetable."
+                )
             }), 409
+
+        # Use the ACTUAL database lecture.
+        # This is safer than trusting oldLecture from frontend.
+        actual_old_lecture = old_schedule[
+            old_lecture_index
+        ]
+
+        normalize_lecture(
+            actual_old_lecture
+        )
 
         # =================================================
         # STEP 2
-        # RE-CHECK DESTINATION CONFLICT
+        # VALIDATE NEW LECTURE
         # =================================================
 
         new_faculty_ids = (
@@ -2239,16 +2258,12 @@ def approve_lecture_request():
             )
         )
 
-        new_start = (
-            new_lecture.get(
-                "startTimeMins"
-            )
+        new_start = new_lecture.get(
+            "startTimeMins"
         )
 
-        new_end = (
-            new_lecture.get(
-                "endTimeMins"
-            )
+        new_end = new_lecture.get(
+            "endTimeMins"
         )
 
         if (
@@ -2259,47 +2274,102 @@ def approve_lecture_request():
 
             return jsonify({
                 "success": False,
-                "message":
+                "message": (
                     "New lecture has invalid time information."
+                )
             }), 400
 
-        destination_conflicts = (
-            find_conflicts(
+        if new_start >= new_end:
+
+            return jsonify({
+                "success": False,
+                "message": (
+                    "New lecture start time must be "
+                    "before end time."
+                )
+            }), 400
+
+        # =================================================
+        # STEP 3
+        # RE-CHECK DESTINATION CONFLICT
+        # =================================================
+
+        destination_conflicts = []
+
+        if new_faculty_ids:
+
+            destination_conflicts = find_conflicts(
                 faculty_ids=new_faculty_ids,
                 day=day,
                 start_mins=new_start,
                 end_mins=new_end,
                 current_class=new_class
             )
-        )
 
-        if destination_conflicts:
+        # -------------------------------------------------
+        # IMPORTANT:
+        #
+        # The old occupied lecture belongs to existing_class.
+        # If destination is the same class and the same lecture
+        # is being moved/edited, do not treat that old lecture
+        # as a destination conflict.
+        # -------------------------------------------------
+
+        filtered_destination_conflicts = []
+
+        for conflict in destination_conflicts:
+
+            conflict_class = conflict.get(
+                "class"
+            )
+
+            conflict_lecture = conflict.get(
+                "lecture",
+                {}
+            )
+
+            if (
+                conflict_class == existing_class
+                and
+                conflict_lecture.get(
+                    "startTimeMins"
+                ) == actual_old_lecture.get(
+                    "startTimeMins"
+                )
+                and
+                conflict_lecture.get(
+                    "endTimeMins"
+                ) == actual_old_lecture.get(
+                    "endTimeMins"
+                )
+            ):
+                continue
+
+            filtered_destination_conflicts.append(
+                conflict
+            )
+
+        if filtered_destination_conflicts:
 
             return jsonify({
                 "success": False,
-                "message":
-                    "Cannot approve request because the destination timetable now has another conflict.",
+                "message": (
+                    "Cannot approve request because "
+                    "the destination timetable now has "
+                    "another conflict."
+                ),
                 "conflicts":
-                    destination_conflicts
+                    filtered_destination_conflicts
             }), 409
 
         # =================================================
-        # STEP 3
-        # CHECK DESTINATION EXACT DUPLICATE
+        # STEP 4
+        # LOAD DESTINATION TIMETABLE
         # =================================================
 
-        destination_tt = None
-
-        if new_class:
-
-            destination_tt = (
-                db.timetables.find_one(
-                    {
-                        "className":
-                            new_class
-                    }
-                )
-            )
+        destination_tt = db.timetables.find_one({
+            "className": new_class
+        })
 
         destination_schedule = []
 
@@ -2307,15 +2377,20 @@ def approve_lecture_request():
 
             destination_schedule = (
                 destination_tt
-                .get(
-                    "weeklySchedule",
-                    {}
-                )
-                .get(
-                    day,
-                    []
-                )
+                .get("weeklySchedule", {})
+                .get(day, [])
             )
+
+        if not isinstance(
+            destination_schedule,
+            list
+        ):
+            destination_schedule = []
+
+        # =================================================
+        # STEP 5
+        # CHECK EXACT DUPLICATE
+        # =================================================
 
         duplicate = False
 
@@ -2331,19 +2406,47 @@ def approve_lecture_request():
                 lecture
             )
 
+            # Ignore the old lecture itself when
+            # destination class is same as existing class.
             if (
+                existing_class == new_class
+                and
                 lecture.get(
                     "startTimeMins"
                 )
                 ==
-                new_start
+                actual_old_lecture.get(
+                    "startTimeMins"
+                )
                 and
                 lecture.get(
                     "endTimeMins"
                 )
                 ==
-                new_end
+                actual_old_lecture.get(
+                    "endTimeMins"
+                )
                 and
+                target_mentor_id in
+                get_lecture_faculty_ids(
+                    lecture
+                )
+            ):
+                continue
+
+            same_time = (
+                lecture.get(
+                    "startTimeMins"
+                )
+                == new_start
+                and
+                lecture.get(
+                    "endTimeMins"
+                )
+                == new_end
+            )
+
+            same_faculty = (
                 set(
                     get_lecture_faculty_ids(
                         lecture
@@ -2353,6 +2456,12 @@ def approve_lecture_request():
                 set(
                     new_faculty_ids
                 )
+            )
+
+            if (
+                same_time
+                and
+                same_faculty
             ):
 
                 duplicate = True
@@ -2362,34 +2471,38 @@ def approve_lecture_request():
 
             return jsonify({
                 "success": False,
-                "message":
-                    "The destination timetable already contains this lecture."
+                "message": (
+                    "The destination timetable already "
+                    "contains this lecture."
+                )
             }), 409
 
         # =================================================
-        # STEP 4
+        # STEP 6
         # PREPARE NEW LECTURE
         # =================================================
 
-        new_lecture["status"] = (
-            "approved"
-        )
+        new_lecture["status"] = "approved"
 
         new_lecture["facultyIds"] = (
-            new_faculty_ids
-        )
-
-        new_lecture["faculty"] = (
-            resolve_faculty(
+            clean_id_list(
                 new_faculty_ids
             )
         )
 
+        new_lecture["faculty"] = (
+            resolve_faculty(
+                new_lecture["facultyIds"]
+            )
+        )
+
+        # Ensure time values remain present
+        new_lecture["startTimeMins"] = new_start
+        new_lecture["endTimeMins"] = new_end
+
         # =================================================
-        # STEP 5
+        # STEP 7
         # REMOVE OLD LECTURE
-        #
-        # ONLY AFTER ALL VALIDATIONS PASSED.
         # =================================================
 
         updated_old_schedule = list(
@@ -2400,26 +2513,24 @@ def approve_lecture_request():
             old_lecture_index
         )
 
-        if old_tt:
+        db.timetables.update_one(
+            {
+                "className":
+                    existing_class
+            },
+            {
+                "$set": {
+                    f"weeklySchedule.{day}":
+                        updated_old_schedule,
 
-            db.timetables.update_one(
-                {
-                    "className":
-                        existing_class
-                },
-                {
-                    "$set": {
-                        f"weeklySchedule.{day}":
-                            updated_old_schedule,
-
-                        "updatedAt":
-                            datetime.utcnow()
-                    }
+                    "updatedAt":
+                        datetime.utcnow()
                 }
-            )
+            }
+        )
 
         # =================================================
-        # STEP 6
+        # STEP 8
         # INSERT NEW LECTURE
         # =================================================
 
@@ -2470,35 +2581,47 @@ def approve_lecture_request():
             })
 
         # =================================================
-        # STEP 7
+        # STEP 9
         # MARK REQUEST APPROVED
         # =================================================
 
-        db.lecture_requests.update_one(
-            {
-                "_id":
-                    object_id,
-
-                "status":
-                    "pending"
-            },
-            {
-                "$set": {
+        update_result = (
+            db.lecture_requests.update_one(
+                {
+                    "_id":
+                        object_id,
 
                     "status":
-                        "approved",
+                        "pending"
+                },
+                {
+                    "$set": {
 
-                    "updatedAt":
-                        datetime.utcnow(),
+                        "status":
+                            "approved",
 
-                    "processedAt":
-                        datetime.utcnow(),
+                        "updatedAt":
+                            datetime.utcnow(),
 
-                    "processedBy":
-                        target_mentor_id
+                        "processedAt":
+                            datetime.utcnow(),
+
+                        "processedBy":
+                            target_mentor_id
+                    }
                 }
-            }
+            )
         )
+
+        if update_result.modified_count == 0:
+
+            return jsonify({
+                "success": False,
+                "message": (
+                    "Lecture was updated, but the request "
+                    "status could not be updated."
+                )
+            }), 500
 
         return jsonify({
 
@@ -2512,8 +2635,12 @@ def approve_lecture_request():
                 True,
 
             "targetMentorId":
-                target_mentor_id
-        })
+                target_mentor_id,
+
+            "requestId":
+                str(req_id)
+
+        }), 200
 
     except Exception as e:
 
@@ -2541,14 +2668,13 @@ def reject_lecture_request():
             "requestId"
         )
 
+        # -------------------------------------------------
+        # Accept both names
+        # -------------------------------------------------
         approver_id = (
-            data.get(
-                "mentorId"
-            )
+            data.get("mentorId")
             or
-            data.get(
-                "approverMentorId"
-            )
+            data.get("approverMentorId")
         )
 
         if not req_id:
@@ -2559,6 +2685,21 @@ def reject_lecture_request():
                     "requestId required"
             }), 400
 
+        if not approver_id:
+
+            return jsonify({
+                "success": False,
+                "message":
+                    "mentorId is required to reject this request."
+            }), 400
+
+        approver_id = str(
+            approver_id
+        ).strip()
+
+        # -------------------------------------------------
+        # Validate ObjectId
+        # -------------------------------------------------
         try:
 
             object_id = ObjectId(
@@ -2573,6 +2714,9 @@ def reject_lecture_request():
                     "Invalid requestId"
             }), 400
 
+        # -------------------------------------------------
+        # Find pending request
+        # -------------------------------------------------
         req = db.lecture_requests.find_one(
             {
                 "_id":
@@ -2591,6 +2735,9 @@ def reject_lecture_request():
                     "Request not found or already processed"
             }), 404
 
+        # -------------------------------------------------
+        # Assigned faculty
+        # -------------------------------------------------
         target_mentor_id = str(
             req.get(
                 "targetMentorId",
@@ -2598,53 +2745,72 @@ def reject_lecture_request():
             )
         ).strip()
 
-        # Backend authorization
-        if not approver_id:
+        if not target_mentor_id:
 
             return jsonify({
                 "success": False,
                 "message":
-                    "mentorId is required to reject this request."
-            }), 400
+                    "Assigned faculty is missing from this request."
+            }), 409
 
-        approver_id = str(
-            approver_id
-        ).strip()
-
+        # -------------------------------------------------
+        # BACKEND AUTHORIZATION
+        #
+        # Only assigned faculty can reject.
+        # -------------------------------------------------
         if approver_id != target_mentor_id:
 
             return jsonify({
                 "success": False,
-                "message":
-                    "Unauthorized. Only the assigned faculty can reject this lecture request."
+                "message": (
+                    "Unauthorized. Only the assigned faculty "
+                    "can reject this lecture request."
+                )
             }), 403
 
-        result = (
-            db.lecture_requests.update_one(
-                {
-                    "_id":
-                        object_id,
+        # -------------------------------------------------
+        # Verify mentor still exists
+        # -------------------------------------------------
+        target_mentor = db.mentors.find_one({
+            "mentorId":
+                target_mentor_id
+        })
+
+        if not target_mentor:
+
+            return jsonify({
+                "success": False,
+                "message":
+                    "Assigned faculty no longer exists."
+            }), 404
+
+        # -------------------------------------------------
+        # Reject request
+        # -------------------------------------------------
+        result = db.lecture_requests.update_one(
+            {
+                "_id":
+                    object_id,
+
+                "status":
+                    "pending"
+            },
+            {
+                "$set": {
 
                     "status":
-                        "pending"
-                },
-                {
-                    "$set": {
+                        "rejected",
 
-                        "status":
-                            "rejected",
+                    "updatedAt":
+                        datetime.utcnow(),
 
-                        "updatedAt":
-                            datetime.utcnow(),
+                    "processedAt":
+                        datetime.utcnow(),
 
-                        "processedAt":
-                            datetime.utcnow(),
-
-                        "processedBy":
-                            target_mentor_id
-                    }
+                    "processedBy":
+                        target_mentor_id
                 }
-            )
+            }
         )
 
         if result.modified_count == 0:
@@ -2661,11 +2827,15 @@ def reject_lecture_request():
                 True,
 
             "message":
-                "Lecture request rejected.",
+                "Lecture request rejected successfully.",
 
             "targetMentorId":
-                target_mentor_id
-        })
+                target_mentor_id,
+
+            "requestId":
+                str(req_id)
+
+        }), 200
 
     except Exception as e:
 
