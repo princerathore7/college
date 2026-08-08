@@ -1019,3 +1019,57 @@ def get_holidays():
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+@timetable_bp.route("/verify-conflict", methods=["POST"])
+def verify_conflict():
+    try:
+        data = request.get_json() or {}
+
+        class_name = data.get("existingClass")
+        day = data.get("day")
+        start_mins = data.get("startTimeMins")
+        end_mins = data.get("endTimeMins")
+        mentor_id = data.get("mentorId")
+
+        if not all([class_name, day, mentor_id]):
+            return jsonify({
+                "success": False,
+                "message": "existingClass, day and mentorId are required"
+            }), 400
+
+        timetable = db.timetables.find_one({"className": class_name})
+
+        if not timetable:
+            return jsonify({
+                "success": True,
+                "exists": False,
+                "message": "Class timetable not found"
+            })
+
+        lectures = timetable.get("weeklySchedule", {}).get(day, [])
+
+        for lec in lectures:
+
+            if (
+                mentor_id in clean_id_list(lec.get("facultyIds", []))
+                and lec.get("startTimeMins") == start_mins
+                and lec.get("endTimeMins") == end_mins
+                and lec.get("status") == "approved"
+            ):
+
+                return jsonify({
+                    "success": True,
+                    "exists": True,
+                    "oldLecture": lec
+                })
+
+        return jsonify({
+            "success": True,
+            "exists": False,
+            "message": "Lecture no longer exists"
+        })
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500

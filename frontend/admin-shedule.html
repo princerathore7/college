@@ -977,9 +977,36 @@ function validateTime(start, end, startMeridian, endMeridian) {
   const endMins = getMinutes(end, endMeridian);
   return startMins < endMins;
 }
+// --- NEW HELPER: Convert time to minutes for the backend ---
+function timeToMinutes(rawTime, meridian) {
+    let [hours, minutes] = rawTime.split(':').map(Number);
+    if (meridian === "PM" && hours !== 12) hours += 12;
+    if (meridian === "AM" && hours === 12) hours = 0;
+    return (hours * 60) + minutes;
+}
 
+// --- NEW HELPER: Verify existing conflict ---
+async function verifyConflict(existingClass, day, startTimeMins, endTimeMins, mentorId) {
+    try {
+        const response = await fetch("/api/timetable/verify-conflict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                existingClass,
+                day,
+                startTimeMins,
+                endTimeMins,
+                mentorId
+            })
+        });
+        return await response.json();
+    } catch (error) {
+        console.error("Verification API Error:", error);
+        return { success: false, exists: false };
+    }
+}
+// --- UPDATED: handleTimetableSubmit ---
 async function handleTimetableSubmit() {
-
     const selectedYear = document.getElementById("year").value;
     const selectedClass = document.getElementById("className").value;
 
@@ -990,185 +1017,166 @@ async function handleTimetableSubmit() {
         return showErrorModal("Missing Detail", "Please select a Class.");
 
     const finalClassName = `${selectedYear} ${selectedClass}`;
-
     const weeklySchedule = {};
-
     let hasValidationError = false;
 
-    days.forEach(day => {
-
+    // Use for...of instead of forEach so we can safely 'await' the verification calls
+    for (const day of days) {
         weeklySchedule[day] = [];
+        const periodCards = document.querySelectorAll(`#${day}-periods .period-card`);
 
-        const periodCards =
-            document.querySelectorAll(`#${day}-periods .period-card`);
-
-        periodCards.forEach(card => {
-
+        for (const card of periodCards) {
             // Raw HH:MM values
-            const rawStart =
-                card.querySelector(".startTime").value;
-
-            const rawEnd =
-                card.querySelector(".endTime").value;
+            const rawStart = card.querySelector(".startTime").value;
+            const rawEnd = card.querySelector(".endTime").value;
 
             // AM / PM
-            const startMeridian =
-                card.querySelector(".startMeridian").value;
-
-            const endMeridian =
-                card.querySelector(".endMeridian").value;
+            const startMeridian = card.querySelector(".startMeridian").value;
+            const endMeridian = card.querySelector(".endMeridian").value;
 
             // Convert for backend
-            const startTime =
-                convertTo12Hour(rawStart, startMeridian);
-
-            const endTime =
-                convertTo12Hour(rawEnd, endMeridian);
-
-            const type =
-                card.querySelector(".periodType").value;
-
-            const subject =
-                card.querySelector(".subject").value.trim();
-
-            const room =
-                card.querySelector(".room").value.trim();
-
-            const facultyChips =
-                card.querySelectorAll(".chip");
-
-            const facultyIds =
-                Array.from(facultyChips).map(
-                    chip => chip.dataset.id
-                );
-                console.log("Faculty Chips:", facultyChips);
-console.log("Faculty IDs:", facultyIds);
+            const startTime = convertTo12Hour(rawStart, startMeridian);
+            const endTime = convertTo12Hour(rawEnd, endMeridian);
+            const type = card.querySelector(".periodType").value;
+            const subject = card.querySelector(".subject").value.trim();
+            const room = card.querySelector(".room").value.trim();
+            
+            const facultyChips = card.querySelectorAll(".chip");
+            const facultyIds = Array.from(facultyChips).map(chip => chip.dataset.id);
 
             // Validation
-
             if (!rawStart || !rawEnd) {
-
                 showErrorModal(
                     "Invalid Time",
                     `Please specify start and end times for all periods on ${day}.`
                 );
-
                 hasValidationError = true;
-                return;
-
+                break;
             }
 
             // Compare time values using AM/PM correctly
             if (!validateTime(rawStart, rawEnd, startMeridian, endMeridian)) {
-
                 showErrorModal(
                     "Invalid Time",
                     `End time must be greater than start time.`
                 );
-
                 hasValidationError = true;
-                return;
-
+                break;
             }
 
             if (!subject) {
-
                 showErrorModal(
                     "Missing Detail",
                     `Please specify subject/break name for ${day}.`
                 );
-
                 hasValidationError = true;
-                return;
-
+                break;
             }
 
             if (type !== "Break" && facultyIds.length === 0) {
-
                 showErrorModal(
                     "Missing Faculty",
                     `Please select at least one faculty for ${subject}.`
                 );
-
                 hasValidationError = true;
-                return;
+                break;
+            }
 
+            // ==========================================
+            // NEW: Verification Logic for existing lectures
+            // ==========================================
+            if (facultyIds.length > 0 && type !== "Break") {
+                const startTimeMins = timeToMinutes(rawStart, startMeridian);
+                const endTimeMins = timeToMinutes(rawEnd, endMeridian);
+
+                for (const chip of facultyChips) {
+                    // Check if the UI has attached an 'existingClass' to this override
+                    // (Requires frontend state update as explained above)
+                    const existingClass = chip.dataset.existingClass || card.dataset.existingClass;
+                    const mentorId = chip.dataset.id;
+
+                    if (existingClass) {
+                        const verifyRes = await verifyConflict(
+                            existingClass, 
+                            day, 
+                            startTimeMins, 
+                            endTimeMins, 
+                            mentorId
+                        );
+
+                        if (!verifyRes.success || !verifyRes.exists) {
+                            showErrorModal(
+                                "Verification Failed",
+                                `The existing lecture for mentor ${mentorId} in class ${existingClass} is no longer available in this time slot. Please refresh the timetable.`
+                            );
+                            hasValidationError = true;
+                            return; // Stop execution entirely
+                        }
+                    }
+                }
             }
 
             weeklySchedule[day].push({
-
                 startTime: startTime,
-
                 endTime: endTime,
-
                 type: type.toLowerCase(),
-
                 subject: subject,
-
                 facultyIds: facultyIds,
-
                 room: type === "Break" ? "" : room
-
             });
-
-        });
-
-    });
+        }
+        
+        // Stop processing further days if an error was found
+        if (hasValidationError) break; 
+    }
 
     if (hasValidationError) return;
 
     const finalData = {
-
         year: selectedYear,
-
         className: finalClassName,
-
-        mentorID:
-    localStorage.getItem("mentorId"),
-
+        mentorID: localStorage.getItem("mentorId"),
         weeklySchedule
-
     };
 
     console.log(finalData);
-
     await executeUpload(finalData);
-
 }
+// --- UPDATED: executeUpload --- 
+// (Maintained exactly as requested, though logic remains identical)
 async function executeUpload(payload) {
-  // Update Button State
-  const originalBtnText = submitBtn.innerHTML;
-  submitBtn.disabled = true;
-  submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Posting Timetable...`;
+    // Update Button State
+    const originalBtnText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Posting Timetable...`;
 
-  try {
-    const response = await fetch("https://college-hwbb.onrender.com/api/timetable/set-weekly", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+    try {
+        const response = await fetch("https://college-hwbb.onrender.com/api/timetable/set-weekly", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
 
-    const data = await response.json();
+        const data = await response.json();
 
-    if (data.success) {
-      if (data.conflict && data.requestCreated) {
-        showConflictModal();
-      } else {
-        showSuccessModal();
-      }
-      resetForm();
-    } else {
-      showErrorModal("Upload Failed", data.message || "An error occurred while saving the timetable.");
+        if (data.success) {
+            if (data.conflict && data.requestCreated) {
+                showConflictModal();
+            } else {
+                showSuccessModal();
+            }
+            resetForm();
+        } else {
+            showErrorModal("Upload Failed", data.message || "An error occurred while saving the timetable.");
+        }
+    } catch (error) {
+        console.error("API Error:", error);
+        showErrorModal("Server Error", "Could not connect to the server. Please try again later.");
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
     }
-  } catch (error) {
-    console.error("API Error:", error);
-    showErrorModal("Server Error", "Could not connect to the server. Please try again later.");
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = originalBtnText;
-  }
 }
-
 // =======================================================
 // UI MODALS & RESET
 // =======================================================
