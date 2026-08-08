@@ -1343,15 +1343,43 @@
                     <div class="form-grid">
 
                         <div class="form-group">
-                            <label>Class Name *</label>
+<div>
+    <label>Class Details *</label>
+    
+    <!-- Flexbox container to align dropdowns side-by-side -->
+    <div style="display: flex; gap: 10px; margin-top: 8px;">
+        
+        <!-- Year Dropdown -->
+        <select id="year" name="year" required>
+            <option value="" disabled selected>Select Year</option>
+            <option value="1st Year">1st Year</option>
+            <option value="2nd Year">2nd Year</option>
+            <option value="3rd Year">3rd Year</option>
+            <option value="4th Year">4th Year</option>
+        </select>
 
-                            <input
-                                id="className"
-                                type="text"
-                                placeholder="Example: 2nd Year IT2"
-                            >
-                        </div>
+        <!-- Branch Dropdown -->
+        <select id="branch" name="branch" required>
+            <option value="" disabled selected>Select Branch</option>
+            <option value="IT">IT</option>
+            <option value="CSE">CSE</option>
+            <option value="ECE">ECE</option>
+            <option value="ME">Mechanical</option>
+            <option value="CE">Civil</option>
+        </select>
 
+        <!-- Section Dropdown -->
+        <select id="section" name="section" required>
+            <option value="" disabled selected>Select Section</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+        
+    </div>
+</div>
                         <div class="form-group">
                             <label>Admin / Mentor ID</label>
 
