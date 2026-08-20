@@ -4818,37 +4818,28 @@ function createRequestCard(
    APPROVE REQUEST + UPDATE TIMETABLE
 ========================================================= */
 
-async function approveRequest(
-    requestId
-) {
+async function approveRequest(requestId) {
 
     if (
         !confirm(
             "Approve this lecture request? The existing lecture may be moved and the timetable will be updated."
         )
     ) {
-
         return;
-
     }
-
 
     showLoading(
         "Approving lecture request..."
     );
 
-
     try {
 
         // =================================================
-        // GET LOGGED-IN MENTOR ID
+        // GET MENTOR ID
         // =================================================
 
         const mentorId =
-            localStorage.getItem(
-                "mentorId"
-            );
-
+            localStorage.getItem("mentorId");
 
         if (!mentorId) {
 
@@ -4860,204 +4851,13 @@ async function approveRequest(
 
 
         // =================================================
-        // FIND REQUEST FROM allRequests
-        // =================================================
-
-        const selectedRequest =
-            Array.isArray(
-                allRequests
-            )
-                ? allRequests.find(
-                    item =>
-                        String(
-                            item._id
-                        ) ===
-                        String(
-                            requestId
-                        )
-                )
-                : null;
-
-
-        if (!selectedRequest) {
-
-            throw new Error(
-                "Lecture request data could not be found."
-            );
-
-        }
-
-
-        // =================================================
-        // ORIGINAL REQUESTED LECTURE
-        // =================================================
-
-        const requestedLecture =
-            (
-                selectedRequest.newLecture
-                &&
-                typeof selectedRequest.newLecture === "object"
-            )
-                ? {
-                    ...selectedRequest.newLecture
-                }
-                : {};
-
-
-        // =================================================
-        // KEEP REQUEST DATA AS FALLBACK
-        // =================================================
-
-        if (
-            !requestedLecture.subject
-            &&
-            selectedRequest.subject
-        ) {
-
-            requestedLecture.subject =
-                selectedRequest.subject;
-
-        }
-
-
-        if (
-            !requestedLecture.room
-            &&
-            selectedRequest.room
-        ) {
-
-            requestedLecture.room =
-                selectedRequest.room;
-
-        }
-
-
-        if (
-            !requestedLecture.startTime
-            &&
-            selectedRequest.startTime
-        ) {
-
-            requestedLecture.startTime =
-                selectedRequest.startTime;
-
-        }
-
-
-        if (
-            !requestedLecture.endTime
-            &&
-            selectedRequest.endTime
-        ) {
-
-            requestedLecture.endTime =
-                selectedRequest.endTime;
-
-        }
-
-
-        if (
-            !requestedLecture.facultyIds
-            &&
-            selectedRequest.facultyIds
-        ) {
-
-            requestedLecture.facultyIds =
-                selectedRequest.facultyIds;
-
-        }
-
-
-        // =================================================
-        // OPTIONAL EDITED APPROVAL VALUES
-        //
-        // If your approval modal has these IDs, they will
-        // automatically be used.
-        //
-        // Otherwise original request values remain.
-        // =================================================
-
-        const approvedStartElement =
-            document.getElementById(
-                "approveStartTime"
-            );
-
-
-        const approvedEndElement =
-            document.getElementById(
-                "approveEndTime"
-            );
-
-
-        const approvedSubjectElement =
-            document.getElementById(
-                "approveSubject"
-            );
-
-
-        const approvedRoomElement =
-            document.getElementById(
-                "approveRoom"
-            );
-
-
-        if (
-            approvedStartElement
-            &&
-            approvedStartElement.value
-        ) {
-
-            requestedLecture.startTime =
-                approvedStartElement.value;
-
-        }
-
-
-        if (
-            approvedEndElement
-            &&
-            approvedEndElement.value
-        ) {
-
-            requestedLecture.endTime =
-                approvedEndElement.value;
-
-        }
-
-
-        if (
-            approvedSubjectElement
-            &&
-            approvedSubjectElement.value
-        ) {
-
-            requestedLecture.subject =
-                approvedSubjectElement.value.trim();
-
-        }
-
-
-        if (
-            approvedRoomElement
-            &&
-            approvedRoomElement.value
-        ) {
-
-            requestedLecture.room =
-                approvedRoomElement.value.trim();
-
-        }
-
-
-        // =================================================
-        // SEND APPROVAL + LECTURE DATA
+        // APPROVE + UPDATE TIMETABLE
         // =================================================
 
         const response =
             await fetch(
                 `${API_BASE}/lecture-request/approve-update`,
                 {
-
                     method: "PUT",
 
                     headers: {
@@ -5071,19 +4871,15 @@ async function approveRequest(
                             requestId,
 
                         mentorId:
-                            mentorId,
-
-                        approvedLecture:
-                            requestedLecture
+                            mentorId
 
                     })
-
                 }
             );
 
 
         // =================================================
-        // READ RESPONSE
+        // READ BACKEND RESPONSE
         // =================================================
 
         const data =
@@ -5101,8 +4897,7 @@ async function approveRequest(
         // =================================================
 
         if (
-            !response.ok
-            ||
+            !response.ok ||
             !data.success
         ) {
 
@@ -5115,7 +4910,7 @@ async function approveRequest(
 
 
         // =================================================
-        // SUCCESS MESSAGE
+        // SUCCESS
         // =================================================
 
         showStatus(
@@ -5139,42 +4934,19 @@ async function approveRequest(
         // REFRESH TIMETABLE
         // =================================================
 
-        if (
-            selectedClass
-        ) {
+        if (selectedClass) {
 
             await reloadAfterSave();
 
         }
 
 
-        // =================================================
-        // OPTIONAL HARD REFRESH
-        //
-        // This guarantees fresh DB data is shown.
-        // =================================================
-
-        if (
-            typeof fetchRequests ===
-            "function"
-        ) {
-
-            await fetchRequests(
-                false
-            );
-
-        }
-
-
-    } catch (
-        error
-    ) {
+    } catch (error) {
 
         console.error(
             "Approve + update error:",
             error
         );
-
 
         showStatus(
 
@@ -5185,7 +4957,6 @@ async function approveRequest(
 
         );
 
-
     } finally {
 
         hideLoading();
@@ -5193,7 +4964,6 @@ async function approveRequest(
     }
 
 }
-
 /* =========================================================
    REJECT REQUEST
 ========================================================= */
