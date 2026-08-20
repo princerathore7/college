@@ -4201,3 +4201,1425 @@ def verify_conflict():
             "success": False,
             "message": str(e)
         }), 500
+    # =========================================================
+# APPROVE + UPDATE TIMETABLE
+#
+# Flow:
+#
+# MH1 requests lecture from MH2
+#              ↓
+# MH2 approves
+#              ↓
+# Remove old MH2 lecture
+#              ↓
+# Add MH1 requested lecture
+#              ↓
+# Subject + Faculty + Room + Time updated
+#              ↓
+# Verify timetable update
+#              ↓
+# Mark request approved
+# =========================================================
+
+@timetable_bp.route(
+    "/lecture-request/approve-update",
+    methods=["PUT"]
+)
+def approve_lecture_request_and_update_timetable():
+
+    try:
+
+        # =================================================
+        # READ REQUEST
+        # =================================================
+
+        data = request.get_json(
+            silent=True
+        ) or {}
+
+        req_id = data.get(
+            "requestId"
+        )
+
+        mentor_id = (
+            data.get("mentorId")
+            or
+            data.get("approverMentorId")
+        )
+
+        if not req_id:
+
+            return jsonify({
+                "success": False,
+                "message": "requestId required"
+            }), 400
+
+        if not mentor_id:
+
+            return jsonify({
+                "success": False,
+                "message": "mentorId required"
+            }), 400
+
+        mentor_id = str(
+            mentor_id
+        ).strip()
+
+
+        # =================================================
+        # OBJECT ID
+        # =================================================
+
+        try:
+
+            object_id = ObjectId(
+                str(req_id)
+            )
+
+        except Exception:
+
+            return jsonify({
+                "success": False,
+                "message": "Invalid requestId"
+            }), 400
+
+
+        # =================================================
+        # FIND PENDING REQUEST
+        # =================================================
+
+        req = db.lecture_requests.find_one({
+            "_id": object_id,
+            "status": "pending"
+        })
+
+        if not req:
+
+            return jsonify({
+                "success": False,
+                "message":
+                    "Request not found or already processed"
+            }), 404
+
+
+        # =================================================
+        # VERIFY APPROVING MENTOR
+        # =================================================
+
+        target_mentor_id = str(
+            req.get(
+                "targetMentorId",
+                ""
+            )
+        ).strip()
+
+        if (
+            target_mentor_id
+            and
+            mentor_id != target_mentor_id
+        ):
+
+            return jsonify({
+                "success": False,
+                "message":
+                    "This request is not assigned to this mentor."
+            }), 403
+
+
+        # =================================================
+        # REQUEST DATA
+        # =================================================
+
+        old_class = req.get(
+            "existingClass"
+        )
+
+        new_class = req.get(
+            "className"
+        )
+
+        original_day = req.get(
+            "day"
+        )
+
+        old_lecture = req.get(
+            "oldLecture",
+            {}
+        )
+
+        stored_new_lecture = req.get(
+            "newLecture",
+            {}
+        )
+
+
+        if not old_class:
+
+            return jsonify({
+                "success": False,
+                "message":
+                    "existingClass is missing"
+            }), 409
+
+
+        if not new_class:
+
+            return jsonify({
+                "success": False,
+                "message":
+                    "className is missing"
+            }), 409
+
+
+        if not original_day:
+
+            return jsonify({
+                "success": False,
+                "message":
+                    "day is missing"
+            }), 409
+
+
+        if not isinstance(
+            old_lecture,
+            dict
+        ):
+
+            old_lecture = {}
+
+
+        if not isinstance(
+            stored_new_lecture,
+            dict
+        ):
+
+            stored_new_lecture = {}
+
+
+        # =================================================
+        # OPTIONAL FRONTEND EDITED LECTURE
+        #
+        # Frontend can send:
+        #
+        # approvedLecture: {
+        #     subject,
+        #     room,
+        #     startTime,
+        #     endTime,
+        #     facultyIds
+        # }
+        #
+        # If not sent, stored newLecture is used.
+        # =================================================
+
+        approved_lecture = data.get(
+            "approvedLecture"
+        )
+
+        if (
+            not isinstance(
+                approved_lecture,
+                dict
+            )
+            or
+            not approved_lecture
+        ):
+
+            approved_lecture = dict(
+                stored_new_lecture
+            )
+
+        else:
+
+            # Start from original request
+            # and override only edited values.
+
+            merged_lecture = dict(
+                stored_new_lecture
+            )
+
+            merged_lecture.update(
+                approved_lecture
+            )
+
+            approved_lecture = (
+                merged_lecture
+            )
+
+
+        # =================================================
+        # DAY
+        #
+        # Day remains original request day unless
+        # frontend explicitly sends another day.
+        # =================================================
+
+        day = (
+            approved_lecture.get(
+                "day"
+            )
+            or
+            data.get(
+                "day"
+            )
+            or
+            original_day
+        )
+
+
+        # =================================================
+        # SUBJECT
+        # =================================================
+
+        subject = str(
+            approved_lecture.get(
+                "subject",
+                req.get(
+                    "subject",
+                    ""
+                )
+            )
+            or
+            ""
+        ).strip()
+
+
+        # =================================================
+        # ROOM
+        # =================================================
+
+        room = str(
+            approved_lecture.get(
+                "room",
+                req.get(
+                    "room",
+                    ""
+                )
+            )
+            or
+            ""
+        ).strip()
+
+
+        # =================================================
+        # TIME
+        # =================================================
+
+        start_time = (
+            approved_lecture.get(
+                "startTime"
+            )
+            or
+            req.get(
+                "startTime"
+            )
+        )
+
+        end_time = (
+            approved_lecture.get(
+                "endTime"
+            )
+            or
+            req.get(
+                "endTime"
+            )
+        )
+
+
+        if not start_time:
+
+            return jsonify({
+                "success": False,
+                "message":
+                    "startTime is required"
+            }), 400
+
+
+        if not end_time:
+
+            return jsonify({
+                "success": False,
+                "message":
+                    "endTime is required"
+            }), 400
+
+
+        # =================================================
+        # CONVERT TIME
+        # =================================================
+
+        new_start_mins = (
+            time_to_minutes(
+                start_time
+            )
+        )
+
+        new_end_mins = (
+            time_to_minutes(
+                end_time
+            )
+        )
+
+
+        if new_start_mins >= new_end_mins:
+
+            return jsonify({
+                "success": False,
+                "message":
+                    "Invalid time range"
+            }), 400
+
+
+        # =================================================
+        # FACULTY IDS
+        # =================================================
+
+        faculty_ids = clean_id_list(
+            approved_lecture.get(
+                "facultyIds",
+                []
+            )
+        )
+
+
+        # If no faculty was supplied,
+        # use requester mentor.
+
+        if not faculty_ids:
+
+            requester_id = str(
+                req.get(
+                    "requesterMentorId",
+                    ""
+                )
+            ).strip()
+
+            if requester_id:
+
+                faculty_ids = [
+                    requester_id
+                ]
+
+            else:
+
+                return jsonify({
+                    "success": False,
+                    "message":
+                        "Requested faculty could not be determined."
+                }), 409
+
+
+        # =================================================
+        # BUILD FINAL LECTURE
+        # =================================================
+
+        final_lecture = dict(
+            approved_lecture
+        )
+
+        final_lecture["day"] = day
+
+        final_lecture["subject"] = subject
+
+        final_lecture["room"] = room
+
+        final_lecture["startTime"] = (
+            str(start_time).strip()
+        )
+
+        final_lecture["endTime"] = (
+            str(end_time).strip()
+        )
+
+        final_lecture["startTimeMins"] = (
+            new_start_mins
+        )
+
+        final_lecture["endTimeMins"] = (
+            new_end_mins
+        )
+
+        final_lecture["facultyIds"] = (
+            faculty_ids
+        )
+
+        # Approved lecture is ACTIVE
+
+        final_lecture["status"] = (
+            "approved"
+        )
+
+        # Resolve faculty names from mentors collection
+
+        final_lecture["faculty"] = (
+            resolve_faculty(
+                faculty_ids
+            )
+        )
+
+
+        # =================================================
+        # FIND OLD TIMETABLE
+        # =================================================
+
+        old_tt = db.timetables.find_one({
+            "className": old_class
+        })
+
+        if not old_tt:
+
+            return jsonify({
+                "success": False,
+                "message":
+                    "Old timetable not found."
+            }), 409
+
+
+        old_weekly = (
+            old_tt.get(
+                "weeklySchedule",
+                {}
+            )
+        )
+
+        old_schedule = (
+            old_weekly.get(
+                day,
+                []
+            )
+        )
+
+
+        if not isinstance(
+            old_schedule,
+            list
+        ):
+
+            old_schedule = []
+
+
+        # =================================================
+        # FIND EXACT OLD LECTURE
+        # =================================================
+
+        old_index = -1
+
+
+        old_faculty_ids = (
+            get_lecture_faculty_ids(
+                old_lecture
+            )
+        )
+
+
+        old_start = (
+            old_lecture.get(
+                "startTimeMins"
+            )
+        )
+
+        old_end = (
+            old_lecture.get(
+                "endTimeMins"
+            )
+        )
+
+
+        # Fallback if minutes weren't stored
+
+        if (
+            old_start is None
+            and
+            old_lecture.get(
+                "startTime"
+            )
+        ):
+
+            old_start = (
+                time_to_minutes(
+                    old_lecture.get(
+                        "startTime"
+                    )
+                )
+            )
+
+
+        if (
+            old_end is None
+            and
+            old_lecture.get(
+                "endTime"
+            )
+        ):
+
+            old_end = (
+                time_to_minutes(
+                    old_lecture.get(
+                        "endTime"
+                    )
+                )
+            )
+
+
+        for index, lecture in enumerate(
+            old_schedule
+        ):
+
+            if not isinstance(
+                lecture,
+                dict
+            ):
+
+                continue
+
+
+            normalize_lecture(
+                lecture
+            )
+
+
+            lecture_faculty_ids = (
+                get_lecture_faculty_ids(
+                    lecture
+                )
+            )
+
+
+            # Faculty match
+
+            faculty_match = True
+
+            if target_mentor_id:
+
+                faculty_match = (
+                    target_mentor_id
+                    in
+                    lecture_faculty_ids
+                )
+
+
+            # Old request faculty match
+
+            requested_faculty_match = True
+
+            if old_faculty_ids:
+
+                requested_faculty_match = bool(
+                    set(
+                        old_faculty_ids
+                    )
+                    &
+                    set(
+                        lecture_faculty_ids
+                    )
+                )
+
+
+            # Time match
+
+            time_match = True
+
+            if (
+                old_start is not None
+                and
+                old_end is not None
+            ):
+
+                time_match = (
+                    lecture.get(
+                        "startTimeMins"
+                    )
+                    ==
+                    old_start
+                    and
+                    lecture.get(
+                        "endTimeMins"
+                    )
+                    ==
+                    old_end
+                )
+
+
+            # Subject match
+
+            subject_match = True
+
+            old_subject = str(
+                old_lecture.get(
+                    "subject",
+                    ""
+                )
+                or
+                ""
+            ).strip()
+
+            current_subject = str(
+                lecture.get(
+                    "subject",
+                    ""
+                )
+                or
+                ""
+            ).strip()
+
+
+            if old_subject:
+
+                subject_match = (
+                    old_subject
+                    ==
+                    current_subject
+                )
+
+
+            if (
+                faculty_match
+                and
+                requested_faculty_match
+                and
+                time_match
+                and
+                subject_match
+            ):
+
+                old_index = index
+
+                break
+
+
+        # =================================================
+        # FALLBACK:
+        # Match by old lecture _id
+        # =================================================
+
+        if old_index == -1:
+
+            old_id = old_lecture.get(
+                "_id"
+            )
+
+            if old_id:
+
+                old_id = str(
+                    old_id
+                )
+
+                for index, lecture in enumerate(
+                    old_schedule
+                ):
+
+                    if not isinstance(
+                        lecture,
+                        dict
+                    ):
+
+                        continue
+
+                    if str(
+                        lecture.get(
+                            "_id",
+                            ""
+                        )
+                    ) == old_id:
+
+                        old_index = index
+
+                        break
+
+
+        if old_index == -1:
+
+            return jsonify({
+                "success": False,
+                "message":
+                    "The original occupied lecture could not be found. Timetable was not changed."
+            }), 409
+
+
+        # =================================================
+        # PREPARE OLD SCHEDULE
+        # =================================================
+
+        updated_old_schedule = list(
+            old_schedule
+        )
+
+        removed_old_lecture = (
+            updated_old_schedule.pop(
+                old_index
+            )
+        )
+
+
+        # =================================================
+        # FIND DESTINATION TIMETABLE
+        # =================================================
+
+        destination_tt = db.timetables.find_one({
+            "className": new_class
+        })
+
+
+        destination_schedule = []
+
+        if destination_tt:
+
+            destination_schedule = (
+                destination_tt
+                .get(
+                    "weeklySchedule",
+                    {}
+                )
+                .get(
+                    day,
+                    []
+                )
+            )
+
+
+        if not isinstance(
+            destination_schedule,
+            list
+        ):
+
+            destination_schedule = []
+
+
+        # =================================================
+        # DESTINATION CONFLICT CHECK
+        #
+        # Ignore the lecture being moved when both classes
+        # are the same.
+        # =================================================
+
+        for existing in destination_schedule:
+
+            if not isinstance(
+                existing,
+                dict
+            ):
+
+                continue
+
+
+            normalize_lecture(
+                existing
+            )
+
+
+            # If same class, the old lecture has already
+            # been logically removed from consideration.
+
+            if (
+                old_class
+                ==
+                new_class
+                and
+                existing is removed_old_lecture
+            ):
+
+                continue
+
+
+            existing_start = (
+                existing.get(
+                    "startTimeMins"
+                )
+            )
+
+            existing_end = (
+                existing.get(
+                    "endTimeMins"
+                )
+            )
+
+
+            if (
+                existing_start is None
+                or
+                existing_end is None
+            ):
+
+                try:
+
+                    existing_start = (
+                        time_to_minutes(
+                            existing.get(
+                                "startTime"
+                            )
+                        )
+                    )
+
+                    existing_end = (
+                        time_to_minutes(
+                            existing.get(
+                                "endTime"
+                            )
+                        )
+                    )
+
+                except (
+                    ValueError,
+                    TypeError
+                ):
+
+                    continue
+
+
+            if lectures_overlap(
+                new_start_mins,
+                new_end_mins,
+                existing_start,
+                existing_end
+            ):
+
+                return jsonify({
+                    "success": False,
+                    "message": (
+                        "The approved lecture time "
+                        "conflicts with another lecture "
+                        "in the destination class."
+                    ),
+                    "conflict": True,
+                    "conflictClass": new_class,
+                    "conflictDay": day,
+                    "conflictStart": existing.get(
+                        "startTime"
+                    ),
+                    "conflictEnd": existing.get(
+                        "endTime"
+                    ),
+                    "conflictSubject": existing.get(
+                        "subject",
+                        ""
+                    )
+                }), 409
+
+
+        # =================================================
+        # PREPARE DESTINATION SCHEDULE
+        # =================================================
+
+        final_destination_schedule = (
+            list(
+                destination_schedule
+            )
+        )
+
+
+        # If same class, remove original lecture
+        # from destination schedule.
+
+        if (
+            old_class
+            ==
+            new_class
+        ):
+
+            same_old_index = -1
+
+            for index, lecture in enumerate(
+                final_destination_schedule
+            ):
+
+                if not isinstance(
+                    lecture,
+                    dict
+                ):
+
+                    continue
+
+
+                if (
+                    lecture.get(
+                        "_id"
+                    )
+                    and
+                    removed_old_lecture.get(
+                        "_id"
+                    )
+                    and
+                    str(
+                        lecture.get(
+                            "_id"
+                        )
+                    )
+                    ==
+                    str(
+                        removed_old_lecture.get(
+                            "_id"
+                        )
+                    )
+                ):
+
+                    same_old_index = index
+
+                    break
+
+
+            if same_old_index != -1:
+
+                final_destination_schedule.pop(
+                    same_old_index
+                )
+
+
+        # =================================================
+        # ADD FINAL APPROVED LECTURE
+        # =================================================
+
+        final_destination_schedule.append(
+            final_lecture
+        )
+
+
+        # =================================================
+        # DATABASE UPDATE
+        #
+        # IMPORTANT:
+        # Don't mark request approved until BOTH
+        # timetable operations are successful.
+        # =================================================
+
+        old_update_result = None
+
+        destination_update_result = None
+
+
+        # =================================================
+        # CASE 1:
+        # SAME CLASS
+        # =================================================
+
+        if (
+            old_class
+            ==
+            new_class
+        ):
+
+            result = db.timetables.update_one(
+                {
+                    "className":
+                        old_class
+                },
+                {
+                    "$set": {
+                        f"weeklySchedule.{day}":
+                            final_destination_schedule,
+
+                        "updatedAt":
+                            datetime.utcnow()
+                    }
+                }
+            )
+
+
+            if result.matched_count == 0:
+
+                return jsonify({
+                    "success": False,
+                    "message":
+                        "Timetable could not be updated."
+                }), 500
+
+
+        # =================================================
+        # CASE 2:
+        # DIFFERENT CLASS
+        # =================================================
+
+        else:
+
+            # ---------------------------------------------
+            # REMOVE FROM OLD CLASS
+            # ---------------------------------------------
+
+            old_update_result = (
+                db.timetables.update_one(
+                    {
+                        "className":
+                            old_class
+                    },
+                    {
+                        "$set": {
+                            f"weeklySchedule.{day}":
+                                updated_old_schedule,
+
+                            "updatedAt":
+                                datetime.utcnow()
+                        }
+                    }
+                )
+            )
+
+
+            if (
+                old_update_result.matched_count
+                == 0
+            ):
+
+                return jsonify({
+                    "success": False,
+                    "message":
+                        "Old timetable could not be updated."
+                }), 500
+
+
+            # ---------------------------------------------
+            # DESTINATION CLASS EXISTS
+            # ---------------------------------------------
+
+            if destination_tt:
+
+                destination_update_result = (
+                    db.timetables.update_one(
+                        {
+                            "className":
+                                new_class
+                        },
+                        {
+                            "$set": {
+                                f"weeklySchedule.{day}":
+                                    final_destination_schedule,
+
+                                "updatedAt":
+                                    datetime.utcnow()
+                            }
+                        }
+                    )
+                )
+
+
+                if (
+                    destination_update_result.matched_count
+                    == 0
+                ):
+
+                    # -------------------------------------
+                    # ROLLBACK OLD CLASS
+                    # -------------------------------------
+
+                    db.timetables.update_one(
+                        {
+                            "className":
+                                old_class
+                        },
+                        {
+                            "$set": {
+                                f"weeklySchedule.{day}":
+                                    old_schedule,
+
+                                "updatedAt":
+                                    datetime.utcnow()
+                            }
+                        }
+                    )
+
+
+                    return jsonify({
+                        "success": False,
+                        "message":
+                            "Destination timetable could not be updated. Old timetable was restored."
+                    }), 500
+
+
+            # ---------------------------------------------
+            # DESTINATION CLASS DOES NOT EXIST
+            # ---------------------------------------------
+
+            else:
+
+                try:
+
+                    db.timetables.insert_one({
+
+                        "className":
+                            new_class,
+
+                        "mentorID":
+                            req.get(
+                                "requesterMentorId",
+                                ""
+                            ),
+
+                        "weeklySchedule": {
+                            day: [
+                                final_lecture
+                            ]
+                        },
+
+                        "createdAt":
+                            datetime.utcnow(),
+
+                        "updatedAt":
+                            datetime.utcnow()
+                    })
+
+                except Exception as insert_error:
+
+                    # -------------------------------------
+                    # ROLLBACK OLD CLASS
+                    # -------------------------------------
+
+                    db.timetables.update_one(
+                        {
+                            "className":
+                                old_class
+                        },
+                        {
+                            "$set": {
+                                f"weeklySchedule.{day}":
+                                    old_schedule,
+
+                                "updatedAt":
+                                    datetime.utcnow()
+                            }
+                        }
+                    )
+
+
+                    return jsonify({
+                        "success": False,
+                        "message":
+                            "Destination timetable could not be created. Old timetable was restored.",
+                        "error":
+                            str(insert_error)
+                    }), 500
+
+
+        # =================================================
+        # VERIFY DATABASE TIMETABLE
+        # =================================================
+
+        verify_tt = db.timetables.find_one({
+            "className":
+                new_class
+        })
+
+
+        if not verify_tt:
+
+            return jsonify({
+                "success": False,
+                "message":
+                    "Timetable update verification failed."
+            }), 500
+
+
+        verify_schedule = (
+            verify_tt
+            .get(
+                "weeklySchedule",
+                {}
+            )
+            .get(
+                day,
+                []
+            )
+        )
+
+
+        lecture_verified = False
+
+
+        for lecture in verify_schedule:
+
+            if not isinstance(
+                lecture,
+                dict
+            ):
+
+                continue
+
+
+            lecture_start = (
+                lecture.get(
+                    "startTimeMins"
+                )
+            )
+
+            lecture_end = (
+                lecture.get(
+                    "endTimeMins"
+                )
+            )
+
+
+            if (
+                lecture_start
+                ==
+                new_start_mins
+                and
+                lecture_end
+                ==
+                new_end_mins
+                and
+                str(
+                    lecture.get(
+                        "subject",
+                        ""
+                    )
+                ).strip()
+                ==
+                subject
+                and
+                str(
+                    lecture.get(
+                        "room",
+                        ""
+                    )
+                ).strip()
+                ==
+                room
+            ):
+
+                saved_faculty_ids = set(
+                    get_lecture_faculty_ids(
+                        lecture
+                    )
+                )
+
+                requested_faculty_ids = set(
+                    faculty_ids
+                )
+
+
+                if (
+                    saved_faculty_ids
+                    ==
+                    requested_faculty_ids
+                ):
+
+                    lecture_verified = True
+
+                    break
+
+
+        if not lecture_verified:
+
+            return jsonify({
+                "success": False,
+                "message":
+                    "Lecture was written but database verification failed."
+            }), 500
+
+
+        # =================================================
+        # MARK REQUEST APPROVED
+        # =================================================
+
+        approval_result = (
+            db.lecture_requests.update_one(
+                {
+                    "_id":
+                        object_id,
+
+                    "status":
+                        "pending"
+                },
+                {
+                    "$set": {
+
+                        "status":
+                            "approved",
+
+                        "processedBy":
+                            mentor_id,
+
+                        "processedAt":
+                            datetime.utcnow(),
+
+                        "updatedAt":
+                            datetime.utcnow(),
+
+                        "approvedLecture":
+                            final_lecture
+                    }
+                }
+            )
+        )
+
+
+        if (
+            approval_result.modified_count
+            == 0
+        ):
+
+            return jsonify({
+                "success": False,
+                "message":
+                    "Timetable was updated, but request status could not be changed to approved."
+            }), 500
+
+
+        # =================================================
+        # SUCCESS
+        # =================================================
+
+        return jsonify({
+
+            "success":
+                True,
+
+            "message":
+                "Lecture approved and timetable updated successfully.",
+
+            "requestId":
+                str(req_id),
+
+            "className":
+                new_class,
+
+            "day":
+                day,
+
+            "subject":
+                subject,
+
+            "room":
+                room,
+
+            "startTime":
+                start_time,
+
+            "endTime":
+                end_time,
+
+            "facultyIds":
+                faculty_ids,
+
+            "faculty":
+                final_lecture.get(
+                    "faculty",
+                    []
+                ),
+
+            "timetableUpdated":
+                True,
+
+            "requestStatusUpdated":
+                True
+
+        }), 200
+
+
+    except ValueError as e:
+
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 400
+
+
+    except Exception as e:
+
+        print(
+            "APPROVE + UPDATE ERROR:",
+            repr(e)
+        )
+
+        return jsonify({
+            "success": False,
+            "message":
+                str(e)
+        }), 500
