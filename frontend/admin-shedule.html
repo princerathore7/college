@@ -4817,6 +4817,9 @@ function createRequestCard(
 /* =========================================================
    APPROVE REQUEST
 ========================================================= */
+/* =========================================================
+   APPROVE REQUEST
+========================================================= */
 
 async function approveRequest(
     requestId
@@ -4840,6 +4843,27 @@ async function approveRequest(
 
     try {
 
+        // -------------------------------------------------
+        // GET LOGGED-IN MENTOR ID FROM LOCAL STORAGE
+        // -------------------------------------------------
+
+        const mentorId =
+            localStorage.getItem("mentorId");
+
+
+        if (!mentorId) {
+
+            throw new Error(
+                "Mentor ID not found in local storage. Please login again."
+            );
+
+        }
+
+
+        // -------------------------------------------------
+        // APPROVE REQUEST
+        // -------------------------------------------------
+
         const response =
             await fetch(
                 `${API_BASE}/lecture-request/approve`,
@@ -4853,8 +4877,13 @@ async function approveRequest(
                     },
 
                     body: JSON.stringify({
-                        requestId: requestId,
-                        mentorId: loggedInMentorId
+
+                        requestId:
+                            requestId,
+
+                        mentorId:
+                            mentorId
+
                     })
 
                 }
@@ -4871,6 +4900,10 @@ async function approveRequest(
         );
 
 
+        // -------------------------------------------------
+        // CHECK BACKEND RESPONSE
+        // -------------------------------------------------
+
         if (
             !response.ok ||
             !data.success
@@ -4884,6 +4917,10 @@ async function approveRequest(
         }
 
 
+        // -------------------------------------------------
+        // SUCCESS
+        // -------------------------------------------------
+
         showStatus(
             data.message ||
             "Lecture request approved successfully.",
@@ -4891,8 +4928,16 @@ async function approveRequest(
         );
 
 
+        // -------------------------------------------------
+        // REFRESH REQUESTS
+        // -------------------------------------------------
+
         await openRequestsModal();
 
+
+        // -------------------------------------------------
+        // REFRESH TIMETABLE
+        // -------------------------------------------------
 
         if (selectedClass) {
 
