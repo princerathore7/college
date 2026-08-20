@@ -4814,8 +4814,6 @@ function createRequestCard(
     `;
 
 }
-
-
 /* =========================================================
    APPROVE REQUEST
 ========================================================= */
@@ -4854,14 +4852,23 @@ async function approveRequest(
                             "application/json"
                     },
 
-               body: JSON.stringify({
-        requestId: request._id,
-        mentorId: loggedInMentorId
-    })
-});
+                    body: JSON.stringify({
+                        requestId: requestId,
+                        mentorId: loggedInMentorId
+                    })
+
+                }
+            );
+
 
         const data =
             await response.json();
+
+
+        console.log(
+            "APPROVE REQUEST RESPONSE:",
+            data
+        );
 
 
         if (
@@ -4878,6 +4885,7 @@ async function approveRequest(
 
 
         showStatus(
+            data.message ||
             "Lecture request approved successfully.",
             "success"
         );
@@ -4895,7 +4903,10 @@ async function approveRequest(
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Approve request error:",
+            error
+        );
 
         showStatus(
             error.message ||
