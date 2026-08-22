@@ -410,7 +410,6 @@
     let weeklyScheduleData = null;
     let currentSelectedDay = "";
     let timerInterval = null;
-    let refreshInterval = null;
 
     // DOM Elements
     const displayClassName = document.getElementById('displayClassName');
@@ -487,7 +486,7 @@
         if (loader) loader.classList.add('hidden');
 
         if (data.success && data.timetable && data.timetable.weeklySchedule) {
-          weeklyScheduleData = normalizeWeeklySchedule(data.timetable.weeklySchedule);
+          weeklyScheduleData = data.timetable.weeklySchedule;
           renderSchedule(currentSelectedDay);
           
           // Start the timer to update running class and countdowns every minute
@@ -535,30 +534,6 @@
         };
         dayTabsContainer.appendChild(btn);
       });
-    }
-
-    function normalizeWeeklySchedule(schedule) {
-      const normalized = {};
-      daysOfWeek.forEach(day => {
-        const source = Array.isArray(schedule?.[day]) ? schedule[day] : [];
-        const seen = new Set();
-        normalized[day] = source.filter(lecture => {
-          if (!lecture || typeof lecture !== "object") return false;
-          const facultyIds = Array.isArray(lecture.facultyIds)
-            ? lecture.facultyIds.map(String).sort().join(",")
-            : Array.isArray(lecture.faculty)
-              ? lecture.faculty.map(f => String(f?.mentorId || f?.id || f?.name || "")).sort().join(",")
-              : String(lecture.faculty || "");
-          const key = [
-            lecture.startTime || "", lecture.endTime || "",
-            lecture.subject || "", lecture.room || "", facultyIds, lecture.type || "subject"
-          ].join("|");
-          if (seen.has(key)) return false;
-          seen.add(key);
-          return true;
-        });
-      });
-      return normalized;
     }
 
     function renderSchedule(day) {

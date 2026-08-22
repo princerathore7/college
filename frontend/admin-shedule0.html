@@ -1,4 +1,4 @@
-```html
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1657,6 +1657,7 @@ tbody tr:last-child td {
 
 
 <script>
+    const mentorId = localStorage.getItem("mentorId");
 /* =========================================================
    CONFIG
 ========================================================= */
@@ -3249,13 +3250,15 @@ function removeLectureRow(
 ========================================================= */
 
 async function requestLectureFromRow(rowId) {
+
     const row = document.getElementById(rowId);
     if (!row) return;
 
     const day = row.dataset.day;
     const index = Number(row.dataset.index);
-    const original = currentWeeklySchedule?.[day]?.[index];
-    if (!original) {
+    const lecture = currentWeeklySchedule?.[day]?.[index];
+
+    if (!lecture) {
         showStatus("Lecture not found. Please reload the timetable.", "error");
         return;
     }
@@ -3266,33 +3269,22 @@ async function requestLectureFromRow(rowId) {
         return;
     }
 
-    if (isLectureOwnedByCurrentMentor(original)) {
-        showStatus("This lecture is assigned to you. You can edit/remove it directly.", "info");
+    if (isLectureOwnedByCurrentMentor(lecture)) {
+        showStatus("This lecture is assigned to you. You can remove it directly.", "info");
         return;
     }
 
-    const assigned = getPrimaryAssignedMentor(original);
+    const assigned = getPrimaryAssignedMentor(lecture);
     if (!assigned.mentorId) {
         showStatus("Assigned faculty ID is missing. Cannot send request.", "error");
         return;
     }
 
-    // CRITICAL: read the CURRENT edited DOM row. Do NOT reuse original.
-    const edited = collectRowData(row);
-    const newLecture = {
-        ...edited,
-        facultyIds: cleanArray(edited.facultyIds || []),
-        faculty: edited.faculty || [],
-        status: "pending"
-    };
+    const startTime = lecture.startTime;
+    const endTime = lecture.endTime;
 
-    if (!newLecture.startTime || !newLecture.endTime) {
-        showStatus("Start and end time are required.", "error");
-        return;
-    }
-
-    if (timeToMinutes(newLecture.startTime) >= timeToMinutes(newLecture.endTime)) {
-        showStatus("Invalid requested time range.", "error");
+    if (!startTime || !endTime) {
+        showStatus("Lecture time is missing. Reload the timetable.", "error");
         return;
     }
 
@@ -3304,54 +3296,79 @@ async function requestLectureFromRow(rowId) {
         className: selectedClass,
         existingClass: selectedClass,
         day,
-        startTime: newLecture.startTime,
-        endTime: newLecture.endTime,
-        subject: newLecture.subject || "",
-        room: newLecture.room || "",
-        facultyIds: newLecture.facultyIds.length ? newLecture.facultyIds : [assigned.mentorId],
-        oldLecture: { ...original, facultyIds: getLectureFacultyIds(original), className: selectedClass },
-        newLecture
+        startTime,
+        endTime,
+        subject: lecture.subject || "",
+        room: lecture.room || "",
+        facultyIds: getLectureFacultyIds(lecture),
+        oldLecture: {
+            ...lecture,
+            facultyIds: getLectureFacultyIds(lecture),
+            className: selectedClass
+        },
+        newLecture: {
+            ...lecture,
+            facultyIds: getLectureFacultyIds(lecture),
+            status: "pending"
+        }
     };
 
     showLoading("Verifying occupied lecture...");
+
     try {
+        /*
+         * First verify the exact occupied lecture. This prevents the UI
+         * from sending a request for a free slot or a stale lecture.
+         */
         const verifyResponse = await fetch(`${API_BASE}/verify-conflict`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 existingClass: selectedClass,
                 day,
-                startTime: original.startTime,
-                endTime: original.endTime,
-                startTimeMins: timeToMinutes(original.startTime),
-                endTimeMins: timeToMinutes(original.endTime),
+                startTimeMins: timeToMinutes(startTime),
+                endTimeMins: timeToMinutes(endTime),
                 mentorId: assigned.mentorId
             })
         });
+
         const verifyData = await verifyResponse.json();
-        if (!verifyResponse.ok || !verifyData.success || !verifyData.exists) {
-            throw new Error(verifyData.message || "The original lecture is no longer occupied by this faculty.");
+
+        if (!verifyResponse.ok || !verifyData.success) {
+            throw new Error(verifyData.message || "Unable to verify lecture occupancy.");
+        }
+
+        if (!verifyData.exists) {
+            throw new Error("This lecture is no longer occupied by the assigned faculty. Please reload the timetable.");
         }
 
         payload.oldLecture = verifyData.oldLecture || payload.oldLecture;
 
+        /*
+         * IMPORTANT: the backend must validate this request again.
+         * Frontend verification is only a UX guard and is not security.
+         */
         const response = await fetch(`${API_BASE}/request-lecture`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         });
+
         const data = await response.json();
+
         if (!response.ok || !data.success) {
             throw new Error(data.message || "Failed to send lecture request.");
         }
 
         showStatus(
             data.requestCreated === false
-                ? "A request for this slot is already pending."
+                ? "A lecture request for this slot already exists."
                 : `Lecture request sent to ${assigned.name || assigned.mentorId}.`,
             data.requestCreated === false ? "warning" : "success"
         );
+
         await reloadAfterSave();
+
     } catch (error) {
         console.error("Request lecture error:", error);
         showStatus(error.message || "Unable to send lecture request.", "error");
@@ -3876,9 +3893,6 @@ function showConflictRequestModal(
         targetMentorId:
             data.conflictFacultyId,
 
-        requestedLecture:
-            data.requestedLecture || {},
-
         targetName:
             data.conflictFacultyName,
 
@@ -3986,18 +4000,6 @@ function showConflictRequestModal(
 
         </div>
 
-        <div class="conflict-card" style="border-color:#bfdbfe;background:#eff6ff;">
-            <div class="conflict-title" style="color:#1d4ed8;">
-                <i class="fa-solid fa-pen-to-square"></i> Requested Lecture
-            </div>
-            <div class="conflict-grid">
-                <div class="conflict-item"><span>Subject</span><strong>${escapeHtml((data.requestedLecture || {}).subject || "")}</strong></div>
-                <div class="conflict-item"><span>Room</span><strong>${escapeHtml((data.requestedLecture || {}).room || "")}</strong></div>
-                <div class="conflict-item"><span>Faculty</span><strong>${escapeHtml(((data.requestedLecture || {}).faculty || []).map(f => f.name || f.mentorId || "").join(", ") || data.conflictFacultyName || "")}</strong></div>
-                <div class="conflict-item"><span>Time</span><strong>${escapeHtml(`${(data.requestedLecture || {}).startTime || ""} - ${(data.requestedLecture || {}).endTime || ""}`)}</strong></div>
-            </div>
-        </div>
-
 
         <p
             style="
@@ -4033,18 +4035,151 @@ function showConflictRequestModal(
 ========================================================= */
 
 async function confirmSendRequest() {
-    // /set-weekly already creates the pending request server-side.
-    // This button is now only a confirmation/close action; it MUST NOT
-    // call /request-lecture again, otherwise the request can be duplicated
-    // or the wrong reloaded lecture can be captured.
-    if (!pendingRequestLecture) {
-        showStatus("No pending request found.", "error");
+
+    if (
+        !pendingRequestLecture
+    ) {
+
+        showStatus(
+            "No pending conflict request found.",
+            "error"
+        );
+
         return;
+
     }
-    closeModal("requestModal");
-    pendingRequestLecture = null;
-    await reloadAfterSave();
-    showStatus("Lecture request is already pending and has been sent to the faculty.", "success");
+
+
+    const requestData =
+        pendingRequestLecture;
+
+
+    const requestButton =
+        document.getElementById(
+            "confirmRequestBtn"
+        );
+
+
+    requestButton.disabled =
+        true;
+
+    requestButton.innerHTML =
+        `
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            Sending...
+        `;
+
+
+    try {
+
+        /*
+           We need the actual conflicting
+           lecture information.
+
+           The backend's request-lecture
+           endpoint itself verifies the conflict
+           again, so frontend cannot bypass
+           server validation.
+        */
+
+        const payload =
+            buildRequestPayload(
+                requestData
+            );
+
+
+        const response =
+            await fetch(
+                `${API_BASE}/request-lecture`,
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(
+                            payload
+                        )
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+
+            throw new Error(
+                data.message ||
+                "Failed to send lecture request."
+            );
+
+        }
+
+
+        closeModal(
+            "requestModal"
+        );
+
+
+        if (
+            data.requestCreated === false
+        ) {
+
+            showStatus(
+                "This lecture request already exists.",
+                "warning"
+            );
+
+        } else {
+
+            showStatus(
+                `Lecture request sent to ${requestData.targetName || "faculty"} successfully.`,
+                "success"
+            );
+
+        }
+
+
+        pendingRequestLecture =
+            null;
+
+
+        await reloadAfterSave();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        showStatus(
+            error.message ||
+            "Unable to send request.",
+            "error"
+        );
+
+    } finally {
+
+        requestButton.disabled =
+            false;
+
+        requestButton.innerHTML =
+            `
+                <i class="fa-solid fa-paper-plane"></i>
+                Send Request
+            `;
+
+    }
+
 }
 
 
@@ -4679,39 +4814,50 @@ function createRequestCard(
     `;
 
 }
-
-
 /* =========================================================
-   APPROVE REQUEST
+   APPROVE REQUEST + UPDATE TIMETABLE
 ========================================================= */
 
-async function approveRequest(
-    requestId
-) {
+async function approveRequest(requestId) {
 
     if (
         !confirm(
-            "Approve this lecture request? The existing lecture may be moved."
+            "Approve this lecture request? The existing lecture may be moved and the timetable will be updated."
         )
     ) {
-
         return;
-
     }
-
 
     showLoading(
         "Approving lecture request..."
     );
 
-
     try {
+
+        // =================================================
+        // GET MENTOR ID
+        // =================================================
+
+        const mentorId =
+            localStorage.getItem("mentorId");
+
+        if (!mentorId) {
+
+            throw new Error(
+                "Mentor ID not found in local storage. Please login again."
+            );
+
+        }
+
+
+        // =================================================
+        // APPROVE + UPDATE TIMETABLE
+        // =================================================
 
         const response =
             await fetch(
-                `${API_BASE}/lecture-request/approve`,
+                `${API_BASE}/lecture-request/approve-update`,
                 {
-
                     method: "PUT",
 
                     headers: {
@@ -4719,18 +4865,36 @@ async function approveRequest(
                             "application/json"
                     },
 
-                    body:
-                        JSON.stringify({
-                            requestId
-                        })
+                    body: JSON.stringify({
 
+                        requestId:
+                            requestId,
+
+                        mentorId:
+                            mentorId
+
+                    })
                 }
             );
 
 
+        // =================================================
+        // READ BACKEND RESPONSE
+        // =================================================
+
         const data =
             await response.json();
 
+
+        console.log(
+            "APPROVE + UPDATE RESPONSE:",
+            data
+        );
+
+
+        // =================================================
+        // CHECK RESPONSE
+        // =================================================
 
         if (
             !response.ok ||
@@ -4739,20 +4903,36 @@ async function approveRequest(
 
             throw new Error(
                 data.message ||
-                "Failed to approve request."
+                "Failed to approve and update timetable."
             );
 
         }
 
 
+        // =================================================
+        // SUCCESS
+        // =================================================
+
         showStatus(
-            "Lecture request approved successfully.",
+
+            data.message ||
+            "Lecture approved and timetable updated successfully.",
+
             "success"
+
         );
 
 
+        // =================================================
+        // REFRESH REQUEST MODAL
+        // =================================================
+
         await openRequestsModal();
 
+
+        // =================================================
+        // REFRESH TIMETABLE
+        // =================================================
 
         if (selectedClass) {
 
@@ -4763,12 +4943,18 @@ async function approveRequest(
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Approve + update error:",
+            error
+        );
 
         showStatus(
+
             error.message ||
-            "Unable to approve request.",
+            "Unable to approve request and update timetable.",
+
             "error"
+
         );
 
     } finally {
@@ -4778,8 +4964,6 @@ async function approveRequest(
     }
 
 }
-
-
 /* =========================================================
    REJECT REQUEST
 ========================================================= */
@@ -4818,13 +5002,11 @@ async function rejectRequest(
                             "application/json"
                     },
 
-                    body:
-                        JSON.stringify({
-                            requestId
-                        })
-
-                }
-            );
+                     body: JSON.stringify({
+        requestId: request._id,
+        mentorId: loggedInMentorId
+    })
+});
 
 
         const data =
@@ -5831,4 +6013,3 @@ window.addEventListener(
 
 </body>
 </html>
-```
