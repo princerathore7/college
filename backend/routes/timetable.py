@@ -1118,6 +1118,170 @@ def get_approval_mode(
 
 
 # =========================================================
+# EXACT OCCUPANCY LOOKUP FOR MANUAL LECTURE REQUESTS
+# =========================================================
+
+def find_occupied_lecture_for_mentor(
+    mentor_id,
+    day,
+    start_mins,
+    end_mins,
+    class_name=None
+):
+    """
+    Find the ACTUAL active lecture occupied by mentor_id.
+
+    IMPORTANT:
+    This helper intentionally DOES NOT use find_conflicts(), because
+    find_conflicts() excludes current_class. That is correct for normal
+    timetable posting, but WRONG when a mentor clicks "Request Lecture"
+    on a lecture that already exists inside the currently loaded class.
+
+    If class_name is supplied, the lookup is restricted to that class.
+    """
+    mentor_id = str(mentor_id or "").strip()
+    day = str(day or "").strip()
+
+    if not mentor_id or not day:
+        return None
+
+    try:
+        start_mins = int(start_mins)
+        end_mins = int(end_mins)
+    except (TypeError, ValueError):
+        return None
+
+    if start_mins >= end_mins:
+        return None
+
+    wanted_class = (
+        str(class_name).strip()
+        if class_name is not None
+        else None
+    )
+
+    for timetable in db.timetables.find({}):
+        timetable_class = str(
+            timetable.get("className", "")
+        ).strip()
+
+        if wanted_class is not None and timetable_class != wanted_class:
+            continue
+
+        weekly = timetable.get("weeklySchedule", {})
+        if not isinstance(weekly, dict):
+            continue
+
+        day_schedule = weekly.get(day, [])
+        if not isinstance(day_schedule, list):
+            continue
+
+        for raw in day_schedule:
+            if not isinstance(raw, dict):
+                continue
+
+            lecture = copy.deepcopy(raw)
+            normalize_lecture(lecture)
+
+            if not lecture_is_approved(lecture):
+                continue
+
+            faculty_ids = get_lecture_faculty_ids(lecture)
+            if mentor_id not in faculty_ids:
+                continue
+
+            existing_start = lecture.get("startTimeMins")
+            existing_end = lecture.get("endTimeMins")
+
+            if existing_start is None or existing_end is None:
+                continue
+
+            if not lectures_overlap(
+                start_mins,
+                end_mins,
+                existing_start,
+                existing_end
+            ):
+                continue
+
+            mentor_info = get_mentor_info(mentor_id)
+
+            return {
+                "mentorId": mentor_id,
+                "mentorName": mentor_info.get(
+                    "name", "Unknown Faculty"
+                ),
+                "approvalMode": bool(
+                    mentor_info.get("approvalMode", False)
+                ),
+                "class": timetable_class,
+                "subject": lecture.get("subject", ""),
+                "day": day,
+                "room": lecture.get("room", ""),
+                "lecture": lecture,
+                "start": lecture.get("startTime"),
+                "end": lecture.get("endTime"),
+                "startTimeMins": existing_start,
+                "endTimeMins": existing_end
+            }
+
+    return None
+
+
+# =========================================================
+# SAME-CLASS TIME OVERLAP VALIDATION
+# =========================================================
+
+def validate_same_class_day_schedule(lectures, day):
+    """
+    Allows MULTIPLE lectures on the same day, but prevents two lectures
+    in the same class from occupying overlapping time ranges.
+
+    Example allowed:
+        08:00-09:00
+        09:00-10:00
+        10:00-11:00
+
+    Example rejected:
+        08:00-09:00
+        08:30-09:30
+    """
+    normalized = []
+
+    for index, raw in enumerate(lectures or []):
+        if not isinstance(raw, dict):
+            continue
+
+        lecture = copy.deepcopy(raw)
+        normalize_time_range(lecture)
+        normalized.append((index, lecture))
+
+    for i in range(len(normalized)):
+        index_a, a = normalized[i]
+
+        for j in range(i + 1, len(normalized)):
+            index_b, b = normalized[j]
+
+            if lectures_overlap(
+                a["startTimeMins"],
+                a["endTimeMins"],
+                b["startTimeMins"],
+                b["endTimeMins"]
+            ):
+                return {
+                    "day": day,
+                    "firstIndex": index_a,
+                    "secondIndex": index_b,
+                    "firstStart": a.get("startTime"),
+                    "firstEnd": a.get("endTime"),
+                    "secondStart": b.get("startTime"),
+                    "secondEnd": b.get("endTime")
+                }
+
+    return None
+
+
+# =========================================================
 # MANUAL LECTURE REQUEST
 # =========================================================
 
@@ -1182,35 +1346,33 @@ def request_lecture():
             }), 400
 
         # -------------------------------------------------
-        # ALWAYS VERIFY REAL OCCUPANCY
+        # ALWAYS VERIFY THE EXACT REAL OCCUPANCY
+        # -------------------------------------------------
+        #
+        # DO NOT use find_conflicts() here. That function intentionally
+        # excludes the current class, while Request Lecture is clicked
+        # ON a lecture that already exists in the current class.
         # -------------------------------------------------
 
-        conflicts = find_conflicts(
-            [target_id],
+        conflict = find_occupied_lecture_for_mentor(
+            target_id,
             day,
             start_mins,
             end_mins,
-            class_name
+            class_name=class_name
         )
 
-        if not conflicts:
-
+        if not conflict:
             return jsonify({
                 "success": False,
                 "conflict": False,
                 "requestCreated": False,
                 "message":
                     "No occupied lecture found for this faculty at the selected time."
-            }), 400
+            }), 409
 
-        # Only approval-mode faculty can receive approval requests
-        approval_conflicts = [
-            c for c in conflicts
-            if c.get("approvalMode") is True
-        ]
-
-        if not approval_conflicts:
-
+        # Only approval-mode faculty can receive approval requests.
+        if conflict.get("approvalMode") is not True:
             return jsonify({
                 "success": False,
                 "conflict": True,
@@ -1218,8 +1380,6 @@ def request_lecture():
                 "message":
                     "Faculty is occupied, but approval mode is disabled."
             }), 409
-
-        conflict = approval_conflicts[0]
 
         new_lecture = data.get(
             "newLecture",
@@ -2533,6 +2693,28 @@ def set_weekly_timetable():
                         f"Schedule for {day} must be a list"
                 }), 400
 
+            # Multiple lectures on the same day are fully supported.
+            # Only overlapping time ranges inside the SAME class are rejected.
+            same_day_overlap = validate_same_class_day_schedule(
+                lectures,
+                day
+            )
+
+            if same_day_overlap:
+                return jsonify({
+                    "success": False,
+                    "message": (
+                        f"Overlapping lectures are not allowed on {day}: "
+                        f"{same_day_overlap['firstStart']} - "
+                        f"{same_day_overlap['firstEnd']} overlaps with "
+                        f"{same_day_overlap['secondStart']} - "
+                        f"{same_day_overlap['secondEnd']}."
+                    ),
+                    "day": day,
+                    "firstIndex": same_day_overlap["firstIndex"],
+                    "secondIndex": same_day_overlap["secondIndex"]
+                }), 409
+
             valid_day_schedule = []
 
             for lecture in lectures:
@@ -2894,6 +3076,28 @@ def update_single_day():
                 "message":
                     "schedule must be a list"
             }), 400
+
+        # Multiple lectures on the same day are allowed, but their time
+        # ranges cannot overlap within the same class.
+        same_day_overlap = validate_same_class_day_schedule(
+            schedule,
+            day
+        )
+
+        if same_day_overlap:
+            return jsonify({
+                "success": False,
+                "message": (
+                    f"Overlapping lectures are not allowed on {day}: "
+                    f"{same_day_overlap['firstStart']} - "
+                    f"{same_day_overlap['firstEnd']} overlaps with "
+                    f"{same_day_overlap['secondStart']} - "
+                    f"{same_day_overlap['secondEnd']}."
+                ),
+                "day": day,
+                "firstIndex": same_day_overlap["firstIndex"],
+                "secondIndex": same_day_overlap["secondIndex"]
+            }), 409
 
         valid_schedule = []
 
@@ -3552,18 +3756,19 @@ def verify_conflict():
             }), 400
 
         # -------------------------------------------------
-        # Use SAME robust conflict engine
+        # Find the EXACT occupied lecture in this class.
+        # Do not use find_conflicts() because it excludes current_class.
         # -------------------------------------------------
 
-        conflicts = find_conflicts(
-            [mentor_id],
+        conflict = find_occupied_lecture_for_mentor(
+            mentor_id,
             day,
             start_mins,
             end_mins,
-            current_class=class_name
+            class_name=class_name
         )
 
-        if not conflicts:
+        if not conflict:
 
             return jsonify({
 
@@ -3576,8 +3781,6 @@ def verify_conflict():
                 "message":
                     "No occupied lecture found."
             })
-
-        conflict = conflicts[0]
 
         return jsonify({
 

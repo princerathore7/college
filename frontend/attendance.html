@@ -6,36 +6,126 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{font-family:Arial;background:#f4f7fb;margin:0;padding:15px}
-h2{color:#0b1f3a}
-.card{background:#fff;padding:15px;border-radius:10px;box-shadow:0 6px 15px rgba(0,0,0,.08)}
-.controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px}
-select,input{padding:8px;border-radius:6px;border:1px solid #ccc}
-table{width:100%;border-collapse:collapse}
-th,td{border:1px solid #ddd;padding:8px;text-align:center}
-th{background:#0b1f3a;color:#fff}
-button{padding:6px 12px;border:none;border-radius:5px;cursor:pointer}
-.p{background:#2ecc71;color:#fff}
-.a{background:#e74c3c;color:#fff}
-.selected{outline:3px solid #000}
-.no-data{text-align:center;color:#888}
+body{
+  font-family:Arial;
+  background:#f4f7fb;
+  margin:0;
+  padding:15px
+}
+
+h2{
+  color:#0b1f3a
+}
+
+.card{
+  background:#fff;
+  padding:15px;
+  border-radius:10px;
+  box-shadow:0 6px 15px rgba(0,0,0,.08)
+}
+
+.controls{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:15px
+}
+
+select,input{
+  padding:8px;
+  border-radius:6px;
+  border:1px solid #ccc
+}
+
+table{
+  width:100%;
+  border-collapse:collapse
+}
+
+th,td{
+  border:1px solid #ddd;
+  padding:8px;
+  text-align:center
+}
+
+th{
+  background:#0b1f3a;
+  color:#fff
+}
+
+button{
+  padding:6px 12px;
+  border:none;
+  border-radius:5px;
+  cursor:pointer
+}
+
+.p{
+  background:#2ecc71;
+  color:#fff
+}
+
+.a{
+  background:#e74c3c;
+  color:#fff
+}
+
+.selected{
+  outline:3px solid #000
+}
+
+.no-data{
+  text-align:center;
+  color:#888
+}
+
+/* ===============================
+   BATCH BADGES
+================================ */
+
+.batch-b1{
+  background:#3498db;
+  color:#fff;
+  padding:4px 8px;
+  border-radius:5px;
+  font-size:12px;
+  font-weight:bold;
+}
+
+.batch-b2{
+  background:#9b59b6;
+  color:#fff;
+  padding:4px 8px;
+  border-radius:5px;
+  font-size:12px;
+  font-weight:bold;
+}
 
 /* Loading button */
+
 .loading{
   pointer-events:none;
   opacity:.7;
 }
+
 .spinner{
-  width:16px;height:16px;
+  width:16px;
+  height:16px;
   border:3px solid #fff;
   border-top:3px solid transparent;
   border-radius:50%;
   animation:spin 1s linear infinite;
-  display:inline-block;
+  display:inline-block
 }
-@keyframes spin{to{transform:rotate(360deg)}}
+
+@keyframes spin{
+  to{
+    transform:rotate(360deg)
+  }
+}
 
 /* Popup modal */
+
 .modal{
   position:fixed;
   inset:0;
@@ -44,6 +134,7 @@ button{padding:6px 12px;border:none;border-radius:5px;cursor:pointer}
   align-items:center;
   justify-content:center;
 }
+
 .modal-content{
   background:#fff;
   padding:20px;
@@ -52,12 +143,44 @@ button{padding:6px 12px;border:none;border-radius:5px;cursor:pointer}
   text-align:center;
   box-shadow:0 10px 25px rgba(0,0,0,.2);
 }
-.modal-content h3{margin-top:0;color:#0b1f3a}
-.modal-content p{margin:6px 0}
+
+.modal-content h3{
+  margin-top:0;
+  color:#0b1f3a
+}
+
+.modal-content p{
+  margin:6px 0
+}
+
 .modal-content button{
   margin-top:10px;
   background:#0b1f3a;
   color:#fff;
+}
+
+/* Responsive */
+
+@media(max-width:700px){
+
+  .controls{
+    flex-direction:column;
+  }
+
+  select,
+  input,
+  #submitBtn{
+    width:100%;
+    box-sizing:border-box;
+  }
+
+  table{
+    font-size:12px;
+  }
+
+  th,td{
+    padding:6px 4px;
+  }
 }
 </style>
 </head>
@@ -69,6 +192,9 @@ button{padding:6px 12px;border:none;border-radius:5px;cursor:pointer}
 <div class="card">
 
 <div class="controls">
+
+  <!-- YEAR -->
+
   <select id="year">
     <option value="">All Years</option>
     <option value="1">1st Year</option>
@@ -78,275 +204,1095 @@ button{padding:6px 12px;border:none;border-radius:5px;cursor:pointer}
     <option value="5">5th Year</option>
   </select>
 
+
+  <!-- BRANCH -->
+
   <select id="branch">
+
     <option value="">All Branches</option>
-     <option value="CSE">CSE - Computer Science Engineering</option>
+
+    <option value="CSE">CSE - Computer Science Engineering</option>
+
     <option value="IT">IT - Information Technology</option>
+
     <option value="AIML">AIML - Artificial Intelligence & Machine Learning</option>
-      <option value="AIDS">AIDS - Artificial Intelligence & Data Science</option>
+
+    <option value="AIDS">AIDS - Artificial Intelligence & Data Science</option>
+
     <option value="CSBS">CSBS - Computer Science & Business Systems</option>
+
     <option value="IOT">IoT - Internet of Things</option>
 
+
     <!-- Electrical / Electronics -->
+
     <option value="ECE">ECE - Electronics & Communication</option>
+
     <option value="EEE">EEE - Electrical & Electronics</option>
+
     <option value="EE">EE - Electrical Engineering</option>
 
+
     <!-- Mechanical / Automobile -->
+
     <option value="ME">ME - Mechanical Engineering</option>
+
     <option value="AU">AU - Automobile Engineering</option>
+
     <option value="MT">MT - Mechatronics</option>
 
+
     <!-- Civil / Core -->
+
     <option value="CE">CE - Civil Engineering</option>
+
     <option value="CHE">CHE - Chemical Engineering</option>
+
     <option value="MIN">MIN - Mining Engineering</option>
+
     <option value="PET">PET - Petroleum Engineering</option>
 
+
     <!-- Bio / Agri -->
+
     <option value="BT">BT - Biotechnology</option>
+
     <option value="BME">BME - Biomedical Engineering</option>
+
     <option value="AG">AG - Agriculture Engineering</option>
+
     <option value="FT">FT - Food Technology</option>
+
     <option value="ENV">ENV - Environmental Engineering</option>
+
     <option value="TX">TX - Textile Engineering</option>
 
+
     <!-- Management / Pharma -->
+
     <option value="PIE">PIE - Production & Industrial Engineering</option>
+
     <option value="IM">IM - Industrial Management</option>
+
     <option value="DPHARMA">D.Pharmacy</option>
+
     <option value="BPHARMA">B.Pharmacy</option>
+
     <option value="MPHARMA">M.Pharmacy</option>
+
     <option value="PHARMA-CHEM">Pharmaceutical Chemistry</option>
+
     <option value="PHARMA-ANALYTICAL">Pharmaceutical Analysis</option>
+
     <option value="PHARMA-QUALITY">Quality Assurance</option>
+
     <option value="PHARMA-PHARMACO">Pharmacology</option>
+
     <option value="PHARMA-PHARMACEUTICS">Pharmaceutics</option>
+
     <option value="PHARMA-BIOTECH">Pharmaceutical Biotechnology</option>
+
     <option value="PHARMA-REGULATORY">Regulatory Affairs</option>
 
+
     <!-- Diploma -->
+
     <option value="DCSE">Diploma - Computer Science Engineering</option>
+
     <option value="DIT">Diploma - Information Technology</option>
+
     <option value="DCYBER">Diploma - Cyber Security</option>
+
     <option value="DECE">Diploma - Electronics & Communication</option>
+
     <option value="DEEE">Diploma - Electrical & Electronics</option>
+
     <option value="DEE">Diploma - Electrical Engineering</option>
+
     <option value="DME">Diploma - Mechanical Engineering</option>
+
     <option value="DCE">Diploma - Civil Engineering</option>
+
     <option value="DMIN">Diploma - Mining Engineering</option>
+
     <option value="DCHE">Diploma - Chemical Engineering</option>
+
     <option value="DAG">Diploma - Agriculture Engineering</option>
+
     <option value="DTX">Diploma - Textile Technology</option>
+
     <option value="DPLASTIC">Diploma - Plastic Engineering</option>
+
     <option value="DPOLY">Diploma - Polymer Engineering</option>
+
   </select>
+
+
+  <!-- SECTION -->
 
   <select id="section">
+
     <option value="">All Sections</option>
+
     <option value="1">Section 1</option>
+
     <option value="2">Section 2</option>
+
     <option value="3">Section 3</option>
+
     <option value="4">Section 4</option>
+
     <option value="5">Section 5</option>
+
   </select>
 
-  <input id="lectureId" placeholder="Lecture ID">
-  <button id="submitBtn" onclick="submitAttendance()">🚀 Submit</button>
+
+  <!-- NEW BATCH FILTER -->
+
+  <select id="batch">
+
+    <option value="">Both B1 & B2</option>
+
+    <option value="B1">B1</option>
+
+    <option value="B2">B2</option>
+
+  </select>
+
+
+  <!-- LECTURE ID -->
+
+  <input
+    id="lectureId"
+    placeholder="Lecture ID"
+  >
+
+
+  <!-- SUBMIT -->
+
+  <button
+    id="submitBtn"
+    onclick="submitAttendance()"
+  >
+    🚀 Submit
+  </button>
+
 </div>
 
+
 <table>
+
 <thead>
+
 <tr>
+
   <th>Enrollment</th>
+
   <th>Name</th>
+
   <th>Year</th>
+
   <th>Branch</th>
+
   <th>Section</th>
+
+  <th>Batch</th>
+
   <th>P</th>
+
   <th>A</th>
+
 </tr>
+
 </thead>
+
+
 <tbody id="studentsBody">
-<tr><td colspan="7" class="no-data">Loading...</td></tr>
+
+<tr>
+
+  <td colspan="8" class="no-data">
+    Loading...
+  </td>
+
+</tr>
+
 </tbody>
+
 </table>
 
 </div>
 
+
 <!-- RESULT POPUP -->
-<div class="modal" id="resultModal">
+
+<div
+  class="modal"
+  id="resultModal"
+>
+
   <div class="modal-content">
+
     <h3>✅ Attendance Submitted</h3>
+
     <p id="totalCount"></p>
+
     <p id="presentCount"></p>
+
     <p id="absentCount"></p>
-    <button onclick="closeModal()">OK</button>
+
+    <button onclick="closeModal()">
+      OK
+    </button>
+
   </div>
+
 </div>
 
+
 <script>
-      /* ===============================
+
+/* ===============================
    ACCESS CONTROL — ADMIN PAGES
 ================================ */
 
-const mentorId = localStorage.getItem("mentorId");
-const source   = sessionStorage.getItem("accessSource");
+const mentorId =
+  localStorage.getItem("mentorId");
 
-// allowed sources
-const ALLOWED_SOURCES = ["ad", "admin"];
+const source =
+  sessionStorage.getItem("accessSource");
 
-if(!mentorId || !ALLOWED_SOURCES.includes(source)){
+
+const ALLOWED_SOURCES = [
+  "ad",
+  "admin"
+];
+
+
+if(
+  !mentorId ||
+  !ALLOWED_SOURCES.includes(source)
+){
+
   document.body.innerHTML = `
-    <h2 style="text-align:center;margin-top:20vh;color:black">
-      ❌ Access Denied <br>
-      Please open this page via Administration Panel
+
+    <h2
+      style="
+        text-align:center;
+        margin-top:20vh;
+        color:black
+      "
+    >
+
+      ❌ Access Denied
+
+      <br>
+
+      Please open this page via
+      Administration Panel
+
     </h2>
+
   `;
-  throw new Error("Unauthorized access");
+
+  throw new Error(
+    "Unauthorized access"
+  );
 }
-const API_STUDENTS = "https://college-hwbb.onrender.com/api/admin/students";
-const API_ROBOT = "https://college-hwbb.onrender.com/api/attendance/robot_update";
+
+
+/* ===============================
+   API
+================================ */
+
+const API_STUDENTS =
+  "https://college-hwbb.onrender.com/api/admin/students";
+
+const API_ROBOT =
+  "https://college-hwbb.onrender.com/api/attendance/robot_update";
+
+
+/* ===============================
+   GLOBAL DATA
+================================ */
 
 let STUDENTS = [];
+
+/*
+  RECORDS stores attendance.
+
+  Example:
+
+  {
+    "ENR001":"P",
+    "ENR002":"A"
+  }
+*/
+
 let RECORDS = {};
+
+
+/* ===============================
+   DOM ELEMENTS
+================================ */
+
+const year =
+  document.getElementById("year");
+
+const branch =
+  document.getElementById("branch");
+
+const section =
+  document.getElementById("section");
+
+const batch =
+  document.getElementById("batch");
+
+const lectureId =
+  document.getElementById("lectureId");
+
+const submitBtn =
+  document.getElementById("submitBtn");
+
+const studentsBody =
+  document.getElementById("studentsBody");
+
 
 /* ===============================
    FETCH STUDENTS
 ================================ */
+
 async function fetchStudents(){
+
   try{
-    console.log("📡 Fetching students...");
-    const res = await fetch(API_STUDENTS);
-    const d = await res.json();
-    console.log("✅ Students API response:", d);
+
+    console.log(
+      "📡 Fetching students..."
+    );
+
+    const res =
+      await fetch(API_STUDENTS);
+
+    const d =
+      await res.json();
+
+    console.log(
+      "✅ Students API response:",
+      d
+    );
+
 
     if(d.success){
-      STUDENTS = d.students;
+
+      STUDENTS =
+        Array.isArray(d.students)
+          ? d.students
+          : [];
+
+      console.log(
+        "👥 Total students fetched:",
+        STUDENTS.length
+      );
+
       render();
+
     }else{
-      console.error("❌ Students fetch failed");
+
+      console.error(
+        "❌ Students fetch failed"
+      );
+
+      studentsBody.innerHTML = `
+
+        <tr>
+
+          <td
+            colspan="8"
+            class="no-data"
+          >
+            Failed to load students
+
+          </td>
+
+        </tr>
+
+      `;
     }
+
   }catch(err){
-    console.error("🔥 Fetch students error:", err);
+
+    console.error(
+      "🔥 Fetch students error:",
+      err
+    );
+
+    studentsBody.innerHTML = `
+
+      <tr>
+
+        <td
+          colspan="8"
+          class="no-data"
+        >
+          Error loading students
+
+        </td>
+
+      </tr>
+
+    `;
   }
 }
 
-/* ===============================
-   RENDER
-================================ */
-function render(){
-  const body = document.getElementById("studentsBody");
-  const y = year.value;
-  const b = branch.value;
-  const s = section.value;
 
-  const filtered = STUDENTS.filter(st =>
-    (!y || st.year === y) &&
-    (!b || st.branch === b) &&
-    (!s || st.section === s)
+/* ===============================
+   GET FILTERED STUDENTS
+================================ */
+
+function getFilteredStudents(){
+
+  const y =
+    year.value;
+
+  const b =
+    branch.value;
+
+  const s =
+    section.value;
+
+
+  return STUDENTS.filter(st =>
+
+    (!y || String(st.year) === String(y)) &&
+
+    (!b || String(st.branch) === String(b)) &&
+
+    (!s || String(st.section) === String(s))
+
+  );
+}
+
+
+/* ===============================
+   DIVIDE STUDENTS INTO B1 / B2
+================================ */
+
+/*
+
+  IMPORTANT LOGIC:
+
+  First:
+
+  Year + Branch + Section
+
+  filters students.
+
+  Then:
+
+  filtered students are divided
+  sequentially into B1 and B2.
+
+  Example:
+
+  100 students
+
+  1 - 50   => B1
+  51 - 100 => B2
+
+
+  For odd number:
+
+  101 students
+
+  1 - 51   => B1
+  52 - 101 => B2
+
+*/
+
+function assignBatches(students){
+
+  const total =
+    students.length;
+
+
+  if(total === 0){
+
+    return [];
+
+  }
+
+
+  /*
+    Math.ceil makes B1 receive
+    the extra student when total
+    is odd.
+
+    Example:
+
+    100 / 2 = 50
+
+    101 / 2 = 50.5
+    ceil = 51
+  */
+
+  const b1Count =
+    Math.ceil(total / 2);
+
+
+  return students.map(
+    (student,index) => {
+
+      return {
+
+        ...student,
+
+        batch:
+          index < b1Count
+            ? "B1"
+            : "B2"
+
+      };
+
+    }
+  );
+}
+
+
+/* ===============================
+   RENDER STUDENTS
+================================ */
+
+function render(){
+
+  /*
+    STEP 1
+
+    Get students according to:
+
+    Year
+    Branch
+    Section
+  */
+
+  const filtered =
+    getFilteredStudents();
+
+
+  console.log(
+    "🔍 Filtered before batch:",
+    filtered.length
   );
 
-  console.log("🔍 Filtered students:", filtered.length);
 
-  body.innerHTML = "";
-  if(!filtered.length){
-    body.innerHTML = `<tr><td colspan="7" class="no-data">No students found</td></tr>`;
+  /*
+    STEP 2
+
+    Assign B1/B2
+  */
+
+  const studentsWithBatch =
+    assignBatches(filtered);
+
+
+  /*
+    STEP 3
+
+    Apply batch filter
+  */
+
+  const selectedBatch =
+    batch.value;
+
+
+  const finalStudents =
+    studentsWithBatch.filter(st =>
+
+      !selectedBatch ||
+      st.batch === selectedBatch
+
+    );
+
+
+  console.log(
+    "🎯 Final students after batch:",
+    finalStudents.length
+  );
+
+
+  /*
+    Clear table
+  */
+
+  studentsBody.innerHTML = "";
+
+
+  /*
+    No students
+  */
+
+  if(!finalStudents.length){
+
+    studentsBody.innerHTML = `
+
+      <tr>
+
+        <td
+          colspan="8"
+          class="no-data"
+        >
+          No students found
+
+        </td>
+
+      </tr>
+
+    `;
+
     return;
   }
 
-  filtered.forEach(st=>{
-    body.innerHTML += `
+
+  /*
+    Render rows
+  */
+
+  finalStudents.forEach(st => {
+
+    const existingStatus =
+      RECORDS[st.enrollment];
+
+
+    studentsBody.innerHTML += `
+
       <tr>
-        <td>${st.enrollment}</td>
-        <td>${st.name}</td>
-        <td>${st.year}</td>
-        <td>${st.branch}</td>
-        <td>${st.section}</td>
-        <td><button class="p" onclick="mark('${st.enrollment}','P',this)">P</button></td>
-        <td><button class="a" onclick="mark('${st.enrollment}','A',this)">A</button></td>
-      </tr>`;
+
+        <td>
+          ${st.enrollment}
+        </td>
+
+
+        <td>
+          ${st.name}
+        </td>
+
+
+        <td>
+          ${st.year}
+        </td>
+
+
+        <td>
+          ${st.branch}
+        </td>
+
+
+        <td>
+          ${st.section}
+        </td>
+
+
+        <td>
+
+          <span
+            class="${
+              st.batch === "B1"
+                ? "batch-b1"
+                : "batch-b2"
+            }"
+          >
+
+            ${st.batch}
+
+          </span>
+
+        </td>
+
+
+        <td>
+
+          <button
+            class="p ${
+              existingStatus === "P"
+                ? "selected"
+                : ""
+            }"
+            onclick="
+              mark(
+                '${st.enrollment}',
+                'P',
+                this
+              )
+            "
+          >
+
+            P
+
+          </button>
+
+        </td>
+
+
+        <td>
+
+          <button
+            class="a ${
+              existingStatus === "A"
+                ? "selected"
+                : ""
+            }"
+            onclick="
+              mark(
+                '${st.enrollment}',
+                'A',
+                this
+              )
+            "
+          >
+
+            A
+
+          </button>
+
+        </td>
+
+      </tr>
+
+    `;
+
   });
+
 }
 
-function mark(enr,status,btn){
-  RECORDS[enr] = status;
-  console.log(`📝 Marked ${enr} as ${status}`);
-  btn.closest("tr").querySelectorAll("button").forEach(b=>b.classList.remove("selected"));
-  btn.classList.add("selected");
+
+/* ===============================
+   MARK ATTENDANCE
+================================ */
+
+function mark(
+  enr,
+  status,
+  btn
+){
+
+  /*
+    Save attendance globally
+  */
+
+  RECORDS[enr] =
+    status;
+
+
+  console.log(
+    `📝 Marked ${enr} as ${status}`
+  );
+
+
+  /*
+    Remove previous selected
+    state from same row
+  */
+
+  btn
+    .closest("tr")
+    .querySelectorAll("button")
+    .forEach(b => {
+
+      b.classList.remove(
+        "selected"
+      );
+
+    });
+
+
+  /*
+    Highlight selected button
+  */
+
+  btn.classList.add(
+    "selected"
+  );
+
 }
+
 
 /* ===============================
    SUBMIT ATTENDANCE
 ================================ */
+
 async function submitAttendance(){
-  const lecture = lectureId.value.trim();
-  const btn = submitBtn;
+
+  const lecture =
+    lectureId.value.trim();
+
+
+  const btn =
+    submitBtn;
+
+
+  /*
+    Lecture validation
+  */
 
   if(!lecture){
-    console.warn("⚠ Lecture ID missing");
-    return alert("Lecture ID required");
-  }
-  if(!Object.keys(RECORDS).length){
-    console.warn("⚠ No attendance marked");
-    return alert("No attendance marked");
+
+    console.warn(
+      "⚠ Lecture ID missing"
+    );
+
+    return alert(
+      "Lecture ID required"
+    );
+
   }
 
-  btn.classList.add("loading");
-  btn.innerHTML = `<span class="spinner"></span> Submitting`;
+
+  /*
+    Attendance validation
+  */
+
+  if(
+    !Object.keys(RECORDS).length
+  ){
+
+    console.warn(
+      "⚠ No attendance marked"
+    );
+
+    return alert(
+      "No attendance marked"
+    );
+
+  }
+
+
+  /*
+    Loading state
+  */
+
+  btn.classList.add(
+    "loading"
+  );
+
+
+  btn.innerHTML = `
+
+    <span class="spinner"></span>
+
+    Submitting
+
+  `;
+
 
   try{
-    console.log("🚀 Submitting attendance:", RECORDS);
-    const res = await fetch(API_ROBOT,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({lectureId:lecture,records:RECORDS})
-    });
 
-    const d = await res.json();
-    console.log("✅ Submit response:", d);
+    console.log(
+      "🚀 Submitting attendance:",
+      RECORDS
+    );
 
-    // counts
-    const total = Object.keys(RECORDS).length;
-    const present = Object.values(RECORDS).filter(v=>v==="P").length;
-    const absent = Object.values(RECORDS).filter(v=>v==="A").length;
 
-    showModal(total,present,absent);
+    const res =
+      await fetch(
+        API_ROBOT,
+        {
+
+          method:"POST",
+
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+
+          body:JSON.stringify({
+
+            lectureId:
+              lecture,
+
+            records:
+              RECORDS
+
+          })
+
+        }
+      );
+
+
+    const d =
+      await res.json();
+
+
+    console.log(
+      "✅ Submit response:",
+      d
+    );
+
+
+    /*
+      Counts
+    */
+
+    const total =
+      Object.keys(
+        RECORDS
+      ).length;
+
+
+    const present =
+      Object.values(
+        RECORDS
+      )
+      .filter(
+        v => v === "P"
+      )
+      .length;
+
+
+    const absent =
+      Object.values(
+        RECORDS
+      )
+      .filter(
+        v => v === "A"
+      )
+      .length;
+
+
+    /*
+      Show result
+    */
+
+    showModal(
+      total,
+      present,
+      absent
+    );
+
+
+    /*
+      Clear attendance
+    */
 
     RECORDS = {};
-    document.querySelectorAll(".selected").forEach(b=>b.classList.remove("selected"));
+
+
+    /*
+      Re-render table
+
+      This also removes
+      selected buttons.
+    */
+
+    render();
+
 
   }catch(err){
-    console.error("🔥 Submit error:", err);
-    alert("Something went wrong while submitting");
+
+    console.error(
+      "🔥 Submit error:",
+      err
+    );
+
+
+    alert(
+      "Something went wrong while submitting"
+    );
+
   }
 
-  btn.classList.remove("loading");
-  btn.innerHTML = "🚀 Submit";
+
+  /*
+    Restore button
+  */
+
+  btn.classList.remove(
+    "loading"
+  );
+
+
+  btn.innerHTML =
+    "🚀 Submit";
+
 }
+
 
 /* ===============================
-   MODAL
+   RESULT MODAL
 ================================ */
-function showModal(total,present,absent){
-  totalCount.textContent = `👥 Total Marked: ${total}`;
-  presentCount.textContent = `✅ Present: ${present}`;
-  absentCount.textContent = `❌ Absent: ${absent}`;
-  resultModal.style.display="flex";
+
+function showModal(
+  total,
+  present,
+  absent
+){
+
+  document.getElementById(
+    "totalCount"
+  ).textContent =
+    `👥 Total Marked: ${total}`;
+
+
+  document.getElementById(
+    "presentCount"
+  ).textContent =
+    `✅ Present: ${present}`;
+
+
+  document.getElementById(
+    "absentCount"
+  ).textContent =
+    `❌ Absent: ${absent}`;
+
+
+  document.getElementById(
+    "resultModal"
+  ).style.display =
+    "flex";
+
 }
 
+
+/* ===============================
+   CLOSE MODAL
+================================ */
+
 function closeModal(){
-  resultModal.style.display="none";
+
+  document.getElementById(
+    "resultModal"
+  ).style.display =
+    "none";
+
 }
+
 
 /* ===============================
    FILTER LISTENERS
 ================================ */
-["year","branch","section"].forEach(id=>{
-  document.getElementById(id).addEventListener("change",render);
+
+[
+  "year",
+  "branch",
+  "section",
+  "batch"
+]
+.forEach(id => {
+
+  document
+    .getElementById(id)
+    .addEventListener(
+      "change",
+      render
+    );
+
 });
 
+
+/* ===============================
+   INITIAL FETCH
+================================ */
+
 fetchStudents();
+
 </script>
 
 </body>
