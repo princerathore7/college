@@ -1,657 +1,2167 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
+
 <title>My Lecture Requests</title>
+
 <style>
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#172033;padding:20px}
-.container{max-width:1200px;margin:auto}
-.header{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:20px;flex-wrap:wrap}
-h2{margin:0;color:#0b1f3a}
-.mentor{background:#fff;padding:10px 15px;border-radius:10px;box-shadow:0 5px 15px #0001}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:20px}
-.stat{background:#fff;padding:18px;border-radius:12px;box-shadow:0 5px 15px #0001}
-.stat b{display:block;font-size:25px;margin-top:5px}
-.card{background:#fff;border-radius:14px;box-shadow:0 7px 20px #0001;overflow:hidden}
-.toolbar{padding:15px;display:flex;gap:10px;flex-wrap:wrap;border-bottom:1px solid #eee}
-select{padding:9px;border:1px solid #ccd3df;border-radius:7px}
-table{width:100%;border-collapse:collapse}
-th,td{padding:12px 10px;border-bottom:1px solid #eee;text-align:center}
-th{background:#0b1f3a;color:#fff}
-.badge{display:inline-block;padding:6px 10px;border-radius:20px;font-size:12px;font-weight:bold}
-.pending{background:#fff3cd;color:#856404}
-.approved{background:#d4edda;color:#155724}
-.rejected{background:#f8d7da;color:#721c24}
-.removed{background:#e2e3e5;color:#383d41}
-button{border:0;border-radius:7px;padding:8px 12px;cursor:pointer;font-weight:bold}
-.btn{background:#0b1f3a;color:#fff}
-.btn-green{background:#20a464;color:#fff}
-.btn-red{background:#d9363e;color:#fff}
-.btn-gray{background:#697386;color:#fff}
-button:disabled{opacity:.55;cursor:not-allowed}
-.empty{text-align:center;padding:40px;color:#777}
-.modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;padding:15px;z-index:50}
-.modal.show{display:flex}
-.modal-box{width:min(520px,100%);background:#fff;border-radius:15px;padding:22px;box-shadow:0 15px 50px #0005}
-.modal-box h3{margin-top:0;color:#0b1f3a}
-.info{background:#f5f7fa;padding:12px;border-radius:9px;margin:10px 0}
-.row{margin:12px 0}
-.row label{display:block;font-size:13px;font-weight:bold;margin-bottom:5px}
-.row input{width:100%;padding:10px;border:1px solid #ccd3df;border-radius:7px}
-.locked{background:#eef1f5;color:#666}
-.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
-.spinner{display:inline-block;width:15px;height:15px;border:3px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle}
-@keyframes spin{to{transform:rotate(360deg)}}
-@media(max-width:700px){table{font-size:12px}th,td{padding:8px 5px}.hide-mobile{display:none}}
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+
+  margin:0;
+
+  font-family:
+    Arial,
+    sans-serif;
+
+  background:
+    #f4f7fb;
+
+  color:#172033;
+
+}
+
+.container{
+
+  max-width:1100px;
+
+  margin:auto;
+
+  padding:25px;
+
+}
+
+.header{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+  gap:15px;
+
+  margin-bottom:25px;
+
+}
+
+.header h1{
+
+  margin:0;
+
+  color:#0b1f3a;
+
+}
+
+.refresh{
+
+  border:0;
+
+  background:#0b1f3a;
+
+  color:white;
+
+  padding:10px 16px;
+
+  border-radius:8px;
+
+  cursor:pointer;
+
+}
+
+.filters{
+
+  display:flex;
+
+  gap:10px;
+
+  flex-wrap:wrap;
+
+  margin-bottom:20px;
+
+}
+
+.filter{
+
+  padding:9px 15px;
+
+  border-radius:20px;
+
+  border:1px solid #ddd;
+
+  background:white;
+
+  cursor:pointer;
+
+}
+
+.filter.active{
+
+  background:#0b1f3a;
+
+  color:white;
+
+}
+
+.requests{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(320px,1fr)
+    );
+
+  gap:18px;
+
+}
+
+.card{
+
+  background:white;
+
+  border-radius:14px;
+
+  padding:20px;
+
+  box-shadow:
+    0 8px 25px
+    rgba(0,0,0,.08);
+
+}
+
+.top{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  gap:10px;
+
+  align-items:flex-start;
+
+}
+
+.title{
+
+  font-size:18px;
+
+  font-weight:bold;
+
+  color:#0b1f3a;
+
+}
+
+.status{
+
+  padding:5px 10px;
+
+  border-radius:20px;
+
+  font-size:12px;
+
+  font-weight:bold;
+
+  text-transform:uppercase;
+
+}
+
+.pending{
+
+  background:#fff3cd;
+
+  color:#856404;
+
+}
+
+.approved{
+
+  background:#d4edda;
+
+  color:#155724;
+
+}
+
+.disapproved{
+
+  background:#f8d7da;
+
+  color:#721c24;
+
+}
+
+.info{
+
+  margin-top:15px;
+
+  line-height:1.8;
+
+  color:#555;
+
+}
+
+.info strong{
+
+  color:#222;
+
+}
+
+.time{
+
+  display:inline-block;
+
+  background:#eef3f9;
+
+  color:#0b1f3a;
+
+  padding:8px 12px;
+
+  border-radius:8px;
+
+  font-weight:bold;
+
+  margin-top:8px;
+
+}
+
+.lock{
+
+  color:#888;
+
+  font-size:12px;
+
+  margin-left:5px;
+
+}
+
+.actions{
+
+  display:flex;
+
+  gap:8px;
+
+  flex-wrap:wrap;
+
+  margin-top:18px;
+
+}
+
+button{
+
+  border:0;
+
+  padding:9px 14px;
+
+  border-radius:7px;
+
+  cursor:pointer;
+
+  font-weight:bold;
+
+}
+
+.approve{
+
+  background:#27ae60;
+
+  color:white;
+
+}
+
+.reject{
+
+  background:#e74c3c;
+
+  color:white;
+
+}
+
+.edit{
+
+  background:#0b1f3a;
+
+  color:white;
+
+}
+
+.remove{
+
+  background:#c0392b;
+
+  color:white;
+
+}
+
+.disabled{
+
+  opacity:.5;
+
+  pointer-events:none;
+
+}
+
+.empty{
+
+  text-align:center;
+
+  padding:50px;
+
+  color:#888;
+
+}
+
+.modal{
+
+  display:none;
+
+  position:fixed;
+
+  inset:0;
+
+  background:
+    rgba(0,0,0,.55);
+
+  align-items:center;
+
+  justify-content:center;
+
+  padding:20px;
+
+}
+
+.modal.show{
+
+  display:flex;
+
+}
+
+.modal-box{
+
+  background:white;
+
+  width:100%;
+
+  max-width:500px;
+
+  border-radius:14px;
+
+  padding:25px;
+
+}
+
+.modal-box h2{
+
+  margin-top:0;
+
+  color:#0b1f3a;
+
+}
+
+.field{
+
+  margin-bottom:15px;
+
+}
+
+.field label{
+
+  display:block;
+
+  font-weight:bold;
+
+  margin-bottom:6px;
+
+}
+
+.field input,
+.field select{
+
+  width:100%;
+
+  padding:11px;
+
+  border:1px solid #ccc;
+
+  border-radius:7px;
+
+}
+
+.locked{
+
+  background:#f1f3f5;
+
+  color:#666;
+
+  cursor:not-allowed;
+
+}
+
+.search-results{
+
+  border:1px solid #ddd;
+
+  border-radius:7px;
+
+  max-height:180px;
+
+  overflow:auto;
+
+  margin-top:5px;
+
+  display:none;
+
+}
+
+.mentor{
+
+  padding:10px;
+
+  cursor:pointer;
+
+  border-bottom:1px solid #eee;
+
+}
+
+.mentor:hover{
+
+  background:#f4f7fb;
+
+}
+
+.modal-actions{
+
+  display:flex;
+
+  gap:10px;
+
+  margin-top:20px;
+
+}
+
+.save{
+
+  background:#27ae60;
+
+  color:white;
+
+}
+
+.cancel{
+
+  background:#777;
+
+  color:white;
+
+}
+
+.message{
+
+  margin-bottom:20px;
+
+  padding:12px;
+
+  border-radius:8px;
+
+  display:none;
+
+}
+
+.message.success{
+
+  display:block;
+
+  background:#d4edda;
+
+  color:#155724;
+
+}
+
+.message.error{
+
+  display:block;
+
+  background:#f8d7da;
+
+  color:#721c24;
+
+}
+
 </style>
+
 </head>
+
+
 <body>
 
 <div class="container">
+
   <div class="header">
-    <div>
-      <h2>📋 My Lecture Requests</h2>
-      <small>Track your requested lectures and edit approved lectures.</small>
-    </div>
-    <div class="mentor">
-      👤 <b id="mentorName">Loading...</b><br>
-      <small id="mentorId"></small>
-    </div>
+
+    <h1>📋 My Lecture Requests</h1>
+
+    <button
+      class="refresh"
+      onclick="loadRequests()"
+    >
+      🔄 Refresh
+    </button>
+
   </div>
 
-  <div class="grid">
-    <div class="stat">⏳ Pending <b id="pendingCount">0</b></div>
-    <div class="stat">✅ Approved <b id="approvedCount">0</b></div>
-    <div class="stat">❌ Rejected <b id="rejectedCount">0</b></div>
-    <div class="stat">🗑 Removed <b id="removedCount">0</b></div>
+
+  <div id="message"
+       class="message">
   </div>
 
-  <div class="card">
-    <div class="toolbar">
-      <select id="statusFilter" onchange="renderRequests()">
-        <option value="">All Status</option>
-        <option value="pending">Pending</option>
-        <option value="approved">Approved</option>
-        <option value="rejected">Rejected</option>
-        <option value="removed">Removed</option>
-      </select>
-      <button class="btn" onclick="loadRequests()">🔄 Refresh</button>
-    </div>
 
-    <div style="overflow-x:auto">
-      <table>
-        <thead>
-          <tr>
-            <th>Class</th>
-            <th>Day</th>
-            <th>Time</th>
-            <th>Faculty</th>
-            <th>Subject</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="requestsBody">
-          <tr><td colspan="7" class="empty">Loading requests...</td></tr>
-        </tbody>
-      </table>
-    </div>
+  <div class="filters">
+
+    <button
+      class="filter active"
+      data-filter="all"
+      onclick="setFilter('all',this)"
+    >
+      All
+    </button>
+
+    <button
+      class="filter"
+      data-filter="pending"
+      onclick="setFilter('pending',this)"
+    >
+      Pending
+    </button>
+
+    <button
+      class="filter"
+      data-filter="approved"
+      onclick="setFilter('approved',this)"
+    >
+      Approved
+    </button>
+
+    <button
+      class="filter"
+      data-filter="disapproved"
+      onclick="setFilter('disapproved',this)"
+    >
+      Disapproved
+    </button>
+
   </div>
+
+
+  <div
+    id="requests"
+    class="requests"
+  ></div>
+
 </div>
 
-<!-- REQUEST POPUP -->
-<div class="modal" id="requestModal">
+
+<!-- =====================================================
+     EDIT MODAL
+====================================================== -->
+
+<div
+  id="editModal"
+  class="modal"
+>
+
   <div class="modal-box">
-    <h3 id="modalTitle">Lecture Request</h3>
-    <div id="modalContent"></div>
-    <div class="actions">
-      <button class="btn-gray" onclick="closeModal()">Close</button>
-      <button id="approveBtn" class="btn-green" onclick="approveCurrentRequest()">✅ Approve Request</button>
+
+    <h2>
+      ✏️ Edit The Lecture
+    </h2>
+
+
+    <div class="field">
+
+      <label>
+        Lecture Time 🔒
+      </label>
+
+      <input
+        id="editTime"
+        class="locked"
+        readonly
+      >
+
     </div>
+
+
+    <div class="field">
+
+      <label>
+        Faculty
+      </label>
+
+      <input
+        id="facultySearch"
+        placeholder="Search faculty..."
+        autocomplete="off"
+      >
+
+      <div
+        id="mentorResults"
+        class="search-results"
+      ></div>
+
+    </div>
+
+
+    <div class="field">
+
+      <label>
+        Selected Faculty
+      </label>
+
+      <input
+        id="selectedFaculty"
+        readonly
+        class="locked"
+      >
+
+    </div>
+
+
+    <div class="field">
+
+      <label>
+        Subject
+      </label>
+
+      <input
+        id="editSubject"
+        placeholder="Enter subject"
+      >
+
+    </div>
+
+
+    <div class="modal-actions">
+
+      <button
+        class="save"
+        onclick="saveLectureEdit()"
+      >
+        💾 Save Changes
+      </button>
+
+      <button
+        class="cancel"
+        onclick="closeEditModal()"
+      >
+        Cancel
+      </button>
+
+    </div>
+
   </div>
+
 </div>
 
-<!-- EDIT POPUP -->
-<div class="modal" id="editModal">
-  <div class="modal-box">
-    <h3>✏️ Edit Approved Lecture</h3>
-    <div class="info">
-      <b>⚠ Lecture time is locked.</b><br>
-      Day, start time and end time cannot be changed here.
-    </div>
-
-    <div class="row">
-      <label>Day</label>
-      <input id="editDay" class="locked" readonly>
-    </div>
-
-    <div class="row">
-      <label>Start Time</label>
-      <input id="editStart" class="locked" readonly>
-    </div>
-
-    <div class="row">
-      <label>End Time</label>
-      <input id="editEnd" class="locked" readonly>
-    </div>
-
-    <div class="row">
-      <label>Faculty Name</label>
-      <input id="editFacultyName" placeholder="Faculty name">
-    </div>
-
-    <div class="row">
-      <label>Faculty ID</label>
-      <input id="editFacultyId" placeholder="Faculty ID">
-    </div>
-
-    <div class="row">
-      <label>Subject</label>
-      <input id="editSubject" placeholder="Subject">
-    </div>
-
-    <div class="actions">
-      <button class="btn-gray" onclick="closeEditModal()">Cancel</button>
-      <button id="saveEditBtn" class="btn-green" onclick="saveApprovedLecture()">💾 Save to Timetable</button>
-    </div>
-  </div>
-</div>
 
 <script>
-/* =========================================================
+
+/* =====================================================
    CONFIG
-========================================================= */
+===================================================== */
 
-const API_BASE = "https://college-hwbb.onrender.com/api/timetable";
+const API_BASE =
+  "https://college-hwbb.onrender.com/api/timetable";
 
-/* =========================================================
-   MENTOR FROM LOCAL STORAGE
-========================================================= */
 
-const mentorId =
-  localStorage.getItem("mentorId") ||
-  localStorage.getItem("mentorID") ||
-  "";
+/* =====================================================
+   MENTOR ID FROM LOCAL STORAGE
+===================================================== */
 
-const mentorName =
-  localStorage.getItem("mentorName") ||
-  localStorage.getItem("mentor_name") ||
-  localStorage.getItem("name") ||
-  "Mentor";
-
-if (!mentorId) {
-  document.body.innerHTML = `
-    <h2 style="text-align:center;margin-top:20vh">
-      ❌ Mentor session not found.<br>
-      Please login again.
-    </h2>`;
-  throw new Error("mentorId missing from localStorage");
-}
-
-document.getElementById("mentorName").textContent = mentorName;
-document.getElementById("mentorId").textContent = "Mentor ID: " + mentorId;
-
-/* =========================================================
-   STATE
-========================================================= */
-
-let REQUESTS = [];
-let currentRequest = null;
-
-/* =========================================================
-   HELPERS
-========================================================= */
-
-function esc(value) {
-  return String(value ?? "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
-
-function getStatusClass(status) {
-  return ["pending","approved","rejected","removed"].includes(status)
-    ? status : "pending";
-}
-
-function getFacultyName(req) {
-  const applied = req.appliedLecture || {};
-  const lecture = req.newLecture || applied || {};
+function getMentorId(){
 
   return (
-    req.facultyName ||
-    req.mentorName ||
-    lecture.facultyName ||
-    lecture.mentorName ||
-    lecture.faculty ||
-    "Not assigned"
-  );
+
+    localStorage.getItem(
+      "mentorId"
+    )
+
+    ||
+
+    ""
+
+  ).trim();
+
 }
 
-function getSubject(req) {
-  const applied = req.appliedLecture || {};
-  const lecture = req.newLecture || applied || {};
-  return req.subject || lecture.subject || req.existingSubject || "-";
-}
 
-function getStart(req) {
-  const applied = req.appliedLecture || {};
-  const lecture = req.newLecture || applied || {};
-  return req.startTime || lecture.startTime || req.existingStart || "-";
-}
+const mentorId =
+  getMentorId();
 
-function getEnd(req) {
-  const applied = req.appliedLecture || {};
-  const lecture = req.newLecture || applied || {};
-  return req.endTime || lecture.endTime || req.existingEnd || "-";
-}
 
-/* =========================================================
-   LOAD MY REQUESTS
-========================================================= */
+if(!mentorId){
 
-async function loadRequests() {
-  const body = document.getElementById("requestsBody");
-  body.innerHTML = `<tr><td colspan="7" class="empty">Loading requests...</td></tr>`;
+  document.body.innerHTML = `
 
-  try {
-    const res = await fetch(
-      `${API_BASE}/lecture-requests/my/${encodeURIComponent(mentorId)}`
-    );
+    <div
+      style="
+        text-align:center;
+        margin-top:20vh;
+        font-family:Arial;
+      "
+    >
 
-    const data = await res.json();
+      <h2>
+        ❌ Mentor ID not found
+      </h2>
 
-    if (!res.ok || !data.success) {
-      throw new Error(data.message || "Unable to load lecture requests");
-    }
+      <p>
+        Please login again.
+      </p>
 
-    REQUESTS = Array.isArray(data.requests) ? data.requests : [];
-
-    updateCounts();
-    renderRequests();
-
-  } catch (err) {
-    console.error("Load requests error:", err);
-    body.innerHTML = `
-      <tr>
-        <td colspan="7" class="empty">
-          ❌ ${esc(err.message)}
-          <br><br>
-          <button class="btn" onclick="loadRequests()">Retry</button>
-        </td>
-      </tr>`;
-  }
-}
-
-/* =========================================================
-   COUNTS
-========================================================= */
-
-function updateCounts() {
-  const count = status =>
-    REQUESTS.filter(r => String(r.status).toLowerCase() === status).length;
-
-  document.getElementById("pendingCount").textContent = count("pending");
-  document.getElementById("approvedCount").textContent = count("approved");
-  document.getElementById("rejectedCount").textContent = count("rejected");
-  document.getElementById("removedCount").textContent = count("removed");
-}
-
-/* =========================================================
-   RENDER
-========================================================= */
-
-function renderRequests() {
-  const body = document.getElementById("requestsBody");
-  const filter = document.getElementById("statusFilter").value;
-
-  const list = REQUESTS.filter(r =>
-    !filter || String(r.status).toLowerCase() === filter
-  );
-
-  if (!list.length) {
-    body.innerHTML = `
-      <tr><td colspan="7" class="empty">
-        No lecture requests found.
-      </td></tr>`;
-    return;
-  }
-
-  body.innerHTML = list.map(req => {
-    const status = String(req.status || "pending").toLowerCase();
-    const statusClass = getStatusClass(status);
-    const faculty = getFacultyName(req);
-    const subject = getSubject(req);
-    const start = getStart(req);
-    const end = getEnd(req);
-
-    let action = "";
-
-    if (status === "pending") {
-      action = `
-        <button class="btn" onclick="openRequestModal('${esc(req._id)}')">
-          👁 View / Approve
-        </button>`;
-    } else if (status === "approved") {
-      action = `
-        <button class="btn-green" onclick="openEditModal('${esc(req._id)}')">
-          ✏️ Edit the Lecture Now
-        </button>`;
-    } else {
-      action = `<span style="color:#888">No action</span>`;
-    }
-
-    return `
-      <tr>
-        <td>${esc(req.className || "-")}</td>
-        <td>${esc(req.day || "-")}</td>
-        <td>${esc(start)} - ${esc(end)}</td>
-        <td>${esc(faculty)}</td>
-        <td>${esc(subject)}</td>
-        <td>
-          <span class="badge ${statusClass}">
-            ${esc(status.toUpperCase())}
-          </span>
-        </td>
-        <td>${action}</td>
-      </tr>`;
-  }).join("");
-}
-
-/* =========================================================
-   REQUEST POPUP
-========================================================= */
-
-function openRequestModal(id) {
-  currentRequest = REQUESTS.find(r => String(r._id) === String(id));
-
-  if (!currentRequest) {
-    alert("Request not found. Please refresh.");
-    return;
-  }
-
-  const status = String(currentRequest.status || "pending").toLowerCase();
-
-  document.getElementById("modalTitle").textContent =
-    status === "pending"
-      ? "📨 Lecture Request"
-      : "📋 Lecture Request Details";
-
-  document.getElementById("modalContent").innerHTML = `
-    <div class="info">
-      <b>Requested By:</b> ${esc(
-        currentRequest.requesterMentorName ||
-        currentRequest.requesterName ||
-        currentRequest.requesterMentorId ||
-        "-"
-      )}
     </div>
 
-    <div class="info">
-      <b>Class:</b> ${esc(currentRequest.className || "-")}<br>
-      <b>Day:</b> ${esc(currentRequest.day || "-")}<br>
-      <b>Time:</b> ${esc(getStart(currentRequest))} -
-      ${esc(getEnd(currentRequest))}<br>
-      <b>Subject:</b> ${esc(getSubject(currentRequest))}<br>
-      <b>Faculty:</b> ${esc(getFacultyName(currentRequest))}
-    </div>
-
-    <div class="info">
-      <b>Current occupied faculty:</b>
-      ${esc(currentRequest.conflictFacultyName || currentRequest.targetMentorName || "-")}
-      <br>
-      <b>Existing lecture:</b>
-      ${esc(currentRequest.existingSubject || "-")}
-    </div>
-
-    ${
-      currentRequest.message
-      ? `<div class="info">${esc(currentRequest.message)}</div>`
-      : ""
-    }
   `;
 
-  document.getElementById("approveBtn").style.display =
-    status === "pending" ? "inline-block" : "none";
+  throw new Error(
+    "mentorId missing"
+  );
 
-  document.getElementById("requestModal").classList.add("show");
 }
 
-function closeModal() {
-  document.getElementById("requestModal").classList.remove("show");
-}
 
-/* =========================================================
-   APPROVE REQUEST
-   IMPORTANT:
-   This ONLY approves the request.
-   Backend does NOT directly update timetable.
-========================================================= */
+/* =====================================================
+   STATE
+===================================================== */
 
-async function approveCurrentRequest() {
-  if (!currentRequest?._id) return;
+let allRequests = [];
 
-  const btn = document.getElementById("approveBtn");
+let currentFilter =
+  "all";
 
-  if (!confirm(
-    "Approve this lecture request?\n\n" +
-    "The lecture will become editable by the requesting mentor."
-  )) {
-    return;
-  }
+let editingRequest = null;
 
-  btn.disabled = true;
-  btn.innerHTML = `<span class="spinner"></span> Approving...`;
+let selectedFacultyId =
+  "";
 
-  try {
-    const res = await fetch(
-      `${API_BASE}/lecture-request/approve`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          requestId: currentRequest._id,
-          mentorId: mentorId,
-          mentorName: mentorName
-        })
-      }
+let selectedFacultyName =
+  "";
+
+
+/* =====================================================
+   LOAD REQUESTS
+===================================================== */
+
+async function loadRequests(){
+
+  const container =
+    document.getElementById(
+      "requests"
     );
 
-    const data = await res.json();
 
-    if (!res.ok || !data.success) {
-      throw new Error(data.message || "Approval failed");
+  container.innerHTML = `
+
+    <div class="empty">
+      ⏳ Loading lecture requests...
+    </div>
+
+  `;
+
+
+  try{
+
+    const response =
+      await fetch(
+
+        `${API_BASE}/lecture-requests/my/${encodeURIComponent(mentorId)}`
+
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(
+      !response.ok ||
+      !data.success
+    ){
+
+      throw new Error(
+        data.message ||
+        "Unable to load requests."
+      );
+
     }
 
-    closeModal();
+
+    allRequests =
+      Array.isArray(
+        data.requests
+      )
+      ? data.requests
+      : [];
+
+
+    renderRequests();
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+
+    container.innerHTML = `
+
+      <div class="empty">
+
+        ❌
+        ${escapeHtml(
+          error.message
+        )}
+
+      </div>
+
+    `;
+
+  }
+
+}
+
+
+/* =====================================================
+   FILTER
+===================================================== */
+
+function setFilter(
+  filter,
+  button
+){
+
+  currentFilter =
+    filter;
+
+
+  document
+    .querySelectorAll(
+      ".filter"
+    )
+    .forEach(btn => {
+
+      btn.classList.remove(
+        "active"
+      );
+
+    });
+
+
+  button.classList.add(
+    "active"
+  );
+
+
+  renderRequests();
+
+}
+
+
+/* =====================================================
+   RENDER
+===================================================== */
+
+function renderRequests(){
+
+  const container =
+    document.getElementById(
+      "requests"
+    );
+
+
+  let requests =
+    [...allRequests];
+
+
+  if(
+    currentFilter !== "all"
+  ){
+
+    requests =
+      requests.filter(
+        req => {
+
+          const status =
+            getDisplayStatus(
+              req
+            );
+
+          return (
+            status ===
+            currentFilter
+          );
+
+        }
+      );
+
+  }
+
+
+  if(!requests.length){
+
+    container.innerHTML = `
+
+      <div class="empty">
+
+        📭 No ${
+
+          currentFilter === "all"
+            ? ""
+            : currentFilter + " "
+
+        }
+
+        lecture requests found.
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+    requests
+      .map(
+        renderRequestCard
+      )
+      .join("");
+
+}
+
+
+/* =====================================================
+   REQUEST CARD
+===================================================== */
+
+function renderRequestCard(
+  req
+){
+
+  const status =
+    getDisplayStatus(
+      req
+    );
+
+
+  const statusClass =
+    status === "approved"
+      ? "approved"
+      : status === "disapproved"
+      ? "disapproved"
+      : "pending";
+
+
+  const requester =
+    req.requesterName
+    ||
+    req.requesterMentorId
+    ||
+    "Unknown";
+
+
+  const target =
+    req.targetName
+    ||
+    req.targetMentorId
+    ||
+    "Unknown";
+
+
+  const time =
+
+    `${escapeHtml(
+      req.startTime ||
+      req.oldLecture?.startTime ||
+      "-"
+    )} - ${escapeHtml(
+      req.endTime ||
+      req.oldLecture?.endTime ||
+      "-"
+    )}`;
+
+
+  let actions = "";
+
+
+  /* ---------------------------------------------
+     TARGET MENTOR ACTIONS
+  --------------------------------------------- */
+
+  if(
+    status === "pending"
+    &&
+    req.canApprove
+  ){
+
+    actions += `
+
+      <button
+        class="approve"
+        onclick="approveRequest('${req._id}')"
+      >
+        ✅ Approve
+      </button>
+
+    `;
+
+
+    actions += `
+
+      <button
+        class="reject"
+        onclick="rejectRequest('${req._id}')"
+      >
+        ❌ Disapprove
+      </button>
+
+    `;
+
+  }
+
+
+  /* ---------------------------------------------
+     REQUESTER ACTIONS
+  --------------------------------------------- */
+
+  if(
+    status === "approved"
+    &&
+    req.canEdit
+    &&
+    !req.lectureRemoved
+  ){
+
+    actions += `
+
+      <button
+        class="edit"
+        onclick="openEditModal('${req._id}')"
+      >
+        ✏️ Edit The Lecture Now
+      </button>
+
+    `;
+
+  }
+
+
+  if(
+    status === "approved"
+    &&
+    req.canRemove
+    &&
+    !req.lectureRemoved
+  ){
+
+    actions += `
+
+      <button
+        class="remove"
+        onclick="removeLecture('${req._id}')"
+      >
+        🗑 Remove Lecture
+      </button>
+
+    `;
+
+  }
+
+
+  let approvedInfo = "";
+
+
+  if(status === "approved"){
+
+    approvedInfo = `
+
+      <div>
+
+        <strong>
+          Lecture Time
+        </strong>
+
+        <div class="time">
+
+          ${time}
+
+          <span class="lock">
+            🔒 Locked
+          </span>
+
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+
+  if(req.lectureRemoved){
+
+    approvedInfo += `
+
+      <div
+        style="
+          margin-top:10px;
+          color:#c0392b;
+          font-weight:bold;
+        "
+      >
+
+        🗑 Lecture Removed
+
+      </div>
+
+    `;
+
+  }
+
+
+  return `
+
+    <div class="card">
+
+      <div class="top">
+
+        <div class="title">
+
+          ${escapeHtml(
+            req.className ||
+            req.existingClass ||
+            "Lecture Request"
+          )}
+
+        </div>
+
+
+        <span
+          class="status ${statusClass}"
+        >
+
+          ${status}
+
+        </span>
+
+      </div>
+
+
+      <div class="info">
+
+        <div>
+
+          <strong>
+            Day:
+          </strong>
+
+          ${escapeHtml(
+            req.day || "-"
+          )}
+
+        </div>
+
+
+        ${approvedInfo}
+
+
+        <div>
+
+          <strong>
+            Requested By:
+          </strong>
+
+          ${escapeHtml(
+            requester
+          )}
+
+        </div>
+
+
+        <div>
+
+          <strong>
+            Designated Faculty:
+          </strong>
+
+          ${escapeHtml(
+            target
+          )}
+
+        </div>
+
+
+        <div>
+
+          <strong>
+            Subject:
+          </strong>
+
+          ${escapeHtml(
+            req.subject ||
+            req.oldLecture?.subject ||
+            "-"
+          )}
+
+        </div>
+
+
+      </div>
+
+
+      ${
+        actions
+          ? `
+            <div class="actions">
+              ${actions}
+            </div>
+          `
+          : ""
+      }
+
+    </div>
+
+  `;
+
+}
+
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+function getDisplayStatus(
+  req
+){
+
+  const status =
+    String(
+      req.displayStatus ||
+      req.status ||
+      "pending"
+    )
+    .toLowerCase()
+    .trim();
+
+
+  if(
+    status === "rejected"
+  ){
+
+    return "disapproved";
+
+  }
+
+
+  return status;
+
+}
+
+
+/* =====================================================
+   APPROVE
+===================================================== */
+
+async function approveRequest(
+  requestId
+){
+
+  if(
+    !confirm(
+      "Approve this lecture request?"
+    )
+  ){
+
+    return;
+
+  }
+
+
+  try{
+
+    const response =
+      await fetch(
+
+        `${API_BASE}/lecture-request/approve`,
+
+        {
+
+          method:
+            "PUT",
+
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+
+              requestId,
+
+              mentorId
+
+            })
+
+        }
+
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(
+      !response.ok ||
+      !data.success
+    ){
+
+      throw new Error(
+        data.message ||
+        "Approval failed."
+      );
+
+    }
+
+
+    showMessage(
+      "Request approved. Timetable is unchanged until the requester edits and saves the lecture.",
+      "success"
+    );
+
 
     await loadRequests();
 
-    alert(
-      "✅ Request approved.\n\n" +
-      "The requesting mentor can now use 'Edit the Lecture Now'."
+
+  }catch(error){
+
+    showMessage(
+      error.message,
+      "error"
     );
 
-  } catch (err) {
-    console.error("Approve request error:", err);
-    alert("❌ " + err.message);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = "✅ Approve Request";
   }
+
 }
 
-/* =========================================================
-   EDIT APPROVED LECTURE POPUP
-========================================================= */
 
-function openEditModal(id) {
-  const req = REQUESTS.find(r => String(r._id) === String(id));
+/* =====================================================
+   DISAPPROVE
+===================================================== */
 
-  if (!req) {
-    alert("Request not found. Please refresh.");
+async function rejectRequest(
+  requestId
+){
+
+  if(
+    !confirm(
+      "Disapprove this lecture request?"
+    )
+  ){
+
     return;
+
   }
 
-  if (String(req.status).toLowerCase() !== "approved") {
-    alert("Only approved requests can be edited.");
-    return;
-  }
 
-  currentRequest = req;
+  try{
 
-  const lecture = req.appliedLecture || req.newLecture || {};
+    const response =
+      await fetch(
 
-  document.getElementById("editDay").value =
-    req.day || lecture.day || "";
+        `${API_BASE}/lecture-request/reject`,
 
-  document.getElementById("editStart").value =
-    req.startTime || lecture.startTime || "";
+        {
 
-  document.getElementById("editEnd").value =
-    req.endTime || lecture.endTime || "";
+          method:
+            "PUT",
 
-  document.getElementById("editFacultyName").value =
-    lecture.facultyName ||
-    lecture.mentorName ||
-    req.facultyName ||
-    req.requesterMentorName ||
-    "";
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
 
-  document.getElementById("editFacultyId").value =
-    (
-      Array.isArray(lecture.facultyIds)
-        ? lecture.facultyIds[0]
-        : lecture.mentorId || req.requesterMentorId || ""
+          body:
+            JSON.stringify({
+
+              requestId,
+
+              mentorId
+
+            })
+
+        }
+
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(
+      !response.ok ||
+      !data.success
+    ){
+
+      throw new Error(
+        data.message ||
+        "Disapproval failed."
+      );
+
+    }
+
+
+    showMessage(
+      "Lecture request disapproved.",
+      "success"
     );
 
-  document.getElementById("editSubject").value =
-    lecture.subject ||
-    req.subject ||
+
+    await loadRequests();
+
+
+  }catch(error){
+
+    showMessage(
+      error.message,
+      "error"
+    );
+
+  }
+
+}
+
+
+/* =====================================================
+   OPEN EDIT MODAL
+===================================================== */
+
+function openEditModal(
+  requestId
+){
+
+  const req =
+    allRequests.find(
+      item =>
+        String(
+          item._id
+        ) === String(
+          requestId
+        )
+    );
+
+
+  if(!req){
+
+    showMessage(
+      "Request not found.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if(
+    !req.canEdit
+  ){
+
+    showMessage(
+      "You cannot edit this lecture.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  editingRequest =
+    req;
+
+
+  const lecture =
+    req.appliedLecture
+    ||
+    req.oldLecture
+    ||
+    {};
+
+
+  /*
+    TIME IS LOCKED
+  */
+
+  document.getElementById(
+    "editTime"
+  ).value =
+
+    `${lecture.startTime || req.startTime || "-"} - ${
+      lecture.endTime || req.endTime || "-"
+    }`;
+
+
+  document.getElementById(
+    "editSubject"
+  ).value =
+
+    lecture.subject
+    ||
+    req.subject
+    ||
     "";
 
-  document.getElementById("editModal").classList.add("show");
+
+  /*
+    Current faculty
+  */
+
+  const currentFaculty =
+    lecture.faculty?.[0];
+
+
+  selectedFacultyId =
+
+    currentFaculty?.mentorId
+    ||
+    lecture.facultyIds?.[0]
+    ||
+    req.targetMentorId
+    ||
+    "";
+
+
+  selectedFacultyName =
+
+    currentFaculty?.name
+    ||
+    req.targetName
+    ||
+    selectedFacultyId;
+
+
+  document.getElementById(
+    "selectedFaculty"
+  ).value =
+    selectedFacultyName;
+
+
+  document.getElementById(
+    "facultySearch"
+  ).value =
+    "";
+
+
+  document.getElementById(
+    "mentorResults"
+  ).style.display =
+    "none";
+
+
+  document.getElementById(
+    "editModal"
+  ).classList.add(
+    "show"
+  );
+
 }
 
-function closeEditModal() {
-  document.getElementById("editModal").classList.remove("show");
+
+/* =====================================================
+   CLOSE MODAL
+===================================================== */
+
+function closeEditModal(){
+
+  editingRequest =
+    null;
+
+  selectedFacultyId =
+    "";
+
+  selectedFacultyName =
+    "";
+
+  document.getElementById(
+    "editModal"
+  ).classList.remove(
+    "show"
+  );
+
 }
 
-/* =========================================================
-   SAVE APPROVED LECTURE
-========================================================= */
 
-async function saveApprovedLecture() {
-  if (!currentRequest?._id) return;
+/* =====================================================
+   FACULTY SEARCH
+===================================================== */
 
-  const facultyId =
-    document.getElementById("editFacultyId").value.trim();
+let searchTimer = null;
 
-  const facultyName =
-    document.getElementById("editFacultyName").value.trim();
+
+document.getElementById(
+  "facultySearch"
+)
+.addEventListener(
+  "input",
+  function(){
+
+    const query =
+      this.value.trim();
+
+
+    clearTimeout(
+      searchTimer
+    );
+
+
+    if(query.length < 2){
+
+      document.getElementById(
+        "mentorResults"
+      ).style.display =
+        "none";
+
+      return;
+
+    }
+
+
+    searchTimer =
+      setTimeout(
+        () =>
+          searchMentors(query),
+        300
+      );
+
+  }
+);
+
+
+/* =====================================================
+   SEARCH MENTORS
+===================================================== */
+
+async function searchMentors(
+  query
+){
+
+  try{
+
+    const response =
+      await fetch(
+
+        `${API_BASE}/mentor/search?q=${encodeURIComponent(query)}`
+
+      );
+
+
+    const data =
+      await response.json();
+
+
+    const box =
+      document.getElementById(
+        "mentorResults"
+      );
+
+
+    if(
+      !data.success ||
+      !Array.isArray(
+        data.mentors
+      )
+    ){
+
+      box.style.display =
+        "none";
+
+      return;
+
+    }
+
+
+    if(!data.mentors.length){
+
+      box.innerHTML = `
+
+        <div
+          style="
+            padding:10px;
+            color:#888;
+          "
+        >
+          No faculty found.
+        </div>
+
+      `;
+
+      box.style.display =
+        "block";
+
+      return;
+
+    }
+
+
+    box.innerHTML =
+      data.mentors
+        .map(
+          mentor => `
+
+            <div
+              class="mentor"
+              onclick="
+                selectFaculty(
+                  '${escapeJs(
+                    mentor.mentorId
+                  )}',
+                  '${escapeJs(
+                    mentor.name
+                  )}'
+                )
+              "
+            >
+
+              <strong>
+                ${escapeHtml(
+                  mentor.name
+                )}
+              </strong>
+
+              <br>
+
+              <small>
+
+                ${escapeHtml(
+                  mentor.mentorId
+                )}
+
+                ${
+                  mentor.subject
+                    ? " • " +
+                      escapeHtml(
+                        mentor.subject
+                      )
+                    : ""
+                }
+
+              </small>
+
+            </div>
+
+          `
+        )
+        .join("");
+
+
+    box.style.display =
+      "block";
+
+
+  }catch(error){
+
+    console.error(
+      "Faculty search error:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =====================================================
+   SELECT FACULTY
+===================================================== */
+
+function selectFaculty(
+  id,
+  name
+){
+
+  selectedFacultyId =
+    id;
+
+
+  selectedFacultyName =
+    name;
+
+
+  document.getElementById(
+    "selectedFaculty"
+  ).value =
+    name;
+
+
+  document.getElementById(
+    "facultySearch"
+  ).value =
+    "";
+
+
+  document.getElementById(
+    "mentorResults"
+  ).style.display =
+    "none";
+
+}
+
+
+/* =====================================================
+   SAVE EDIT
+===================================================== */
+
+async function saveLectureEdit(){
+
+  if(!editingRequest){
+
+    return;
+
+  }
+
 
   const subject =
-    document.getElementById("editSubject").value.trim();
+    document.getElementById(
+      "editSubject"
+    ).value.trim();
 
-  if (!facultyId) {
-    alert("Faculty ID is required.");
-    return;
-  }
 
-  if (!subject) {
-    alert("Subject is required.");
-    return;
-  }
+  if(!selectedFacultyId){
 
-  const btn = document.getElementById("saveEditBtn");
-
-  btn.disabled = true;
-  btn.innerHTML = `<span class="spinner"></span> Updating...`;
-
-  try {
-    /*
-      IMPORTANT:
-      Day/start/end are NOT taken from editable inputs.
-      They are sent from the approved request itself.
-      This prevents changing the locked lecture time.
-    */
-
-    const payload = {
-      requestId: currentRequest._id,
-
-      mentorId: mentorId,
-      mentorName: mentorName,
-
-      day: currentRequest.day,
-
-      startTime:
-        currentRequest.startTime ||
-        currentRequest.appliedLecture?.startTime ||
-        currentRequest.newLecture?.startTime,
-
-      endTime:
-        currentRequest.endTime ||
-        currentRequest.appliedLecture?.endTime ||
-        currentRequest.newLecture?.endTime,
-
-      subject: subject,
-
-      facultyIds: [facultyId],
-
-      facultyName: facultyName
-    };
-
-    const res = await fetch(
-      `${API_BASE}/lecture-request/edit-approved`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      }
+    showMessage(
+      "Please select a faculty.",
+      "error"
     );
 
-    const data = await res.json();
+    return;
 
-    if (!res.ok || !data.success) {
-      throw new Error(data.message || "Lecture update failed");
+  }
+
+
+  if(!subject){
+
+    showMessage(
+      "Please enter subject.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  try{
+
+    const response =
+      await fetch(
+
+        `${API_BASE}/lecture-request/edit`,
+
+        {
+
+          method:
+            "PUT",
+
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+
+              requestId:
+                editingRequest._id,
+
+              mentorId,
+
+              facultyIds:[
+                selectedFacultyId
+              ],
+
+              subject
+
+            })
+
+        }
+
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(
+      !response.ok ||
+      !data.success
+    ){
+
+      if(
+        data.conflict
+      ){
+
+        throw new Error(
+          "Selected faculty is already occupied during this locked lecture time."
+        );
+
+      }
+
+
+      throw new Error(
+        data.message ||
+        "Lecture update failed."
+      );
+
     }
+
 
     closeEditModal();
 
-    await loadRequests();
 
-    alert(
-      "✅ Lecture updated successfully!\n\n" +
-      "The timetable has been updated without a time conflict."
+    showMessage(
+      "✅ Lecture updated successfully on the timetable.",
+      "success"
     );
 
-  } catch (err) {
-    console.error("Edit approved lecture error:", err);
-    alert("❌ " + err.message);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = "💾 Save to Timetable";
+
+    await loadRequests();
+
+
+  }catch(error){
+
+    showMessage(
+      error.message,
+      "error"
+    );
+
   }
+
 }
 
-/* =========================================================
+
+/* =====================================================
+   REMOVE LECTURE
+===================================================== */
+
+async function removeLecture(
+  requestId
+){
+
+  if(
+    !confirm(
+      "Are you sure you want to remove this lecture from the timetable?"
+    )
+  ){
+
+    return;
+
+  }
+
+
+  try{
+
+    const response =
+      await fetch(
+
+        `${API_BASE}/lecture-request/remove`,
+
+        {
+
+          method:
+            "DELETE",
+
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+
+              requestId,
+
+              mentorId
+
+            })
+
+        }
+
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(
+      !response.ok ||
+      !data.success
+    ){
+
+      throw new Error(
+        data.message ||
+        "Unable to remove lecture."
+      );
+
+    }
+
+
+    showMessage(
+      "🗑 Lecture removed successfully.",
+      "success"
+    );
+
+
+    await loadRequests();
+
+
+  }catch(error){
+
+    showMessage(
+      error.message,
+      "error"
+    );
+
+  }
+
+}
+
+
+/* =====================================================
+   MESSAGE
+===================================================== */
+
+function showMessage(
+  text,
+  type
+){
+
+  const box =
+    document.getElementById(
+      "message"
+    );
+
+
+  box.textContent =
+    text;
+
+
+  box.className =
+    `message ${type}`;
+
+
+  setTimeout(
+    () => {
+
+      box.className =
+        "message";
+
+    },
+    5000
+  );
+
+}
+
+
+/* =====================================================
+   ESCAPE HTML
+===================================================== */
+
+function escapeHtml(
+  value
+){
+
+  return String(
+    value ?? ""
+  )
+
+  .replace(
+    /&/g,
+    "&amp;"
+  )
+
+  .replace(
+    /</g,
+    "&lt;"
+  )
+
+  .replace(
+    />/g,
+    "&gt;"
+  )
+
+  .replace(
+    /"/g,
+    "&quot;"
+  )
+
+  .replace(
+    /'/g,
+    "&#039;"
+  );
+
+}
+
+
+function escapeJs(
+  value
+){
+
+  return String(
+    value ?? ""
+  )
+  .replace(
+    /\\/g,
+    "\\\\"
+  )
+  .replace(
+    /'/g,
+    "\\'"
+  )
+  .replace(
+    /"/g,
+    '\\"'
+  );
+
+}
+
+
+/* =====================================================
    INITIAL LOAD
-========================================================= */
+===================================================== */
 
 loadRequests();
 
-/* Refresh every 30 seconds so status changes appear automatically */
-setInterval(loadRequests, 30000);
 </script>
 
 </body>
+
 </html>
-'''
