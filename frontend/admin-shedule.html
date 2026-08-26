@@ -2213,75 +2213,145 @@ function renderTimetable() {
     `;
 
 
-    DAYS.forEach(
-        day => {
+    DAYS.forEach(day => {
 
-            const lectures =
-                currentWeeklySchedule[day] || [];
-
-
-            if (!lectures.length) {
-
-                html += `
-
-                    <tr>
-
-                        <td class="day-cell">
-
-                            ${day}
-
-                        </td>
-
-                        <td colspan="7">
-
-                            <span
-                                style="
-                                    color:#98a2b3;
-                                    font-size:12px;
-                                "
-                            >
-                                No lectures scheduled
-                            </span>
-
-                            <button
-                                class="btn btn-light"
-                                style="
-                                    margin-left:10px;
-                                    padding:6px 9px;
-                                    font-size:11px;
-                                "
-                                onclick="addLectureForDay('${day}')"
-                            >
-                                <i class="fa-solid fa-plus"></i>
-                                Add
-                            </button>
-
-                        </td>
-
-                    </tr>
-
-                `;
-
-                return;
-
-            }
+        const lectures =
+            currentWeeklySchedule[day] || [];
 
 
-            lectures.forEach(
-                (lecture, index) => {
+        /* =================================================
+           NO LECTURES
+        ================================================= */
 
-                    html +=
-                        createLectureRow(
-                            day,
-                            index,
-                            lecture
-                        );
+        if (!lectures.length) {
 
-                }
-            );
+            html += `
+
+                <tr class="empty-day-row">
+
+                    <td class="day-cell">
+
+                        ${escapeHtml(day)}
+
+                    </td>
+
+                    <td colspan="7">
+
+                        <span
+                            style="
+                                color:#98a2b3;
+                                font-size:12px;
+                            "
+                        >
+
+                            No lectures scheduled
+
+                        </span>
+
+                        <button
+                            class="btn btn-light"
+                            style="
+                                margin-left:10px;
+                                padding:6px 9px;
+                                font-size:11px;
+                            "
+                            onclick="addLectureForDay('${escapeAttr(day)}')"
+                        >
+
+                            <i class="fa-solid fa-plus"></i>
+
+                            Add Lecture
+
+                        </button>
+
+                    </td>
+
+                </tr>
+
+            `;
+
+
+            return;
 
         }
-    );
+
+
+        /* =================================================
+           EXISTING LECTURES
+        ================================================= */
+
+        lectures.forEach(
+            (lecture, index) => {
+
+                html +=
+                    createLectureRow(
+                        day,
+                        index,
+                        lecture
+                    );
+
+            }
+        );
+
+
+        /* =================================================
+           ADD ANOTHER LECTURE BUTTON
+           -------------------------------------------------
+           IMPORTANT:
+           This is rendered AFTER the lectures of the
+           CURRENT DAY, not after the whole timetable.
+
+           Therefore:
+           Monday + -> Monday
+           Tuesday + -> Tuesday
+           Wednesday + -> Wednesday
+           etc.
+        ================================================= */
+
+        html += `
+
+            <tr class="add-lecture-row">
+
+                <td
+                    class="day-cell"
+                    style="
+                        font-weight:600;
+                        color:#667085;
+                    "
+                >
+
+                    ${escapeHtml(day)}
+
+                </td>
+
+                <td colspan="7">
+
+                    <button
+                        type="button"
+                        class="btn btn-light"
+                        style="
+                            padding:7px 11px;
+                            font-size:11px;
+                            display:inline-flex;
+                            align-items:center;
+                            gap:6px;
+                        "
+                        onclick="addLectureForDay('${escapeAttr(day)}')"
+                    >
+
+                        <i class="fa-solid fa-plus"></i>
+
+                        Add Another Lecture
+
+                    </button>
+
+                </td>
+
+            </tr>
+
+        `;
+
+    });
 
 
     html += `
@@ -2302,8 +2372,6 @@ function renderTimetable() {
     attachFacultySearchEvents();
 
 }
-
-
 /* =========================================================
    CREATE LECTURE ROW
 ========================================================= */
@@ -2365,6 +2433,13 @@ function getPrimaryAssignedMentor(lecture) {
 function isPersistedLecture(lecture) {
     return !(lecture && lecture._isNew === true);
 }
+
+
+/* =========================================================
+   CREATE LECTURE ROW
+   ---------------------------------------------------------
+   UNCHANGED WORKFLOW
+========================================================= */
 
 function createLectureRow(
     day,
@@ -2513,8 +2588,11 @@ function createLectureRow(
 
                         `
                         <span class="request-badge">
+
                             <i class="fa-solid fa-clock"></i>
+
                             Pending
+
                         </span>
                         `
 
@@ -2522,8 +2600,11 @@ function createLectureRow(
 
                         `
                         <span class="approved-badge">
+
                             <i class="fa-solid fa-check"></i>
+
                             Approved
+
                         </span>
                         `
                     }
@@ -2540,43 +2621,78 @@ function createLectureRow(
                     id="actions_${rowId}"
                 >
 
-                    ${isPersistedLecture(lecture)
-                        ? (isLectureOwnedByCurrentMentor(lecture)
-                            ? `
+                    ${
+                        isPersistedLecture(lecture)
+
+                        ? (
+
+                            isLectureOwnedByCurrentMentor(lecture)
+
+                            ?
+
+                            `
                                 <span class="ownership-badge owner">
+
                                     <i class="fa-solid fa-user-check"></i>
+
                                     Your Lecture
+
                                 </span>
+
                                 <button
                                     class="btn btn-danger"
                                     onclick="removeLectureRow('${rowId}')"
                                 >
+
                                     <i class="fa-solid fa-trash"></i>
+
                                     Remove Lecture
+
                                 </button>
-                              `
-                            : `
+                            `
+
+                            :
+
+                            `
                                 <span class="ownership-badge other">
+
                                     <i class="fa-solid fa-user-lock"></i>
-                                    Assigned to ${escapeHtml(getPrimaryAssignedMentor(lecture).name)}
+
+                                    Assigned to ${escapeHtml(
+                                        getPrimaryAssignedMentor(lecture).name
+                                    )}
+
                                 </span>
+
                                 <button
                                     class="btn btn-request"
                                     onclick="requestLectureFromRow('${rowId}')"
                                 >
+
                                     <i class="fa-solid fa-paper-plane"></i>
+
                                     Request Lecture
+
                                 </button>
-                              `)
-                        : `
+                            `
+
+                        )
+
+                        :
+
+                        `
                             <button
                                 class="btn btn-danger"
                                 onclick="removeLectureRow('${rowId}')"
                             >
+
                                 <i class="fa-solid fa-trash"></i>
+
                                 Remove Lecture
+
                             </button>
-                          `}
+                        `
+                    }
 
                 </div>
 
@@ -2587,6 +2703,7 @@ function createLectureRow(
     `;
 
 }
+
 
 
 /* =========================================================
@@ -3097,19 +3214,27 @@ document.addEventListener(
     }
 );
 
-
 /* =========================================================
    ADD LECTURE
 ========================================================= */
 
-function addLectureForDay(
-    day
-) {
+function addLectureForDay(day) {
+
+    if (!day) {
+
+        showStatus(
+            "Invalid day selected.",
+            "error"
+        );
+
+        return;
+
+    }
+
 
     if (!currentWeeklySchedule[day]) {
 
-        currentWeeklySchedule[day] =
-            [];
+        currentWeeklySchedule[day] = [];
 
     }
 
@@ -3156,6 +3281,10 @@ function addLectureForDay(
 
 /* =========================================================
    ADD LECTURE DEFAULT DAY
+   ---------------------------------------------------------
+   Kept for any existing global "Add Lecture" button.
+   Day-specific + buttons use addLectureForDay(day)
+   directly.
 ========================================================= */
 
 function addLectureRow() {
@@ -3172,8 +3301,7 @@ function addLectureRow() {
     }
 
 
-    let day =
-        DAYS[0];
+    let day = DAYS[0];
 
 
     for (const d of DAYS) {
@@ -3192,56 +3320,99 @@ function addLectureRow() {
     }
 
 
-    addLectureForDay(
-        day
-    );
+    addLectureForDay(day);
 
 }
-
-
 /* =========================================================
    REMOVE LECTURE ROW
 ========================================================= */
 
-function removeLectureRow(
-    rowId
-) {
+function removeLectureRow(rowId) {
 
     const row =
         document.getElementById(rowId);
 
+
     if (!row) return;
 
-    const day = row.dataset.day;
-    const index = Number(row.dataset.index);
-    const lecture = currentWeeklySchedule?.[day]?.[index];
+
+    const day =
+        row.dataset.day;
+
+
+    const index =
+        Number(row.dataset.index);
+
+
+    const lecture =
+        currentWeeklySchedule?.[day]?.[index];
+
 
     if (!lecture) {
-        showStatus("Lecture not found. Please reload the timetable.", "error");
-        return;
-    }
 
-    // SECURITY UX: a mentor can remove only a lecture assigned to them.
-    if (isPersistedLecture(lecture) && !isLectureOwnedByCurrentMentor(lecture)) {
         showStatus(
-            "You cannot remove another faculty member's lecture. Use Request Lecture instead.",
+            "Lecture not found. Please reload the timetable.",
             "error"
         );
+
         return;
+
     }
 
-    if (!confirm(`Remove this lecture from ${day}?`)) return;
+
+    // SECURITY UX:
+    // A mentor can remove only a lecture assigned to them.
+
+    if (
+        isPersistedLecture(lecture) &&
+        !isLectureOwnedByCurrentMentor(lecture)
+    ) {
+
+        showStatus(
+
+            "You cannot remove another faculty member's lecture. Use Request Lecture instead.",
+
+            "error"
+
+        );
+
+        return;
+
+    }
+
+
+    if (
+        !confirm(
+            `Remove this lecture from ${day}?`
+        )
+    ) {
+
+        return;
+
+    }
+
 
     if (currentWeeklySchedule[day]) {
-        currentWeeklySchedule[day].splice(index, 1);
+
+        currentWeeklySchedule[day].splice(
+            index,
+            1
+        );
+
     }
+
 
     renderTimetable();
 
+
     showStatus(
+
         "Lecture removed locally. Click Save Changes to apply the removal.",
+
         "warning"
+
     );
+
 }
 
 
