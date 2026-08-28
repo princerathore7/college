@@ -1,285 +1,2090 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Post Assignments — Admin</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500;600&display=swap"
+    rel="stylesheet"
+>
 
 <style>
-*{box-sizing:border-box;font-family:Poppins,sans-serif}
-body{margin:0;background:#f4f7fb}
 
-/* HEADER */
+*{
+    box-sizing:border-box;
+    font-family:Poppins,sans-serif;
+}
+
+body{
+    margin:0;
+    background:#f4f7fb;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
 header{
-  background:linear-gradient(135deg,#001f3f,#003366);
-  color:#fff;
-  padding:14px 20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+    background:linear-gradient(135deg,#001f3f,#003366);
+    color:#fff;
+    padding:14px 20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
 }
-header h1{font-family:Playfair Display;font-size:1.4rem}
+
+header h1{
+    font-family:Playfair Display;
+    font-size:1.4rem;
+    margin:0;
+}
+
 header button{
-  padding:8px 14px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-  font-weight:600;
+    padding:8px 14px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:600;
 }
-.back-btn{background:#fff;color:#001f3f}
-.logout-btn{background:#fff;color:#001f3f}
 
-/* MAIN */
-main{max-width:1000px;margin:30px auto;padding:20px}
+.back-btn{
+    background:#fff;
+    color:#001f3f;
+}
+
+.logout-btn{
+    background:#fff;
+    color:#001f3f;
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+main{
+    max-width:1100px;
+    margin:30px auto;
+    padding:20px;
+}
+
+
+/* =========================================================
+   TABS
+========================================================= */
+
+.tabs{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+    background:#fff;
+    padding:8px;
+    border-radius:12px;
+    box-shadow:0 6px 16px rgba(0,0,0,.08);
+}
+
+.tab-btn{
+    flex:1;
+    border:none;
+    padding:12px 15px;
+    border-radius:8px;
+    background:#eef3f8;
+    color:#001f3f;
+    font-weight:600;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.tab-btn:hover{
+    background:#dce8f5;
+}
+
+.tab-btn.active{
+    background:#001f3f;
+    color:#fff;
+}
+
+
+/* =========================================================
+   TAB CONTENT
+========================================================= */
+
+.tab-content{
+    display:none;
+}
+
+.tab-content.active{
+    display:block;
+}
+
+
+/* =========================================================
+   SECTION
+========================================================= */
+
 .section{
-  background:#fff;
-  padding:20px;
-  border-radius:12px;
-  box-shadow:0 6px 16px rgba(0,0,0,.08);
-  margin-bottom:20px;
+    background:#fff;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 6px 16px rgba(0,0,0,.08);
+    margin-bottom:20px;
 }
+
 .section-title{
-  font-family:Playfair Display;
-  color:#001f3f;
-  margin-bottom:15px;
+    font-family:Playfair Display;
+    color:#001f3f;
+    margin-top:0;
+    margin-bottom:15px;
 }
 
-/* FORM */
-form{display:flex;flex-direction:column;gap:10px}
-label{font-weight:500}
-input,select{
-  padding:10px;
-  border-radius:8px;
-  border:1px solid #ccc;
+
+/* =========================================================
+   FORM
+========================================================= */
+
+form{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
 }
+
+label{
+    font-weight:500;
+}
+
+input,
+select{
+    padding:10px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    outline:none;
+}
+
+input:focus,
+select:focus{
+    border-color:#003366;
+}
+
 .submitBtn{
-  background:#001f3f;
-  color:#fff;
-  padding:10px;
-  border:none;
-  border-radius:8px;
-  font-weight:600;
-  cursor:pointer;
+    background:#001f3f;
+    color:#fff;
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    font-weight:600;
+    cursor:pointer;
 }
-.submitBtn:hover{background:#003366}
-.message{margin-top:10px;font-weight:600}
 
-/* TABLE */
-table{width:100%;border-collapse:collapse;margin-top:10px}
-th,td{padding:10px;border-bottom:1px solid #eee}
-th{background:#e3ecf7;color:#001f3f}
-.deleteBtn{
-  background:#d32f2f;
-  color:#fff;
-  border:none;
-  padding:6px 12px;
-  border-radius:6px;
-  cursor:pointer;
+.submitBtn:hover{
+    background:#003366;
 }
-.deleteBtn:hover{background:#b71c1c}
+
+.message{
+    margin-top:10px;
+    font-weight:600;
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+.search-box{
+    display:flex;
+    gap:10px;
+    margin-bottom:15px;
+}
+
+.search-box input{
+    flex:1;
+}
+
+.clear-search{
+    background:#697586;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    padding:10px 15px;
+    cursor:pointer;
+    font-weight:600;
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.table-wrapper{
+    width:100%;
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+}
+
+th,
+td{
+    padding:10px;
+    border-bottom:1px solid #eee;
+    text-align:left;
+}
+
+th{
+    background:#e3ecf7;
+    color:#001f3f;
+    white-space:nowrap;
+}
+
+td{
+    vertical-align:middle;
+}
+
+
+/* =========================================================
+   DELETE BUTTON
+========================================================= */
+
+.deleteBtn{
+    background:#d32f2f;
+    color:#fff;
+    border:none;
+    padding:6px 12px;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.deleteBtn:hover{
+    background:#b71c1c;
+}
+
+
+/* =========================================================
+   LOCKED / NOT OWNED
+========================================================= */
+
+.not-owned{
+    color:#98a2b3;
+    font-size:12px;
+    font-weight:500;
+}
+
+.owner-badge{
+    display:inline-block;
+    padding:5px 8px;
+    border-radius:20px;
+    background:#d4edda;
+    color:#155724;
+    font-size:11px;
+    font-weight:600;
+    margin-bottom:5px;
+}
+
+
+/* =========================================================
+   INFO BOX
+========================================================= */
+
+.info-box{
+    background:#f5f8fc;
+    border-left:4px solid #003366;
+    padding:12px;
+    border-radius:7px;
+    margin-bottom:15px;
+    color:#475467;
+    font-size:13px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:700px){
+
+    header{
+        padding:12px;
+    }
+
+    header h1{
+        font-size:1.1rem;
+    }
+
+    main{
+        padding:12px;
+        margin:15px auto;
+    }
+
+    .tabs{
+        flex-direction:column;
+    }
+
+    .search-box{
+        flex-direction:column;
+    }
+
+    th,
+    td{
+        padding:8px 6px;
+        font-size:12px;
+    }
+
+}
+
 </style>
+
 </head>
+
 
 <body>
 
+
+<!-- =========================================================
+     HEADER
+========================================================= -->
+
 <header>
-  <button class="back-btn" onclick="history.back()">← Back</button>
-  <h1>Post Assignments</h1>
-  <button class="logout-btn" onclick="logout()">Logout</button>
+
+    <button
+        class="back-btn"
+        onclick="history.back()"
+    >
+        ← Back
+    </button>
+
+    <h1>Post Assignments</h1>
+
+    <button
+        class="logout-btn"
+        onclick="logout()"
+    >
+        Logout
+    </button>
+
 </header>
+
 
 <main>
 
-<!-- ADD ASSIGNMENT -->
-<div class="section">
-<h2 class="section-title">Add New Assignment</h2>
 
-<form id="assignmentForm">
+<!-- =========================================================
+     TABS
+========================================================= -->
 
-<label>Year</label>
-<select id="year">
-  <option value="">Select Year</option>
-  <option value="1">1st Year</option>
-  <option value="2">2nd Year</option>
-  <option value="3">3rd Year</option>
-  <option value="4">4th Year</option>
-</select>
+<div class="tabs">
 
-<label>Branch</label>
-<select id="branch">
-  <option value="">Select Branch</option>
-  <option value="CSE">CSE</option>
-  <option value="IT">IT</option>
-  <option value="AIML">AIML</option>
-  <option value="DS">DS</option>
- 
-  <option value="AIML">AIML - Artificial Intelligence & Machine Learning</option>
-  <option value="AIDS">AIDS - Artificial Intelligence & Data Science</option>
-  <option value="CSBS">CSBS - Computer Science & Business Systems</option>
-  <option value="IOT">IoT - Internet of Things</option>
-  <option value="ECE">ECE - Electronics & Communication</option>
-  <option value="EEE">EEE - Electrical & Electronics</option>
-  <option value="EE">EE - Electrical Engineering</option>
-  <option value="ME">ME - Mechanical Engineering</option>
-  <option value="AU">AU - Automobile Engineering</option>
-  <option value="MT">MT - Mechatronics</option>
-  <option value="CE">CE - Civil Engineering</option>
-  <option value="CHE">CHE - Chemical Engineering</option>
-  <option value="MIN">MIN - Mining Engineering</option>
-  <option value="PET">PET - Petroleum Engineering</option>
-  <option value="BT">BT - Biotechnology</option>
-  <option value="BME">BME - Biomedical Engineering</option>
-  <option value="FT">FT - Food Technology</option>
-  <option value="AG">AG - Agriculture Engineering</option>
-  <option value="ENV">ENV - Environmental Engineering</option>
-  <option value="TX">TX - Textile Engineering</option>
-  <option value="PIE">PIE - Production & Industrial Engineering</option>
-  <option value="IM">IM - Industrial Management</option>
+    <button
+        class="tab-btn active"
+        id="postTabBtn"
+        onclick="switchTab('post')"
+    >
+        ➕ Post Assignments
+    </button>
 
-  <!-- Diploma -->
-  <option value="DCSE">Diploma - Computer Science</option>
-  <option value="DIT">Diploma - IT</option>
-  <option value="DCYBER">Diploma - Cyber Security</option>
-  <option value="DECE">Diploma - ECE</option>
-  <option value="DEEE">Diploma - EEE</option>
-  <option value="DEE">Diploma - Electrical</option>
-  <option value="DME">Diploma - Mechanical</option>
-  <option value="DCE">Diploma - Civil</option>
-  <option value="DMIN">Diploma - Mining</option>
-  <option value="DCHE">Diploma - Chemical</option>
-  <option value="DAG">Diploma - Agriculture</option>
-  <option value="DTX">Diploma - Textile</option>
-  <option value="DPLASTIC">Diploma - Plastic</option>
-  <option value="DPOLY">Diploma - Polymer</option>
+    <button
+        class="tab-btn"
+        id="deleteTabBtn"
+        onclick="switchTab('delete')"
+    >
+        🗑 Delete Assignments
+    </button>
 
-  <!-- Pharmacy -->
-  <option value="DPHARMA">D.Pharmacy</option>
-  <option value="BPHARMA">B.Pharmacy</option>
-  <option value="MPHARMA">M.Pharmacy</option>
-</select>
-
-<label>Section</label>
-<select id="section">
-  <option value="">Select Section</option>
-  <option value="1">1</option>
-  <option value="2">2</option>
-  <option value="3">3</option>
-  <option value="4">4</option>
-  <option value="5">5</option>
-</select>
-
-<label>Title</label>
-<input id="title" required>
-
-<label>Subject</label>
-<input id="subject" required>
-
-<label>Deadline</label>
-<input type="date" id="deadline" required>
-
-<button class="submitBtn">Post Assignment</button>
-</form>
-
-<div class="message" id="message"></div>
 </div>
 
-<!-- LIST -->
-<div class="section">
-<h2 class="section-title">Posted Assignments</h2>
-<table>
-<thead>
-<tr>
-<th>Class</th>
-<th>Title</th>
-<th>Subject</th>
-<th>Deadline</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody id="assignmentTable">
-<tr><td colspan="5" style="text-align:center">Loading...</td></tr>
-</tbody>
-</table>
+
+
+<!-- =========================================================
+     POST ASSIGNMENTS TAB
+========================================================= -->
+
+<div
+    class="tab-content active"
+    id="postTab"
+>
+
+
+    <!-- =====================================================
+         ADD ASSIGNMENT
+    ====================================================== -->
+
+    <div class="section">
+
+        <h2 class="section-title">
+            Add New Assignment
+        </h2>
+
+
+        <form id="assignmentForm">
+
+
+            <label>
+                Year
+            </label>
+
+            <select id="year">
+
+                <option value="">
+                    Select Year
+                </option>
+
+                <option value="1">
+                    1st Year
+                </option>
+
+                <option value="2">
+                    2nd Year
+                </option>
+
+                <option value="3">
+                    3rd Year
+                </option>
+
+                <option value="4">
+                    4th Year
+                </option>
+
+            </select>
+
+
+
+            <label>
+                Branch
+            </label>
+
+            <select id="branch">
+
+                <option value="">
+                    Select Branch
+                </option>
+
+                <option value="CSE">
+                    CSE
+                </option>
+
+                <option value="IT">
+                    IT
+                </option>
+
+                <option value="AIML">
+                    AIML
+                </option>
+
+                <option value="DS">
+                    DS
+                </option>
+
+                <option value="AIDS">
+                    AIDS - Artificial Intelligence & Data Science
+                </option>
+
+                <option value="CSBS">
+                    CSBS - Computer Science & Business Systems
+                </option>
+
+                <option value="IOT">
+                    IoT - Internet of Things
+                </option>
+
+                <option value="ECE">
+                    ECE - Electronics & Communication
+                </option>
+
+                <option value="EEE">
+                    EEE - Electrical & Electronics
+                </option>
+
+                <option value="EE">
+                    EE - Electrical Engineering
+                </option>
+
+                <option value="ME">
+                    ME - Mechanical Engineering
+                </option>
+
+                <option value="AU">
+                    AU - Automobile Engineering
+                </option>
+
+                <option value="MT">
+                    MT - Mechatronics
+                </option>
+
+                <option value="CE">
+                    CE - Civil Engineering
+                </option>
+
+                <option value="CHE">
+                    CHE - Chemical Engineering
+                </option>
+
+                <option value="MIN">
+                    MIN - Mining Engineering
+                </option>
+
+                <option value="PET">
+                    PET - Petroleum Engineering
+                </option>
+
+                <option value="BT">
+                    BT - Biotechnology
+                </option>
+
+                <option value="BME">
+                    BME - Biomedical Engineering
+                </option>
+
+                <option value="FT">
+                    FT - Food Technology
+                </option>
+
+                <option value="AG">
+                    AG - Agriculture Engineering
+                </option>
+
+                <option value="ENV">
+                    ENV - Environmental Engineering
+                </option>
+
+                <option value="TX">
+                    TX - Textile Engineering
+                </option>
+
+                <option value="PIE">
+                    PIE - Production & Industrial Engineering
+                </option>
+
+                <option value="IM">
+                    IM - Industrial Management
+                </option>
+
+
+                <!-- DIPLOMA -->
+
+                <option value="DCSE">
+                    Diploma - Computer Science
+                </option>
+
+                <option value="DIT">
+                    Diploma - IT
+                </option>
+
+                <option value="DCYBER">
+                    Diploma - Cyber Security
+                </option>
+
+                <option value="DECE">
+                    Diploma - ECE
+                </option>
+
+                <option value="DEEE">
+                    Diploma - EEE
+                </option>
+
+                <option value="DEE">
+                    Diploma - Electrical
+                </option>
+
+                <option value="DME">
+                    Diploma - Mechanical
+                </option>
+
+                <option value="DCE">
+                    Diploma - Civil
+                </option>
+
+                <option value="DMIN">
+                    Diploma - Mining
+                </option>
+
+                <option value="DCHE">
+                    Diploma - Chemical
+                </option>
+
+                <option value="DAG">
+                    Diploma - Agriculture
+                </option>
+
+                <option value="DTX">
+                    Diploma - Textile
+                </option>
+
+                <option value="DPLASTIC">
+                    Diploma - Plastic
+                </option>
+
+                <option value="DPOLY">
+                    Diploma - Polymer
+                </option>
+
+
+                <!-- PHARMACY -->
+
+                <option value="DPHARMA">
+                    D.Pharmacy
+                </option>
+
+                <option value="BPHARMA">
+                    B.Pharmacy
+                </option>
+
+                <option value="MPHARMA">
+                    M.Pharmacy
+                </option>
+
+            </select>
+
+
+
+            <label>
+                Section
+            </label>
+
+            <select id="section">
+
+                <option value="">
+                    Select Section
+                </option>
+
+                <option value="1">
+                    1
+                </option>
+
+                <option value="2">
+                    2
+                </option>
+
+                <option value="3">
+                    3
+                </option>
+
+                <option value="4">
+                    4
+                </option>
+
+                <option value="5">
+                    5
+                </option>
+
+            </select>
+
+
+
+            <label>
+                Title
+            </label>
+
+            <input
+                id="title"
+                required
+            >
+
+
+
+            <label>
+                Subject
+            </label>
+
+            <input
+                id="subject"
+                required
+            >
+
+
+
+            <label>
+                Deadline
+            </label>
+
+            <input
+                type="date"
+                id="deadline"
+                required
+            >
+
+
+
+            <button
+                class="submitBtn"
+                type="submit"
+            >
+                Post Assignment
+            </button>
+
+        </form>
+
+
+        <div
+            class="message"
+            id="message"
+        ></div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         POSTED ASSIGNMENTS
+    ====================================================== -->
+
+    <div class="section">
+
+        <h2 class="section-title">
+            Posted Assignments
+        </h2>
+
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Class
+                        </th>
+
+                        <th>
+                            Title
+                        </th>
+
+                        <th>
+                            Subject
+                        </th>
+
+                        <th>
+                            Deadline
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="assignmentTable">
+
+                    <tr>
+
+                        <td
+                            colspan="4"
+                            style="text-align:center"
+                        >
+                            Loading...
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
 </div>
+
+
+
+<!-- =========================================================
+     DELETE ASSIGNMENTS TAB
+========================================================= -->
+
+<div
+    class="tab-content"
+    id="deleteTab"
+>
+
+
+    <div class="section">
+
+        <h2 class="section-title">
+            Delete Assignments
+        </h2>
+
+
+        <div class="info-box">
+
+            🔐 You can delete only assignments posted by
+            <b>this mentor from this device</b>.
+            Other assignments will remain visible but
+            cannot be deleted from this account/device.
+
+        </div>
+
+
+        <!-- SEARCH -->
+
+        <div class="search-box">
+
+            <input
+                type="text"
+                id="assignmentSearch"
+                placeholder="Search by class, title or subject..."
+                oninput="filterAssignments()"
+            >
+
+            <button
+                type="button"
+                class="clear-search"
+                onclick="clearSearch()"
+            >
+                Clear
+            </button>
+
+        </div>
+
+
+        <!-- TABLE -->
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Class
+                        </th>
+
+                        <th>
+                            Title
+                        </th>
+
+                        <th>
+                            Subject
+                        </th>
+
+                        <th>
+                            Deadline
+                        </th>
+
+                        <th>
+                            Posted By
+                        </th>
+
+                        <th>
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="deleteAssignmentTable">
+
+                    <tr>
+
+                        <td
+                            colspan="6"
+                            style="text-align:center"
+                        >
+                            Loading...
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
 
 </main>
 
+
+
 <script>
-/* ACCESS CONTROL */
-const mentorId = localStorage.getItem("mentorId");
-const src = sessionStorage.getItem("accessSource");
-if(!mentorId || !["ad","admin"].includes(src)){
-  document.body.innerHTML="<h2 style='text-align:center;margin-top:20vh;color:red'>Unauthorized</h2>";
-  throw "";
+
+
+/* =========================================================
+   ACCESS CONTROL
+========================================================= */
+
+const mentorId =
+    localStorage.getItem("mentorId");
+
+const src =
+    sessionStorage.getItem("accessSource");
+
+
+if(
+    !mentorId ||
+    !["ad","admin"].includes(src)
+){
+
+    document.body.innerHTML =
+
+        "<h2 style='text-align:center;margin-top:20vh;color:red'>Unauthorized</h2>";
+
+    throw new Error("Unauthorized");
+
 }
+
+
+
+/* =========================================================
+   API
+========================================================= */
+
+const API_BASE =
+    "https://college-hwbb.onrender.com/api/assignments";
+
+
+
+/* =========================================================
+   DEVICE ID
+   ---------------------------------------------------------
+   One permanent ID for this browser/device storage.
+========================================================= */
+
+function getDeviceId(){
+
+    let deviceId =
+        localStorage.getItem("assignmentDeviceId");
+
+
+    if(!deviceId){
+
+        deviceId =
+            generateDeviceId();
+
+        localStorage.setItem(
+            "assignmentDeviceId",
+            deviceId
+        );
+
+    }
+
+
+    return deviceId;
+
+}
+
+
+function generateDeviceId(){
+
+    if(
+        window.crypto &&
+        crypto.randomUUID
+    ){
+
+        return crypto.randomUUID();
+
+    }
+
+
+    return (
+
+        "device-" +
+
+        Date.now() +
+
+        "-" +
+
+        Math.random()
+            .toString(36)
+            .substring(2,12)
+
+    );
+
+}
+
+
+const deviceId =
+    getDeviceId();
+
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
 
 function logout(){
-  localStorage.clear();
-  sessionStorage.clear();
-  location.href="mentor-login.html";
+
+    localStorage.clear();
+
+    sessionStorage.clear();
+
+    location.href =
+        "mentor-login.html";
+
 }
 
-/* FETCH */
+
+
+/* =========================================================
+   TAB SWITCH
+========================================================= */
+
+function switchTab(tab){
+
+    const postTab =
+        document.getElementById("postTab");
+
+    const deleteTab =
+        document.getElementById("deleteTab");
+
+    const postTabBtn =
+        document.getElementById("postTabBtn");
+
+    const deleteTabBtn =
+        document.getElementById("deleteTabBtn");
+
+
+    if(tab === "post"){
+
+        postTab.classList.add("active");
+
+        deleteTab.classList.remove("active");
+
+        postTabBtn.classList.add("active");
+
+        deleteTabBtn.classList.remove("active");
+
+    }
+    else{
+
+        postTab.classList.remove("active");
+
+        deleteTab.classList.add("active");
+
+        postTabBtn.classList.remove("active");
+
+        deleteTabBtn.classList.add("active");
+
+
+        /*
+         * Refresh when opening delete tab so
+         * latest assignments are visible.
+         */
+
+        fetchAssignmentsForDelete();
+
+    }
+
+}
+
+
+
+/* =========================================================
+   GLOBAL ASSIGNMENTS CACHE
+========================================================= */
+
+let allAssignments = [];
+
+
+
+/* =========================================================
+   FETCH ASSIGNMENTS
+========================================================= */
+
 async function fetchAssignments(){
-  const tbody=document.getElementById("assignmentTable");
-  const res=await fetch("https://college-hwbb.onrender.com/api/assignments");
-  const data=await res.json();
-  tbody.innerHTML="";
-  if(data.assignments.length===0){
-    tbody.innerHTML="<tr><td colspan='5' style='text-align:center'>No assignments</td></tr>";
-    return;
-  }
-  data.assignments.forEach(a=>{
-    tbody.innerHTML+=`
-    <tr>
-      <td>${a.class}</td>
-      <td>${a.title}</td>
-      <td>${a.subject}</td>
-      <td>${a.deadline}</td>
-      <td><button class="deleteBtn" onclick="deleteAssignment('${a.assignmentId}')">Delete</button></td>
-    </tr>`;
-  });
+
+    const tbody =
+        document.getElementById(
+            "assignmentTable"
+        );
+
+
+    try{
+
+        const res =
+            await fetch(API_BASE);
+
+
+        const data =
+            await res.json();
+
+
+        if(!res.ok){
+
+            throw new Error(
+                data.message ||
+                "Failed to fetch assignments"
+            );
+
+        }
+
+
+        allAssignments =
+            Array.isArray(data.assignments)
+                ? data.assignments
+                : [];
+
+
+        renderPostAssignments();
+
+
+    }
+    catch(error){
+
+        console.error(error);
+
+
+        tbody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="4"
+                    style="text-align:center;color:red"
+                >
+
+                    Unable to load assignments.
+
+                </td>
+
+            </tr>
+
+        `;
+
+    }
+
 }
 
-/* DELETE */
-async function deleteAssignment(id){
-  if(!confirm("Delete this assignment?")) return;
-  const res=await fetch(`https://college-hwbb.onrender.com/api/assignments/${id}`,{method:"DELETE"});
-  const data=await res.json();
-  if(data.success){
-    alert("Deleted");
-    fetchAssignments();
-  }
+
+
+/* =========================================================
+   RENDER POST TAB
+   ---------------------------------------------------------
+   Same functionality as before, but no delete button here.
+========================================================= */
+
+function renderPostAssignments(){
+
+    const tbody =
+        document.getElementById(
+            "assignmentTable"
+        );
+
+
+    tbody.innerHTML = "";
+
+
+    if(
+        allAssignments.length === 0
+    ){
+
+        tbody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="4"
+                    style="text-align:center"
+                >
+                    No assignments
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    allAssignments.forEach(a => {
+
+        const row =
+            document.createElement("tr");
+
+
+        row.innerHTML = `
+
+            <td>
+                ${escapeHtml(a.class || "")}
+            </td>
+
+            <td>
+                ${escapeHtml(a.title || "")}
+            </td>
+
+            <td>
+                ${escapeHtml(a.subject || "")}
+            </td>
+
+            <td>
+                ${escapeHtml(a.deadline || "")}
+            </td>
+
+        `;
+
+
+        tbody.appendChild(row);
+
+    });
+
 }
 
-/* POST */
-document.getElementById("assignmentForm").onsubmit=async e=>{
-  e.preventDefault();
-  const y=year.value,b=branch.value,s=section.value;
-  if(!y||!b||!s){alert("Select class properly");return;}
-  const className=`${y}${b}${s}`;
 
-  const res=await fetch("https://college-hwbb.onrender.com/api/assignments",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      class:className,
-      title:title.value,
-      subject:subject.value,
-      deadline:deadline.value
-    })
-  });
 
-  const data=await res.json();
-  message.textContent=data.success?"Assignment Posted":"Error";
-  message.style.color=data.success?"green":"red";
-  if(data.success){assignmentForm.reset();fetchAssignments();}
+/* =========================================================
+   OWNERSHIP CHECK
+   ---------------------------------------------------------
+   Assignment is deletable only when BOTH:
+   1. mentorId matches current mentor
+   2. deviceId matches current device
+========================================================= */
+
+function isMyAssignment(assignment){
+
+    if(!assignment){
+
+        return false;
+
+    }
+
+
+    const assignmentMentorId =
+        String(
+            assignment.mentorId ||
+            assignment.postedByMentorId ||
+            assignment.createdByMentorId ||
+            ""
+        ).trim();
+
+
+    const assignmentDeviceId =
+        String(
+            assignment.deviceId ||
+            assignment.postedByDeviceId ||
+            assignment.createdByDeviceId ||
+            ""
+        ).trim();
+
+
+    const currentMentorId =
+        String(
+            mentorId || ""
+        ).trim();
+
+
+    const currentDeviceId =
+        String(
+            deviceId || ""
+        ).trim();
+
+
+    return (
+
+        assignmentMentorId !== "" &&
+
+        assignmentDeviceId !== "" &&
+
+        assignmentMentorId === currentMentorId &&
+
+        assignmentDeviceId === currentDeviceId
+
+    );
+
+}
+
+
+
+/* =========================================================
+   DELETE TAB FETCH
+========================================================= */
+
+async function fetchAssignmentsForDelete(){
+
+    const tbody =
+        document.getElementById(
+            "deleteAssignmentTable"
+        );
+
+
+    tbody.innerHTML = `
+
+        <tr>
+
+            <td
+                colspan="6"
+                style="text-align:center"
+            >
+                Loading assignments...
+            </td>
+
+        </tr>
+
+    `;
+
+
+    try{
+
+        const res =
+            await fetch(API_BASE);
+
+
+        const data =
+            await res.json();
+
+
+        if(!res.ok){
+
+            throw new Error(
+                data.message ||
+                "Failed to fetch assignments"
+            );
+
+        }
+
+
+        allAssignments =
+            Array.isArray(data.assignments)
+                ? data.assignments
+                : [];
+
+
+        renderDeleteAssignments(
+            allAssignments
+        );
+
+    }
+    catch(error){
+
+        console.error(error);
+
+
+        tbody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="6"
+                    style="text-align:center;color:red"
+                >
+
+                    ${escapeHtml(
+                        error.message ||
+                        "Unable to load assignments."
+                    )}
+
+                </td>
+
+            </tr>
+
+        `;
+
+    }
+
+}
+
+
+
+/* =========================================================
+   RENDER DELETE TAB
+========================================================= */
+
+function renderDeleteAssignments(
+    assignments
+){
+
+    const tbody =
+        document.getElementById(
+            "deleteAssignmentTable"
+        );
+
+
+    tbody.innerHTML = "";
+
+
+    if(
+        !assignments ||
+        assignments.length === 0
+    ){
+
+        tbody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="6"
+                    style="text-align:center"
+                >
+                    No assignments found
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    assignments.forEach(a => {
+
+        const row =
+            document.createElement("tr");
+
+
+        const owned =
+            isMyAssignment(a);
+
+
+        let actionHtml = "";
+
+
+        /*
+         * IMPORTANT:
+         * Delete button exists ONLY for owned
+         * assignment.
+         */
+
+        if(owned){
+
+            actionHtml = `
+
+                <span class="owner-badge">
+
+                    Your Assignment
+
+                </span>
+
+                <br>
+
+                <button
+                    class="deleteBtn"
+                    onclick="deleteAssignment('${escapeJs(String(a.assignmentId || ""))}')"
+                >
+
+                    Delete
+
+                </button>
+
+            `;
+
+        }
+        else{
+
+            actionHtml = `
+
+                <span class="not-owned">
+
+                    Not available
+
+                </span>
+
+            `;
+
+        }
+
+
+        row.innerHTML = `
+
+            <td>
+                ${escapeHtml(a.class || "")}
+            </td>
+
+            <td>
+                ${escapeHtml(a.title || "")}
+            </td>
+
+            <td>
+                ${escapeHtml(a.subject || "")}
+            </td>
+
+            <td>
+                ${escapeHtml(a.deadline || "")}
+            </td>
+
+            <td>
+                ${owned
+                    ? "You"
+                    : "Other Mentor"
+                }
+            </td>
+
+            <td>
+                ${actionHtml}
+            </td>
+
+        `;
+
+
+        tbody.appendChild(row);
+
+    });
+
+}
+
+
+
+/* =========================================================
+   SEARCH / FILTER
+========================================================= */
+
+function filterAssignments(){
+
+    const searchInput =
+        document.getElementById(
+            "assignmentSearch"
+        );
+
+
+    const query =
+        String(
+            searchInput.value || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    if(!query){
+
+        renderDeleteAssignments(
+            allAssignments
+        );
+
+        return;
+
+    }
+
+
+    const filtered =
+        allAssignments.filter(a => {
+
+            const className =
+                String(
+                    a.class || ""
+                ).toLowerCase();
+
+
+            const title =
+                String(
+                    a.title || ""
+                ).toLowerCase();
+
+
+            const subject =
+                String(
+                    a.subject || ""
+                ).toLowerCase();
+
+
+            const deadline =
+                String(
+                    a.deadline || ""
+                ).toLowerCase();
+
+
+            return (
+
+                className.includes(query) ||
+
+                title.includes(query) ||
+
+                subject.includes(query) ||
+
+                deadline.includes(query)
+
+            );
+
+        });
+
+
+    renderDeleteAssignments(
+        filtered
+    );
+
+}
+
+
+
+/* =========================================================
+   CLEAR SEARCH
+========================================================= */
+
+function clearSearch(){
+
+    const input =
+        document.getElementById(
+            "assignmentSearch"
+        );
+
+
+    input.value = "";
+
+
+    renderDeleteAssignments(
+        allAssignments
+    );
+
+}
+
+
+
+/* =========================================================
+   DELETE ASSIGNMENT
+========================================================= */
+
+async function deleteAssignment(
+    id
+){
+
+    if(!id){
+
+        alert(
+            "Invalid assignment ID."
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Find assignment locally first.
+     */
+
+    const assignment =
+        allAssignments.find(
+            a =>
+                String(
+                    a.assignmentId || ""
+                ) === String(id)
+        );
+
+
+    /*
+     * Frontend ownership check.
+     */
+
+    if(
+        !assignment ||
+        !isMyAssignment(assignment)
+    ){
+
+        alert(
+            "You are not authorized to delete this assignment."
+        );
+
+        return;
+
+    }
+
+
+    if(
+        !confirm(
+            "Delete this assignment?"
+        )
+    ){
+
+        return;
+
+    }
+
+
+    try{
+
+        /*
+         * Send mentor + device information.
+         *
+         * Backend should verify these values before
+         * actually deleting the assignment.
+         */
+
+        const res =
+            await fetch(
+                `${API_BASE}/${encodeURIComponent(id)}`,
+                {
+                    method:"DELETE",
+
+                    headers:{
+                        "Content-Type":
+                            "application/json",
+
+                        "X-Mentor-ID":
+                            String(mentorId),
+
+                        "X-Device-ID":
+                            String(deviceId)
+                    },
+
+                    body:JSON.stringify({
+
+                        mentorId:
+                            mentorId,
+
+                        deviceId:
+                            deviceId
+
+                    })
+
+                }
+            );
+
+
+        const data =
+            await res.json();
+
+
+        if(!res.ok || !data.success){
+
+            throw new Error(
+                data.message ||
+                "Unable to delete assignment."
+            );
+
+        }
+
+
+        alert(
+            "Assignment deleted successfully."
+        );
+
+
+        /*
+         * Refresh both lists.
+         */
+
+        await fetchAssignments();
+
+        await fetchAssignmentsForDelete();
+
+    }
+    catch(error){
+
+        console.error(error);
+
+
+        alert(
+            error.message ||
+            "Failed to delete assignment."
+        );
+
+    }
+
+}
+
+
+
+/* =========================================================
+   POST ASSIGNMENT
+========================================================= */
+
+document
+.getElementById("assignmentForm")
+.onsubmit = async e => {
+
+    e.preventDefault();
+
+
+    const y =
+        document.getElementById(
+            "year"
+        ).value;
+
+
+    const b =
+        document.getElementById(
+            "branch"
+        ).value;
+
+
+    const s =
+        document.getElementById(
+            "section"
+        ).value;
+
+
+    const titleValue =
+        document.getElementById(
+            "title"
+        ).value.trim();
+
+
+    const subjectValue =
+        document.getElementById(
+            "subject"
+        ).value.trim();
+
+
+    const deadlineValue =
+        document.getElementById(
+            "deadline"
+        ).value;
+
+
+    const messageElement =
+        document.getElementById(
+            "message"
+        );
+
+
+    if(!y || !b || !s){
+
+        alert(
+            "Select class properly"
+        );
+
+        return;
+
+    }
+
+
+    if(!titleValue){
+
+        alert(
+            "Enter assignment title."
+        );
+
+        return;
+
+    }
+
+
+    if(!subjectValue){
+
+        alert(
+            "Enter subject."
+        );
+
+        return;
+
+    }
+
+
+    if(!deadlineValue){
+
+        alert(
+            "Select deadline."
+        );
+
+        return;
+
+    }
+
+
+    const className =
+        `${y}${b}${s}`;
+
+
+    try{
+
+        const res =
+            await fetch(
+                API_BASE,
+                {
+                    method:"POST",
+
+                    headers:{
+                        "Content-Type":
+                            "application/json",
+
+                        /*
+                         * These headers allow the backend
+                         * to identify the creator.
+                         */
+
+                        "X-Mentor-ID":
+                            String(mentorId),
+
+                        "X-Device-ID":
+                            String(deviceId)
+
+                    },
+
+                    body:JSON.stringify({
+
+                        class:
+                            className,
+
+                        title:
+                            titleValue,
+
+                        subject:
+                            subjectValue,
+
+                        deadline:
+                            deadlineValue,
+
+                        /*
+                         * Ownership information.
+                         *
+                         * Backend should save these fields
+                         * in the assignment document.
+                         */
+
+                        mentorId:
+                            mentorId,
+
+                        postedByMentorId:
+                            mentorId,
+
+                        deviceId:
+                            deviceId,
+
+                        postedByDeviceId:
+                            deviceId
+
+                    })
+
+                }
+            );
+
+
+        const data =
+            await res.json();
+
+
+        if(!res.ok){
+
+            throw new Error(
+                data.message ||
+                "Failed to post assignment."
+            );
+
+        }
+
+
+        messageElement.textContent =
+            data.success
+                ? "Assignment Posted Successfully"
+                : (
+                    data.message ||
+                    "Error"
+                );
+
+
+        messageElement.style.color =
+            data.success
+                ? "green"
+                : "red";
+
+
+        if(data.success){
+
+            document
+                .getElementById(
+                    "assignmentForm"
+                )
+                .reset();
+
+
+            /*
+             * Refresh assignment list.
+             */
+
+            await fetchAssignments();
+
+        }
+
+    }
+    catch(error){
+
+        console.error(error);
+
+
+        messageElement.textContent =
+            error.message ||
+            "Unable to post assignment.";
+
+
+        messageElement.style.color =
+            "red";
+
+    }
+
 };
 
+
+
+/* =========================================================
+   HTML ESCAPE
+========================================================= */
+
+function escapeHtml(value){
+
+    return String(value ?? "")
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+
+/* =========================================================
+   JAVASCRIPT STRING ESCAPE
+========================================================= */
+
+function escapeJs(value){
+
+    return String(value ?? "")
+        .replace(
+            /\\/g,
+            "\\\\"
+        )
+        .replace(
+            /'/g,
+            "\\'"
+        )
+        .replace(
+            /"/g,
+            '\\"'
+        )
+        .replace(
+            /\r/g,
+            "\\r"
+        )
+        .replace(
+            /\n/g,
+            "\\n"
+        );
+
+}
+
+
+
+/* =========================================================
+   INITIAL LOAD
+========================================================= */
+
 fetchAssignments();
+
 </script>
 
 </body>
 </html>
+```
