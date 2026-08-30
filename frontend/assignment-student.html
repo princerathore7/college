@@ -1903,52 +1903,50 @@ title="Refresh assignments"
     );
 
 
-    /* =========================================================
-       GET STUDENT CLASS
-    ========================================================= */
+   /* =========================================================
+   GET STUDENT CLASS
+========================================================= */
 
-    function getStudentClass() {
+function getStudentClass() {
 
-        const possibleKeys = [
+    // 1. First try studentProfile
+    const studentProfile = localStorage.getItem("studentProfile");
 
-            "studentClass",
+    if (studentProfile) {
+        try {
 
-            "class",
+            const profile = JSON.parse(studentProfile);
 
-            "student_class",
-
-            "studentClassName",
-
-            "userClass"
-
-        ];
-
-
-        for (
-            const key of possibleKeys
-        ) {
-
-            const value =
-                localStorage.getItem(key);
-
-
-            if (
-                value &&
-                value.trim()
-            ) {
-
-                return value.trim();
-
+            if (profile.class && profile.class.trim()) {
+                return profile.class.trim();
             }
 
+        } catch (error) {
+            console.error("Error parsing studentProfile:", error);
         }
-
-
-        return "";
-
     }
 
+    // 2. Fallback: check other possible keys
+    const possibleKeys = [
+        "studentClass",
+        "class",
+        "student_class",
+        "studentClassName",
+        "userClass"
+    ];
 
+    for (const key of possibleKeys) {
+
+        const value = localStorage.getItem(key);
+
+        if (value && value.trim()) {
+            return value.trim();
+        }
+    }
+
+    // 3. Nothing found
+    return "";
+}
     /* =========================================================
        GET ENROLLMENT NUMBER
     ========================================================= */
