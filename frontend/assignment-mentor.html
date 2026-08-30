@@ -1,0 +1,1880 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+```
+<title>Assignment Status | Mentor</title>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    :root {
+        --bg: #07080d;
+        --card: #10121a;
+        --card2: #151823;
+        --border: rgba(255,255,255,0.08);
+        --text: #f4f6fb;
+        --muted: #8f96a8;
+        --accent: #00f5d4;
+        --accent2: #00c8ff;
+        --danger: #ff4d6d;
+        --success: #28e07f;
+        --warning: #ffc857;
+    }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        background:
+            radial-gradient(circle at 10% 0%, rgba(0,245,212,0.08), transparent 30%),
+            radial-gradient(circle at 90% 10%, rgba(0,200,255,0.08), transparent 30%),
+            var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+    }
+
+    /* =====================================================
+       HEADER
+    ===================================================== */
+
+    .topbar {
+        height: 76px;
+        border-bottom: 1px solid var(--border);
+        background: rgba(7,8,13,0.86);
+        backdrop-filter: blur(18px);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 34px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+    }
+
+    .brand-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0,245,212,0.1);
+        border: 1px solid rgba(0,245,212,0.25);
+        color: var(--accent);
+        font-size: 20px;
+    }
+
+    .brand h1 {
+        font-size: 19px;
+        letter-spacing: 0.2px;
+    }
+
+    .brand p {
+        color: var(--muted);
+        font-size: 12px;
+        margin-top: 3px;
+    }
+
+    .mentor-badge {
+        border: 1px solid var(--border);
+        background: var(--card);
+        padding: 9px 14px;
+        border-radius: 10px;
+        color: var(--muted);
+        font-size: 13px;
+    }
+
+    .mentor-badge span {
+        color: var(--accent);
+        font-weight: 700;
+    }
+
+    /* =====================================================
+       MAIN
+    ===================================================== */
+
+    .container {
+        width: min(1180px, calc(100% - 36px));
+        margin: 0 auto;
+        padding: 35px 0 60px;
+    }
+
+    .page-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 20px;
+        margin-bottom: 28px;
+    }
+
+    .page-heading h2 {
+        font-size: 30px;
+        margin-bottom: 8px;
+    }
+
+    .page-heading p {
+        color: var(--muted);
+        font-size: 14px;
+    }
+
+    .refresh-btn {
+        border: 1px solid var(--border);
+        background: var(--card);
+        color: var(--text);
+        border-radius: 10px;
+        padding: 11px 17px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .refresh-btn:hover {
+        border-color: rgba(0,245,212,0.4);
+        color: var(--accent);
+    }
+
+    /* =====================================================
+       SUMMARY
+    ===================================================== */
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 30px;
+    }
+
+    .summary-card {
+        background: linear-gradient(
+            145deg,
+            rgba(255,255,255,0.045),
+            rgba(255,255,255,0.015)
+        );
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 20px;
+    }
+
+    .summary-label {
+        color: var(--muted);
+        font-size: 13px;
+        margin-bottom: 9px;
+    }
+
+    .summary-value {
+        font-size: 27px;
+        font-weight: 800;
+    }
+
+    .summary-card:nth-child(2) .summary-value {
+        color: var(--accent);
+    }
+
+    .summary-card:nth-child(3) .summary-value {
+        color: var(--accent2);
+    }
+
+    /* =====================================================
+       ASSIGNMENTS
+    ===================================================== */
+
+    .section-title {
+        font-size: 18px;
+        margin-bottom: 16px;
+    }
+
+    .assignments-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .assignment-card {
+        background: rgba(16,18,26,0.92);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 21px;
+        transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .assignment-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(0,245,212,0.22);
+    }
+
+    .assignment-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+    }
+
+    .assignment-title {
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 1.3;
+    }
+
+    .assignment-id {
+        color: #697084;
+        font-size: 11px;
+        margin-top: 6px;
+        word-break: break-all;
+    }
+
+    .status-pill {
+        white-space: nowrap;
+        height: fit-content;
+        padding: 6px 9px;
+        border-radius: 999px;
+        background: rgba(40,224,127,0.1);
+        color: var(--success);
+        border: 1px solid rgba(40,224,127,0.2);
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .assignment-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 18px 0;
+    }
+
+    .meta-item {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.06);
+        color: var(--muted);
+        border-radius: 8px;
+        padding: 7px 10px;
+        font-size: 12px;
+    }
+
+    .completion-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px;
+        border-radius: 12px;
+        background: rgba(0,245,212,0.045);
+        border: 1px solid rgba(0,245,212,0.1);
+        margin-bottom: 14px;
+    }
+
+    .completion-info small {
+        color: var(--muted);
+        display: block;
+        font-size: 11px;
+        margin-bottom: 4px;
+    }
+
+    .completion-count {
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--accent);
+    }
+
+    .completion-total {
+        color: var(--muted);
+        font-size: 12px;
+    }
+
+    .add-btn {
+        width: 100%;
+        border: none;
+        border-radius: 11px;
+        padding: 12px 15px;
+        background: linear-gradient(
+            135deg,
+            var(--accent),
+            var(--accent2)
+        );
+        color: #031014;
+        font-weight: 800;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .add-btn:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.08);
+    }
+
+    /* =====================================================
+       LOADING / EMPTY
+    ===================================================== */
+
+    .loading {
+        padding: 60px 20px;
+        text-align: center;
+        color: var(--muted);
+        grid-column: 1 / -1;
+    }
+
+    .spinner {
+        width: 34px;
+        height: 34px;
+        border: 3px solid rgba(255,255,255,0.1);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto 14px;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .empty-state {
+        border: 1px dashed var(--border);
+        border-radius: 16px;
+        padding: 50px 20px;
+        text-align: center;
+        color: var(--muted);
+        grid-column: 1 / -1;
+    }
+
+    .empty-state strong {
+        display: block;
+        color: var(--text);
+        margin-bottom: 7px;
+    }
+
+    /* =====================================================
+       MODAL
+    ===================================================== */
+
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.72);
+        backdrop-filter: blur(7px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        z-index: 500;
+    }
+
+    .modal-overlay.active {
+        display: flex;
+    }
+
+    .modal {
+        width: min(570px, 100%);
+        max-height: 90vh;
+        overflow-y: auto;
+        background: #10121a;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 20px;
+        box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+    }
+
+    .modal-header {
+        padding: 21px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+    }
+
+    .modal-header h3 {
+        font-size: 18px;
+    }
+
+    .modal-header p {
+        color: var(--muted);
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+    .close-btn {
+        width: 32px;
+        height: 32px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--muted);
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 17px;
+    }
+
+    .close-btn:hover {
+        color: var(--danger);
+        border-color: rgba(255,77,109,0.3);
+    }
+
+    .modal-body {
+        padding: 21px;
+    }
+
+    .already-section {
+        margin-bottom: 22px;
+    }
+
+    .subheading {
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .student-list {
+        max-height: 180px;
+        overflow-y: auto;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        padding: 2px;
+    }
+
+    .student-chip {
+        background: rgba(40,224,127,0.08);
+        border: 1px solid rgba(40,224,127,0.18);
+        color: var(--success);
+        padding: 7px 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-family: monospace;
+    }
+
+    .no-students {
+        color: var(--muted);
+        font-size: 12px;
+        padding: 12px;
+        border: 1px dashed var(--border);
+        border-radius: 9px;
+        width: 100%;
+    }
+
+    .input-label {
+        color: var(--muted);
+        font-size: 12px;
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    textarea {
+        width: 100%;
+        min-height: 125px;
+        resize: vertical;
+        background: #0a0c12;
+        color: var(--text);
+        border: 1px solid var(--border);
+        outline: none;
+        border-radius: 11px;
+        padding: 13px;
+        font-size: 13px;
+        font-family: monospace;
+        transition: 0.2s;
+    }
+
+    textarea:focus {
+        border-color: rgba(0,245,212,0.45);
+        box-shadow: 0 0 0 3px rgba(0,245,212,0.05);
+    }
+
+    .input-help {
+        color: #697084;
+        font-size: 11px;
+        margin-top: 7px;
+    }
+
+    .modal-footer {
+        padding: 17px 21px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .cancel-btn,
+    .save-btn {
+        padding: 11px 17px;
+        border-radius: 9px;
+        cursor: pointer;
+        font-weight: 700;
+    }
+
+    .cancel-btn {
+        background: transparent;
+        color: var(--muted);
+        border: 1px solid var(--border);
+    }
+
+    .save-btn {
+        border: none;
+        background: linear-gradient(
+            135deg,
+            var(--accent),
+            var(--accent2)
+        );
+        color: #031014;
+    }
+
+    .save-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* =====================================================
+       TOAST
+    ===================================================== */
+
+    .toast-container {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .toast {
+        min-width: 260px;
+        max-width: 360px;
+        padding: 13px 15px;
+        border-radius: 11px;
+        background: #171a23;
+        border: 1px solid var(--border);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        font-size: 13px;
+        animation: toastIn 0.25s ease;
+    }
+
+    .toast.success {
+        border-color: rgba(40,224,127,0.3);
+    }
+
+    .toast.error {
+        border-color: rgba(255,77,109,0.3);
+    }
+
+    @keyframes toastIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* =====================================================
+       RESPONSIVE
+    ===================================================== */
+
+    @media (max-width: 800px) {
+
+        .assignments-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .page-heading {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .refresh-btn {
+            width: 100%;
+        }
+
+        .topbar {
+            padding: 0 18px;
+        }
+
+        .mentor-badge {
+            display: none;
+        }
+
+        .container {
+            width: min(100% - 24px, 700px);
+            padding-top: 24px;
+        }
+
+        .page-heading h2 {
+            font-size: 25px;
+        }
+    }
+
+    @media (max-width: 450px) {
+
+        .brand p {
+            display: none;
+        }
+
+        .brand h1 {
+            font-size: 16px;
+        }
+
+        .brand-icon {
+            width: 38px;
+            height: 38px;
+        }
+
+        .assignment-card {
+            padding: 17px;
+        }
+    }
+</style>
+```
+
+</head>
+
+<body>
+
+<header class="topbar">
+
+```
+<div class="brand">
+
+    <div class="brand-icon">
+        ✓
+    </div>
+
+    <div>
+        <h1>Assignment Status</h1>
+        <p>Mentor Dashboard</p>
+    </div>
+
+</div>
+
+<div class="mentor-badge">
+    Mentor ID:
+    <span id="mentorIdDisplay">—</span>
+</div>
+```
+
+</header>
+
+<main class="container">
+
+```
+<div class="page-heading">
+
+    <div>
+        <h2>Assignment Completion</h2>
+        <p>
+            Track students who have completed your posted assignments.
+        </p>
+    </div>
+
+    <button
+        class="refresh-btn"
+        onclick="loadAssignments()"
+    >
+        ↻ Refresh
+    </button>
+
+</div>
+
+
+<!-- SUMMARY -->
+
+<section class="summary-grid">
+
+    <div class="summary-card">
+
+        <div class="summary-label">
+            Total Assignments
+        </div>
+
+        <div
+            class="summary-value"
+            id="totalAssignments"
+        >
+            0
+        </div>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <div class="summary-label">
+            Completed Entries
+        </div>
+
+        <div
+            class="summary-value"
+            id="totalCompleted"
+        >
+            0
+        </div>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <div class="summary-label">
+            Last Updated
+        </div>
+
+        <div
+            class="summary-value"
+            id="lastUpdated"
+            style="font-size:18px;"
+        >
+            —
+        </div>
+
+    </div>
+
+</section>
+
+
+<h3 class="section-title">
+    Your Posted Assignments
+</h3>
+
+
+<section
+    class="assignments-grid"
+    id="assignmentsGrid"
+>
+
+    <div class="loading">
+
+        <div class="spinner"></div>
+
+        Loading assignments...
+
+    </div>
+
+</section>
+```
+
+</main>
+
+<!-- =========================================================
+     MODAL
+========================================================= -->
+
+<div
+    class="modal-overlay"
+    id="studentModal"
+>
+
+```
+<div class="modal">
+
+    <div class="modal-header">
+
+        <div>
+
+            <h3>
+                Students Who Completed
+            </h3>
+
+            <p id="modalAssignmentInfo">
+                Assignment
+            </p>
+
+        </div>
+
+        <button
+            class="close-btn"
+            onclick="closeModal()"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="modal-body">
+
+        <!-- ALREADY COMPLETED -->
+
+        <div class="already-section">
+
+            <div class="subheading">
+                Already Completed
+            </div>
+
+            <div
+                class="student-list"
+                id="completedStudentsList"
+            >
+
+                <div class="no-students">
+                    Loading...
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ADD STUDENTS -->
+
+        <div>
+
+            <label
+                class="input-label"
+                for="enrollmentInput"
+            >
+                Add Enrollment Numbers
+            </label>
+
+            <textarea
+                id="enrollmentInput"
+                placeholder="Example:
+```
+
+0101IT001
+0101IT002
+0101IT003
+
+You can also separate them with commas."
+></textarea>
+
+```
+            <div class="input-help">
+                Multiple enrollment numbers are supported.
+                Duplicate entries are automatically ignored.
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="modal-footer">
+
+        <button
+            class="cancel-btn"
+            onclick="closeModal()"
+        >
+            Cancel
+        </button>
+
+        <button
+            class="save-btn"
+            id="saveStudentsBtn"
+            onclick="saveStudents()"
+        >
+            Add Students
+        </button>
+
+    </div>
+
+</div>
+```
+
+</div>
+
+<div
+    class="toast-container"
+    id="toastContainer"
+></div>
+
+<script>
+
+    /* =========================================================
+       CONFIG
+    ========================================================= */
+
+    /*
+        IMPORTANT:
+
+        Production Render backend URL yaha daalo.
+
+        Example:
+        const API_BASE_URL = "https://your-backend.onrender.com";
+
+        Agar frontend aur backend same origin par hain,
+        to empty string rehne do.
+    */
+
+    const API_BASE_URL = "https://college-hwbb.onrender.com";
+
+
+    /* =========================================================
+       STATE
+    ========================================================= */
+
+    let mentorId = "";
+
+    let assignments = [];
+
+    let selectedAssignmentId = "";
+
+
+    /* =========================================================
+       INITIALIZE
+    ========================================================= */
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        () => {
+
+            mentorId = getMentorId();
+
+            document.getElementById(
+                "mentorIdDisplay"
+            ).textContent =
+                mentorId || "Not Found";
+
+            if (!mentorId) {
+
+                showToast(
+                    "Mentor ID not found in localStorage.",
+                    "error"
+                );
+
+                renderNoAssignments(
+                    "Mentor ID not found."
+                );
+
+                return;
+            }
+
+            loadAssignments();
+
+        }
+    );
+
+
+    /* =========================================================
+       GET MENTOR ID
+    ========================================================= */
+
+    function getMentorId() {
+
+        /*
+            Apne project ke existing localStorage key
+            ke according yaha keys add/change kar sakte ho.
+        */
+
+        const possibleKeys = [
+            "mentorId",
+            "mentorID",
+            "mentor_id",
+            "userMentorId",
+            "userId"
+        ];
+
+        for (
+            const key of possibleKeys
+        ) {
+
+            const value =
+                localStorage.getItem(key);
+
+            if (
+                value &&
+                value.trim()
+            ) {
+
+                return value.trim();
+
+            }
+
+        }
+
+        return "";
+
+    }
+
+
+    /* =========================================================
+       API HELPER
+    ========================================================= */
+
+    async function apiFetch(
+        endpoint,
+        options = {}
+    ) {
+
+        const response =
+            await fetch(
+                API_BASE_URL + endpoint,
+                {
+                    ...options,
+
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+
+                        ...(options.headers || {})
+                    }
+                }
+            );
+
+        let data = {};
+
+        try {
+
+            data =
+                await response.json();
+
+        } catch {
+
+            data = {};
+
+        }
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Something went wrong."
+            );
+
+        }
+
+        return data;
+
+    }
+
+
+    /* =========================================================
+       LOAD MENTOR ASSIGNMENTS
+    ========================================================= */
+
+    async function loadAssignments() {
+
+        const grid =
+            document.getElementById(
+                "assignmentsGrid"
+            );
+
+        grid.innerHTML = `
+            <div class="loading">
+                <div class="spinner"></div>
+                Loading assignments...
+            </div>
+        `;
+
+        try {
+
+            const data =
+                await apiFetch(
+                    `/api/assignments/mentor/${encodeURIComponent(mentorId)}`
+                );
+
+            if (
+                !data.success
+            ) {
+
+                throw new Error(
+                    data.message ||
+                    "Failed to load assignments."
+                );
+
+            }
+
+            assignments =
+                data.assignments || [];
+
+            updateSummary();
+
+            renderAssignments();
+
+            document.getElementById(
+                "lastUpdated"
+            ).textContent =
+                new Date().toLocaleTimeString(
+                    [],
+                    {
+                        hour: "2-digit",
+                        minute: "2-digit"
+                    }
+                );
+
+        } catch (error) {
+
+            console.error(
+                "LOAD ASSIGNMENTS ERROR:",
+                error
+            );
+
+            grid.innerHTML = `
+                <div class="empty-state">
+                    <strong>
+                        Failed to load assignments
+                    </strong>
+                    ${escapeHtml(error.message)}
+                </div>
+            `;
+
+            showToast(
+                error.message,
+                "error"
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       SUMMARY
+    ========================================================= */
+
+    function updateSummary() {
+
+        document.getElementById(
+            "totalAssignments"
+        ).textContent =
+            assignments.length;
+
+        const totalCompleted =
+            assignments.reduce(
+                (
+                    total,
+                    assignment
+                ) => {
+
+                    return total +
+                        Number(
+                            assignment.totalCompleted ||
+                            0
+                        );
+
+                },
+                0
+            );
+
+        document.getElementById(
+            "totalCompleted"
+        ).textContent =
+            totalCompleted;
+
+    }
+
+
+    /* =========================================================
+       RENDER ASSIGNMENTS
+    ========================================================= */
+
+    function renderAssignments() {
+
+        const grid =
+            document.getElementById(
+                "assignmentsGrid"
+            );
+
+        if (
+            !assignments.length
+        ) {
+
+            renderNoAssignments(
+                "No active assignments found."
+            );
+
+            return;
+
+        }
+
+        grid.innerHTML =
+            assignments
+                .map(
+                    assignmentCard
+                )
+                .join("");
+
+    }
+
+
+    /* =========================================================
+       ASSIGNMENT CARD
+    ========================================================= */
+
+    function assignmentCard(
+        assignment
+    ) {
+
+        const completed =
+            Number(
+                assignment.totalCompleted ||
+                0
+            );
+
+        const students =
+            Array.isArray(
+                assignment.completedStudents
+            )
+                ? assignment.completedStudents
+                : [];
+
+        const deadline =
+            assignment.deadline ||
+            "No deadline";
+
+        const assignmentId =
+            assignment.assignmentId ||
+            "";
+
+        return `
+            <article class="assignment-card">
+
+                <div class="assignment-top">
+
+                    <div>
+
+                        <div class="assignment-title">
+                            ${escapeHtml(
+                                assignment.title ||
+                                "Untitled Assignment"
+                            )}
+                        </div>
+
+                        <div class="assignment-id">
+                            ID:
+                            ${escapeHtml(
+                                assignmentId
+                            )}
+                        </div>
+
+                    </div>
+
+                    <div class="status-pill">
+                        ACTIVE
+                    </div>
+
+                </div>
+
+
+                <div class="assignment-meta">
+
+                    <div class="meta-item">
+                        📚
+                        ${escapeHtml(
+                            assignment.subject ||
+                            "Unknown Subject"
+                        )}
+                    </div>
+
+                    <div class="meta-item">
+                        👥
+                        ${escapeHtml(
+                            assignment.class ||
+                            "Unknown Class"
+                        )}
+                    </div>
+
+                    <div class="meta-item">
+                        ⏰
+                        ${escapeHtml(
+                            deadline
+                        )}
+                    </div>
+
+                </div>
+
+
+                <div class="completion-box">
+
+                    <div class="completion-info">
+
+                        <small>
+                            Students completed
+                        </small>
+
+                        <div class="completion-count">
+                            ${completed}
+                        </div>
+
+                    </div>
+
+                    <div class="completion-total">
+                        ${students.length === completed
+                            ? "Marked students"
+                            : "Completed"}
+                    </div>
+
+                </div>
+
+
+                <button
+                    class="add-btn"
+                    onclick="openStudentModal(
+                        '${escapeJs(assignmentId)}'
+                    )"
+                >
+                    + Add Students Who Completed
+                </button>
+
+            </article>
+        `;
+
+    }
+
+
+    /* =========================================================
+       OPEN MODAL
+    ========================================================= */
+
+    async function openStudentModal(
+        assignmentId
+    ) {
+
+        selectedAssignmentId =
+            assignmentId;
+
+        const modal =
+            document.getElementById(
+                "studentModal"
+            );
+
+        const assignment =
+            assignments.find(
+                item =>
+                    String(
+                        item.assignmentId
+                    ) === String(
+                        assignmentId
+                    )
+            );
+
+        document.getElementById(
+            "modalAssignmentInfo"
+        ).textContent =
+            assignment
+                ? `${assignment.title || "Assignment"} • ${assignment.class || ""}`
+                : "Assignment";
+
+        document.getElementById(
+            "enrollmentInput"
+        ).value = "";
+
+        document.getElementById(
+            "completedStudentsList"
+        ).innerHTML = `
+            <div class="no-students">
+                Loading completed students...
+            </div>
+        `;
+
+        modal.classList.add(
+            "active"
+        );
+
+        try {
+
+            const data =
+                await apiFetch(
+                    `/api/assignments/${encodeURIComponent(assignmentId)}/completed-students`
+                );
+
+            renderCompletedStudents(
+                data.completedStudents || []
+            );
+
+        } catch (error) {
+
+            console.error(
+                "COMPLETED STUDENTS ERROR:",
+                error
+            );
+
+            document.getElementById(
+                "completedStudentsList"
+            ).innerHTML = `
+                <div class="no-students">
+                    ${escapeHtml(error.message)}
+                </div>
+            `;
+
+        }
+
+    }
+
+
+    /* =========================================================
+       RENDER COMPLETED STUDENTS
+    ========================================================= */
+
+    function renderCompletedStudents(
+        students
+    ) {
+
+        const list =
+            document.getElementById(
+                "completedStudentsList"
+            );
+
+        if (
+            !students.length
+        ) {
+
+            list.innerHTML = `
+                <div class="no-students">
+                    No students have been marked completed yet.
+                </div>
+            `;
+
+            return;
+
+        }
+
+        list.innerHTML =
+            students
+                .map(
+                    student => {
+
+                        const enrollment =
+                            typeof student === "string"
+                                ? student
+                                : student.enrollmentNumber;
+
+                        return `
+                            <div class="student-chip">
+                                ✓
+                                ${escapeHtml(
+                                    enrollment
+                                )}
+                            </div>
+                        `;
+
+                    }
+                )
+                .join("");
+
+    }
+
+
+    /* =========================================================
+       SAVE STUDENTS
+    ========================================================= */
+
+    async function saveStudents() {
+
+        if (
+            !selectedAssignmentId
+        ) {
+
+            showToast(
+                "No assignment selected.",
+                "error"
+            );
+
+            return;
+
+        }
+
+        const input =
+            document.getElementById(
+                "enrollmentInput"
+            );
+
+        const raw =
+            input.value.trim();
+
+        if (!raw) {
+
+            showToast(
+                "Enter at least one enrollment number.",
+                "error"
+            );
+
+            return;
+
+        }
+
+        /*
+            Supports:
+
+            ENROLL001
+            ENROLL002
+
+            OR
+
+            ENROLL001, ENROLL002
+
+            OR
+
+            ENROLL001
+            ENROLL002,
+            ENROLL003
+        */
+
+        const enrollmentNumbers =
+            raw
+                .split(/[\s,;]+/)
+                .map(
+                    value =>
+                        value
+                            .trim()
+                            .toUpperCase()
+                )
+                .filter(Boolean);
+
+        const uniqueEnrollments =
+            [
+                ...new Set(
+                    enrollmentNumbers
+                )
+            ];
+
+        if (
+            !uniqueEnrollments.length
+        ) {
+
+            showToast(
+                "No valid enrollment numbers found.",
+                "error"
+            );
+
+            return;
+
+        }
+
+        const saveButton =
+            document.getElementById(
+                "saveStudentsBtn"
+            );
+
+        saveButton.disabled =
+            true;
+
+        saveButton.textContent =
+            "Saving...";
+
+        try {
+
+            const data =
+                await apiFetch(
+                    `/api/assignments/${encodeURIComponent(selectedAssignmentId)}/mark-submitted`,
+                    {
+                        method: "POST",
+
+                        body: JSON.stringify({
+
+                            mentorId:
+                                mentorId,
+
+                            enrollmentNumbers:
+                                uniqueEnrollments
+
+                        })
+                    }
+                );
+
+            if (
+                !data.success
+            ) {
+
+                throw new Error(
+                    data.message ||
+                    "Students could not be added."
+                );
+
+            }
+
+            let message =
+                `${data.addedCount || 0} student(s) marked as completed.`;
+
+            if (
+                data.alreadyCompletedCount
+            ) {
+
+                message +=
+                    ` ${data.alreadyCompletedCount} already completed.`;
+
+            }
+
+            showToast(
+                message,
+                "success"
+            );
+
+            input.value = "";
+
+            /*
+                Reload the complete mentor assignment list
+                so count + chips remain synchronized with DB.
+            */
+
+            await loadAssignments();
+
+            /*
+                Refresh modal's completed student list.
+            */
+
+            await refreshModalStudents();
+
+        } catch (error) {
+
+            console.error(
+                "SAVE STUDENTS ERROR:",
+                error
+            );
+
+            showToast(
+                error.message,
+                "error"
+            );
+
+        } finally {
+
+            saveButton.disabled =
+                false;
+
+            saveButton.textContent =
+                "Add Students";
+
+        }
+
+    }
+
+
+    /* =========================================================
+       REFRESH MODAL STUDENTS
+    ========================================================= */
+
+    async function refreshModalStudents() {
+
+        if (
+            !selectedAssignmentId
+        ) {
+            return;
+        }
+
+        try {
+
+            const data =
+                await apiFetch(
+                    `/api/assignments/${encodeURIComponent(selectedAssignmentId)}/completed-students`
+                );
+
+            renderCompletedStudents(
+                data.completedStudents || []
+            );
+
+        } catch (error) {
+
+            console.error(
+                error
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       CLOSE MODAL
+    ========================================================= */
+
+    function closeModal() {
+
+        document.getElementById(
+            "studentModal"
+        ).classList.remove(
+            "active"
+        );
+
+        selectedAssignmentId =
+            "";
+
+    }
+
+
+    /* =========================================================
+       CLICK OUTSIDE MODAL
+    ========================================================= */
+
+    document.getElementById(
+        "studentModal"
+    ).addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target === this
+            ) {
+
+                closeModal();
+
+            }
+
+        }
+    );
+
+
+    /* =========================================================
+       ESC KEY
+    ========================================================= */
+
+    document.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.key === "Escape"
+            ) {
+
+                closeModal();
+
+            }
+
+        }
+    );
+
+
+    /* =========================================================
+       EMPTY STATE
+    ========================================================= */
+
+    function renderNoAssignments(
+        message
+    ) {
+
+        document.getElementById(
+            "assignmentsGrid"
+        ).innerHTML = `
+            <div class="empty-state">
+
+                <strong>
+                    No Assignments
+                </strong>
+
+                ${escapeHtml(message)}
+
+            </div>
+        `;
+
+    }
+
+
+    /* =========================================================
+       TOAST
+    ========================================================= */
+
+    function showToast(
+        message,
+        type = "success"
+    ) {
+
+        const container =
+            document.getElementById(
+                "toastContainer"
+            );
+
+        const toast =
+            document.createElement(
+                "div"
+            );
+
+        toast.className =
+            `toast ${type}`;
+
+        toast.textContent =
+            message;
+
+        container.appendChild(
+            toast
+        );
+
+        setTimeout(
+            () => {
+
+                toast.style.opacity =
+                    "0";
+
+                toast.style.transform =
+                    "translateY(10px)";
+
+                setTimeout(
+                    () => toast.remove(),
+                    250
+                );
+
+            },
+            3500
+        );
+
+    }
+
+
+    /* =========================================================
+       SECURITY / HTML ESCAPE
+    ========================================================= */
+
+    function escapeHtml(
+        value
+    ) {
+
+        return String(
+            value ?? ""
+        )
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
+    }
+
+
+    /* =========================================================
+       JAVASCRIPT STRING ESCAPE
+    ========================================================= */
+
+    function escapeJs(
+        value
+    ) {
+
+        return String(
+            value ?? ""
+        )
+            .replace(
+                /\\/g,
+                "\\\\"
+            )
+            .replace(
+                /'/g,
+                "\\'"
+            )
+            .replace(
+                /\r/g,
+                "\\r"
+            )
+            .replace(
+                /\n/g,
+                "\\n"
+            );
+
+    }
+
+</script>
+
+</body>
+</html>

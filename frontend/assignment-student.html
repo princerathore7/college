@@ -1,0 +1,2924 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+```
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Assignment Status | Student</title>
+
+
+<style>
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+
+    :root {
+
+        --bg: #07080d;
+
+        --card: #10121a;
+
+        --card-light: #151823;
+
+        --border: rgba(255,255,255,0.08);
+
+        --text: #f4f6fb;
+
+        --muted: #8f96a8;
+
+        --accent: #00f5d4;
+
+        --accent-blue: #00c8ff;
+
+        --success: #28e07f;
+
+        --warning: #ffc857;
+
+        --danger: #ff4d6d;
+
+    }
+
+
+    body {
+
+        min-height: 100vh;
+
+        background:
+            radial-gradient(
+                circle at 10% 0%,
+                rgba(0,245,212,0.09),
+                transparent 30%
+            ),
+            radial-gradient(
+                circle at 90% 5%,
+                rgba(0,200,255,0.08),
+                transparent 30%
+            ),
+            var(--bg);
+
+        color: var(--text);
+
+        font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
+
+    }
+
+
+    /* =====================================================
+       HEADER
+    ===================================================== */
+
+    .topbar {
+
+        height: 76px;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        padding: 0 34px;
+
+        border-bottom:
+            1px solid var(--border);
+
+        background:
+            rgba(7,8,13,0.88);
+
+        backdrop-filter: blur(18px);
+
+        position: sticky;
+
+        top: 0;
+
+        z-index: 100;
+
+    }
+
+
+    .brand {
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 13px;
+
+    }
+
+
+    .brand-icon {
+
+        width: 42px;
+
+        height: 42px;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        border-radius: 12px;
+
+        background:
+            rgba(0,245,212,0.09);
+
+        border:
+            1px solid rgba(0,245,212,0.25);
+
+        color: var(--accent);
+
+        font-size: 20px;
+
+        font-weight: 900;
+
+    }
+
+
+    .brand h1 {
+
+        font-size: 19px;
+
+        letter-spacing: 0.2px;
+
+    }
+
+
+    .brand p {
+
+        color: var(--muted);
+
+        font-size: 12px;
+
+        margin-top: 3px;
+
+    }
+
+
+    .student-info {
+
+        display: flex;
+
+        flex-direction: column;
+
+        align-items: flex-end;
+
+        gap: 3px;
+
+    }
+
+
+    .student-class {
+
+        color: var(--accent);
+
+        font-weight: 700;
+
+        font-size: 13px;
+
+    }
+
+
+    .student-enrollment {
+
+        color: var(--muted);
+
+        font-size: 11px;
+
+        font-family: monospace;
+
+    }
+
+
+    /* =====================================================
+       MAIN
+    ===================================================== */
+
+    .container {
+
+        width:
+            min(
+                1100px,
+                calc(100% - 36px)
+            );
+
+        margin: 0 auto;
+
+        padding:
+            35px 0 65px;
+
+    }
+
+
+    .heading {
+
+        margin-bottom: 25px;
+
+    }
+
+
+    .heading h2 {
+
+        font-size: 30px;
+
+        margin-bottom: 7px;
+
+    }
+
+
+    .heading p {
+
+        color: var(--muted);
+
+        font-size: 14px;
+
+    }
+
+
+    /* =====================================================
+       SUMMARY
+    ===================================================== */
+
+    .summary {
+
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                3,
+                1fr
+            );
+
+        gap: 15px;
+
+        margin-bottom: 30px;
+
+    }
+
+
+    .summary-card {
+
+        background:
+            linear-gradient(
+                145deg,
+                rgba(255,255,255,0.045),
+                rgba(255,255,255,0.012)
+            );
+
+        border:
+            1px solid var(--border);
+
+        border-radius: 17px;
+
+        padding: 20px;
+
+    }
+
+
+    .summary-label {
+
+        color: var(--muted);
+
+        font-size: 12px;
+
+        margin-bottom: 8px;
+
+    }
+
+
+    .summary-number {
+
+        font-size: 29px;
+
+        font-weight: 900;
+
+    }
+
+
+    .summary-card.completed
+    .summary-number {
+
+        color: var(--success);
+
+    }
+
+
+    .summary-card.pending
+    .summary-number {
+
+        color: var(--warning);
+
+    }
+
+
+    /* =====================================================
+       PROGRESS
+    ===================================================== */
+
+    .progress-card {
+
+        border:
+            1px solid var(--border);
+
+        background:
+            rgba(16,18,26,0.92);
+
+        border-radius: 18px;
+
+        padding: 20px;
+
+        margin-bottom: 30px;
+
+    }
+
+
+    .progress-top {
+
+        display: flex;
+
+        justify-content: space-between;
+
+        align-items: center;
+
+        margin-bottom: 12px;
+
+    }
+
+
+    .progress-title {
+
+        font-size: 14px;
+
+        font-weight: 700;
+
+    }
+
+
+    .progress-percent {
+
+        color: var(--accent);
+
+        font-size: 14px;
+
+        font-weight: 800;
+
+    }
+
+
+    .progress-track {
+
+        height: 9px;
+
+        border-radius: 999px;
+
+        overflow: hidden;
+
+        background:
+            rgba(255,255,255,0.07);
+
+    }
+
+
+    .progress-fill {
+
+        height: 100%;
+
+        width: 0%;
+
+        border-radius: inherit;
+
+        background:
+            linear-gradient(
+                90deg,
+                var(--accent),
+                var(--accent-blue)
+            );
+
+        transition:
+            width 0.5s ease;
+
+    }
+
+
+    /* =====================================================
+       ASSIGNMENT CIRCLE TRACKER
+    ===================================================== */
+
+    .section-heading {
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        margin-bottom: 17px;
+
+    }
+
+
+    .section-heading h3 {
+
+        font-size: 18px;
+
+    }
+
+
+    .section-heading span {
+
+        color: var(--muted);
+
+        font-size: 12px;
+
+    }
+
+
+    .assignment-tracker {
+
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                6,
+                minmax(
+                    80px,
+                    1fr
+                )
+            );
+
+        gap: 18px;
+
+        margin-bottom: 34px;
+
+    }
+
+
+    .assignment-circle-item {
+
+        display: flex;
+
+        flex-direction: column;
+
+        align-items: center;
+
+        cursor: pointer;
+
+    }
+
+
+    .assignment-circle {
+
+        width: 76px;
+
+        height: 76px;
+
+        border-radius: 50%;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        position: relative;
+
+        background:
+            #0d1017;
+
+        border:
+            2px solid
+            rgba(255,255,255,0.11);
+
+        transition:
+            transform 0.2s,
+            border-color 0.2s,
+            box-shadow 0.2s;
+
+    }
+
+
+    .assignment-circle-item:hover
+    .assignment-circle {
+
+        transform:
+            translateY(-4px);
+
+    }
+
+
+    .assignment-circle.done {
+
+        border-color:
+            var(--success);
+
+        box-shadow:
+            0 0 24px
+            rgba(40,224,127,0.18);
+
+    }
+
+
+    .assignment-circle.done
+    .circle-number {
+
+        color: var(--success);
+
+    }
+
+
+    .assignment-circle.pending {
+
+        border-color:
+            rgba(255,200,87,0.35);
+
+    }
+
+
+    .circle-number {
+
+        font-size: 23px;
+
+        font-weight: 900;
+
+        color: var(--muted);
+
+    }
+
+
+    .circle-check {
+
+        position: absolute;
+
+        right: -3px;
+
+        top: -3px;
+
+        width: 24px;
+
+        height: 24px;
+
+        border-radius: 50%;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        background:
+            var(--success);
+
+        color: #04130b;
+
+        font-size: 13px;
+
+        font-weight: 900;
+
+        border:
+            3px solid
+            var(--bg);
+
+    }
+
+
+    .circle-title {
+
+        width: 100%;
+
+        text-align: center;
+
+        color: var(--text);
+
+        font-size: 11px;
+
+        margin-top: 9px;
+
+        line-height: 1.3;
+
+        overflow: hidden;
+
+        display:
+            -webkit-box;
+
+        -webkit-line-clamp: 2;
+
+        -webkit-box-orient:
+            vertical;
+
+    }
+
+
+    .circle-status {
+
+        font-size: 10px;
+
+        margin-top: 4px;
+
+        color: var(--muted);
+
+    }
+
+
+    .assignment-circle-item.completed
+    .circle-status {
+
+        color: var(--success);
+
+    }
+
+
+    /* =====================================================
+       ASSIGNMENT LIST
+    ===================================================== */
+
+    .assignment-list {
+
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0,1fr)
+            );
+
+        gap: 17px;
+
+    }
+
+
+    .assignment-card {
+
+        background:
+            rgba(16,18,26,0.94);
+
+        border:
+            1px solid var(--border);
+
+        border-radius: 17px;
+
+        padding: 19px;
+
+        cursor: pointer;
+
+        transition:
+            transform 0.2s,
+            border-color 0.2s;
+
+    }
+
+
+    .assignment-card:hover {
+
+        transform:
+            translateY(-2px);
+
+        border-color:
+            rgba(0,245,212,0.22);
+
+    }
+
+
+    .assignment-card.done {
+
+        border-color:
+            rgba(40,224,127,0.17);
+
+    }
+
+
+    .assignment-card-top {
+
+        display: flex;
+
+        justify-content: space-between;
+
+        gap: 14px;
+
+    }
+
+
+    .assignment-card-title {
+
+        font-size: 16px;
+
+        font-weight: 800;
+
+        line-height: 1.35;
+
+    }
+
+
+    .assignment-subject {
+
+        color: var(--muted);
+
+        font-size: 12px;
+
+        margin-top: 5px;
+
+    }
+
+
+    .status {
+
+        white-space: nowrap;
+
+        height: fit-content;
+
+        border-radius: 999px;
+
+        padding: 6px 9px;
+
+        font-size: 10px;
+
+        font-weight: 800;
+
+    }
+
+
+    .status.done {
+
+        color: var(--success);
+
+        background:
+            rgba(40,224,127,0.09);
+
+        border:
+            1px solid
+            rgba(40,224,127,0.18);
+
+    }
+
+
+    .status.pending {
+
+        color: var(--warning);
+
+        background:
+            rgba(255,200,87,0.08);
+
+        border:
+            1px solid
+            rgba(255,200,87,0.18);
+
+    }
+
+
+    .assignment-details {
+
+        display: flex;
+
+        flex-wrap: wrap;
+
+        gap: 8px;
+
+        margin-top: 17px;
+
+    }
+
+
+    .detail {
+
+        color: var(--muted);
+
+        background:
+            rgba(255,255,255,0.035);
+
+        border:
+            1px solid
+            rgba(255,255,255,0.055);
+
+        border-radius: 8px;
+
+        padding: 7px 9px;
+
+        font-size: 11px;
+
+    }
+
+
+    .done-message {
+
+        color: var(--success);
+
+        font-size: 11px;
+
+        margin-top: 13px;
+
+    }
+
+
+    /* =====================================================
+       EMPTY / LOADING
+    ===================================================== */
+
+    .loading {
+
+        text-align: center;
+
+        color: var(--muted);
+
+        padding: 60px 20px;
+
+        grid-column:
+            1 / -1;
+
+    }
+
+
+    .spinner {
+
+        width: 35px;
+
+        height: 35px;
+
+        border:
+            3px solid
+            rgba(255,255,255,0.1);
+
+        border-top-color:
+            var(--accent);
+
+        border-radius: 50%;
+
+        animation:
+            spin 0.8s linear infinite;
+
+        margin:
+            0 auto 14px;
+
+    }
+
+
+    @keyframes spin {
+
+        to {
+            transform:
+                rotate(360deg);
+        }
+
+    }
+
+
+    .empty {
+
+        padding: 45px 20px;
+
+        border:
+            1px dashed
+            var(--border);
+
+        border-radius: 16px;
+
+        text-align: center;
+
+        color: var(--muted);
+
+        grid-column:
+            1 / -1;
+
+    }
+
+
+    .empty strong {
+
+        display: block;
+
+        color: var(--text);
+
+        margin-bottom: 7px;
+
+    }
+
+
+    /* =====================================================
+       DETAILS MODAL
+    ===================================================== */
+
+    .modal-overlay {
+
+        position: fixed;
+
+        inset: 0;
+
+        background:
+            rgba(0,0,0,0.74);
+
+        backdrop-filter:
+            blur(7px);
+
+        display: none;
+
+        align-items: center;
+
+        justify-content: center;
+
+        padding: 18px;
+
+        z-index: 500;
+
+    }
+
+
+    .modal-overlay.active {
+
+        display: flex;
+
+    }
+
+
+    .modal {
+
+        width:
+            min(
+                500px,
+                100%
+            );
+
+        background:
+            #10121a;
+
+        border:
+            1px solid
+            rgba(255,255,255,0.1);
+
+        border-radius: 20px;
+
+        overflow: hidden;
+
+        box-shadow:
+            0 25px 80px
+            rgba(0,0,0,0.55);
+
+    }
+
+
+    .modal-header {
+
+        padding: 21px;
+
+        display: flex;
+
+        justify-content: space-between;
+
+        gap: 15px;
+
+        border-bottom:
+            1px solid
+            var(--border);
+
+    }
+
+
+    .modal-header h3 {
+
+        font-size: 19px;
+
+        line-height: 1.35;
+
+    }
+
+
+    .modal-header p {
+
+        color: var(--muted);
+
+        font-size: 12px;
+
+        margin-top: 6px;
+
+    }
+
+
+    .close {
+
+        width: 32px;
+
+        height: 32px;
+
+        flex-shrink: 0;
+
+        border:
+            1px solid
+            var(--border);
+
+        background:
+            transparent;
+
+        color: var(--muted);
+
+        border-radius: 8px;
+
+        cursor: pointer;
+
+        font-size: 18px;
+
+    }
+
+
+    .close:hover {
+
+        color: var(--danger);
+
+    }
+
+
+    .modal-body {
+
+        padding: 21px;
+
+    }
+
+
+    .modal-status {
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 12px;
+
+        padding: 15px;
+
+        border-radius: 12px;
+
+        margin-bottom: 17px;
+
+    }
+
+
+    .modal-status.done {
+
+        background:
+            rgba(40,224,127,0.07);
+
+        border:
+            1px solid
+            rgba(40,224,127,0.15);
+
+    }
+
+
+    .modal-status.pending {
+
+        background:
+            rgba(255,200,87,0.06);
+
+        border:
+            1px solid
+            rgba(255,200,87,0.14);
+
+    }
+
+
+    .modal-status-icon {
+
+        width: 42px;
+
+        height: 42px;
+
+        border-radius: 50%;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        font-weight: 900;
+
+        font-size: 19px;
+
+    }
+
+
+    .modal-status.done
+    .modal-status-icon {
+
+        color: var(--success);
+
+        background:
+            rgba(40,224,127,0.1);
+
+    }
+
+
+    .modal-status.pending
+    .modal-status-icon {
+
+        color: var(--warning);
+
+        background:
+            rgba(255,200,87,0.1);
+
+    }
+
+
+    .modal-status strong {
+
+        display: block;
+
+        font-size: 13px;
+
+    }
+
+
+    .modal-status small {
+
+        color: var(--muted);
+
+        display: block;
+
+        margin-top: 4px;
+
+        font-size: 11px;
+
+    }
+
+
+    .info-grid {
+
+        display: grid;
+
+        grid-template-columns:
+            repeat(2,1fr);
+
+        gap: 10px;
+
+    }
+
+
+    .info-box {
+
+        background:
+            rgba(255,255,255,0.035);
+
+        border:
+            1px solid
+            var(--border);
+
+        border-radius: 10px;
+
+        padding: 12px;
+
+    }
+
+
+    .info-label {
+
+        color: var(--muted);
+
+        font-size: 10px;
+
+        margin-bottom: 5px;
+
+    }
+
+
+    .info-value {
+
+        font-size: 13px;
+
+        font-weight: 700;
+
+        word-break: break-word;
+
+    }
+
+
+    .modal-footer {
+
+        padding:
+            16px 21px;
+
+        border-top:
+            1px solid
+            var(--border);
+
+        display: flex;
+
+        justify-content: flex-end;
+
+    }
+
+
+    .done-button {
+
+        padding:
+            10px 17px;
+
+        border-radius: 9px;
+
+        border: none;
+
+        background:
+            var(--success);
+
+        color: #03130a;
+
+        font-weight: 800;
+
+        cursor: default;
+
+    }
+
+
+    .pending-button {
+
+        padding:
+            10px 17px;
+
+        border-radius: 9px;
+
+        border:
+            1px solid
+            rgba(255,200,87,0.25);
+
+        background:
+            rgba(255,200,87,0.08);
+
+        color: var(--warning);
+
+        font-weight: 700;
+
+    }
+
+
+    /* =====================================================
+       REFRESH
+    ===================================================== */
+
+    .refresh-btn {
+
+        position: fixed;
+
+        right: 22px;
+
+        bottom: 22px;
+
+        width: 46px;
+
+        height: 46px;
+
+        border-radius: 50%;
+
+        border:
+            1px solid
+            rgba(0,245,212,0.25);
+
+        background:
+            rgba(16,18,26,0.95);
+
+        color: var(--accent);
+
+        font-size: 19px;
+
+        cursor: pointer;
+
+        z-index: 90;
+
+        box-shadow:
+            0 10px 30px
+            rgba(0,0,0,0.35);
+
+    }
+
+
+    .refresh-btn.loading {
+
+        animation:
+            rotateRefresh 0.8s linear infinite;
+
+    }
+
+
+    @keyframes rotateRefresh {
+
+        to {
+            transform:
+                rotate(360deg);
+        }
+
+    }
+
+
+    /* =====================================================
+       RESPONSIVE
+    ===================================================== */
+
+    @media (max-width: 900px) {
+
+        .assignment-tracker {
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+        }
+
+    }
+
+
+    @media (max-width: 700px) {
+
+        .assignment-list {
+
+            grid-template-columns: 1fr;
+
+        }
+
+        .summary {
+
+            grid-template-columns: 1fr;
+
+        }
+
+        .assignment-tracker {
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+        }
+
+        .topbar {
+
+            padding: 0 18px;
+
+        }
+
+        .student-info {
+
+            display: none;
+
+        }
+
+        .container {
+
+            width:
+                calc(100% - 24px);
+
+            padding-top: 25px;
+
+        }
+
+        .heading h2 {
+
+            font-size: 25px;
+
+        }
+
+    }
+
+
+    @media (max-width: 430px) {
+
+        .assignment-tracker {
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+        }
+
+        .assignment-circle {
+
+            width: 70px;
+
+            height: 70px;
+
+        }
+
+        .brand h1 {
+
+            font-size: 16px;
+
+        }
+
+        .brand p {
+
+            display: none;
+
+        }
+
+    }
+
+</style>
+```
+
+</head>
+
+<body>
+
+<!-- =========================================================
+     HEADER
+========================================================= -->
+
+<header class="topbar">
+
+```
+<div class="brand">
+
+    <div class="brand-icon">
+        ✓
+    </div>
+
+    <div>
+
+        <h1>
+            Assignment Status
+        </h1>
+
+        <p>
+            Student Dashboard
+        </p>
+
+    </div>
+
+</div>
+
+
+<div class="student-info">
+
+    <div
+        class="student-class"
+        id="studentClassDisplay"
+    >
+        —
+    </div>
+
+    <div
+        class="student-enrollment"
+        id="enrollmentDisplay"
+    >
+        —
+    </div>
+
+</div>
+```
+
+</header>
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
+
+<main class="container">
+
+```
+<section class="heading">
+
+    <h2>
+        My Assignments
+    </h2>
+
+    <p>
+        Track your assignment completion status.
+    </p>
+
+</section>
+
+
+<!-- =====================================================
+     SUMMARY
+===================================================== -->
+
+<section class="summary">
+
+
+    <div class="summary-card">
+
+        <div class="summary-label">
+            Total Assignments
+        </div>
+
+        <div
+            class="summary-number"
+            id="totalAssignments"
+        >
+            0
+        </div>
+
+    </div>
+
+
+    <div class="summary-card completed">
+
+        <div class="summary-label">
+            Completed
+        </div>
+
+        <div
+            class="summary-number"
+            id="completedAssignments"
+        >
+            0
+        </div>
+
+    </div>
+
+
+    <div class="summary-card pending">
+
+        <div class="summary-label">
+            Pending
+        </div>
+
+        <div
+            class="summary-number"
+            id="pendingAssignments"
+        >
+            0
+        </div>
+
+    </div>
+
+
+</section>
+
+
+<!-- =====================================================
+     PROGRESS
+===================================================== -->
+
+<section class="progress-card">
+
+    <div class="progress-top">
+
+        <div class="progress-title">
+            Assignment Progress
+        </div>
+
+        <div
+            class="progress-percent"
+            id="progressPercent"
+        >
+            0%
+        </div>
+
+    </div>
+
+
+    <div class="progress-track">
+
+        <div
+            class="progress-fill"
+            id="progressFill"
+        ></div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     CIRCLE TRACKER
+===================================================== -->
+
+<div class="section-heading">
+
+    <h3>
+        Assignment Tracker
+    </h3>
+
+    <span id="trackerCount">
+        0 assignments
+    </span>
+
+</div>
+
+
+<section
+    class="assignment-tracker"
+    id="assignmentTracker"
+>
+
+    <div class="loading">
+
+        <div class="spinner"></div>
+
+        Loading assignments...
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     ASSIGNMENT LIST
+===================================================== -->
+
+<div class="section-heading">
+
+    <h3>
+        Assignment Details
+    </h3>
+
+</div>
+
+
+<section
+    class="assignment-list"
+    id="assignmentList"
+>
+
+    <div class="loading">
+
+        <div class="spinner"></div>
+
+        Loading...
+
+    </div>
+
+</section>
+```
+
+</main>
+
+<!-- =========================================================
+     REFRESH BUTTON
+========================================================= -->
+
+<button
+class="refresh-btn"
+id="refreshBtn"
+onclick="loadStudentAssignments()"
+title="Refresh assignments"
+
+>
+
+```
+↻
+```
+
+</button>
+
+<!-- =========================================================
+     DETAILS MODAL
+========================================================= -->
+
+<div
+    class="modal-overlay"
+    id="detailsModal"
+>
+
+```
+<div class="modal">
+
+
+    <div class="modal-header">
+
+        <div>
+
+            <h3 id="modalTitle">
+                Assignment
+            </h3>
+
+            <p id="modalSubject">
+                Subject
+            </p>
+
+        </div>
+
+
+        <button
+            class="close"
+            onclick="closeModal()"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="modal-body">
+
+
+        <div
+            class="modal-status"
+            id="modalStatusBox"
+        >
+
+            <div
+                class="modal-status-icon"
+                id="modalStatusIcon"
+            >
+                ✓
+            </div>
+
+
+            <div>
+
+                <strong
+                    id="modalStatusTitle"
+                >
+                    Completed
+                </strong>
+
+                <small
+                    id="modalStatusText"
+                >
+                    This assignment has been marked as submitted.
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="info-grid">
+
+
+            <div class="info-box">
+
+                <div class="info-label">
+                    CLASS
+                </div>
+
+                <div
+                    class="info-value"
+                    id="modalClass"
+                >
+                    —
+                </div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <div class="info-label">
+                    SUBJECT
+                </div>
+
+                <div
+                    class="info-value"
+                    id="modalSubjectBox"
+                >
+                    —
+                </div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <div class="info-label">
+                    DEADLINE
+                </div>
+
+                <div
+                    class="info-value"
+                    id="modalDeadline"
+                >
+                    —
+                </div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <div class="info-label">
+                    ASSIGNMENT ID
+                </div>
+
+                <div
+                    class="info-value"
+                    id="modalAssignmentId"
+                >
+                    —
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+    <div class="modal-footer">
+
+        <div id="modalFooterButton"></div>
+
+    </div>
+
+
+</div>
+```
+
+</div>
+
+<script>
+
+
+    /* =========================================================
+       CONFIG
+    ========================================================= */
+
+    /*
+        Agar frontend aur backend alag production domains
+        par hain to yaha Render backend URL daalo.
+
+        Example:
+
+        const API_BASE_URL =
+            "https://your-backend.onrender.com";
+
+        Agar same origin hai to empty string rakho.
+    */
+
+    const API_BASE_URL = "";
+
+
+    /* =========================================================
+       STATE
+    ========================================================= */
+
+    let studentClass = "";
+
+    let enrollmentNumber = "";
+
+    let assignments = [];
+
+
+    /* =========================================================
+       INITIALIZE
+    ========================================================= */
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        () => {
+
+            studentClass =
+                getStudentClass();
+
+            enrollmentNumber =
+                getEnrollmentNumber();
+
+
+            document.getElementById(
+                "studentClassDisplay"
+            ).textContent =
+                studentClass || "Class not found";
+
+
+            document.getElementById(
+                "enrollmentDisplay"
+            ).textContent =
+                enrollmentNumber ||
+                "Enrollment not found";
+
+
+            if (
+                !studentClass ||
+                !enrollmentNumber
+            ) {
+
+                showMissingStudentInfo();
+
+                return;
+
+            }
+
+
+            loadStudentAssignments();
+
+        }
+    );
+
+
+    /* =========================================================
+       GET STUDENT CLASS
+    ========================================================= */
+
+    function getStudentClass() {
+
+        const possibleKeys = [
+
+            "studentClass",
+
+            "class",
+
+            "student_class",
+
+            "studentClassName",
+
+            "userClass"
+
+        ];
+
+
+        for (
+            const key of possibleKeys
+        ) {
+
+            const value =
+                localStorage.getItem(key);
+
+
+            if (
+                value &&
+                value.trim()
+            ) {
+
+                return value.trim();
+
+            }
+
+        }
+
+
+        return "";
+
+    }
+
+
+    /* =========================================================
+       GET ENROLLMENT NUMBER
+    ========================================================= */
+
+    function getEnrollmentNumber() {
+
+        const possibleKeys = [
+
+            "enrollmentNumber",
+
+            "enrollment",
+
+            "enrollmentNo",
+
+            "enrollment_number",
+
+            "studentEnrollment",
+
+            "studentEnrollmentNumber"
+
+        ];
+
+
+        for (
+            const key of possibleKeys
+        ) {
+
+            const value =
+                localStorage.getItem(key);
+
+
+            if (
+                value &&
+                value.trim()
+            ) {
+
+                return value.trim();
+
+            }
+
+        }
+
+
+        return "";
+
+    }
+
+
+    /* =========================================================
+       API HELPER
+    ========================================================= */
+
+    async function apiFetch(
+        endpoint
+    ) {
+
+        const response =
+            await fetch(
+                API_BASE_URL + endpoint
+            );
+
+
+        let data = {};
+
+
+        try {
+
+            data =
+                await response.json();
+
+        } catch {
+
+            data = {};
+
+        }
+
+
+        if (
+            !response.ok
+        ) {
+
+            throw new Error(
+                data.message ||
+                "Failed to load assignments."
+            );
+
+        }
+
+
+        return data;
+
+    }
+
+
+    /* =========================================================
+       LOAD STUDENT ASSIGNMENTS
+    ========================================================= */
+
+    async function loadStudentAssignments() {
+
+        if (
+            !studentClass ||
+            !enrollmentNumber
+        ) {
+
+            showMissingStudentInfo();
+
+            return;
+
+        }
+
+
+        const refresh =
+            document.getElementById(
+                "refreshBtn"
+            );
+
+
+        refresh.classList.add(
+            "loading"
+        );
+
+
+        renderLoading();
+
+
+        try {
+
+            const endpoint =
+                `/api/assignments/student/` +
+                `${encodeURIComponent(studentClass)}/` +
+                `${encodeURIComponent(enrollmentNumber)}`;
+
+
+            const data =
+                await apiFetch(
+                    endpoint
+                );
+
+
+            if (
+                !data.success
+            ) {
+
+                throw new Error(
+                    data.message ||
+                    "Unable to load assignments."
+                );
+
+            }
+
+
+            assignments =
+                data.assignments || [];
+
+
+            updateSummary(
+                data
+            );
+
+
+            renderTracker();
+
+
+            renderAssignmentList();
+
+
+        } catch (error) {
+
+            console.error(
+                "STUDENT ASSIGNMENTS ERROR:",
+                error
+            );
+
+
+            renderError(
+                error.message
+            );
+
+        } finally {
+
+            refresh.classList.remove(
+                "loading"
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       UPDATE SUMMARY
+    ========================================================= */
+
+    function updateSummary(
+        data
+    ) {
+
+        const total =
+            Number(
+                data.totalAssignments ??
+                assignments.length
+            );
+
+
+        const completed =
+            Number(
+                data.completedAssignments ??
+                assignments.filter(
+                    a => a.completed
+                ).length
+            );
+
+
+        const pending =
+            Number(
+                data.pendingAssignments ??
+                (
+                    total -
+                    completed
+                )
+            );
+
+
+        document.getElementById(
+            "totalAssignments"
+        ).textContent =
+            total;
+
+
+        document.getElementById(
+            "completedAssignments"
+        ).textContent =
+            completed;
+
+
+        document.getElementById(
+            "pendingAssignments"
+        ).textContent =
+            pending;
+
+
+        const percentage =
+            total > 0
+                ? Math.round(
+                    (
+                        completed /
+                        total
+                    ) * 100
+                )
+                : 0;
+
+
+        document.getElementById(
+            "progressPercent"
+        ).textContent =
+            `${percentage}%`;
+
+
+        document.getElementById(
+            "progressFill"
+        ).style.width =
+            `${percentage}%`;
+
+
+        document.getElementById(
+            "trackerCount"
+        ).textContent =
+            `${total} assignment${total === 1 ? "" : "s"}`;
+
+    }
+
+
+    /* =========================================================
+       RENDER CIRCLE TRACKER
+    ========================================================= */
+
+    function renderTracker() {
+
+        const tracker =
+            document.getElementById(
+                "assignmentTracker"
+            );
+
+
+        if (
+            !assignments.length
+        ) {
+
+            tracker.innerHTML = `
+                <div class="empty">
+                    <strong>
+                        No assignments found
+                    </strong>
+
+                    There are currently no active
+                    assignments for your class.
+                </div>
+            `;
+
+            return;
+
+        }
+
+
+        tracker.innerHTML =
+            assignments
+                .map(
+                    (
+                        assignment,
+                        index
+                    ) => {
+
+                        const done =
+                            isAssignmentDone(
+                                assignment
+                            );
+
+
+                        const title =
+                            assignment.title ||
+                            "Assignment";
+
+
+                        return `
+                            <div
+                                class="
+                                    assignment-circle-item
+                                    ${done ? "completed" : ""}
+                                "
+                                onclick="
+                                    openAssignment(
+                                        ${index}
+                                    )
+                                "
+                            >
+
+                                <div
+                                    class="
+                                        assignment-circle
+                                        ${done ? "done" : "pending"}
+                                    "
+                                >
+
+                                    <div
+                                        class="circle-number"
+                                    >
+                                        ${index + 1}
+                                    </div>
+
+
+                                    ${
+                                        done
+                                            ? `
+                                                <div
+                                                    class="circle-check"
+                                                >
+                                                    ✓
+                                                </div>
+                                              `
+                                            : ""
+                                    }
+
+                                </div>
+
+
+                                <div
+                                    class="circle-title"
+                                    title="${escapeHtml(title)}"
+                                >
+                                    ${escapeHtml(title)}
+                                </div>
+
+
+                                <div
+                                    class="circle-status"
+                                >
+                                    ${
+                                        done
+                                            ? "Completed"
+                                            : "Pending"
+                                    }
+                                </div>
+
+                            </div>
+                        `;
+
+                    }
+                )
+                .join("");
+
+    }
+
+
+    /* =========================================================
+       RENDER ASSIGNMENT LIST
+    ========================================================= */
+
+    function renderAssignmentList() {
+
+        const list =
+            document.getElementById(
+                "assignmentList"
+            );
+
+
+        if (
+            !assignments.length
+        ) {
+
+            list.innerHTML = `
+                <div class="empty">
+
+                    <strong>
+                        No Assignments
+                    </strong>
+
+                    No active assignments are
+                    assigned to your class right now.
+
+                </div>
+            `;
+
+            return;
+
+        }
+
+
+        list.innerHTML =
+            assignments
+                .map(
+                    (
+                        assignment,
+                        index
+                    ) => {
+
+                        const done =
+                            isAssignmentDone(
+                                assignment
+                            );
+
+
+                        return `
+                            <article
+                                class="
+                                    assignment-card
+                                    ${done ? "done" : ""}
+                                "
+                                onclick="
+                                    openAssignment(
+                                        ${index}
+                                    )
+                                "
+                            >
+
+                                <div
+                                    class="assignment-card-top"
+                                >
+
+                                    <div>
+
+                                        <div
+                                            class="assignment-card-title"
+                                        >
+                                            ${escapeHtml(
+                                                assignment.title ||
+                                                "Untitled Assignment"
+                                            )}
+                                        </div>
+
+                                        <div
+                                            class="assignment-subject"
+                                        >
+                                            ${escapeHtml(
+                                                assignment.subject ||
+                                                "Subject not specified"
+                                            )}
+                                        </div>
+
+                                    </div>
+
+
+                                    <div
+                                        class="
+                                            status
+                                            ${done ? "done" : "pending"}
+                                        "
+                                    >
+                                        ${
+                                            done
+                                                ? "✓ DONE"
+                                                : "PENDING"
+                                        }
+                                    </div>
+
+                                </div>
+
+
+                                <div
+                                    class="assignment-details"
+                                >
+
+                                    <div class="detail">
+                                        👥
+                                        ${escapeHtml(
+                                            assignment.class ||
+                                            studentClass
+                                        )}
+                                    </div>
+
+                                    <div class="detail">
+                                        ⏰
+                                        ${escapeHtml(
+                                            assignment.deadline ||
+                                            "No deadline"
+                                        )}
+                                    </div>
+
+                                </div>
+
+
+                                ${
+                                    done
+                                        ? `
+                                            <div
+                                                class="done-message"
+                                            >
+                                                ✓ Mentor has marked
+                                                this assignment as
+                                                submitted.
+                                            </div>
+                                          `
+                                        : ""
+                                }
+
+                            </article>
+                        `;
+
+                    }
+                )
+                .join("");
+
+    }
+
+
+    /* =========================================================
+       CHECK STATUS
+    ========================================================= */
+
+    function isAssignmentDone(
+        assignment
+    ) {
+
+        if (
+            assignment.completed === true
+        ) {
+
+            return true;
+
+        }
+
+
+        const status =
+            String(
+                assignment.status ||
+                ""
+            )
+                .trim()
+                .toLowerCase();
+
+
+        return [
+            "done",
+            "submitted",
+            "completed"
+        ].includes(
+            status
+        );
+
+    }
+
+
+    /* =========================================================
+       OPEN ASSIGNMENT DETAILS
+    ========================================================= */
+
+    function openAssignment(
+        index
+    ) {
+
+        const assignment =
+            assignments[index];
+
+
+        if (!assignment) {
+            return;
+        }
+
+
+        const done =
+            isAssignmentDone(
+                assignment
+            );
+
+
+        document.getElementById(
+            "modalTitle"
+        ).textContent =
+            assignment.title ||
+            "Assignment";
+
+
+        document.getElementById(
+            "modalSubject"
+        ).textContent =
+            assignment.subject ||
+            "Subject";
+
+
+        document.getElementById(
+            "modalClass"
+        ).textContent =
+            assignment.class ||
+            studentClass;
+
+
+        document.getElementById(
+            "modalSubjectBox"
+        ).textContent =
+            assignment.subject ||
+            "—";
+
+
+        document.getElementById(
+            "modalDeadline"
+        ).textContent =
+            assignment.deadline ||
+            "No deadline";
+
+
+        document.getElementById(
+            "modalAssignmentId"
+        ).textContent =
+            assignment.assignmentId ||
+            "—";
+
+
+        const statusBox =
+            document.getElementById(
+                "modalStatusBox"
+            );
+
+
+        const statusIcon =
+            document.getElementById(
+                "modalStatusIcon"
+            );
+
+
+        const statusTitle =
+            document.getElementById(
+                "modalStatusTitle"
+            );
+
+
+        const statusText =
+            document.getElementById(
+                "modalStatusText"
+            );
+
+
+        const footer =
+            document.getElementById(
+                "modalFooterButton"
+            );
+
+
+        if (done) {
+
+            statusBox.className =
+                "modal-status done";
+
+
+            statusIcon.textContent =
+                "✓";
+
+
+            statusTitle.textContent =
+                "Assignment Completed";
+
+
+            statusText.textContent =
+                "Your enrollment number has been marked as submitted.";
+
+
+            footer.innerHTML = `
+                <button
+                    class="done-button"
+                >
+                    ✓ Completed
+                </button>
+            `;
+
+        } else {
+
+            statusBox.className =
+                "modal-status pending";
+
+
+            statusIcon.textContent =
+                "○";
+
+
+            statusTitle.textContent =
+                "Assignment Pending";
+
+
+            statusText.textContent =
+                "This assignment has not been marked as completed yet.";
+
+
+            footer.innerHTML = `
+                <button
+                    class="pending-button"
+                >
+                    Pending
+                </button>
+            `;
+
+        }
+
+
+        document.getElementById(
+            "detailsModal"
+        ).classList.add(
+            "active"
+        );
+
+    }
+
+
+    /* =========================================================
+       CLOSE MODAL
+    ========================================================= */
+
+    function closeModal() {
+
+        document.getElementById(
+            "detailsModal"
+        ).classList.remove(
+            "active"
+        );
+
+    }
+
+
+    /* =========================================================
+       CLICK OUTSIDE MODAL
+    ========================================================= */
+
+    document.getElementById(
+        "detailsModal"
+    ).addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target === this
+            ) {
+
+                closeModal();
+
+            }
+
+        }
+    );
+
+
+    /* =========================================================
+       ESC KEY
+    ========================================================= */
+
+    document.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.key === "Escape"
+            ) {
+
+                closeModal();
+
+            }
+
+        }
+    );
+
+
+    /* =========================================================
+       LOADING STATE
+    ========================================================= */
+
+    function renderLoading() {
+
+        const loadingHtml = `
+            <div class="loading">
+
+                <div class="spinner"></div>
+
+                Loading assignments...
+
+            </div>
+        `;
+
+
+        document.getElementById(
+            "assignmentTracker"
+        ).innerHTML =
+            loadingHtml;
+
+
+        document.getElementById(
+            "assignmentList"
+        ).innerHTML =
+            loadingHtml;
+
+    }
+
+
+    /* =========================================================
+       ERROR STATE
+    ========================================================= */
+
+    function renderError(
+        message
+    ) {
+
+        const html = `
+            <div class="empty">
+
+                <strong>
+                    Unable to Load Assignments
+                </strong>
+
+                ${escapeHtml(message)}
+
+                <br><br>
+
+                Tap the refresh button
+                to try again.
+
+            </div>
+        `;
+
+
+        document.getElementById(
+            "assignmentTracker"
+        ).innerHTML =
+            html;
+
+
+        document.getElementById(
+            "assignmentList"
+        ).innerHTML =
+            html;
+
+    }
+
+
+    /* =========================================================
+       MISSING STUDENT INFO
+    ========================================================= */
+
+    function showMissingStudentInfo() {
+
+        document.getElementById(
+            "totalAssignments"
+        ).textContent =
+            "—";
+
+
+        document.getElementById(
+            "completedAssignments"
+        ).textContent =
+            "—";
+
+
+        document.getElementById(
+            "pendingAssignments"
+        ).textContent =
+            "—";
+
+
+        document.getElementById(
+            "progressPercent"
+        ).textContent =
+            "—";
+
+
+        document.getElementById(
+            "assignmentTracker"
+        ).innerHTML = `
+            <div class="empty">
+
+                <strong>
+                    Student Information Missing
+                </strong>
+
+                Class or enrollment number
+                was not found in localStorage.
+
+            </div>
+        `;
+
+
+        document.getElementById(
+            "assignmentList"
+        ).innerHTML = `
+            <div class="empty">
+
+                <strong>
+                    Cannot Load Assignments
+                </strong>
+
+                Please login again so your
+                student information is available.
+
+            </div>
+        `;
+
+    }
+
+
+    /* =========================================================
+       HTML ESCAPE
+    ========================================================= */
+
+    function escapeHtml(
+        value
+    ) {
+
+        return String(
+            value ?? ""
+        )
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
+    }
+
+
+</script>
+
+</body>
+
+</html>
