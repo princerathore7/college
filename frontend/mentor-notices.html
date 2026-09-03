@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Mentor Notices</title>
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        /* =========================================
+           HEADER
+        ========================================= */
+
+        .header {
+            background: #0b1f3a;
+            color: white;
+            padding: 18px 25px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 20px;
+
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .header-icon {
+            width: 45px;
+            height: 45px;
+
+            border-radius: 12px;
+
+            background: rgba(255, 255, 255, 0.12);
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 21px;
+        }
+
+        .header-title h1 {
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+
+        .header-title p {
+            font-size: 13px;
+            opacity: 0.75;
+        }
+
+        /* =========================================
+           MENTOR ID
+        ========================================= */
+
+        .mentor-id-box {
+            background: rgba(255, 255, 255, 0.12);
+
+            border: 1px solid rgba(255, 255, 255, 0.18);
+
+            padding: 9px 14px;
+
+            border-radius: 10px;
+
+            display: flex;
+            align-items: center;
+            gap: 9px;
+
+            font-size: 13px;
+        }
+
+        .mentor-id-box strong {
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        /* =========================================
+           MAIN
+        ========================================= */
+
+        .container {
+            width: 100%;
+            max-width: 1050px;
+
+            margin: 0 auto;
+
+            padding: 25px 18px 50px;
+        }
+
+        /* =========================================
+           TOP BAR
+        ========================================= */
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            gap: 15px;
+
+            margin-bottom: 22px;
+
+            flex-wrap: wrap;
+        }
+
+        .page-heading h2 {
+            font-size: 23px;
+            color: #0b1f3a;
+
+            margin-bottom: 5px;
+        }
+
+        .page-heading p {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .refresh-btn {
+            border: none;
+
+            background: #0b1f3a;
+            color: white;
+
+            padding: 10px 16px;
+
+            border-radius: 9px;
+
+            cursor: pointer;
+
+            font-size: 14px;
+
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            transition: 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background: #16375f;
+        }
+
+        .refresh-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* =========================================
+           LOADING
+        ========================================= */
+
+        .loading {
+            background: white;
+
+            border-radius: 14px;
+
+            padding: 45px 20px;
+
+            text-align: center;
+
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.06);
+
+            color: #6b7280;
+        }
+
+        .loading i {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+
+        /* =========================================
+           ERROR
+        ========================================= */
+
+        .error-box {
+            display: none;
+
+            background: #fff1f2;
+
+            border: 1px solid #fecdd3;
+
+            color: #be123c;
+
+            padding: 15px 17px;
+
+            border-radius: 11px;
+
+            margin-bottom: 18px;
+
+            font-size: 14px;
+        }
+
+        /* =========================================
+           EMPTY
+        ========================================= */
+
+        .empty {
+            display: none;
+
+            background: white;
+
+            border-radius: 15px;
+
+            padding: 60px 20px;
+
+            text-align: center;
+
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.06);
+        }
+
+        .empty i {
+            font-size: 45px;
+            color: #9ca3af;
+
+            margin-bottom: 15px;
+        }
+
+        .empty h3 {
+            color: #374151;
+            margin-bottom: 7px;
+        }
+
+        .empty p {
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        /* =========================================
+           NOTICE LIST
+        ========================================= */
+
+        .notice-list {
+            display: flex;
+            flex-direction: column;
+
+            gap: 16px;
+        }
+
+        /* =========================================
+           NOTICE CARD
+        ========================================= */
+
+        .notice-card {
+            background: white;
+
+            border-radius: 15px;
+
+            overflow: hidden;
+
+            box-shadow: 0 3px 16px rgba(0, 0, 0, 0.07);
+
+            border: 1px solid #e5e7eb;
+
+            transition: 0.2s;
+
+            cursor: pointer;
+
+            position: relative;
+        }
+
+        .notice-card:hover {
+            transform: translateY(-2px);
+
+            box-shadow: 0 7px 22px rgba(0, 0, 0, 0.09);
+        }
+
+        .notice-card.unread {
+            border-left: 5px solid #0b1f3a;
+        }
+
+        /* =========================================
+           NOTICE CONTENT
+        ========================================= */
+
+        .notice-content {
+            padding: 19px;
+        }
+
+        .notice-top {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: flex-start;
+
+            gap: 15px;
+
+            margin-bottom: 10px;
+        }
+
+        .notice-title {
+            font-size: 18px;
+
+            color: #111827;
+
+            line-height: 1.4;
+        }
+
+        .unread-badge {
+            background: #0b1f3a;
+
+            color: white;
+
+            font-size: 10px;
+
+            padding: 5px 8px;
+
+            border-radius: 20px;
+
+            white-space: nowrap;
+        }
+
+        .notice-message {
+            font-size: 14px;
+
+            color: #4b5563;
+
+            line-height: 1.65;
+
+            white-space: pre-wrap;
+
+            margin-bottom: 15px;
+        }
+
+        /* =========================================
+           NOTICE IMAGE
+        ========================================= */
+
+        .notice-image {
+            width: 100%;
+
+            max-height: 400px;
+
+            object-fit: cover;
+
+            display: block;
+
+            border-radius: 10px;
+
+            margin-top: 12px;
+
+            margin-bottom: 15px;
+        }
+
+        /* =========================================
+           META
+        ========================================= */
+
+        .notice-meta {
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 9px 15px;
+
+            color: #6b7280;
+
+            font-size: 12px;
+
+            border-top: 1px solid #f0f0f0;
+
+            padding-top: 12px;
+        }
+
+        .meta-item {
+            display: flex;
+
+            align-items: center;
+
+            gap: 5px;
+        }
+
+        .meta-item i {
+            color: #0b1f3a;
+        }
+
+        /* =========================================
+           TARGET BADGE
+        ========================================= */
+
+        .target-badge {
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 6px;
+
+            background: #eef2ff;
+
+            color: #3730a3;
+
+            padding: 5px 9px;
+
+            border-radius: 20px;
+
+            font-size: 11px;
+
+            margin-bottom: 10px;
+        }
+
+        /* =========================================
+           ACCESS DENIED
+        ========================================= */
+
+        .access-denied {
+            display: none;
+
+            min-height: 100vh;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 20px;
+
+            background: #f4f7fb;
+        }
+
+        .access-box {
+            width: 100%;
+            max-width: 450px;
+
+            background: white;
+
+            padding: 40px 25px;
+
+            border-radius: 18px;
+
+            text-align: center;
+
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .access-box i {
+            font-size: 48px;
+
+            color: #dc2626;
+
+            margin-bottom: 18px;
+        }
+
+        .access-box h2 {
+            color: #111827;
+
+            margin-bottom: 10px;
+        }
+
+        .access-box p {
+            color: #6b7280;
+
+            font-size: 14px;
+
+            line-height: 1.6;
+        }
+
+        /* =========================================
+           TOAST
+        ========================================= */
+
+        .toast {
+            position: fixed;
+
+            right: 20px;
+            bottom: 20px;
+
+            background: #111827;
+
+            color: white;
+
+            padding: 12px 17px;
+
+            border-radius: 9px;
+
+            font-size: 13px;
+
+            opacity: 0;
+
+            pointer-events: none;
+
+            transform: translateY(15px);
+
+            transition: 0.25s;
+
+            z-index: 9999;
+        }
+
+        .toast.show {
+            opacity: 1;
+
+            transform: translateY(0);
+        }
+
+        /* =========================================
+           MOBILE
+        ========================================= */
+
+        @media (max-width: 650px) {
+
+            .header {
+                padding: 14px 15px;
+
+                align-items: flex-start;
+
+                flex-direction: column;
+            }
+
+            .header-title h1 {
+                font-size: 19px;
+            }
+
+            .mentor-id-box {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .container {
+                padding: 20px 12px 40px;
+            }
+
+            .page-heading h2 {
+                font-size: 20px;
+            }
+
+            .refresh-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .notice-content {
+                padding: 15px;
+            }
+
+            .notice-title {
+                font-size: 16px;
+            }
+
+            .notice-message {
+                font-size: 13px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+<!-- =====================================================
+     ACCESS DENIED
+===================================================== -->
+
+<div id="accessDenied"
+     class="access-denied">
+
+    <div class="access-box">
+
+        <i class="fa-solid fa-lock"></i>
+
+        <h2>Mentor ID Required</h2>
+
+        <p>
+            You cannot access Mentor Notices without a valid
+            Mentor ID.
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     MAIN PAGE
+===================================================== -->
+
+<div id="mainPage"
+     style="display:none;">
+
+
+    <!-- HEADER -->
+
+    <header class="header">
+
+        <div class="header-left">
+
+            <div class="header-icon">
+
+                <i class="fa-solid fa-bullhorn"></i>
+
+            </div>
+
+            <div class="header-title">
+
+                <h1>Mentor Notices</h1>
+
+                <p>
+                    Notices and announcements for mentors
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="mentor-id-box">
+
+            <i class="fa-solid fa-id-card"></i>
+
+            <span>Mentor ID:</span>
+
+            <strong id="headerMentorId">
+                Loading...
+            </strong>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- MAIN -->
+
+    <main class="container">
+
+
+        <!-- TOP BAR -->
+
+        <div class="top-bar">
+
+            <div class="page-heading">
+
+                <h2>
+                    <i class="fa-solid fa-bell"></i>
+                    Notices
+                </h2>
+
+                <p id="noticeCountText">
+                    Loading notices...
+                </p>
+
+            </div>
+
+
+            <button
+                class="refresh-btn"
+                id="refreshBtn"
+                onclick="loadNotices()">
+
+                <i class="fa-solid fa-rotate"></i>
+
+                Refresh
+
+            </button>
+
+        </div>
+
+
+
+        <!-- ERROR -->
+
+        <div id="errorBox"
+             class="error-box">
+
+            <i class="fa-solid fa-circle-exclamation"></i>
+
+            <span id="errorText"></span>
+
+        </div>
+
+
+
+        <!-- LOADING -->
+
+        <div id="loading"
+             class="loading">
+
+            <i class="fa-solid fa-spinner fa-spin"></i>
+
+            <div>
+                Loading mentor notices...
+            </div>
+
+        </div>
+
+
+
+        <!-- EMPTY -->
+
+        <div id="empty"
+             class="empty">
+
+            <i class="fa-regular fa-bell-slash"></i>
+
+            <h3>
+                No Notices Available
+            </h3>
+
+            <p>
+                There are currently no notices posted for mentors.
+            </p>
+
+        </div>
+
+
+
+        <!-- NOTICE LIST -->
+
+        <div id="noticeList"
+             class="notice-list">
+
+        </div>
+
+
+    </main>
+
+</div>
+
+
+
+<!-- TOAST -->
+
+<div id="toast"
+     class="toast">
+
+    Notice marked as read.
+
+</div>
+
+
+
+<script>
+
+    // =====================================================
+    // CONFIG
+    // =====================================================
+
+    const API_BASE =
+        "https://college-hwbb.onrender.com";
+
+
+    // =====================================================
+    // GLOBAL
+    // =====================================================
+
+    let mentorId = "";
+
+
+
+    // =====================================================
+    // GET MENTOR ID
+    // =====================================================
+
+    function getMentorId() {
+
+        /*
+         * Priority:
+         *
+         * 1. URL ?mentorId=
+         * 2. mentorProfile object
+         * 3. loggedInMentorId
+         * 4. mentorId
+         * 5. fmentoID
+         * 6. mentorID
+         */
+
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        const urlMentorId =
+            params.get("mentorId");
+
+        if (urlMentorId &&
+            urlMentorId.trim()) {
+
+            return urlMentorId.trim();
+
+        }
+
+
+        // -----------------------------------------
+        // mentorProfile
+        // -----------------------------------------
+
+        const mentorProfileRaw =
+            localStorage.getItem(
+                "mentorProfile"
+            );
+
+        if (mentorProfileRaw) {
+
+            try {
+
+                const profile =
+                    JSON.parse(
+                        mentorProfileRaw
+                    );
+
+                const possibleIds = [
+
+                    profile.mentorId,
+
+                    profile.mentorID,
+
+                    profile.id,
+
+                    profile._id,
+
+                    profile.employeeId,
+
+                    profile.facultyId
+
+                ];
+
+                for (const id of possibleIds) {
+
+                    if (id !== undefined &&
+                        id !== null &&
+                        String(id).trim()) {
+
+                        return String(id).trim();
+
+                    }
+
+                }
+
+            }
+            catch (error) {
+
+                console.warn(
+                    "Unable to parse mentorProfile:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        // -----------------------------------------
+        // Individual localStorage keys
+        // -----------------------------------------
+
+        const possibleKeys = [
+
+            "loggedInMentorId",
+
+            "mentorId",
+
+            "mentorID",
+
+            "fmentoID",
+
+            "facultyId",
+
+            "facultyID"
+
+        ];
+
+
+        for (const key of possibleKeys) {
+
+            const value =
+                localStorage.getItem(key);
+
+            if (value &&
+                value.trim()) {
+
+                return value.trim();
+
+            }
+
+        }
+
+
+        return "";
+
+    }
+
+
+
+    // =====================================================
+    // INITIALIZE
+    // =====================================================
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            mentorId =
+                getMentorId();
+
+
+            console.log(
+                "Mentor Notices - Mentor ID:",
+                mentorId
+            );
+
+
+            // -----------------------------------------
+            // Mentor ID mandatory
+            // -----------------------------------------
+
+            if (!mentorId) {
+
+                document
+                    .getElementById("mainPage")
+                    .style.display = "none";
+
+                document
+                    .getElementById("accessDenied")
+                    .style.display = "flex";
+
+                return;
+
+            }
+
+
+            // -----------------------------------------
+            // Show page
+            // -----------------------------------------
+
+            document
+                .getElementById("mainPage")
+                .style.display = "block";
+
+
+            document
+                .getElementById("headerMentorId")
+                .textContent = mentorId;
+
+
+            // -----------------------------------------
+            // Load notices
+            // -----------------------------------------
+
+            loadNotices();
+
+        }
+    );
+
+
+
+    // =====================================================
+    // LOAD MENTOR NOTICES
+    // =====================================================
+
+    async function loadNotices() {
+
+        if (!mentorId) {
+
+            showError(
+                "Mentor ID is missing."
+            );
+
+            return;
+
+        }
+
+
+        const loading =
+            document.getElementById(
+                "loading"
+            );
+
+        const empty =
+            document.getElementById(
+                "empty"
+            );
+
+        const noticeList =
+            document.getElementById(
+                "noticeList"
+            );
+
+        const errorBox =
+            document.getElementById(
+                "errorBox"
+            );
+
+        const refreshBtn =
+            document.getElementById(
+                "refreshBtn"
+            );
+
+
+        // -----------------------------------------
+        // Reset UI
+        // -----------------------------------------
+
+        loading.style.display = "block";
+
+        empty.style.display = "none";
+
+        errorBox.style.display = "none";
+
+        noticeList.innerHTML = "";
+
+        refreshBtn.disabled = true;
+
+
+        try {
+
+            /*
+             * IMPORTANT:
+             *
+             * Existing backend expects:
+             *
+             * target=mentor
+             *
+             * and enrollment is optional.
+             *
+             * Mentor ID is also appended so the page
+             * always identifies the mentor.
+             */
+
+            const url =
+                `${API_BASE}/api/notices` +
+                `?target=mentor` +
+                `&mentorId=${encodeURIComponent(mentorId)}`;
+
+
+            console.log(
+                "Fetching mentor notices:",
+                url
+            );
+
+
+            const response =
+                await fetch(url);
+
+
+            const data =
+                await response.json();
+
+
+            console.log(
+                "Mentor notices response:",
+                data
+            );
+
+
+            if (!response.ok ||
+                !data.success) {
+
+                throw new Error(
+                    data.message ||
+                    "Failed to load mentor notices."
+                );
+
+            }
+
+
+            const notices =
+                Array.isArray(data.notices)
+                    ? data.notices
+                    : [];
+
+
+            loading.style.display = "none";
+
+
+            // -----------------------------------------
+            // No notices
+            // -----------------------------------------
+
+            if (notices.length === 0) {
+
+                empty.style.display = "block";
+
+                document
+                    .getElementById(
+                        "noticeCountText"
+                    )
+                    .textContent =
+                    "No mentor notices found.";
+
+                return;
+
+            }
+
+
+            // -----------------------------------------
+            // Count
+            // -----------------------------------------
+
+            const unreadCount =
+                notices.filter(
+                    notice =>
+                        !notice.is_read
+                ).length;
+
+
+            document
+                .getElementById(
+                    "noticeCountText"
+                )
+                .textContent =
+                `${notices.length} notice${
+                    notices.length === 1
+                        ? ""
+                        : "s"
+                } • ${
+                    unreadCount
+                } unread`;
+
+
+            // -----------------------------------------
+            // Render
+            // -----------------------------------------
+
+            notices.forEach(
+                notice => {
+
+                    renderNotice(
+                        notice
+                    );
+
+                }
+            );
+
+        }
+        catch (error) {
+
+            console.error(
+                "Mentor notices error:",
+                error
+            );
+
+
+            loading.style.display =
+                "none";
+
+
+            showError(
+                error.message ||
+                "Unable to load mentor notices."
+            );
+
+        }
+        finally {
+
+            refreshBtn.disabled =
+                false;
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // RENDER NOTICE
+    // =====================================================
+
+    function renderNotice(notice) {
+
+        const noticeList =
+            document.getElementById(
+                "noticeList"
+            );
+
+
+        const card =
+            document.createElement(
+                "div"
+            );
+
+
+        card.className =
+            "notice-card" +
+            (
+                notice.is_read
+                    ? ""
+                    : " unread"
+            );
+
+
+        // -----------------------------------------
+        // Target
+        // -----------------------------------------
+
+        let targetHTML = `
+            <div class="target-badge">
+                <i class="fa-solid fa-user-tie"></i>
+                Mentors
+            </div>
+        `;
+
+
+        if (notice.targetClass) {
+
+            targetHTML = `
+                <div class="target-badge">
+                    <i class="fa-solid fa-users"></i>
+                    Class: ${escapeHTML(
+                        notice.targetClass
+                    )}
+                </div>
+            `;
+
+        }
+
+
+        // -----------------------------------------
+        // Image
+        // -----------------------------------------
+
+        let imageHTML = "";
+
+
+        if (notice.imageUrl) {
+
+            imageHTML = `
+                <img
+                    class="notice-image"
+                    src="${escapeAttribute(
+                        notice.imageUrl
+                    )}"
+                    alt="Notice image"
+                    loading="lazy"
+                    onerror="this.style.display='none'"
+                >
+            `;
+
+        }
+
+
+        // -----------------------------------------
+        // Read badge
+        // -----------------------------------------
+
+        const unreadHTML =
+            notice.is_read
+                ? ""
+                : `
+                    <span class="unread-badge">
+                        NEW
+                    </span>
+                  `;
+
+
+        // -----------------------------------------
+        // Card HTML
+        // -----------------------------------------
+
+        card.innerHTML = `
+
+            <div class="notice-content">
+
+                ${targetHTML}
+
+                <div class="notice-top">
+
+                    <h3 class="notice-title">
+                        ${escapeHTML(
+                            notice.title ||
+                            "Untitled Notice"
+                        )}
+                    </h3>
+
+                    ${unreadHTML}
+
+                </div>
+
+
+                <div class="notice-message">
+
+                    ${escapeHTML(
+                        notice.message || ""
+                    )}
+
+                </div>
+
+
+                ${imageHTML}
+
+
+                <div class="notice-meta">
+
+                    <div class="meta-item">
+
+                        <i class="fa-solid fa-user"></i>
+
+                        <span>
+                            ${escapeHTML(
+                                notice.sender ||
+                                "Admin"
+                            )}
+                        </span>
+
+                    </div>
+
+
+                    <div class="meta-item">
+
+                        <i class="fa-regular fa-clock"></i>
+
+                        <span>
+                            ${escapeHTML(
+                                notice.timestamp ||
+                                ""
+                            )}
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        `;
+
+
+        // -----------------------------------------
+        // Click -> Mark Read
+        // -----------------------------------------
+
+        card.addEventListener(
+            "click",
+            function () {
+
+                if (!notice.is_read) {
+
+                    markNoticeAsRead(
+                        notice,
+                        card
+                    );
+
+                }
+
+            }
+        );
+
+
+        noticeList.appendChild(
+            card
+        );
+
+    }
+
+
+
+    // =====================================================
+    // MARK NOTICE AS READ
+    // =====================================================
+
+    async function markNoticeAsRead(
+        notice,
+        card
+    ) {
+
+        try {
+
+            const response =
+                await fetch(
+                    `${API_BASE}/api/notices/mark-read`,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+
+                            title:
+                                notice.title,
+
+                            enrollment:
+                                mentorId
+
+                        })
+
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok ||
+                !data.success) {
+
+                throw new Error(
+                    data.message ||
+                    "Unable to mark notice as read."
+                );
+
+            }
+
+
+            // -----------------------------------------
+            // Update UI
+            // -----------------------------------------
+
+            notice.is_read = true;
+
+
+            card.classList.remove(
+                "unread"
+            );
+
+
+            const badge =
+                card.querySelector(
+                    ".unread-badge"
+                );
+
+
+            if (badge) {
+
+                badge.remove();
+
+            }
+
+
+            showToast(
+                "Notice marked as read."
+            );
+
+
+            updateNoticeCount();
+
+        }
+        catch (error) {
+
+            console.error(
+                "Mark read error:",
+                error
+            );
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // UPDATE NOTICE COUNT
+    // =====================================================
+
+    function updateNoticeCount() {
+
+        const cards =
+            document.querySelectorAll(
+                ".notice-card"
+            );
+
+
+        const unread =
+            document.querySelectorAll(
+                ".notice-card.unread"
+            ).length;
+
+
+        document
+            .getElementById(
+                "noticeCountText"
+            )
+            .textContent =
+            `${cards.length} notice${
+                cards.length === 1
+                    ? ""
+                    : "s"
+            } • ${unread} unread`;
+
+    }
+
+
+
+    // =====================================================
+    // ERROR
+    // =====================================================
+
+    function showError(message) {
+
+        const errorBox =
+            document.getElementById(
+                "errorBox"
+            );
+
+        const errorText =
+            document.getElementById(
+                "errorText"
+            );
+
+
+        errorText.textContent =
+            message;
+
+
+        errorBox.style.display =
+            "block";
+
+    }
+
+
+
+    // =====================================================
+    // TOAST
+    // =====================================================
+
+    function showToast(message) {
+
+        const toast =
+            document.getElementById(
+                "toast"
+            );
+
+
+        toast.textContent =
+            message;
+
+
+        toast.classList.add(
+            "show"
+        );
+
+
+        setTimeout(
+            function () {
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            2500
+        );
+
+    }
+
+
+
+    // =====================================================
+    // HTML ESCAPE
+    // =====================================================
+
+    function escapeHTML(value) {
+
+        return String(value)
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
+    }
+
+
+
+    // =====================================================
+    // ATTRIBUTE ESCAPE
+    // =====================================================
+
+    function escapeAttribute(value) {
+
+        return String(value)
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
+    }
+
+</script>
+
+</body>
+
+</html>
