@@ -245,42 +245,105 @@ let allForms = []; // Store forms globally for filtering
 
 async function loadForms() {
     const container = document.getElementById("formsContainer");
-    
-    // Get student details directly from localStorage as per your new structure
-    const enrollment = localStorage.getItem("enrollment");
-    const studentClass = localStorage.getItem("studentClass") || "";
 
-    if (!enrollment) return; // Handled by loadStudentInfo() redirect
+    // Get complete student profile
+    const profileRaw = localStorage.getItem("studentProfile");
 
-    /* 
-      Assuming studentClass is saved with spaces like "2 CSE A"
-      We split it to extract Year, Branch, and Section so it matches backend logic
-    */
-    const classParts = studentClass.trim().split(/\s+/);
-    const year = classParts[0] || "";
-    const branch = classParts[1] || "";
-    const section = classParts[2] || "";
+    if (!profileRaw) {
+        console.error("studentProfile not found in localStorage");
+        container.innerHTML =
+            `<div class="empty-state">⚠️ Student session not found. Please login again.</div>`;
+        return;
+    }
 
-    // Append class details as URL Parameters
+    let profile;
+
+    try {
+        profile = JSON.parse(profileRaw);
+    } catch (error) {
+        console.error("Invalid studentProfile JSON:", error);
+        container.innerHTML =
+            `<div class="empty-state">⚠️ Invalid student profile. Please login again.</div>`;
+        return;
+    }
+
+    const enrollment = profile.enrollment || "";
+    const studentClass = profile.class || "";
+
+    console.log("Student Profile:", profile);
+    console.log("Enrollment:", enrollment);
+    console.log("Student Class:", studentClass);
+
+    if (!enrollment || !studentClass) {
+        console.error("Missing enrollment or class");
+        return;
+    }
+
+    /*
+     * Current class format:
+     * "2nd Year AIML2"
+     *
+     * Convert it into:
+     * year    = "2nd Year"
+     * branch  = "AIML"
+     * section = "2"
+     */
+
+    const match = studentClass.match(/^(.+?)\s+([A-Za-z]+)(\d+)$/);
+
+    if (!match) {
+        console.error("Unable to parse class:", studentClass);
+        container.innerHTML =
+            `<div class="empty-state">⚠️ Invalid class format: ${studentClass}</div>`;
+        return;
+    }
+
+    const year = match[1].trim();
+    const branch = match[2].trim();
+    const section = match[3].trim();
+
+    console.log("Parsed class details:");
+    console.log("Year:", year);
+    console.log("Branch:", branch);
+    console.log("Section:", section);
+
     const params = new URLSearchParams({
         year: year,
         branch: branch,
         section: section
     });
 
+    console.log(
+        "Fetching forms:",
+        `https://college-hwbb.onrender.com/api/forms?${params.toString()}`
+    );
+
     try {
-        const res = await fetch(`https://college-hwbb.onrender.com/api/forms?${params.toString()}`, {
-            method: "GET",
-            credentials: "include"
-        });
-        
-        if (!res.ok) throw new Error("Failed to load");
-        
+        const res = await fetch(
+            `https://college-hwbb.onrender.com/api/forms?${params.toString()}`,
+            {
+                method: "GET",
+                credentials: "include"
+            }
+        );
+
+        if (!res.ok) {
+            throw new Error(`Failed to load forms: ${res.status}`);
+        }
+
         allForms = await res.json();
+
+        console.log("Forms received:", allForms);
+
         renderForms(allForms);
+
     } catch (err) {
-        console.error(err);
-        container.innerHTML = `<div class="empty-state">⚠️ Error loading forms. Please refresh the page.</div>`;
+        console.error("Form loading error:", err);
+
+        container.innerHTML =
+            `<div class="empty-state">
+                ⚠️ Error loading forms. Please refresh the page.
+            </div>`;
     }
 }
 

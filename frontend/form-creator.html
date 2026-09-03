@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,24 +6,117 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Create New Form</title>
+
   <style>
-    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
-    .container { max-width: 800px; margin: 40px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 0 12px rgba(0,0,0,0.1); }
-    h1 { margin-bottom: 5px; }
-    .card { background: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 6px; }
-    input, textarea, select { width: 100%; padding: 8px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box; }
-    .pdf-box { border: 2px dashed #ccc; padding: 20px; text-align: center; cursor: pointer; border-radius: 6px; }
-    .field-card { background: #fff; padding: 15px 10px 10px 10px; margin: 10px 0; border-radius: 6px; border: 1px solid #ddd; position: relative; }
-    .remove-btn { position: absolute; top: -10px; right: -10px; background: red; color: #fff; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-weight: bold; }
-    .grid { display: grid; grid-template-columns: 1fr 150px 120px; gap: 10px; align-items: center; }
-    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; align-items: center; } /* New grid for target classes */
-    .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; }
-    .btn.yellow { background: #f4c430; color: #000; font-weight: bold; }
-    .btn.secondary { background: #ccc; color: #000; margin-right: 10px; }
-    .actions { text-align: right; margin-top: 20px; }
-    
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      margin-bottom: 5px;
+    }
+
+    .card {
+      background: #f9f9f9;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 6px;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    .pdf-box {
+      border: 2px dashed #ccc;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .field-card {
+      background: #fff;
+      padding: 15px 10px 10px 10px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      position: relative;
+    }
+
+    .remove-btn {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background: red;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 150px 120px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn.yellow {
+      background: #f4c430;
+      color: #000;
+      font-weight: bold;
+    }
+
+    .btn.secondary {
+      background: #ccc;
+      color: #000;
+      margin-right: 10px;
+    }
+
+    .actions {
+      text-align: right;
+      margin-top: 20px;
+    }
+
     .back-btn {
-      background: #003366;          /* Navy Blue */
+      background: #003366;
       color: #fff;
       border: none;
       padding: 6px 12px;
@@ -35,17 +129,49 @@
       gap: 6px;
       transition: 0.2s ease;
     }
-    .back-btn:hover { background: #002244; }
-    .back-btn:active { transform: scale(0.96); }
+
+    .back-btn:hover {
+      background: #002244;
+    }
+
+    .back-btn:active {
+      transform: scale(0.96);
+    }
+
+    .target-info {
+      background: #eef6ff;
+      border: 1px solid #cfe2ff;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 12px;
+      font-size: 13px;
+      color: #334155;
+    }
+
+    .class-preview {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #2563eb;
+      font-weight: bold;
+    }
+
+    @media (max-width: 650px) {
+      .grid,
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
+
 <body>
 
 <div class="container">
+
   <button class="back-btn" onclick="goBack()">
     ← Back
   </button>
-  
+
   <!-- HEADER -->
   <div class="header">
     <h1>Create New Form</h1>
@@ -54,218 +180,853 @@
 
   <!-- FORM DETAILS -->
   <div class="card">
+
     <label>Form Title *</label>
-    <input type="text" id="formTitle" placeholder="e.g. Scholarship Form 2025">
+    <input
+      type="text"
+      id="formTitle"
+      placeholder="e.g. Scholarship Form 2026"
+    >
+
     <br><br>
+
     <label>Description</label>
-    <textarea id="formDesc" placeholder="Optional description"></textarea>
+    <textarea
+      id="formDesc"
+      placeholder="Optional description"
+    ></textarea>
+
   </div>
 
   <!-- PDF UPLOAD -->
   <div class="card">
+
     <label>Attach PDF Instructions</label>
+
     <div class="pdf-box">
-      <input type="file" id="pdfUpload" multiple accept="application/pdf">
+
+      <input
+        type="file"
+        id="pdfUpload"
+        multiple
+        accept="application/pdf"
+      >
+
       <p>Upload circulars / guidelines (PDF)</p>
+
     </div>
+
   </div>
 
-  <!-- TARGET AUDIENCE CARD -->
+  <!-- TARGET AUDIENCE -->
   <div class="card">
-    <label style="font-weight: bold;">Target Audience *</label>
-    <select id="targetType" onchange="toggleTargetClasses()">
-      <option value="all">All Classes (Visible to everyone)</option>
-      <option value="specific">Specific Classes Only (Select below)</option>
+
+    <label style="font-weight:bold;">
+      Target Audience *
+    </label>
+
+    <select
+      id="targetType"
+      onchange="toggleTargetClasses()"
+    >
+      <option value="all">
+        All Classes (Visible to everyone)
+      </option>
+
+      <option value="specific">
+        Specific Classes Only (Select below)
+      </option>
     </select>
 
-    <div id="targetClassesContainer" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
-      <label>Select Classes to send this form to:</label>
+    <div
+      id="targetClassesContainer"
+      style="
+        display:none;
+        margin-top:15px;
+        padding-top:15px;
+        border-top:1px solid #ddd;
+      "
+    >
+
+      <label>
+        Select Classes to send this form to:
+      </label>
+
       <div id="classesList"></div>
-      <button class="btn secondary" style="margin-top: 10px;" onclick="addTargetClass()">+ Add Target Class</button>
+
+      <button
+        class="btn secondary"
+        style="margin-top:10px;"
+        onclick="addTargetClass()"
+      >
+        + Add Target Class
+      </button>
+
+      <div class="target-info">
+        <strong>Important:</strong>
+        Target classes are saved using the exact structure:
+        <br><br>
+
+        <code>
+          {
+            year: "2nd Year",
+            branch: "AIML",
+            section: "2"
+          }
+        </code>
+
+        <br><br>
+
+        This must match the student's class format.
+      </div>
+
     </div>
+
   </div>
 
-  <!-- FIELDS -->
+  <!-- FORM FIELDS -->
   <div class="card">
-    <label style="font-weight: bold;">Form Input Fields *</label>
+
+    <label style="font-weight:bold;">
+      Form Input Fields *
+    </label>
+
     <div id="fieldsContainer"></div>
-    <button class="btn secondary" style="margin-top: 10px;" onclick="addField()">+ Add New Field</button>
+
+    <button
+      class="btn secondary"
+      style="margin-top:10px;"
+      onclick="addField()"
+    >
+      + Add New Field
+    </button>
+
   </div>
 
   <!-- ACTIONS -->
   <div class="actions">
-    <button class="btn secondary" onclick="goBack()">Cancel</button>
-    <button class="btn yellow" onclick="submitForm()">Create Form</button>
+
+    <button
+      class="btn secondary"
+      onclick="goBack()"
+    >
+      Cancel
+    </button>
+
+    <button
+      class="btn yellow"
+      onclick="submitForm()"
+    >
+      Create Form
+    </button>
+
   </div>
+
 </div>
 
+
 <script>
-/* ===============================
-   ACCESS CONTROL — FORM CREATOR
-================================ */
-const source = sessionStorage.getItem("accessSource"); 
+
+/* =========================================================
+   ACCESS CONTROL
+========================================================= */
+
+const source = sessionStorage.getItem("accessSource");
+
 if (source !== "ad") {
+
   document.body.innerHTML = `
-    <h2 style="text-align:center;margin-top:20vh;color:red">
-      ❌ Access Denied <br>
+    <h2 style="
+      text-align:center;
+      margin-top:20vh;
+      color:red;
+    ">
+      ❌ Access Denied
+      <br><br>
       Please open this page from Administration Panel only
     </h2>
   `;
+
   throw new Error("Invalid access source");
 }
 
-/* ===============================
-   UI LOGIC (TARGET CLASSES)
-================================ */
-// Toggle show/hide for specific classes
+
+/* =========================================================
+   TARGET CLASS UI
+========================================================= */
+
 function toggleTargetClasses() {
-  const type = document.getElementById("targetType").value;
-  document.getElementById("targetClassesContainer").style.display = (type === "specific") ? "block" : "none";
+
+  const type =
+    document.getElementById("targetType").value;
+
+  const container =
+    document.getElementById("targetClassesContainer");
+
+  container.style.display =
+    type === "specific"
+      ? "block"
+      : "none";
 }
 
-// Add a new row to input Year, Branch, Section
+
+/* =========================================================
+   ADD TARGET CLASS
+========================================================= */
+
 function addTargetClass() {
-  const container = document.getElementById("classesList");
-  const div = document.createElement("div");
-  div.className = "field-card"; 
-  div.innerHTML = `
-    <button class="remove-btn" onclick="this.parentElement.remove()">✖</button>
-    <div class="grid-3">
-      <div>
-        <label style="font-size: 12px; color: #555;">Year</label>
-        <input type="text" placeholder="e.g. 2" class="target-year" required>
-      </div>
-      <div>
-        <label style="font-size: 12px; color: #555;">Branch</label>
-        <input type="text" placeholder="e.g. CSE" class="target-branch" required>
-      </div>
-      <div>
-        <label style="font-size: 12px; color: #555;">Section</label>
-        <input type="text" placeholder="e.g. A" class="target-section" required>
-      </div>
-    </div>
-  `;
-  container.appendChild(div);
-}
 
-/* ===============================
-   UI LOGIC (FORM FIELDS)
-================================ */
-function addField() {
-  const container = document.getElementById("fieldsContainer");
-  const div = document.createElement("div");
+  const container =
+    document.getElementById("classesList");
+
+  const div =
+    document.createElement("div");
+
   div.className = "field-card";
+
   div.innerHTML = `
-    <button class="remove-btn" onclick="this.parentElement.remove()">✖</button>
-    <div class="grid">
-      <input type="text" placeholder="Field Label (e.g. Father's Name)" class="field-label" required>
-      <select class="field-type">
-        <option value="text">Text</option>
-        <option value="number">Number</option>
-        <option value="date">Date</option>
-        <option value="file">File Upload</option>
-      </select>
-      <select class="field-required">
-        <option value="true">Required</option>
-        <option value="false">Optional</option>
-      </select>
+
+    <button
+      class="remove-btn"
+      type="button"
+      onclick="this.parentElement.remove()"
+    >
+      ✖
+    </button>
+
+    <div class="grid-3">
+
+      <!-- YEAR -->
+
+      <div>
+
+        <label
+          style="font-size:12px;color:#555;"
+        >
+          Year
+        </label>
+
+        <select class="target-year">
+
+          <option value="">
+            Select Year
+          </option>
+
+          <option value="1st Year">
+            1st Year
+          </option>
+
+          <option value="2nd Year">
+            2nd Year
+          </option>
+
+          <option value="3rd Year">
+            3rd Year
+          </option>
+
+          <option value="4th Year">
+            4th Year
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- BRANCH -->
+
+      <div>
+
+        <label
+          style="font-size:12px;color:#555;"
+        >
+          Branch
+        </label>
+
+        <select class="target-branch">
+
+          <option value="">
+            Select Branch
+          </option>
+
+          <option value="CSE">
+            CSE
+          </option>
+
+          <option value="AIML">
+            AIML
+          </option>
+
+          <option value="IT">
+            IT
+          </option>
+
+          <option value="ECE">
+            ECE
+          </option>
+
+          <option value="EEE">
+            EEE
+          </option>
+
+          <option value="ME">
+            ME
+          </option>
+
+          <option value="CE">
+            CE
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- SECTION -->
+
+      <div>
+
+        <label
+          style="font-size:12px;color:#555;"
+        >
+          Section
+        </label>
+
+        <input
+          type="text"
+          class="target-section"
+          placeholder="e.g. 2"
+          maxlength="5"
+        >
+
+        <div class="class-preview"></div>
+
+      </div>
+
     </div>
   `;
+
+  container.appendChild(div);
+
+  updateClassPreview(div);
+}
+
+
+/* =========================================================
+   CLASS PREVIEW
+========================================================= */
+
+function updateClassPreview(row) {
+
+  const year =
+    row.querySelector(".target-year");
+
+  const branch =
+    row.querySelector(".target-branch");
+
+  const section =
+    row.querySelector(".target-section");
+
+  const preview =
+    row.querySelector(".class-preview");
+
+  function update() {
+
+    const y = year.value.trim();
+    const b = branch.value.trim().toUpperCase();
+    const s = section.value.trim();
+
+    if (y && b && s) {
+
+      preview.textContent =
+        `Student class: ${y} ${b}${s}`;
+
+    } else {
+
+      preview.textContent = "";
+
+    }
+  }
+
+  year.addEventListener("change", update);
+  branch.addEventListener("change", update);
+  section.addEventListener("input", update);
+}
+
+
+/* =========================================================
+   FORM FIELD UI
+========================================================= */
+
+function addField() {
+
+  const container =
+    document.getElementById("fieldsContainer");
+
+  const div =
+    document.createElement("div");
+
+  div.className = "field-card";
+
+  div.innerHTML = `
+
+    <button
+      class="remove-btn"
+      type="button"
+      onclick="this.parentElement.remove()"
+    >
+      ✖
+    </button>
+
+    <div class="grid">
+
+      <input
+        type="text"
+        placeholder="Field Label (e.g. Father's Name)"
+        class="field-label"
+        required
+      >
+
+      <select class="field-type">
+
+        <option value="text">
+          Text
+        </option>
+
+        <option value="number">
+          Number
+        </option>
+
+        <option value="date">
+          Date
+        </option>
+
+        <option value="file">
+          File Upload
+        </option>
+
+      </select>
+
+      <select class="field-required">
+
+        <option value="true">
+          Required
+        </option>
+
+        <option value="false">
+          Optional
+        </option>
+
+      </select>
+
+    </div>
+  `;
+
   container.appendChild(div);
 }
 
-/* ===============================
-   SUBMISSION LOGIC
-================================ */
+
+/* =========================================================
+   NORMALIZE TARGET CLASS
+========================================================= */
+
+function normalizeTargetClass(year, branch, section) {
+
+  return {
+    year: String(year).trim(),
+    branch: String(branch).trim().toUpperCase(),
+    section: String(section).trim().toUpperCase()
+  };
+}
+
+
+/* =========================================================
+   SUBMIT FORM
+========================================================= */
+
 async function submitForm() {
-  const title = document.getElementById("formTitle").value.trim();
-  const description = document.getElementById("formDesc").value.trim();
-  const targetType = document.getElementById("targetType").value;
-  const pdfs = document.getElementById("pdfUpload").files;
 
-  // Validate Title
-  if (!title) { alert("Form title is required"); return; }
+  const title =
+    document.getElementById("formTitle")
+      .value
+      .trim();
 
-  // Extract & Validate Target Classes
+  const description =
+    document.getElementById("formDesc")
+      .value
+      .trim();
+
+  const targetType =
+    document.getElementById("targetType")
+      .value;
+
+  const pdfs =
+    document.getElementById("pdfUpload")
+      .files;
+
+
+  /* =====================================================
+     VALIDATE TITLE
+  ===================================================== */
+
+  if (!title) {
+
+    alert("Form title is required");
+
+    return;
+  }
+
+
+  /* =====================================================
+     TARGET CLASSES
+  ===================================================== */
+
   const targetClasses = [];
+
+
   if (targetType === "specific") {
-    const classRows = document.querySelectorAll("#classesList .field-card");
-    if (classRows.length === 0) { alert("Please add at least one specific class (Year/Branch/Section)."); return; }
-    
-    for (const row of classRows) {
-      const year = row.querySelector(".target-year").value.trim();
-      const branch = row.querySelector(".target-branch").value.trim();
-      const section = row.querySelector(".target-section").value.trim();
-      
-      if(!year || !branch || !section) {
-        alert("Please fill all Year, Branch, and Section fields in Target Classes.");
-        return;
-      }
-      targetClasses.push({ year, branch, section });
-    }
-  }
 
-  // Extract & Validate Form Fields
-  const fieldCards = document.querySelectorAll("#fieldsContainer .field-card");
-  if (fieldCards.length === 0) { alert("Please add at least one form field."); return; }
+    const classRows =
+      document.querySelectorAll(
+        "#classesList .field-card"
+      );
 
-  const fields = [];
-  for (const card of fieldCards) {
-    const label = card.querySelector(".field-label").value.trim();
-    if (!label) { alert("All fields must have a label"); return; }
-    fields.push({
-      label,
-      type: card.querySelector(".field-type").value,
-      required: card.querySelector(".field-required").value === "true"
-    });
-  }
 
-  // Build FormData for API
-  const formData = new FormData();
-  formData.append("title", title);
-  formData.append("description", description);
-  formData.append("fields", JSON.stringify(fields));
-  formData.append("target_type", targetType);                         // 'all' or 'specific'
-  formData.append("target_classes", JSON.stringify(targetClasses));   // list of objects
-  
-  for (const pdf of pdfs) {
-    formData.append("pdfs", pdf);
-  }
+    if (classRows.length === 0) {
 
-  try {
-    const res = await fetch("https://college-hwbb.onrender.com/api/forms", {
-      method: "POST",
-      body: formData
-    });
+      alert(
+        "Please add at least one target class."
+      );
 
-    const text = await res.text();
-    let data;
-    try { 
-      data = JSON.parse(text); 
-    } catch { 
-      console.error("Non-JSON response:", text); 
-      alert("❌ Server error or invalid response. Check backend logs."); 
-      return; 
-    }
-
-    if (!res.ok) {
-      alert(data.error || "Failed to create form");
       return;
     }
 
-    alert("✅ Form created successfully");
-    window.location.href = "/form-submissions.html"; // Adjust to your admin dashboard route
+
+    for (const row of classRows) {
+
+      let year =
+        row.querySelector(
+          ".target-year"
+        ).value.trim();
+
+      let branch =
+        row.querySelector(
+          ".target-branch"
+        ).value.trim()
+        .toUpperCase();
+
+      let section =
+        row.querySelector(
+          ".target-section"
+        ).value.trim()
+        .toUpperCase();
+
+
+      /* -----------------------------------------------
+         VALIDATION
+      ------------------------------------------------ */
+
+      if (!year || !branch || !section) {
+
+        alert(
+          "Please fill Year, Branch and Section for every target class."
+        );
+
+        return;
+      }
+
+
+      /* -----------------------------------------------
+         NORMALIZED OBJECT
+      ------------------------------------------------ */
+
+      const targetClass =
+        normalizeTargetClass(
+          year,
+          branch,
+          section
+        );
+
+
+      targetClasses.push(
+        targetClass
+      );
+    }
+  }
+
+
+  /* =====================================================
+     REMOVE DUPLICATE TARGET CLASSES
+  ===================================================== */
+
+  const uniqueTargetClasses = [];
+
+  const seenClasses = new Set();
+
+
+  for (const cls of targetClasses) {
+
+    const key =
+      `${cls.year}|${cls.branch}|${cls.section}`;
+
+    if (!seenClasses.has(key)) {
+
+      seenClasses.add(key);
+
+      uniqueTargetClasses.push(cls);
+
+    }
+  }
+
+
+  /* =====================================================
+     FORM FIELDS
+  ===================================================== */
+
+  const fieldCards =
+    document.querySelectorAll(
+      "#fieldsContainer .field-card"
+    );
+
+
+  if (fieldCards.length === 0) {
+
+    alert(
+      "Please add at least one form field."
+    );
+
+    return;
+  }
+
+
+  const fields = [];
+
+
+  for (const card of fieldCards) {
+
+    const label =
+      card.querySelector(
+        ".field-label"
+      ).value.trim();
+
+
+    if (!label) {
+
+      alert(
+        "All fields must have a label"
+      );
+
+      return;
+    }
+
+
+    fields.push({
+
+      label: label,
+
+      type:
+        card.querySelector(
+          ".field-type"
+        ).value,
+
+      required:
+        card.querySelector(
+          ".field-required"
+        ).value === "true"
+
+    });
+  }
+
+
+  /* =====================================================
+     DEBUG — EXACT TARGET PAYLOAD
+  ===================================================== */
+
+  console.log(
+    "========================================"
+  );
+
+  console.log(
+    "FORM TARGET TYPE:",
+    targetType
+  );
+
+  console.log(
+    "TARGET CLASSES:",
+    uniqueTargetClasses
+  );
+
+  console.log(
+    "TARGET CLASSES JSON:",
+    JSON.stringify(
+      uniqueTargetClasses,
+      null,
+      2
+    )
+  );
+
+  console.log(
+    "========================================"
+  );
+
+
+  /* =====================================================
+     FORMDATA
+  ===================================================== */
+
+  const formData =
+    new FormData();
+
+
+  formData.append(
+    "title",
+    title
+  );
+
+  formData.append(
+    "description",
+    description
+  );
+
+  formData.append(
+    "fields",
+    JSON.stringify(fields)
+  );
+
+  formData.append(
+    "target_type",
+    targetType
+  );
+
+  formData.append(
+    "target_classes",
+    JSON.stringify(
+      uniqueTargetClasses
+    )
+  );
+
+
+  /* =====================================================
+     PDF FILES
+  ===================================================== */
+
+  for (const pdf of pdfs) {
+
+    formData.append(
+      "pdfs",
+      pdf
+    );
+  }
+
+
+  /* =====================================================
+     API REQUEST
+  ===================================================== */
+
+  try {
+
+    const res =
+      await fetch(
+        "https://college-hwbb.onrender.com/api/forms",
+        {
+          method: "POST",
+          body: formData
+        }
+      );
+
+
+    const text =
+      await res.text();
+
+
+    let data;
+
+
+    try {
+
+      data =
+        JSON.parse(text);
+
+    } catch {
+
+      console.error(
+        "Non-JSON response:",
+        text
+      );
+
+      alert(
+        "❌ Server error or invalid response. Check backend logs."
+      );
+
+      return;
+    }
+
+
+    if (!res.ok) {
+
+      console.error(
+        "Create form failed:",
+        data
+      );
+
+      alert(
+        data.error ||
+        "Failed to create form"
+      );
+
+      return;
+    }
+
+
+    console.log(
+      "Form created successfully:",
+      data
+    );
+
+
+    alert(
+      "✅ Form created successfully"
+    );
+
+
+    window.location.href =
+      "/form-submissions.html";
+
 
   } catch (err) {
-    console.error(err);
-    alert("❌ Server error. Please try again.");
+
+    console.error(
+      "CREATE FORM ERROR:",
+      err
+    );
+
+    alert(
+      "❌ Server error. Please try again."
+    );
   }
 }
 
-function goBack(){
+
+/* =========================================================
+   BACK
+========================================================= */
+
+function goBack() {
+
   window.history.back();
+
 }
+
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
+
+// Automatically create first field
+addField();
+
 </script>
 
 </body>
 </html>
+```
