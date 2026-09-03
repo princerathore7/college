@@ -181,28 +181,29 @@
             .navbar { flex-direction: column; gap: 15px; text-align: center; }
             .student-pill { text-align: center; }
         }
-           .back-btn {
-  background: #003366;          /* Navy Blue */
-  color: #fff;
-  border: none;
-  padding: 6px 12px;
-  font-size: 13px;
-  font-weight: 500;
-  border-radius: 6px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: 0.2s ease;
-}
+        
+        .back-btn {
+            background: #003366;          /* Navy Blue */
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s ease;
+        }
 
-.back-btn:hover {
-  background: #002244;
-}
+        .back-btn:hover {
+            background: #002244;
+        }
 
-.back-btn:active {
-  transform: scale(0.96);
-}
+        .back-btn:active {
+            transform: scale(0.96);
+        }
     </style>
 </head>
 <body>
@@ -214,7 +215,7 @@
     </div>
     <button class="back-btn" onclick="goBack()">
   ← Back
-</button>
+    </button>
     <div class="student-pill">
         <span class="name" id="studentName">Loading...</span>
         <span class="enroll" id="studentEnrollment">Please wait</span>
@@ -245,15 +246,26 @@ let allForms = []; // Store forms globally for filtering
 async function loadForms() {
     const container = document.getElementById("formsContainer");
     
-    // Get student info from localStorage
-    const profile = JSON.parse(localStorage.getItem("studentProfile"));
-    if (!profile) return; // handled by loadStudentInfo() redirect
+    // Get student details directly from localStorage as per your new structure
+    const enrollment = localStorage.getItem("enrollment");
+    const studentClass = localStorage.getItem("studentClass") || "";
+
+    if (!enrollment) return; // Handled by loadStudentInfo() redirect
+
+    /* 
+      Assuming studentClass is saved with spaces like "2 CSE A"
+      We split it to extract Year, Branch, and Section so it matches backend logic
+    */
+    const classParts = studentClass.trim().split(/\s+/);
+    const year = classParts[0] || "";
+    const branch = classParts[1] || "";
+    const section = classParts[2] || "";
 
     // Append class details as URL Parameters
     const params = new URLSearchParams({
-        year: profile.year || "",
-        branch: profile.branch || "",
-        section: profile.section || ""
+        year: year,
+        branch: branch,
+        section: section
     });
 
     try {
@@ -310,31 +322,35 @@ function filterForms() {
     renderForms(filtered);
 }
 
-
 function loadStudentInfo() {
-    const profile = JSON.parse(localStorage.getItem("studentProfile"));
+    // Read directly from individual localStorage keys
+    const enrollment = localStorage.getItem("enrollment");
+    const studentClass = localStorage.getItem("studentClass");
+    const name = localStorage.getItem("studentName") || "Student"; // Add studentName in your login script if not present
 
-    if (!profile) {
+    if (!enrollment) {
         alert("Session expired. Please login again.");
         window.location.href = "login.html";
         return;
     }
 
     // Display in Navbar
-    document.getElementById("studentName").textContent = profile.name;
-    document.getElementById("studentEnrollment").textContent = `ID: ${profile.enrollment}`;
+    document.getElementById("studentName").textContent = name;
+    document.getElementById("studentEnrollment").textContent = `ID: ${enrollment} | Class: ${studentClass}`;
     
     // Update Header Text to make it personal
     const headerP = document.querySelector(".header-text p");
-    headerP.innerHTML = `Welcome back, <b>${profile.name}</b> (${profile.enrollment}). Select a form below.`;
+    headerP.innerHTML = `Welcome back, <b>${name}</b> (${enrollment}). Select a form below.`;
 }
 
 function openForm(formId) {
     window.location.href = `form-fill.html?formId=${formId}`;
 }
-function goback(){
-window.history.back();
+
+function goBack(){
+    window.history.back();
 }
+
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
     loadStudentInfo();
