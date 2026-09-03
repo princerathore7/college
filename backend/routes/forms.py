@@ -21,12 +21,36 @@ submissions_col = db.form_submissions
 
 
 # ==============================
-# GET ALL ACTIVE FORMS (STUDENT)
+# GET: GET ALL ACTIVE FORMS (STUDENT)
 # ==============================
 @forms_bp.route("/forms", methods=["GET"])
 def get_forms():
+    # Student ki details query params se aayengi
+    year = request.args.get("year")
+    branch = request.args.get("branch")
+    section = request.args.get("section")
+
+    # Base query
+    query = {"active": True}
+
+    # Agar student ne details bheji hain, toh filter lagao
+    if year and branch and section:
+        query["$or"] = [
+            {"target_type": "all"},  # Jo sabke liye hain
+            {
+                "target_type": "specific",
+                "target_classes": {
+                    "$elemMatch": {   # Array ke andar specific object match karne ke liye
+                        "year": year,
+                        "branch": branch,
+                        "section": section
+                    }
+                }
+            }
+        ]
+
     forms = []
-    for f in forms_col.find({"active": True}).sort("created_at", -1):
+    for f in forms_col.find(query).sort("created_at", -1):
         forms.append({
             "id": str(f["_id"]),
             "title": f["title"],
@@ -161,27 +185,28 @@ def view_submission(submission_id):
         "status": s.get("status", "pending"),
          "reason": s.get("reason", "")
     }), 200
-# =============================
-#form creator route 
-# =============================
+# ==============================
+# POST: CREATE FORM
+# ==============================
 @forms_bp.route("/forms", methods=["POST"])
-# @admin_required  # baad me enable kar sakte ho
 def create_form():
     try:
         title = request.form.get("title", "").strip()
         description = request.form.get("description", "").strip()
         fields_raw = request.form.get("fields")
+        target_type = request.form.get("target_type", "all")              # NEW
+        target_classes_raw = request.form.get("target_classes", "[]")     # NEW
 
         if not title or not fields_raw:
             return jsonify({"error": "Title and fields are required"}), 400
 
         try:
             fields = json.loads(fields_raw)
+            target_classes = json.loads(target_classes_raw)               # NEW
         except Exception:
-            return jsonify({"error": "Invalid fields format"}), 400
+            return jsonify({"error": "Invalid fields or target classes format"}), 400
 
         pdf_urls = []
-
         if "pdfs" in request.files:
             pdfs = request.files.getlist("pdfs")
             for pdf in pdfs:
@@ -197,6 +222,8 @@ def create_form():
             "description": description,
             "fields": fields,
             "pdfs": pdf_urls,
+            "target_type": target_type,            # NEW: 'all' or 'specific'
+            "target_classes": target_classes,      # NEW: list of dicts [{year, branch, section}]
             "active": True,
             "created_at": datetime.utcnow()
         }
@@ -212,7 +239,6 @@ def create_form():
     except Exception as e:
         print("CREATE FORM ERROR:", e)
         return jsonify({"error": "Internal server error"}), 500
-
 # ==============================
 # GET SUBMISSIONS OF A SINGLE FORM (ADMIN / TEACHER)
 # ==============================

@@ -85,7 +85,20 @@
     <button class="btn secondary" onclick="history.back()">Cancel</button>
     <button class="btn yellow" onclick="submitForm()">Create Form</button>
   </div>
+<!-- TARGET AUDIENCE CARD (Add this before Form Fields card) -->
+<div class="card">
+  <label>Target Audience *</label>
+  <select id="targetType" onchange="toggleTargetClasses()">
+    <option value="all">All Classes (For everyone)</option>
+    <option value="specific">Specific Classes Only</option>
+  </select>
 
+  <div id="targetClassesContainer" style="display: none; margin-top: 15px;">
+    <label>Select Classes</label>
+    <div id="classesList"></div>
+    <button class="btn secondary" onclick="addTargetClass()">+ Add Class</button>
+  </div>
+</div>
 </div>
 
 <script>
@@ -93,6 +106,79 @@
    ACCESS CONTROL — FORM CREATOR
    (ONLY SOURCE CHECK, NO AUTH)
 ================================ */
+// Function to toggle Target Classes UI
+function toggleTargetClasses() {
+  const type = document.getElementById("targetType").value;
+  document.getElementById("targetClassesContainer").style.display = type === "specific" ? "block" : "none";
+}
+
+// Function to add a Class selection row
+function addTargetClass() {
+  const container = document.getElementById("classesList");
+  const div = document.createElement("div");
+  div.className = "field-card grid"; // reusing existing CSS
+  div.innerHTML = `
+    <button class="remove-btn" onclick="this.parentElement.remove()">✖</button>
+    <input type="text" placeholder="Year (e.g., 2, 3)" class="target-year" required>
+    <input type="text" placeholder="Branch (e.g., CSE)" class="target-branch" required>
+    <input type="text" placeholder="Section (e.g., A)" class="target-section" required>
+  `;
+  container.appendChild(div);
+}
+
+// Update the submitForm() function
+async function submitForm() {
+  const title = document.getElementById("formTitle").value.trim();
+  const description = document.getElementById("formDesc").value.trim();
+  const targetType = document.getElementById("targetType").value;
+  const pdfs = document.getElementById("pdfUpload").files;
+
+  if (!title) { alert("Form title is required"); return; }
+
+  // Target Classes Logic
+  const targetClasses = [];
+  if (targetType === "specific") {
+    const classRows = document.querySelectorAll("#classesList .field-card");
+    if (classRows.length === 0) { alert("Add at least one target class"); return; }
+    
+    for (const row of classRows) {
+      targetClasses.push({
+        year: row.querySelector(".target-year").value.trim(),
+        branch: row.querySelector(".target-branch").value.trim(),
+        section: row.querySelector(".target-section").value.trim()
+      });
+    }
+  }
+
+  // Fields Logic (Existing)
+  const fieldCards = document.querySelectorAll("#fieldsContainer .field-card");
+  if (fieldCards.length === 0) { alert("Add at least one field"); return; }
+  const fields = [];
+  for (const card of fieldCards) {
+    const label = card.querySelector(".field-label").value.trim();
+    if (!label) { alert("All fields must have a label"); return; }
+    fields.push({
+      label,
+      type: card.querySelector(".field-type").value,
+      required: card.querySelector(".field-required").value === "true"
+    });
+  }
+
+  const formData = new FormData();
+  formData.append("title", title);
+  formData.append("description", description);
+  formData.append("fields", JSON.stringify(fields));
+  formData.append("target_type", targetType);                         // NEW
+  formData.append("target_classes", JSON.stringify(targetClasses));   // NEW
+  
+  for (const pdf of pdfs) formData.append("pdfs", pdf);
+
+  try {
+    const res = await fetch("https://college-hwbb.onrender.com/api/forms", {
+      method: "POST",
+      body: formData
+    });
+    // ... rest of your existing submit logic
 const source = sessionStorage.getItem("accessSource"); // set by admin.html
 if (source !== "ad") {
   document.body.innerHTML = `

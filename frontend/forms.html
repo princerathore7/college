@@ -244,17 +244,28 @@ let allForms = []; // Store forms globally for filtering
 
 async function loadForms() {
     const container = document.getElementById("formsContainer");
+    
+    // Get student info from localStorage
+    const profile = JSON.parse(localStorage.getItem("studentProfile"));
+    if (!profile) return; // handled by loadStudentInfo() redirect
+
+    // Append class details as URL Parameters
+    const params = new URLSearchParams({
+        year: profile.year || "",
+        branch: profile.branch || "",
+        section: profile.section || ""
+    });
+
     try {
-        const res = await fetch("https://college-hwbb.onrender.com/api/forms", {
+        const res = await fetch(`https://college-hwbb.onrender.com/api/forms?${params.toString()}`, {
             method: "GET",
             credentials: "include"
         });
-
+        
         if (!res.ok) throw new Error("Failed to load");
-
+        
         allForms = await res.json();
         renderForms(allForms);
-
     } catch (err) {
         console.error(err);
         container.innerHTML = `<div class="empty-state">⚠️ Error loading forms. Please refresh the page.</div>`;
@@ -298,6 +309,7 @@ function filterForms() {
     );
     renderForms(filtered);
 }
+
 
 function loadStudentInfo() {
     const profile = JSON.parse(localStorage.getItem("studentProfile"));
