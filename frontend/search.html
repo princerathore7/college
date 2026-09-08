@@ -1,0 +1,1875 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Student Search</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    background:#fafafa;
+    color:#171717;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.header{
+    height:64px;
+    background:white;
+    border-bottom:1px solid #dbdbdb;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    position:sticky;
+    top:0;
+    z-index:100;
+}
+
+.header-inner{
+    width:100%;
+    max-width:1100px;
+    padding:0 20px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.logo{
+    font-size:22px;
+    font-weight:800;
+}
+
+.search-box{
+    width:350px;
+    position:relative;
+}
+
+.search-box input{
+    width:100%;
+    height:40px;
+
+    border:none;
+    outline:none;
+
+    background:#efefef;
+    border-radius:10px;
+
+    padding:0 42px 0 42px;
+
+    font-size:14px;
+}
+
+.search-icon{
+    position:absolute;
+    left:14px;
+    top:11px;
+
+    color:#777;
+    font-size:16px;
+}
+
+.clear-search{
+    position:absolute;
+    right:12px;
+    top:10px;
+
+    border:none;
+    background:none;
+
+    cursor:pointer;
+
+    color:#777;
+    font-size:16px;
+
+    display:none;
+}
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.container{
+    width:100%;
+    max-width:900px;
+    margin:30px auto;
+    padding:0 20px;
+}
+
+/* =========================================================
+   SEARCH RESULTS
+========================================================= */
+
+.search-section{
+    background:white;
+    border:1px solid #dbdbdb;
+    border-radius:12px;
+    overflow:hidden;
+}
+
+.section-title{
+    padding:16px 18px;
+
+    font-size:14px;
+    font-weight:700;
+
+    border-bottom:1px solid #eee;
+}
+
+.student-result{
+    display:flex;
+    align-items:center;
+
+    padding:14px 18px;
+
+    cursor:pointer;
+
+    transition:background .15s;
+}
+
+.student-result:hover{
+    background:#fafafa;
+}
+
+.avatar{
+    width:48px;
+    height:48px;
+
+    border-radius:50%;
+
+    background:#e9e9e9;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:18px;
+    font-weight:700;
+
+    margin-right:14px;
+}
+
+.student-info{
+    flex:1;
+}
+
+.student-name{
+    font-weight:700;
+    font-size:14px;
+}
+
+.student-enrollment{
+    color:#777;
+    font-size:13px;
+    margin-top:3px;
+}
+
+.student-class{
+    color:#777;
+    font-size:12px;
+    margin-top:2px;
+}
+
+/* =========================================================
+   RECENT SEARCHES
+========================================================= */
+
+.recent-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:16px 18px;
+}
+
+.recent-header strong{
+    font-size:14px;
+}
+
+.clear-all{
+    border:none;
+    background:none;
+
+    color:#0095f6;
+
+    font-weight:600;
+    cursor:pointer;
+}
+
+.recent-item{
+    display:flex;
+    align-items:center;
+
+    padding:12px 18px;
+
+    cursor:pointer;
+}
+
+.recent-item:hover{
+    background:#fafafa;
+}
+
+.recent-avatar{
+    width:42px;
+    height:42px;
+
+    border-radius:50%;
+
+    background:#ededed;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-weight:700;
+
+    margin-right:12px;
+}
+
+.recent-info{
+    flex:1;
+}
+
+.recent-name{
+    font-weight:600;
+    font-size:14px;
+}
+
+.recent-enrollment{
+    color:#777;
+    font-size:12px;
+}
+
+.remove-recent{
+    border:none;
+    background:none;
+    cursor:pointer;
+
+    font-size:18px;
+    color:#777;
+}
+
+/* =========================================================
+   EMPTY / LOADING
+========================================================= */
+
+.empty{
+    padding:45px 20px;
+    text-align:center;
+    color:#777;
+    font-size:14px;
+}
+
+.spinner{
+    width:26px;
+    height:26px;
+
+    border:3px solid #ddd;
+    border-top-color:#222;
+
+    border-radius:50%;
+
+    animation:spin .7s linear infinite;
+
+    margin:auto;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+/* =========================================================
+   PROFILE
+========================================================= */
+
+.profile{
+    display:none;
+}
+
+.back-button{
+    border:none;
+    background:none;
+
+    cursor:pointer;
+
+    font-size:14px;
+    font-weight:600;
+
+    margin-bottom:20px;
+
+    padding:0;
+}
+
+.profile-card{
+    background:white;
+    border:1px solid #dbdbdb;
+    border-radius:12px;
+    overflow:hidden;
+}
+
+.profile-top{
+    padding:35px;
+
+    display:flex;
+    align-items:center;
+
+    border-bottom:1px solid #eee;
+}
+
+.big-avatar{
+    width:100px;
+    height:100px;
+
+    border-radius:50%;
+
+    background:#e9e9e9;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:34px;
+    font-weight:700;
+
+    margin-right:30px;
+}
+
+.profile-main{
+    flex:1;
+}
+
+.profile-name{
+    font-size:25px;
+    font-weight:700;
+}
+
+.profile-enrollment{
+    color:#666;
+    margin-top:6px;
+}
+
+.profile-class{
+    color:#666;
+    margin-top:4px;
+}
+
+/* =========================================================
+   STATS
+========================================================= */
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+
+    border-bottom:1px solid #eee;
+}
+
+.stat{
+    padding:20px;
+    text-align:center;
+
+    border-right:1px solid #eee;
+}
+
+.stat:last-child{
+    border-right:none;
+}
+
+.stat-number{
+    font-size:21px;
+    font-weight:700;
+}
+
+.stat-label{
+    color:#777;
+    font-size:12px;
+    margin-top:4px;
+}
+
+/* =========================================================
+   INFORMATION
+========================================================= */
+
+.info-section{
+    padding:24px;
+}
+
+.info-title{
+    font-size:16px;
+    font-weight:700;
+
+    margin-bottom:16px;
+}
+
+.info-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+}
+
+.info-item{
+    border:1px solid #e5e5e5;
+    border-radius:10px;
+
+    padding:15px;
+
+    background:#fff;
+}
+
+.info-label{
+    font-size:12px;
+    color:#777;
+    margin-bottom:6px;
+}
+
+.info-value{
+    font-size:15px;
+    font-weight:600;
+}
+
+/* =========================================================
+   FINE
+========================================================= */
+
+.fine-box{
+    margin-top:18px;
+
+    padding:18px;
+
+    border:1px solid #e5e5e5;
+    border-radius:10px;
+}
+
+.fine-amount{
+    font-size:24px;
+    font-weight:800;
+}
+
+.fine-reason{
+    margin-top:7px;
+    color:#666;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:700px){
+
+    .search-box{
+        width:240px;
+    }
+
+    .profile-top{
+        padding:24px;
+    }
+
+    .big-avatar{
+        width:75px;
+        height:75px;
+        font-size:25px;
+        margin-right:20px;
+    }
+
+    .profile-name{
+        font-size:20px;
+    }
+
+    .stats{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .stat:nth-child(2){
+        border-right:none;
+    }
+
+    .stat:nth-child(3){
+        border-top:1px solid #eee;
+    }
+
+    .info-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:480px){
+
+    .header-inner{
+        padding:0 12px;
+    }
+
+    .logo{
+        display:none;
+    }
+
+    .search-box{
+        width:100%;
+    }
+
+    .container{
+        padding:0 10px;
+        margin-top:15px;
+    }
+
+    .profile-top{
+        flex-direction:column;
+        text-align:center;
+    }
+
+    .big-avatar{
+        margin-right:0;
+        margin-bottom:15px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+
+<!-- =======================================================
+     HEADER
+======================================================== -->
+
+<header class="header">
+
+    <div class="header-inner">
+
+        <div class="logo">
+            Student Search
+        </div>
+
+        <div class="search-box">
+
+            <span class="search-icon">⌕</span>
+
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search enrollment..."
+                autocomplete="off"
+            >
+
+            <button
+                class="clear-search"
+                id="clearSearch"
+                onclick="clearSearch()"
+            >
+                ×
+            </button>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<!-- =======================================================
+     MAIN
+======================================================== -->
+
+<main class="container">
+
+
+    <!-- ===================================================
+         SEARCH VIEW
+    ==================================================== -->
+
+    <div id="searchView">
+
+
+        <!-- SEARCH RESULTS -->
+
+        <div
+            class="search-section"
+            id="searchResults"
+            style="display:none;"
+        >
+
+            <div class="section-title">
+                Students
+            </div>
+
+            <div id="resultsContainer"></div>
+
+        </div>
+
+
+        <!-- RECENT SEARCHES -->
+
+        <div
+            class="search-section"
+            id="recentSection"
+            style="margin-top:15px;"
+        >
+
+            <div class="recent-header">
+
+                <strong>
+                    Recent searches
+                </strong>
+
+                <button
+                    class="clear-all"
+                    onclick="clearAllRecent()"
+                >
+                    Clear all
+                </button>
+
+            </div>
+
+            <div id="recentContainer"></div>
+
+        </div>
+
+
+        <!-- EMPTY SEARCH -->
+
+        <div
+            class="search-section"
+            id="emptyState"
+            style="margin-top:15px;"
+        >
+
+            <div class="empty">
+
+                Search a student's enrollment number
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- ===================================================
+         PROFILE VIEW
+    ==================================================== -->
+
+    <div
+        class="profile"
+        id="profileView"
+    >
+
+        <button
+            class="back-button"
+            onclick="showSearchView()"
+        >
+            ← Back to search
+        </button>
+
+
+        <div class="profile-card">
+
+
+            <!-- PROFILE HEADER -->
+
+            <div class="profile-top">
+
+                <div
+                    class="big-avatar"
+                    id="profileAvatar"
+                >
+                    S
+                </div>
+
+                <div class="profile-main">
+
+                    <div
+                        class="profile-name"
+                        id="profileName"
+                    >
+                        —
+                    </div>
+
+                    <div
+                        class="profile-enrollment"
+                        id="profileEnrollment"
+                    >
+                        —
+                    </div>
+
+                    <div
+                        class="profile-class"
+                        id="profileClass"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- QUICK STATS -->
+
+            <div class="stats">
+
+                <div class="stat">
+
+                    <div
+                        class="stat-number"
+                        id="attendancePercentage"
+                    >
+                        —
+                    </div>
+
+                    <div class="stat-label">
+                        Attendance
+                    </div>
+
+                </div>
+
+
+                <div class="stat">
+
+                    <div
+                        class="stat-number"
+                        id="submittedAssignments"
+                    >
+                        —
+                    </div>
+
+                    <div class="stat-label">
+                        Assignments Submitted
+                    </div>
+
+                </div>
+
+
+                <div class="stat">
+
+                    <div
+                        class="stat-number"
+                        id="rewardPoints"
+                    >
+                        —
+                    </div>
+
+                    <div class="stat-label">
+                        Rewards
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- STUDENT INFORMATION -->
+
+            <div class="info-section">
+
+                <div class="info-title">
+                    Student Information
+                </div>
+
+                <div class="info-grid">
+
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Enrollment Number
+                        </div>
+
+                        <div
+                            class="info-value"
+                            id="infoEnrollment"
+                        >
+                            —
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Student Name
+                        </div>
+
+                        <div
+                            class="info-value"
+                            id="infoName"
+                        >
+                            —
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Class
+                        </div>
+
+                        <div
+                            class="info-value"
+                            id="infoClass"
+                        >
+                            —
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Attendance
+                        </div>
+
+                        <div
+                            class="info-value"
+                            id="infoAttendance"
+                        >
+                            —
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Classes Attended
+                        </div>
+
+                        <div
+                            class="info-value"
+                            id="infoAttended"
+                        >
+                            —
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Total Classes
+                        </div>
+
+                        <div
+                            class="info-value"
+                            id="infoTotalClasses"
+                        >
+                            —
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Total Assignments
+                        </div>
+
+                        <div
+                            class="info-value"
+                            id="infoTotalAssignments"
+                        >
+                            —
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Submitted Assignments
+                        </div>
+
+                        <div
+                            class="info-value"
+                            id="infoSubmitted"
+                        >
+                            —
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Pending Assignments
+                        </div>
+
+                        <div
+                            class="info-value"
+                            id="infoPending"
+                        >
+                            —
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Reward Points
+                        </div>
+
+                        <div
+                            class="info-value"
+                            id="infoRewards"
+                        >
+                            —
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- FINE -->
+
+                <div class="fine-box">
+
+                    <div class="info-label">
+                        Current Fine
+                    </div>
+
+                    <div
+                        class="fine-amount"
+                        id="fineAmount"
+                    >
+                        ₹0
+                    </div>
+
+                    <div
+                        class="fine-reason"
+                        id="fineReason"
+                    >
+                        No fine
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+
+<script>
+
+/* =========================================================
+   CONFIG
+========================================================= */
+
+/*
+   IMPORTANT:
+   Change this to your actual backend URL.
+*/
+
+const BACKEND_URL =
+    "https://college-hwbb.onrender.com";
+
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const searchInput =
+    document.getElementById("searchInput");
+
+const clearSearchButton =
+    document.getElementById("clearSearch");
+
+const searchResults =
+    document.getElementById("searchResults");
+
+const resultsContainer =
+    document.getElementById("resultsContainer");
+
+const recentSection =
+    document.getElementById("recentSection");
+
+const recentContainer =
+    document.getElementById("recentContainer");
+
+const emptyState =
+    document.getElementById("emptyState");
+
+const searchView =
+    document.getElementById("searchView");
+
+const profileView =
+    document.getElementById("profileView");
+
+
+/* =========================================================
+   RECENT SEARCH STORAGE
+========================================================= */
+
+const RECENT_KEY =
+    "acropolis_student_recent_searches";
+
+
+function getRecentSearches(){
+
+    try{
+
+        return JSON.parse(
+            localStorage.getItem(RECENT_KEY)
+        ) || [];
+
+    }catch(error){
+
+        return [];
+
+    }
+
+}
+
+
+function saveRecentSearch(student){
+
+    let recent =
+        getRecentSearches();
+
+    /*
+       Remove previous occurrence
+       of same enrollment.
+    */
+
+    recent =
+        recent.filter(
+            item =>
+                item.enrollment !==
+                student.enrollment
+        );
+
+
+    /*
+       Add latest search at beginning.
+    */
+
+    recent.unshift({
+
+        enrollment:
+            student.enrollment,
+
+        name:
+            student.name,
+
+        className:
+            student.className
+
+    });
+
+
+    /*
+       Keep maximum 10.
+    */
+
+    recent =
+        recent.slice(0,10);
+
+
+    localStorage.setItem(
+        RECENT_KEY,
+        JSON.stringify(recent)
+    );
+
+
+    renderRecentSearches();
+
+}
+
+
+/* =========================================================
+   RENDER RECENT SEARCHES
+========================================================= */
+
+function renderRecentSearches(){
+
+    const recent =
+        getRecentSearches();
+
+
+    recentContainer.innerHTML = "";
+
+
+    if(recent.length === 0){
+
+        recentContainer.innerHTML = `
+            <div class="empty">
+                No recent searches
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    recent.forEach(
+        (student,index) => {
+
+            const initials =
+                getInitials(student.name);
+
+
+            const div =
+                document.createElement("div");
+
+            div.className =
+                "recent-item";
+
+
+            div.innerHTML = `
+
+                <div class="recent-avatar">
+                    ${escapeHTML(initials)}
+                </div>
+
+                <div class="recent-info">
+
+                    <div class="recent-name">
+                        ${escapeHTML(student.name || "Unknown")}
+                    </div>
+
+                    <div class="recent-enrollment">
+                        ${escapeHTML(student.enrollment)}
+                    </div>
+
+                </div>
+
+                <button
+                    class="remove-recent"
+                    onclick="removeRecent(event, ${index})"
+                >
+                    ×
+                </button>
+
+            `;
+
+
+            div.addEventListener(
+                "click",
+                function(){
+
+                    openStudentProfile(
+                        student.enrollment
+                    );
+
+                }
+            );
+
+
+            recentContainer.appendChild(div);
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   REMOVE ONE RECENT SEARCH
+========================================================= */
+
+function removeRecent(event,index){
+
+    event.stopPropagation();
+
+
+    let recent =
+        getRecentSearches();
+
+
+    recent.splice(index,1);
+
+
+    localStorage.setItem(
+        RECENT_KEY,
+        JSON.stringify(recent)
+    );
+
+
+    renderRecentSearches();
+
+}
+
+
+/* =========================================================
+   CLEAR ALL RECENT
+========================================================= */
+
+function clearAllRecent(){
+
+    localStorage.removeItem(
+        RECENT_KEY
+    );
+
+    renderRecentSearches();
+
+}
+
+
+/* =========================================================
+   SEARCH INPUT
+========================================================= */
+
+let searchTimer = null;
+
+
+searchInput.addEventListener(
+    "input",
+    function(){
+
+        const value =
+            this.value.trim();
+
+
+        clearSearchButton.style.display =
+            value.length > 0
+                ? "block"
+                : "none";
+
+
+        clearTimeout(searchTimer);
+
+
+        if(value.length === 0){
+
+            searchResults.style.display =
+                "none";
+
+            emptyState.style.display =
+                "block";
+
+            return;
+
+        }
+
+
+        /*
+           Small debounce so backend
+           isn't called on every keystroke.
+        */
+
+        searchTimer =
+            setTimeout(
+                () => searchStudents(value),
+                350
+            );
+
+    }
+);
+
+
+/* =========================================================
+   SEARCH STUDENTS
+========================================================= */
+
+async function searchStudents(enrollment){
+
+    searchResults.style.display =
+        "block";
+
+    emptyState.style.display =
+        "none";
+
+
+    resultsContainer.innerHTML = `
+
+        <div class="empty">
+
+            <div class="spinner"></div>
+
+            <div style="margin-top:12px;">
+                Searching...
+            </div>
+
+        </div>
+
+    `;
+
+
+    try{
+
+        /*
+           Current backend route:
+
+           GET /api/student-profile/<enrollment>
+        */
+
+        const response =
+            await fetch(
+                `${BACKEND_URL}/api/student-profile/${encodeURIComponent(enrollment)}`
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if(!response.ok || !data.success){
+
+            resultsContainer.innerHTML = `
+
+                <div class="empty">
+                    Student not found
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        const student =
+            normalizeStudent(data.student);
+
+
+        renderSearchResult(student);
+
+
+    }catch(error){
+
+        console.error(
+            "Student search error:",
+            error
+        );
+
+
+        resultsContainer.innerHTML = `
+
+            <div class="empty">
+
+                Unable to connect to server.
+
+                <br><br>
+
+                Please try again.
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+/* =========================================================
+   NORMALIZE BACKEND DATA
+========================================================= */
+
+function normalizeStudent(student){
+
+    return {
+
+        enrollment:
+            student.enrollment || "",
+
+        name:
+            student.name || "Unknown Student",
+
+        className:
+            student.className ||
+            student.class ||
+            student.class_name ||
+            "—",
+
+        branch:
+            student.branch || "—",
+
+        attendance:
+            student.attendance || {},
+
+        assignments:
+            student.assignments || {},
+
+        fine:
+            student.fine || {},
+
+        rewards:
+            student.rewards || 0
+
+    };
+
+}
+
+
+/* =========================================================
+   SEARCH RESULT
+========================================================= */
+
+function renderSearchResult(student){
+
+    resultsContainer.innerHTML = "";
+
+
+    const initials =
+        getInitials(student.name);
+
+
+    const div =
+        document.createElement("div");
+
+    div.className =
+        "student-result";
+
+
+    div.innerHTML = `
+
+        <div class="avatar">
+            ${escapeHTML(initials)}
+        </div>
+
+        <div class="student-info">
+
+            <div class="student-name">
+                ${escapeHTML(student.name)}
+            </div>
+
+            <div class="student-enrollment">
+                ${escapeHTML(student.enrollment)}
+            </div>
+
+            <div class="student-class">
+                ${escapeHTML(student.className)}
+            </div>
+
+        </div>
+
+    `;
+
+
+    div.addEventListener(
+        "click",
+        function(){
+
+            openStudentProfile(
+                student.enrollment
+            );
+
+        }
+    );
+
+
+    resultsContainer.appendChild(div);
+
+}
+
+
+/* =========================================================
+   OPEN PROFILE
+========================================================= */
+
+async function openStudentProfile(
+    enrollment
+){
+
+    searchView.style.display =
+        "none";
+
+    profileView.style.display =
+        "block";
+
+
+    window.scrollTo({
+        top:0,
+        behavior:"smooth"
+    });
+
+
+    /*
+       Loading state
+    */
+
+    document.getElementById(
+        "profileName"
+    ).innerText =
+        "Loading...";
+
+
+    document.getElementById(
+        "profileEnrollment"
+    ).innerText =
+        enrollment;
+
+
+    try{
+
+        const response =
+            await fetch(
+                `${BACKEND_URL}/api/student-profile/${encodeURIComponent(enrollment)}`
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if(!response.ok || !data.success){
+
+            alert(
+                data.message ||
+                "Student not found"
+            );
+
+            showSearchView();
+
+            return;
+
+        }
+
+
+        const student =
+            normalizeStudent(data.student);
+
+
+        renderProfile(student);
+
+
+        /*
+           Save only after successful
+           profile loading.
+        */
+
+        saveRecentSearch(student);
+
+
+    }catch(error){
+
+        console.error(
+            "Profile loading error:",
+            error
+        );
+
+
+        alert(
+            "Unable to load student profile."
+        );
+
+
+        showSearchView();
+
+    }
+
+}
+
+
+/* =========================================================
+   RENDER PROFILE
+========================================================= */
+
+function renderProfile(student){
+
+    const attendance =
+        student.attendance || {};
+
+    const assignments =
+        student.assignments || {};
+
+    const fine =
+        student.fine || {};
+
+
+    const attendancePercentage =
+        attendance.percentage ?? 0;
+
+    const attendedClasses =
+        attendance.attendedClasses ?? 0;
+
+    const totalClasses =
+        attendance.totalClasses ?? 0;
+
+
+    const totalAssignments =
+        assignments.total ?? 0;
+
+    const submittedAssignments =
+        assignments.submitted ?? 0;
+
+    const pendingAssignments =
+        assignments.pending ??
+        (
+            totalAssignments -
+            submittedAssignments
+        );
+
+
+    const rewards =
+        student.rewards ?? 0;
+
+
+    const fineAmount =
+        fine.amount ?? 0;
+
+    const fineReason =
+        fine.reason ||
+        "No fine";
+
+
+    /*
+       Header
+    */
+
+    document.getElementById(
+        "profileAvatar"
+    ).innerText =
+        getInitials(student.name);
+
+
+    document.getElementById(
+        "profileName"
+    ).innerText =
+        student.name;
+
+
+    document.getElementById(
+        "profileEnrollment"
+    ).innerText =
+        student.enrollment;
+
+
+    document.getElementById(
+        "profileClass"
+    ).innerText =
+        student.className;
+
+
+    /*
+       Stats
+    */
+
+    document.getElementById(
+        "attendancePercentage"
+    ).innerText =
+        `${attendancePercentage}%`;
+
+
+    document.getElementById(
+        "submittedAssignments"
+    ).innerText =
+        `${submittedAssignments}/${totalAssignments}`;
+
+
+    document.getElementById(
+        "rewardPoints"
+    ).innerText =
+        rewards;
+
+
+    /*
+       Information
+    */
+
+    document.getElementById(
+        "infoEnrollment"
+    ).innerText =
+        student.enrollment;
+
+
+    document.getElementById(
+        "infoName"
+    ).innerText =
+        student.name;
+
+
+    document.getElementById(
+        "infoClass"
+    ).innerText =
+        student.className;
+
+
+    document.getElementById(
+        "infoAttendance"
+    ).innerText =
+        `${attendancePercentage}%`;
+
+
+    document.getElementById(
+        "infoAttended"
+    ).innerText =
+        attendedClasses;
+
+
+    document.getElementById(
+        "infoTotalClasses"
+    ).innerText =
+        totalClasses;
+
+
+    document.getElementById(
+        "infoTotalAssignments"
+    ).innerText =
+        totalAssignments;
+
+
+    document.getElementById(
+        "infoSubmitted"
+    ).innerText =
+        submittedAssignments;
+
+
+    document.getElementById(
+        "infoPending"
+    ).innerText =
+        pendingAssignments;
+
+
+    document.getElementById(
+        "infoRewards"
+    ).innerText =
+        rewards;
+
+
+    /*
+       Fine
+    */
+
+    document.getElementById(
+        "fineAmount"
+    ).innerText =
+        `₹${Number(fineAmount).toLocaleString("en-IN")}`;
+
+
+    document.getElementById(
+        "fineReason"
+    ).innerText =
+        fineReason;
+
+}
+
+
+/* =========================================================
+   BACK TO SEARCH
+========================================================= */
+
+function showSearchView(){
+
+    profileView.style.display =
+        "none";
+
+    searchView.style.display =
+        "block";
+
+
+    renderRecentSearches();
+
+
+    window.scrollTo({
+        top:0,
+        behavior:"smooth"
+    });
+
+}
+
+
+/* =========================================================
+   CLEAR SEARCH
+========================================================= */
+
+function clearSearch(){
+
+    searchInput.value = "";
+
+    clearSearchButton.style.display =
+        "none";
+
+    searchResults.style.display =
+        "none";
+
+    emptyState.style.display =
+        "block";
+
+    searchInput.focus();
+
+}
+
+
+/* =========================================================
+   INITIALS
+========================================================= */
+
+function getInitials(name){
+
+    if(!name)
+        return "S";
+
+
+    const words =
+        name
+            .trim()
+            .split(/\s+/);
+
+
+    if(words.length === 1){
+
+        return words[0]
+            .substring(0,2)
+            .toUpperCase();
+
+    }
+
+
+    return (
+        words[0][0] +
+        words[words.length - 1][0]
+    ).toUpperCase();
+
+}
+
+
+/* =========================================================
+   BASIC HTML ESCAPE
+========================================================= */
+
+function escapeHTML(value){
+
+    return String(value)
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+}
+
+
+/* =========================================================
+   INITIAL LOAD
+========================================================= */
+
+renderRecentSearches();
+
+</script>
+
+</body>
+</html>
+```
