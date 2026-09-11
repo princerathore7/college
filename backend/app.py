@@ -43,7 +43,7 @@ from routes.timetable import timetable_bp
 from routes.robot import robot_bp
 from routes.otp import otp_bp
 from routes.signup import signup_bp
-
+from routes.ox import ox_bp
 from routes.verification import verification_bp
 
 from routes.admin_verification import admin_verification_bp
@@ -115,7 +115,7 @@ for bp in [
     missing_bp, receipt_bp, canteen_bp, auth_bp, timetable_bp,  signup_bp,
 verification_bp, sme_bp, otp_bp,
 admin_verification_bp, email_bp,
-cleanup_bp, robot_bp, student_profile_bp
+cleanup_bp, robot_bp, student_profile_bp,ox_bp
 ]:
     app.register_blueprint(bp)
 
