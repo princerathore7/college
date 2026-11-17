@@ -749,11 +749,38 @@ closePopup()
 loadMentors()
 
 }
+/* ===============================
+CLOSE POPUP
+================================ */
+
+function closePopup(){
+
+    const popup = document.getElementById("popup");
+
+    if(popup){
+        popup.style.display = "none";
+    }
+
+    document.getElementById("editMentorForm").style.display = "none";
+
+    document.getElementById("mentorDetails").style.display = "block";
+
+    selectedMentor = null;
+
+}
+
+
+/* ===============================
+CANCEL EDIT
+================================ */
+
 function cancelEdit(){
 
-document.getElementById("editMentorForm").style.display="none";
+    document.getElementById("editMentorForm").style.display = "none";
 
-document.getElementById("mentorDetails").style.display="block";
+    document.getElementById("mentorDetails").style.display = "block";
+
+    console.log("Edit cancelled successfully");
 
 }
 
