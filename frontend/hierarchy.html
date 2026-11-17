@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Institutional Organizational Hierarchy</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Arial, sans-serif;
+    background:#f4f6fa;
+    color:#1e293b;
+}
+
+/* =========================
+HEADER
+========================= */
+
+.header{
+    background:#ffffff;
+    padding:18px 30px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    box-shadow:0 2px 10px rgba(0,0,0,0.06);
+    position:sticky;
+    top:0;
+    z-index:100;
+}
+
+.header-left{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+.logo{
+    width:45px;
+    height:45px;
+    object-fit:contain;
+}
+
+.header-title h2{
+    font-size:20px;
+    color:#172554;
+}
+
+.header-title p{
+    font-size:12px;
+    color:#64748b;
+    margin-top:4px;
+}
+
+.header-actions{
+    display:flex;
+    gap:10px;
+}
+
+button{
+    cursor:pointer;
+    border:none;
+    border-radius:7px;
+    padding:10px 16px;
+    font-size:13px;
+    font-weight:600;
+}
+
+.back-btn{
+    background:#e2e8f0;
+    color:#334155;
+}
+
+.refresh-btn{
+    background:#2563eb;
+    color:white;
+}
+
+button:hover{
+    opacity:0.85;
+}
+
+/* =========================
+MAIN CONTAINER
+========================= */
+
+.container{
+    max-width:1450px;
+    margin:auto;
+    padding:25px;
+}
+
+/* =========================
+PAGE INTRO
+========================= */
+
+.page-intro{
+    margin-bottom:25px;
+}
+
+.page-intro h1{
+    font-size:25px;
+    color:#172554;
+}
+
+.page-intro p{
+    color:#64748b;
+    font-size:14px;
+    margin-top:7px;
+}
+
+/* =========================
+STATISTICS
+========================= */
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:18px;
+    margin-bottom:25px;
+}
+
+.stat-card{
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    border:1px solid #e2e8f0;
+    box-shadow:0 3px 10px rgba(0,0,0,0.03);
+}
+
+.stat-card p{
+    color:#64748b;
+    font-size:13px;
+}
+
+.stat-card h2{
+    font-size:27px;
+    margin-top:10px;
+    color:#172554;
+}
+
+/* =========================
+TOOLBAR
+========================= */
+
+.toolbar{
+    background:white;
+    padding:18px;
+    border-radius:12px;
+    border:1px solid #e2e8f0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+}
+
+.search-box{
+    flex:1;
+    min-width:230px;
+}
+
+.search-box input{
+    width:100%;
+    padding:12px 15px;
+    border:1px solid #cbd5e1;
+    border-radius:7px;
+    outline:none;
+    font-size:14px;
+}
+
+.search-box input:focus{
+    border-color:#2563eb;
+}
+
+.toolbar-actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.expand-btn{
+    background:#eff6ff;
+    color:#1d4ed8;
+}
+
+.collapse-btn{
+    background:#f1f5f9;
+    color:#334155;
+}
+
+/* =========================
+HIERARCHY SECTION
+========================= */
+
+.section{
+    background:white;
+    border:1px solid #e2e8f0;
+    border-radius:12px;
+    padding:25px;
+    margin-bottom:25px;
+}
+
+.section-heading{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+.section-heading h2{
+    font-size:19px;
+    color:#172554;
+}
+
+.section-heading span{
+    font-size:12px;
+    color:#64748b;
+}
+
+/* =========================
+TREE STRUCTURE
+========================= */
+
+.tree{
+    width:100%;
+}
+
+.tree-node{
+    position:relative;
+    margin-bottom:15px;
+}
+
+.tree-card{
+    background:#ffffff;
+    border:1px solid #dbe3ef;
+    border-left:5px solid #64748b;
+    border-radius:10px;
+    padding:15px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    transition:0.2s;
+}
+
+.tree-card:hover{
+    box-shadow:0 4px 15px rgba(0,0,0,0.07);
+    transform:translateY(-1px);
+}
+
+.node-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    min-width:0;
+}
+
+.node-icon{
+    width:43px;
+    height:43px;
+    border-radius:10px;
+    background:#eff6ff;
+    color:#2563eb;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:19px;
+    flex-shrink:0;
+}
+
+.node-info{
+    min-width:0;
+}
+
+.node-info h3{
+    font-size:14px;
+    color:#1e293b;
+    overflow-wrap:anywhere;
+}
+
+.node-info p{
+    font-size:12px;
+    color:#64748b;
+    margin-top:5px;
+}
+
+.node-meta{
+    display:flex;
+    gap:7px;
+    align-items:center;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+}
+
+.badge{
+    font-size:10px;
+    font-weight:700;
+    padding:5px 8px;
+    border-radius:5px;
+    background:#eff6ff;
+    color:#1d4ed8;
+}
+
+.status-badge{
+    background:#dcfce7;
+    color:#15803d;
+}
+
+.auto-badge{
+    background:#fef3c7;
+    color:#92400e;
+}
+
+.node-actions{
+    display:flex;
+    align-items:center;
+    gap:7px;
+}
+
+.toggle-btn{
+    background:#eff6ff;
+    color:#2563eb;
+    padding:7px 11px;
+    min-width:34px;
+}
+
+.children-count{
+    font-size:11px;
+    color:#64748b;
+}
+
+/* =========================
+DESIGNATION COLORS
+========================= */
+
+.level-1{
+    border-left-color:#7c3aed;
+}
+
+.level-2{
+    border-left-color:#2563eb;
+}
+
+.level-3{
+    border-left-color:#0891b2;
+}
+
+.level-4{
+    border-left-color:#059669;
+}
+
+.level-5{
+    border-left-color:#d97706;
+}
+
+.level-6{
+    border-left-color:#64748b;
+}
+
+.level-99{
+    border-left-color:#94a3b8;
+}
+
+/* =========================
+CHILDREN
+========================= */
+
+.tree-children{
+    margin-left:30px;
+    padding-left:20px;
+    border-left:2px dashed #cbd5e1;
+    margin-top:12px;
+}
+
+.tree-children.collapsed{
+    display:none;
+}
+
+/* =========================
+UNASSIGNED
+========================= */
+
+.unassigned-card{
+    background:#fffaf0;
+    border:1px solid #fde68a;
+    border-radius:9px;
+    padding:14px;
+    margin-bottom:10px;
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+}
+
+.unassigned-card h4{
+    font-size:13px;
+}
+
+.unassigned-card p{
+    font-size:11px;
+    color:#92400e;
+    margin-top:5px;
+}
+
+/* =========================
+EMPTY / LOADING
+========================= */
+
+.loading,
+.empty-state,
+.error-state{
+    text-align:center;
+    padding:45px 15px;
+    color:#64748b;
+}
+
+.error-state{
+    color:#dc2626;
+}
+
+.spinner{
+    width:35px;
+    height:35px;
+    border:4px solid #e2e8f0;
+    border-top-color:#2563eb;
+    border-radius:50%;
+    animation:spin 0.8s linear infinite;
+    margin:0 auto 15px;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+/* =========================
+LEGEND
+========================= */
+
+.legend{
+    display:flex;
+    gap:15px;
+    flex-wrap:wrap;
+    margin-top:20px;
+}
+
+.legend-item{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:11px;
+    color:#64748b;
+}
+
+.legend-color{
+    width:10px;
+    height:10px;
+    border-radius:3px;
+}
+
+/* =========================
+RESPONSIVE
+========================= */
+
+@media(max-width:800px){
+
+    .stats{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .header{
+        padding:15px;
+        flex-wrap:wrap;
+        gap:15px;
+    }
+
+    .header-title h2{
+        font-size:16px;
+    }
+
+    .container{
+        padding:15px;
+    }
+
+    .section{
+        padding:15px;
+    }
+
+    .tree-children{
+        margin-left:10px;
+        padding-left:12px;
+    }
+
+}
+
+@media(max-width:500px){
+
+    .stats{
+        grid-template-columns:1fr 1fr;
+        gap:10px;
+    }
+
+    .stat-card{
+        padding:14px;
+    }
+
+    .stat-card h2{
+        font-size:22px;
+    }
+
+    .tree-card{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+
+    .node-meta{
+        justify-content:flex-start;
+    }
+
+    .toolbar-actions{
+        width:100%;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =========================
+HEADER
+========================= -->
+
+<div class="header">
+
+    <div class="header-left">
+
+        <img src="logo.jpg" class="logo">
+
+        <div class="header-title">
+
+            <h2>Institutional Authority</h2>
+
+            <p>Organizational Structure Management</p>
+
+        </div>
+
+    </div>
+
+
+    <div class="header-actions">
+
+        <button class="back-btn" onclick="goBack()">
+            ← Back
+        </button>
+
+        <button class="refresh-btn" onclick="loadHierarchy()">
+            ↻ Refresh
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================
+MAIN
+========================= -->
+
+<div class="container">
+
+
+    <div class="page-intro">
+
+        <h1>Organizational Hierarchy</h1>
+
+        <p>
+            Complete institutional reporting structure,
+            leadership and departmental organization.
+        </p>
+
+    </div>
+
+
+
+    <!-- STATISTICS -->
+
+    <div class="stats">
+
+        <div class="stat-card">
+
+            <p>Total People</p>
+
+            <h2 id="totalPeople">0</h2>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <p>Active People</p>
+
+            <h2 id="activePeople">0</h2>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <p>Hierarchy Members</p>
+
+            <h2 id="hierarchyCount">0</h2>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <p>Unassigned Members</p>
+
+            <h2 id="unassignedCount">0</h2>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- TOOLBAR -->
+
+    <div class="toolbar">
+
+        <div class="search-box">
+
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search name, mentor ID, designation or department..."
+                oninput="searchHierarchy()"
+            >
+
+        </div>
+
+
+        <div class="toolbar-actions">
+
+            <button
+                class="expand-btn"
+                onclick="expandAll()"
+            >
+                Expand All
+            </button>
+
+            <button
+                class="collapse-btn"
+                onclick="collapseAll()"
+            >
+                Collapse All
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ORGANIZATIONAL TREE -->
+
+    <div class="section">
+
+        <div class="section-heading">
+
+            <h2>Institutional Structure</h2>
+
+            <span id="lastUpdated">
+                Awaiting data...
+            </span>
+
+        </div>
+
+
+        <div id="hierarchyContainer">
+
+            <div class="loading">
+
+                <div class="spinner"></div>
+
+                Loading organizational hierarchy...
+
+            </div>
+
+        </div>
+
+
+        <!-- LEGEND -->
+
+        <div class="legend">
+
+            <div class="legend-item">
+                <div class="legend-color" style="background:#7c3aed"></div>
+                Governing Authority
+            </div>
+
+            <div class="legend-item">
+                <div class="legend-color" style="background:#2563eb"></div>
+                Executive Leadership
+            </div>
+
+            <div class="legend-item">
+                <div class="legend-color" style="background:#0891b2"></div>
+                Dean
+            </div>
+
+            <div class="legend-item">
+                <div class="legend-color" style="background:#059669"></div>
+                HOD
+            </div>
+
+            <div class="legend-item">
+                <div class="legend-color" style="background:#d97706"></div>
+                Coordinator
+            </div>
+
+            <div class="legend-item">
+                <div class="legend-color" style="background:#64748b"></div>
+                Faculty
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- UNASSIGNED MEMBERS -->
+
+    <div class="section">
+
+        <div class="section-heading">
+
+            <h2>Unassigned Members</h2>
+
+            <span>
+                Members without a reporting manager
+            </span>
+
+        </div>
+
+
+        <div id="unassignedContainer">
+
+            <div class="loading">
+                Loading unassigned members...
+            </div>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+
+<script>
+
+/* =====================================
+CONFIGURATION
+===================================== */
+
+const API_ROOT = "https://college-hwbb.onrender.com";
+
+const HIERARCHY_API =
+    `${API_ROOT}/api/authority/hierarchy`;
+
+
+/* =====================================
+ACCESS CONTROL
+===================================== */
+
+const mentorId = localStorage.getItem("mentorId");
+
+const source = sessionStorage.getItem("accessSource");
+
+const ALLOWED_SOURCES = ["ad", "admin"];
+
+if(!mentorId || !ALLOWED_SOURCES.includes(source)){
+
+    document.body.innerHTML = `
+
+        <h2 style="
+            text-align:center;
+            margin-top:20vh;
+            color:red;
+        ">
+
+            Access Denied
+
+            <br>
+
+            Please open via Administration Panel
+
+        </h2>
+
+    `;
+
+    throw new Error("Unauthorized access");
+
+}
+
+
+/* =====================================
+GLOBAL DATA
+===================================== */
+
+let hierarchyData = [];
+
+let unassignedData = [];
+
+let totalPeopleData = 0;
+
+let activePeopleData = 0;
+
+
+/* =====================================
+NAVIGATION
+===================================== */
+
+function goBack(){
+
+    window.history.back();
+
+}
+
+
+/* =====================================
+API FETCH HELPER
+===================================== */
+
+async function fetchJSON(url){
+
+    const response = await fetch(url);
+
+    const data = await response.json();
+
+    if(!response.ok || !data.success){
+
+        throw new Error(
+            data.message || "API request failed"
+        );
+
+    }
+
+    return data;
+
+}
+
+
+/* =====================================
+COUNT TREE MEMBERS
+===================================== */
+
+function countTreeMembers(nodes){
+
+    let count = 0;
+
+    nodes.forEach(node => {
+
+        count++;
+
+        if(node.children){
+
+            count += countTreeMembers(node.children);
+
+        }
+
+    });
+
+    return count;
+
+}
+
+
+/* =====================================
+LOAD COMPLETE HIERARCHY
+===================================== */
+
+async function loadHierarchy(){
+
+    const container =
+        document.getElementById("hierarchyContainer");
+
+    container.innerHTML = `
+
+        <div class="loading">
+
+            <div class="spinner"></div>
+
+            Loading organizational hierarchy...
+
+        </div>
+
+    `;
+
+    try{
+
+        const data = await fetchJSON(HIERARCHY_API);
+
+        hierarchyData = data.hierarchy || [];
+
+        totalPeopleData = data.totalPeople || 0;
+
+        activePeopleData = data.activePeople || 0;
+
+
+        // Load unassigned members
+
+        await loadUnassigned();
+
+
+        // Update statistics
+
+        updateStatistics();
+
+
+        // Render tree
+
+        renderHierarchy(hierarchyData);
+
+
+        document.getElementById("lastUpdated").textContent =
+
+            "Last updated: " +
+
+            new Date().toLocaleTimeString();
+
+
+        console.log(
+            "Hierarchy Loaded Successfully:",
+            data
+        );
+
+
+    }
+
+    catch(error){
+
+        console.error("Hierarchy Fetch Error:", error);
+
+        container.innerHTML = `
+
+            <div class="error-state">
+
+                <h3>Unable to Load Hierarchy</h3>
+
+                <p>${escapeHTML(error.message)}</p>
+
+                <br>
+
+                <button class="refresh-btn" onclick="loadHierarchy()">
+                    Try Again
+                </button>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+/* =====================================
+LOAD UNASSIGNED MEMBERS
+===================================== */
+
+async function loadUnassigned(){
+
+    const container =
+        document.getElementById("unassignedContainer");
+
+    try{
+
+        const data = await fetchJSON(
+            `${HIERARCHY_API}/unassigned`
+        );
+
+        unassignedData = data.people || [];
+
+        renderUnassigned(unassignedData);
+
+    }
+
+    catch(error){
+
+        console.error(
+            "Unassigned Fetch Error:",
+            error
+        );
+
+        container.innerHTML = `
+
+            <div class="error-state">
+                Unable to load unassigned members.
+            </div>
+
+        `;
+
+        unassignedData = [];
+
+    }
+
+}
+
+
+/* =====================================
+UPDATE STATISTICS
+===================================== */
+
+function updateStatistics(){
+
+    document.getElementById("totalPeople").textContent =
+        totalPeopleData;
+
+    document.getElementById("activePeople").textContent =
+        activePeopleData;
+
+    document.getElementById("hierarchyCount").textContent =
+        countTreeMembers(hierarchyData);
+
+    document.getElementById("unassignedCount").textContent =
+        unassignedData.length;
+
+}
+
+
+/* =====================================
+ESCAPE HTML
+===================================== */
+
+function escapeHTML(value){
+
+    return String(value ?? "").replace(
+        /[&<>"']/g,
+        char => ({
+            "&":"&amp;",
+            "<":"&lt;",
+            ">":"&gt;",
+            '"':"&quot;",
+            "'":"&#39;"
+        })[char]
+    );
+
+}
+
+
+/* =====================================
+GET ICON
+===================================== */
+
+function getIcon(level){
+
+    const icons = {
+
+        1:"♛",
+
+        2:"★",
+
+        3:"◆",
+
+        4:"▣",
+
+        5:"◈",
+
+        6:"●",
+
+        99:"○"
+
+    };
+
+    return icons[level] || "○";
+
+}
+
+
+/* =====================================
+RENDER HIERARCHY
+===================================== */
+
+function renderHierarchy(nodes){
+
+    const container =
+        document.getElementById("hierarchyContainer");
+
+    if(!nodes || nodes.length === 0){
+
+        container.innerHTML = `
+
+            <div class="empty-state">
+
+                <h3>No Organizational Hierarchy Found</h3>
+
+                <p>No active members are available.</p>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    const tree = document.createElement("div");
+
+    tree.className = "tree";
+
+
+    nodes.forEach(node => {
+
+        tree.appendChild(createNode(node));
+
+    });
+
+
+    container.innerHTML = "";
+
+    container.appendChild(tree);
+
+}
+
+
+/* =====================================
+CREATE INDIVIDUAL NODE
+===================================== */
+
+function createNode(node){
+
+    const wrapper = document.createElement("div");
+
+    wrapper.className = "tree-node";
+
+
+    const level = Number(node.hierarchyLevel) || 99;
+
+    const children = node.children || [];
+
+    const hasChildren = children.length > 0;
+
+
+    const card = document.createElement("div");
+
+    card.className = `tree-card level-${level}`;
+
+
+    const left = document.createElement("div");
+
+    left.className = "node-left";
+
+
+    const icon = document.createElement("div");
+
+    icon.className = "node-icon";
+
+    icon.textContent = getIcon(level);
+
+
+    const info = document.createElement("div");
+
+    info.className = "node-info";
+
+
+    const name = document.createElement("h3");
+
+    name.textContent = node.name || "Unknown";
+
+
+    const designation = document.createElement("p");
+
+    designation.textContent =
+        node.designation || "Designation Not Assigned";
+
+
+    const department = document.createElement("p");
+
+    department.textContent =
+        `${node.department || "Department Not Assigned"} • ID: ${node.mentorId}`;
+
+
+    info.appendChild(name);
+
+    info.appendChild(designation);
+
+    info.appendChild(department);
+
+
+    left.appendChild(icon);
+
+    left.appendChild(info);
+
+
+    const right = document.createElement("div");
+
+    right.className = "node-meta";
+
+
+    const designationBadge = document.createElement("span");
+
+    designationBadge.className = "badge";
+
+    designationBadge.textContent =
+        node.designation || "Unassigned";
+
+
+    const status = document.createElement("span");
+
+    status.className = "badge status-badge";
+
+    status.textContent = node.status || "Active";
+
+
+    right.appendChild(designationBadge);
+
+    right.appendChild(status);
+
+
+    if(node.assignmentType === "AUTO"){
+
+        const auto = document.createElement("span");
+
+        auto.className = "badge auto-badge";
+
+        auto.textContent = "AUTO";
+
+        right.appendChild(auto);
+
+    }
+
+
+    if(hasChildren){
+
+        const toggle = document.createElement("button");
+
+        toggle.className = "toggle-btn";
+
+        toggle.textContent = "−";
+
+        toggle.title = "Collapse children";
+
+        const count = document.createElement("span");
+
+        count.className = "children-count";
+
+        count.textContent =
+            `${children.length} Direct Reports`;
+
+
+        right.appendChild(count);
+
+        right.appendChild(toggle);
+
+        card.addEventListener("click", function(){
+
+            const childContainer =
+                wrapper.querySelector(":scope > .tree-children");
+
+            if(!childContainer) return;
+
+            childContainer.classList.toggle("collapsed");
+
+            const collapsed =
+                childContainer.classList.contains("collapsed");
+
+            toggle.textContent = collapsed ? "+" : "−";
+
+            toggle.title = collapsed
+                ? "Expand children"
+                : "Collapse children";
+
+        });
+
+    }
+
+
+    card.appendChild(left);
+
+    card.appendChild(right);
+
+
+    wrapper.appendChild(card);
+
+
+    if(hasChildren){
+
+        const childContainer =
+            document.createElement("div");
+
+        childContainer.className = "tree-children";
+
+
+        children.forEach(child => {
+
+            childContainer.appendChild(
+                createNode(child)
+            );
+
+        });
+
+
+        wrapper.appendChild(childContainer);
+
+    }
+
+
+    return wrapper;
+
+}
+
+
+/* =====================================
+RENDER UNASSIGNED MEMBERS
+===================================== */
+
+function renderUnassigned(list){
+
+    const container =
+        document.getElementById("unassignedContainer");
+
+    container.innerHTML = "";
+
+
+    if(!list || list.length === 0){
+
+        container.innerHTML = `
+
+            <div class="empty-state">
+
+                <h3>All Members Assigned</h3>
+
+                <p>No unassigned members found.</p>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    list.forEach(person => {
+
+        const card = document.createElement("div");
+
+        card.className = "unassigned-card";
+
+
+        const info = document.createElement("div");
+
+
+        const name = document.createElement("h4");
+
+        name.textContent =
+            `${person.name} (${person.mentorId})`;
+
+
+        const details = document.createElement("p");
+
+        details.textContent =
+            `${person.designation || "No Designation"} • ${person.department}`;
+
+
+        info.appendChild(name);
+
+        info.appendChild(details);
+
+
+        const badge = document.createElement("span");
+
+        badge.className = "badge auto-badge";
+
+        badge.textContent = "UNASSIGNED";
+
+
+        card.appendChild(info);
+
+        card.appendChild(badge);
+
+
+        container.appendChild(card);
+
+    });
+
+}
+
+
+/* =====================================
+SEARCH HIERARCHY
+===================================== */
+
+function searchHierarchy(){
+
+    const query = document
+        .getElementById("searchInput")
+        .value
+        .trim()
+        .toLowerCase();
+
+
+    if(!query){
+
+        renderHierarchy(hierarchyData);
+
+        return;
+
+    }
+
+
+    function filterNodes(nodes){
+
+        const result = [];
+
+
+        nodes.forEach(node => {
+
+            const matches = [
+
+                node.name,
+
+                node.mentorId,
+
+                node.designation,
+
+                node.department,
+
+                node.branch
+
+            ].some(value =>
+
+                String(value || "")
+                .toLowerCase()
+                .includes(query)
+
+            );
+
+
+            const filteredChildren =
+                filterNodes(node.children || []);
+
+
+            if(matches || filteredChildren.length > 0){
+
+                const filteredNode = {
+
+                    ...node,
+
+                    children: filteredChildren
+
+                };
+
+                result.push(filteredNode);
+
+            }
+
+        });
+
+
+        return result;
+
+    }
+
+
+    const filtered = filterNodes(hierarchyData);
+
+    renderHierarchy(filtered);
+
+
+    if(filtered.length === 0){
+
+        document.getElementById("hierarchyContainer").innerHTML = `
+
+            <div class="empty-state">
+
+                <h3>No Results Found</h3>
+
+                <p>Try searching with another keyword.</p>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+/* =====================================
+EXPAND ALL
+===================================== */
+
+function expandAll(){
+
+    document
+        .querySelectorAll(".tree-children")
+        .forEach(element => {
+
+            element.classList.remove("collapsed");
+
+        });
+
+
+    document
+        .querySelectorAll(".toggle-btn")
+        .forEach(button => {
+
+            button.textContent = "−";
+
+        });
+
+}
+
+
+/* =====================================
+COLLAPSE ALL
+===================================== */
+
+function collapseAll(){
+
+    document
+        .querySelectorAll(".tree-children")
+        .forEach(element => {
+
+            element.classList.add("collapsed");
+
+        });
+
+
+    document
+        .querySelectorAll(".toggle-btn")
+        .forEach(button => {
+
+            button.textContent = "+";
+
+        });
+
+}
+
+
+/* =====================================
+INITIALIZE
+===================================== */
+
+document.addEventListener("DOMContentLoaded", function(){
+
+    loadHierarchy();
+
+});
+
+</script>
+
+
+</body>
+
+</html>
