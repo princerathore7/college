@@ -1,0 +1,2283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salary Management | College Dashboard</title>
+
+<style>
+:root {
+    --primary: #4f46e5;
+    --primary-dark: #3730a3;
+    --bg: #f5f7fb;
+    --card: #ffffff;
+    --text: #172033;
+    --muted: #64748b;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --orange: #d97706;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Inter, Arial, sans-serif;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+}
+
+.container {
+    max-width: 1500px;
+    margin: auto;
+    padding: 25px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 25px;
+}
+
+.header h1 {
+    font-size: 27px;
+}
+
+.header p {
+    color: var(--muted);
+    margin-top: 6px;
+    font-size: 14px;
+}
+
+.badge {
+    background: #e0e7ff;
+    color: #3730a3;
+    padding: 9px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    padding: 22px;
+    margin-bottom: 22px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.025);
+}
+
+.card-title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 18px;
+}
+
+.search-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+    background: #fff;
+    color: var(--text);
+    font-size: 14px;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79,70,229,.08);
+}
+
+.search-row input {
+    flex: 1;
+    min-width: 200px;
+}
+
+button {
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 11px 17px;
+    font-weight: 600;
+    font-size: 13px;
+    transition: .2s;
+}
+
+button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+}
+
+.btn-success {
+    background: var(--green);
+    color: white;
+}
+
+.btn-danger {
+    background: var(--red);
+    color: white;
+}
+
+.btn-light {
+    background: #eef2ff;
+    color: #3730a3;
+}
+
+.btn-secondary {
+    background: #64748b;
+    color: white;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 7px;
+}
+
+.employee-box {
+    display: none;
+}
+
+.employee-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.employee-name {
+    font-size: 21px;
+    font-weight: 800;
+}
+
+.employee-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 5px;
+}
+
+.status {
+    padding: 7px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.status-valid {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-invalid {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.section-label {
+    font-weight: 700;
+    font-size: 14px;
+    margin: 22px 0 13px;
+    padding-bottom: 9px;
+    border-bottom: 1px solid var(--border);
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 650px;
+}
+
+th {
+    background: #f8fafc;
+    color: #475569;
+    text-align: left;
+    font-size: 12px;
+    padding: 12px;
+}
+
+td {
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+}
+
+td input {
+    min-width: 95px;
+}
+
+td:first-child {
+    font-weight: 600;
+}
+
+.remove-btn {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 7px 10px;
+}
+
+.summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.summary-box {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    padding: 18px;
+    border-radius: 10px;
+}
+
+.summary-box small {
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.summary-box h2 {
+    font-size: 22px;
+    margin-top: 8px;
+}
+
+.net-box {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+}
+
+.net-box h2 {
+    color: #047857;
+}
+
+.message {
+    display: none;
+    padding: 13px;
+    border-radius: 8px;
+    margin-top: 14px;
+    font-size: 13px;
+}
+
+.message.success {
+    display: block;
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.message.error {
+    display: block;
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.message.info {
+    display: block;
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 13px;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.history-item strong {
+    font-size: 14px;
+}
+
+.history-item small {
+    color: var(--muted);
+}
+
+.tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.tab {
+    background: white;
+    color: var(--muted);
+    border: 1px solid var(--border);
+}
+
+.tab.active {
+    background: var(--primary);
+    color: white;
+}
+
+@media(max-width:900px) {
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media(max-width:600px) {
+    .container {
+        padding: 13px;
+    }
+
+    .grid, .grid-2, .summary {
+        grid-template-columns: 1fr;
+    }
+
+    .header h1 {
+        font-size: 22px;
+    }
+
+    .card {
+        padding: 15px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <div>
+            <h1>Salary Management</h1>
+            <p>Employee payroll information and monthly salary generation</p>
+        </div>
+
+        <div class="badge">ADMIN PAYROLL PANEL</div>
+    </div>
+
+
+    <!-- ADMIN TOKEN -->
+
+    <div class="card">
+
+        <div class="card-title">Admin Authorization</div>
+
+        <div class="search-row">
+
+            <input
+                type="password"
+                id="adminToken"
+                placeholder="Enter admin authorization token"
+            >
+
+            <button class="btn-light" onclick="saveToken()">
+                Set Token
+            </button>
+
+            <button class="btn-secondary" onclick="clearToken()">
+                Clear
+            </button>
+
+        </div>
+
+        <p style="font-size:12px;color:#64748b;margin-top:10px">
+            Token is kept in session storage only. Do not use a shared
+            or permanent browser-exposed secret in production.
+        </p>
+
+    </div>
+
+
+    <!-- MENTOR SEARCH -->
+
+    <div class="card">
+
+        <div class="card-title">Find Employee</div>
+
+        <div class="search-row">
+
+            <input
+                type="text"
+                id="mentorId"
+                placeholder="Enter Mentor ID"
+            >
+
+            <button class="btn-primary" id="lookupBtn" onclick="lookupMentor()">
+                Search Employee
+            </button>
+
+        </div>
+
+        <div id="lookupMessage" class="message"></div>
+
+    </div>
+
+
+    <!-- EMPLOYEE PANEL -->
+
+    <div id="employeePanel" class="employee-box">
+
+        <div class="card">
+
+            <div class="employee-header">
+
+                <div>
+                    <div class="employee-name" id="employeeName">
+                        Employee Name
+                    </div>
+
+                    <div class="employee-sub" id="employeeDesignation">
+                        Designation
+                    </div>
+                </div>
+
+                <span class="status status-valid">
+                    VERIFIED EMPLOYEE
+                </span>
+
+            </div>
+
+
+            <div class="tabs">
+
+                <button class="tab active" onclick="showTab('profile',this)">
+                    Employee Information
+                </button>
+
+                <button class="tab" onclick="showTab('salary',this)">
+                    Salary Generation
+                </button>
+
+                <button class="tab" onclick="showTab('history',this)">
+                    Salary History
+                </button>
+
+            </div>
+
+
+            <!-- PROFILE TAB -->
+
+            <div id="profileTab">
+
+                <div class="card-title">Employee Payroll Information</div>
+
+                <div class="grid">
+
+                    <div class="field">
+                        <label>Mentor ID</label>
+                        <input id="p_mentorId" readonly>
+                    </div>
+
+                    <div class="field">
+                        <label>Employee Code</label>
+                        <input id="p_employeeCode">
+                    </div>
+
+                    <div class="field">
+                        <label>Employee Name</label>
+                        <input id="p_name" readonly>
+                    </div>
+
+                    <div class="field">
+                        <label>Designation</label>
+                        <input id="p_designation" readonly>
+                    </div>
+
+                    <div class="field">
+                        <label>Department</label>
+                        <input id="p_department">
+                    </div>
+
+                    <div class="field">
+                        <label>Location</label>
+                        <input id="p_location">
+                    </div>
+
+                    <div class="field">
+                        <label>PAN Number</label>
+                        <input id="p_pan" maxlength="10" placeholder="ABCDE1234F">
+                    </div>
+
+                    <div class="field">
+                        <label>UAN Number</label>
+                        <input id="p_uan">
+                    </div>
+
+                    <div class="field">
+                        <label>PF Number</label>
+                        <input id="p_pfNumber">
+                    </div>
+
+                    <div class="field">
+                        <label>ESI Number</label>
+                        <input id="p_esiNumber">
+                    </div>
+
+                    <div class="field">
+                        <label>Date of Joining</label>
+                        <input id="p_dateOfJoining" type="date">
+                    </div>
+
+                    <div class="field">
+                        <label>Bank Name</label>
+                        <input id="p_bankName">
+                    </div>
+
+                    <div class="field">
+                        <label>Account Number</label>
+                        <input id="p_accountNumber">
+                    </div>
+
+                    <div class="field">
+                        <label>IFSC Code</label>
+                        <input id="p_ifsc">
+                    </div>
+
+                </div>
+
+                <div class="actions">
+
+                    <button class="btn-success" onclick="saveProfile()">
+                        Save Employee Information
+                    </button>
+
+                </div>
+
+                <div id="profileMessage" class="message"></div>
+
+            </div>
+
+
+            <!-- SALARY TAB -->
+
+            <div id="salaryTab" class="hidden">
+
+                <div class="card-title">Monthly Salary Generation</div>
+
+                <div class="grid-2">
+
+                    <div class="field">
+                        <label>Salary Month</label>
+                        <input type="month" id="salaryMonth">
+                    </div>
+
+                    <div class="field">
+                        <label>Salary Status</label>
+                        <select id="salaryStatus">
+                            <option value="generated">Generated</option>
+                            <option value="approved">Approved</option>
+                            <option value="paid">Paid</option>
+                        </select>
+                    </div>
+
+                </div>
+
+
+                <div class="section-label">Attendance Information</div>
+
+                <div class="grid" id="attendanceFields"></div>
+
+
+                <div class="section-label">Earnings</div>
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Particulars</th>
+                                <th>Master Amount</th>
+                                <th>Current Amount</th>
+                                <th>YTD</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="earningsBody"></tbody>
+
+                    </table>
+
+                </div>
+
+                <div class="actions">
+                    <button class="btn-light" onclick="addEarning()">
+                        + Add Earning
+                    </button>
+                </div>
+
+
+                <div class="section-label">Deductions</div>
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Particulars</th>
+                                <th>Current Amount</th>
+                                <th>YTD</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="deductionsBody"></tbody>
+
+                    </table>
+
+                </div>
+
+                <div class="actions">
+                    <button class="btn-light" onclick="addDeduction()">
+                        + Add Deduction
+                    </button>
+                </div>
+
+
+                <div class="summary">
+
+                    <div class="summary-box">
+                        <small>Gross Earnings</small>
+                        <h2 id="grossEarnings">₹0.00</h2>
+                    </div>
+
+                    <div class="summary-box">
+                        <small>Gross Deductions</small>
+                        <h2 id="grossDeductions">₹0.00</h2>
+                    </div>
+
+                    <div class="summary-box net-box">
+                        <small>Net Transfer</small>
+                        <h2 id="netSalary">₹0.00</h2>
+                    </div>
+
+                </div>
+
+
+                <div class="section-label">Generate Salary</div>
+
+                <p style="font-size:13px;color:#64748b;line-height:1.6">
+                    Before generating a payslip, the system verifies the
+                    employee and checks whether a salary slip already exists
+                    for the selected month. Existing salary slips are never
+                    overwritten by this form.
+                </p>
+
+                <div class="actions">
+
+                    <button
+                        class="btn-success"
+                        id="generateBtn"
+                        onclick="generateSalary()"
+                    >
+                        Generate Salary Slip
+                    </button>
+
+                    <button class="btn-light" onclick="resetSalaryForm()">
+                        Reset Salary Form
+                    </button>
+
+                </div>
+
+                <div id="salaryMessage" class="message"></div>
+
+            </div>
+
+
+            <!-- HISTORY TAB -->
+
+            <div id="historyTab" class="hidden">
+
+                <div class="card-title">Monthly Salary History</div>
+
+                <button class="btn-primary" onclick="loadHistory()">
+                    Refresh History
+                </button>
+
+                <div id="historyList" style="margin-top:15px"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- BULK SALARY -->
+
+    <div class="card">
+
+        <div class="card-title">Bulk Salary Distribution</div>
+
+        <p style="font-size:13px;color:#64748b;margin-bottom:15px">
+            Distribute the same earnings, deductions and attendance
+            template to multiple verified mentor IDs.
+        </p>
+
+        <div class="field">
+            <label>Mentor IDs (one per line or comma-separated)</label>
+
+            <textarea
+                id="bulkMentorIds"
+                rows="4"
+                placeholder="MNT001&#10;MNT002&#10;MNT003"
+            ></textarea>
+        </div>
+
+        <div class="field" style="margin-top:15px">
+            <label>Salary Month</label>
+            <input type="month" id="bulkMonth">
+        </div>
+
+        <div class="actions">
+
+            <button class="btn-primary" onclick="generateBulkSalary()">
+                Generate Bulk Salary
+            </button>
+
+        </div>
+
+        <div id="bulkMessage" class="message"></div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* ============================================================
+   CONFIGURATION
+============================================================ */
+
+const API_BASE = "https://college-hwbb.onrender.com/api/compensation";
+
+let currentEmployee = null;
+
+let salaryLocked = false;
+
+
+/* ============================================================
+   DEFAULT DATA
+============================================================ */
+
+const ATTENDANCE = [
+    ["stdDays", "Standard Days"],
+    ["workDays", "Working Days"],
+    ["lopDays", "LOP Days"],
+    ["previousLopDays", "Previous LOP Days"],
+    ["ndHours", "ND Hours"],
+    ["utHours", "UT Hours"],
+    ["otHours", "OT Hours"],
+    ["nationalHolidayPayHours", "National Holiday Pay Hours"],
+    ["supplementaryPayHours", "Supplementary Pay Hours"],
+    ["publicHolidayPayHours", "Public Holiday Pay Hours"],
+    ["newJoinerArrearDays", "New Joiner Arrear Days"],
+    ["plEncashmentDays", "PL Encashment Days"],
+    ["previousOvertimePayHours", "Previous Overtime Pay Hours"],
+    ["previousSupplementaryPayHours", "Previous Supplementary Pay Hours"],
+    ["previousUtAndTardinessDeduction", "Previous UT & Tardiness Deduction"],
+    ["previousPublicHolidayPayHours", "Previous Public Holiday Pay Hours"],
+    ["previousUtAndTardinessReversalHours", "Previous UT & Tardiness Reversal"],
+    ["previousNationalHolidayPayHours", "Previous National Holiday Pay Hours"],
+    ["managementLevel", "Management Level"],
+    ["lateDeductionHours", "Late Deduction Hours"],
+    ["previousLateDeductionPayHours", "Previous Late Deduction Pay Hours"],
+    ["lopReversalDays", "LOP Reversal Days"]
+];
+
+
+const DEFAULT_EARNINGS = [
+    "BASIC PAY",
+    "BASIC PAY ARREAR",
+    "HOUSE RENT ALLOWANCE",
+    "HOUSE RENT ALLOWANCE ARREAR",
+    "BONUS",
+    "BONUS ARREAR",
+    "OVERTIME PAY",
+    "PUBLIC HOLIDAY PAY",
+    "SUPPLEMENTARY PAY",
+    "UNDERTIME DEDUCTION",
+    "LATE DEDUCTIONS",
+    "DRIVER_CAR_LEASE_REIMBURSEMENT",
+    "DRIVER SALARY REIMBURSEMENT",
+    "FUEL_CAR_LEASE_REIMBURSEMENT",
+    "LTA REIMBURSEMENT"
+];
+
+
+const DEFAULT_DEDUCTIONS = [
+    "PROVIDENT FUND",
+    "ASSET RECOVERY",
+    "EMPLOYEE STATE INSURANCE",
+    "LABOUR WELFARE FUND",
+    "EMPLOYER NPS DEDUCTION",
+    "TELEPHONE REIMBURSEMENT DEDUCTION",
+    "GYM RECOVERY",
+    "DRIVER_CAR_LEASE_REIMBURSEMENT",
+    "DRIVER SALARY REIMBURSEMENT",
+    "FUEL_CAR_LEASE_REIMBURSEMENT",
+    "LTA REIMBURSEMENT",
+    "MEDICLAIM DEDUCTION"
+];
+
+
+/* ============================================================
+   AUTHORIZATION
+============================================================ */
+
+function getHeaders() {
+
+    const token = sessionStorage.getItem("salaryAdminToken");
+
+    return {
+        "Content-Type": "application/json",
+        "X-Admin-Token": token || ""
+    };
+
+}
+
+
+function saveToken() {
+
+    const token = document.getElementById("adminToken").value.trim();
+
+    if (!token) {
+        alert("Please enter admin token");
+        return;
+    }
+
+    sessionStorage.setItem("salaryAdminToken", token);
+
+    alert("Token saved for this browser session");
+
+}
+
+
+function clearToken() {
+
+    sessionStorage.removeItem("salaryAdminToken");
+
+    document.getElementById("adminToken").value = "";
+
+    alert("Token cleared");
+
+}
+
+
+function ensureToken() {
+
+    if (!sessionStorage.getItem("salaryAdminToken")) {
+
+        alert("Please enter admin authorization token first");
+
+        return false;
+
+    }
+
+    return true;
+
+}
+
+
+/* ============================================================
+   API REQUEST
+============================================================ */
+
+async function apiRequest(url, options = {}) {
+
+    const response = await fetch(url, {
+        ...options,
+        credentials: "include",
+        headers: {
+            ...getHeaders(),
+            ...(options.headers || {})
+        }
+    });
+
+    let data = {};
+
+    try {
+        data = await response.json();
+    } catch (e) {
+        throw new Error("Invalid server response");
+    }
+
+    if (!response.ok) {
+
+        throw new Error(
+            data.message || `Request failed (${response.status})`
+        );
+
+    }
+
+    return data;
+
+}
+
+
+/* ============================================================
+   MESSAGE HANDLER
+============================================================ */
+
+function showMessage(id, message, type = "info") {
+
+    const element = document.getElementById(id);
+
+    element.className = "message " + type;
+
+    element.textContent = message;
+
+}
+
+
+function hideMessage(id) {
+
+    const element = document.getElementById(id);
+
+    element.className = "message";
+
+    element.textContent = "";
+
+}
+
+
+/* ============================================================
+   MENTOR LOOKUP
+============================================================ */
+
+async function lookupMentor() {
+
+    if (!ensureToken()) return;
+
+    const mentorId = document.getElementById("mentorId").value.trim();
+
+    if (!mentorId) {
+
+        showMessage(
+            "lookupMessage",
+            "Please enter a Mentor ID",
+            "error"
+        );
+
+        return;
+
+    }
+
+    const button = document.getElementById("lookupBtn");
+
+    button.disabled = true;
+
+    button.textContent = "Searching...";
+
+    currentEmployee = null;
+
+    salaryLocked = true;
+
+    document.getElementById("employeePanel").style.display = "none";
+
+    try {
+
+        const result = await apiRequest(
+            `${API_BASE}/mentor/${encodeURIComponent(mentorId)}`
+        );
+
+        if (!result.success || !result.employee) {
+
+            throw new Error("Invalid mentor");
+
+        }
+
+        currentEmployee = result.employee;
+
+        populateProfile(result.employee);
+
+        document.getElementById("employeeName").textContent =
+            result.employee.name || "Employee";
+
+        document.getElementById("employeeDesignation").textContent =
+            result.employee.designation || "No designation";
+
+        document.getElementById("employeePanel").style.display = "block";
+
+        salaryLocked = false;
+
+        showMessage(
+            "lookupMessage",
+            "Employee verified successfully",
+            "success"
+        );
+
+        await checkExistingSalary();
+
+    } catch (error) {
+
+        currentEmployee = null;
+
+        salaryLocked = true;
+
+        document.getElementById("employeePanel").style.display = "none";
+
+        showMessage(
+            "lookupMessage",
+            error.message || "Invalid Mentor ID",
+            "error"
+        );
+
+    } finally {
+
+        button.disabled = false;
+
+        button.textContent = "Search Employee";
+
+    }
+
+}
+
+
+/* ============================================================
+   PROFILE POPULATION
+============================================================ */
+
+function populateProfile(employee) {
+
+    document.getElementById("p_mentorId").value =
+        employee.mentorId || "";
+
+    document.getElementById("p_employeeCode").value =
+        employee.employeeCode || "";
+
+    document.getElementById("p_name").value =
+        employee.name || "";
+
+    document.getElementById("p_designation").value =
+        employee.designation || "";
+
+    document.getElementById("p_department").value =
+        employee.department || "";
+
+    document.getElementById("p_location").value =
+        employee.location || "";
+
+    document.getElementById("p_pan").value =
+        employee.pan || "";
+
+    document.getElementById("p_uan").value =
+        employee.uan || "";
+
+    document.getElementById("p_pfNumber").value =
+        employee.pfNumber || "";
+
+    document.getElementById("p_esiNumber").value =
+        employee.esiNumber || "";
+
+    document.getElementById("p_dateOfJoining").value =
+        employee.dateOfJoining || "";
+
+    document.getElementById("p_bankName").value =
+        employee.bankName || "";
+
+    document.getElementById("p_accountNumber").value =
+        employee.accountNumber || "";
+
+    document.getElementById("p_ifsc").value =
+        employee.ifsc || "";
+
+}
+
+
+/* ============================================================
+   SAVE EMPLOYEE PROFILE
+============================================================ */
+
+async function saveProfile() {
+
+    if (!currentEmployee || salaryLocked) {
+
+        alert("Please verify employee first");
+
+        return;
+
+    }
+
+    if (!ensureToken()) return;
+
+    const mentorId = currentEmployee.mentorId;
+
+    const pan = document.getElementById("p_pan").value
+        .trim()
+        .toUpperCase();
+
+    if (pan && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan)) {
+
+        showMessage(
+            "profileMessage",
+            "Invalid PAN format",
+            "error"
+        );
+
+        return;
+
+    }
+
+    const profile = {
+
+        employeeCode:
+            document.getElementById("p_employeeCode").value.trim(),
+
+        pan,
+
+        uan:
+            document.getElementById("p_uan").value.trim(),
+
+        pfNumber:
+            document.getElementById("p_pfNumber").value.trim(),
+
+        esiNumber:
+            document.getElementById("p_esiNumber").value.trim(),
+
+        dateOfJoining:
+            document.getElementById("p_dateOfJoining").value,
+
+        bankName:
+            document.getElementById("p_bankName").value.trim(),
+
+        accountNumber:
+            document.getElementById("p_accountNumber").value.trim(),
+
+        ifsc:
+            document.getElementById("p_ifsc").value.trim().toUpperCase(),
+
+        department:
+            document.getElementById("p_department").value.trim(),
+
+        location:
+            document.getElementById("p_location").value.trim()
+
+    };
+
+    try {
+
+        const result = await apiRequest(
+            `${API_BASE}/profile/${encodeURIComponent(mentorId)}`,
+            {
+                method: "POST",
+                body: JSON.stringify(profile)
+            }
+        );
+
+        currentEmployee = result.profile;
+
+        showMessage(
+            "profileMessage",
+            "Employee payroll information saved successfully",
+            "success"
+        );
+
+    } catch (error) {
+
+        showMessage(
+            "profileMessage",
+            error.message,
+            "error"
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   TABS
+============================================================ */
+
+function showTab(tab, button) {
+
+    document.getElementById("profileTab").classList.add("hidden");
+
+    document.getElementById("salaryTab").classList.add("hidden");
+
+    document.getElementById("historyTab").classList.add("hidden");
+
+    document.getElementById(tab + "Tab").classList.remove("hidden");
+
+    document.querySelectorAll(".tab").forEach(btn => {
+
+        btn.classList.remove("active");
+
+    });
+
+    button.classList.add("active");
+
+    if (tab === "history") {
+
+        loadHistory();
+
+    }
+
+}
+
+
+/* ============================================================
+   ATTENDANCE FIELDS
+============================================================ */
+
+function createAttendanceFields() {
+
+    const container = document.getElementById("attendanceFields");
+
+    container.innerHTML = "";
+
+    ATTENDANCE.forEach(([key, label]) => {
+
+        const wrapper = document.createElement("div");
+
+        wrapper.className = "field";
+
+        wrapper.innerHTML = `
+            <label>${label}</label>
+            <input
+                type="number"
+                min="0"
+                step="0.01"
+                id="att_${key}"
+                value="0"
+            >
+        `;
+
+        container.appendChild(wrapper);
+
+    });
+
+}
+
+
+/* ============================================================
+   EARNINGS TABLE
+============================================================ */
+
+function addEarning(name = "", master = 0, amount = 0, ytd = 0) {
+
+    const body = document.getElementById("earningsBody");
+
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+
+        <td>
+            <input
+                type="text"
+                class="earning-name"
+                value="${escapeHTML(name)}"
+                placeholder="Earning name"
+            >
+        </td>
+
+        <td>
+            <input
+                type="number"
+                class="earning-master"
+                value="${master}"
+                min="0"
+                step="0.01"
+                oninput="calculateTotals()"
+            >
+        </td>
+
+        <td>
+            <input
+                type="number"
+                class="earning-amount"
+                value="${amount}"
+                min="0"
+                step="0.01"
+                oninput="calculateTotals()"
+            >
+        </td>
+
+        <td>
+            <input
+                type="number"
+                class="earning-ytd"
+                value="${ytd}"
+                min="0"
+                step="0.01"
+            >
+        </td>
+
+        <td>
+            <button class="remove-btn" onclick="removeRow(this)">
+                Remove
+            </button>
+        </td>
+
+    `;
+
+    body.appendChild(row);
+
+    calculateTotals();
+
+}
+
+
+function loadDefaultEarnings() {
+
+    document.getElementById("earningsBody").innerHTML = "";
+
+    DEFAULT_EARNINGS.forEach(name => {
+
+        addEarning(name, 0, 0, 0);
+
+    });
+
+}
+
+
+/* ============================================================
+   DEDUCTIONS TABLE
+============================================================ */
+
+function addDeduction(name = "", amount = 0, ytd = 0) {
+
+    const body = document.getElementById("deductionsBody");
+
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+
+        <td>
+            <input
+                type="text"
+                class="deduction-name"
+                value="${escapeHTML(name)}"
+                placeholder="Deduction name"
+            >
+        </td>
+
+        <td>
+            <input
+                type="number"
+                class="deduction-amount"
+                value="${amount}"
+                min="0"
+                step="0.01"
+                oninput="calculateTotals()"
+            >
+        </td>
+
+        <td>
+            <input
+                type="number"
+                class="deduction-ytd"
+                value="${ytd}"
+                min="0"
+                step="0.01"
+            >
+        </td>
+
+        <td>
+            <button class="remove-btn" onclick="removeRow(this)">
+                Remove
+            </button>
+        </td>
+
+    `;
+
+    body.appendChild(row);
+
+    calculateTotals();
+
+}
+
+
+function loadDefaultDeductions() {
+
+    document.getElementById("deductionsBody").innerHTML = "";
+
+    DEFAULT_DEDUCTIONS.forEach(name => {
+
+        addDeduction(name, 0, 0);
+
+    });
+
+}
+
+
+function removeRow(button) {
+
+    button.closest("tr").remove();
+
+    calculateTotals();
+
+}
+
+
+/* ============================================================
+   SAFE HTML
+============================================================ */
+
+function escapeHTML(value) {
+
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[char]);
+
+}
+
+
+/* ============================================================
+   CALCULATE SALARY
+============================================================ */
+
+function getNumber(selector, row) {
+
+    const value = Number(row.querySelector(selector).value || 0);
+
+    return Number.isFinite(value) ? value : 0;
+
+}
+
+
+function calculateTotals() {
+
+    let earnings = 0;
+
+    let deductions = 0;
+
+    document.querySelectorAll("#earningsBody tr").forEach(row => {
+
+        earnings += getNumber(".earning-amount", row);
+
+    });
+
+    document.querySelectorAll("#deductionsBody tr").forEach(row => {
+
+        deductions += getNumber(".deduction-amount", row);
+
+    });
+
+    const net = earnings - deductions;
+
+    document.getElementById("grossEarnings").textContent =
+        formatCurrency(earnings);
+
+    document.getElementById("grossDeductions").textContent =
+        formatCurrency(deductions);
+
+    document.getElementById("netSalary").textContent =
+        formatCurrency(net);
+
+}
+
+
+function formatCurrency(value) {
+
+    return Number(value).toLocaleString("en-IN", {
+        style: "currency",
+        currency: "INR",
+        minimumFractionDigits: 2
+    });
+
+}
+
+
+/* ============================================================
+   COLLECT SALARY FORM DATA
+============================================================ */
+
+function collectSalaryData() {
+
+    const attendance = {};
+
+    ATTENDANCE.forEach(([key]) => {
+
+        attendance[key] = Number(
+            document.getElementById("att_" + key).value || 0
+        );
+
+    });
+
+
+    const earnings = [];
+
+    document.querySelectorAll("#earningsBody tr").forEach(row => {
+
+        const name = row.querySelector(".earning-name").value.trim();
+
+        if (!name) return;
+
+        earnings.push({
+
+            name,
+
+            masterAmount: Number(
+                row.querySelector(".earning-master").value || 0
+            ),
+
+            amount: Number(
+                row.querySelector(".earning-amount").value || 0
+            ),
+
+            ytd: Number(
+                row.querySelector(".earning-ytd").value || 0
+            )
+
+        });
+
+    });
+
+
+    const deductions = [];
+
+    document.querySelectorAll("#deductionsBody tr").forEach(row => {
+
+        const name = row.querySelector(".deduction-name").value.trim();
+
+        if (!name) return;
+
+        deductions.push({
+
+            name,
+
+            amount: Number(
+                row.querySelector(".deduction-amount").value || 0
+            ),
+
+            ytd: Number(
+                row.querySelector(".deduction-ytd").value || 0
+            )
+
+        });
+
+    });
+
+
+    return {
+
+        attendance,
+
+        earnings,
+
+        deductions,
+
+        status: document.getElementById("salaryStatus").value
+
+    };
+
+}
+
+
+/* ============================================================
+   DUPLICATE CHECK
+============================================================ */
+
+async function checkExistingSalary() {
+
+    if (!currentEmployee) return;
+
+    const month = document.getElementById("salaryMonth").value;
+
+    if (!month) return;
+
+    try {
+
+        const result = await apiRequest(
+            `${API_BASE}/slip/${encodeURIComponent(currentEmployee.mentorId)}/${month}`
+        );
+
+        if (result.success && result.slip) {
+
+            salaryLocked = true;
+
+            document.getElementById("generateBtn").disabled = true;
+
+            showMessage(
+                "salaryMessage",
+                "Salary already exists for this month. A new slip cannot be generated.",
+                "error"
+            );
+
+            return true;
+
+        }
+
+    } catch (error) {
+
+        if (
+            error.message.toLowerCase().includes("not found") ||
+            error.message.toLowerCase().includes("salary slip not found")
+        ) {
+
+            salaryLocked = false;
+
+            document.getElementById("generateBtn").disabled = false;
+
+            return false;
+
+        }
+
+        // Do not allow generation if duplicate status cannot be verified.
+        salaryLocked = true;
+
+        document.getElementById("generateBtn").disabled = true;
+
+        showMessage(
+            "salaryMessage",
+            "Could not verify existing salary. Check admin authentication before generating.",
+            "error"
+        );
+
+        return null;
+
+    }
+
+}
+
+
+/* ============================================================
+   GENERATE INDIVIDUAL SALARY
+============================================================ */
+
+async function generateSalary() {
+
+    if (!ensureToken()) return;
+
+    if (!currentEmployee || salaryLocked) {
+
+        showMessage(
+            "salaryMessage",
+            "Employee is not verified or salary generation is locked.",
+            "error"
+        );
+
+        return;
+
+    }
+
+    const month = document.getElementById("salaryMonth").value;
+
+    if (!month) {
+
+        showMessage(
+            "salaryMessage",
+            "Please select salary month",
+            "error"
+        );
+
+        return;
+
+    }
+
+    const button = document.getElementById("generateBtn");
+
+    button.disabled = true;
+
+    button.textContent = "Checking...";
+
+    // Server-side check before attempting creation.
+    const duplicate = await checkExistingSalary();
+
+    if (duplicate !== false) {
+
+        button.disabled = true;
+
+        button.textContent = "Generate Salary Slip";
+
+        return;
+
+    }
+
+    button.textContent = "Generating...";
+
+    try {
+
+        const payload = {
+
+            mentorId: currentEmployee.mentorId,
+
+            month,
+
+            ...collectSalaryData()
+
+        };
+
+        const result = await apiRequest(
+            `${API_BASE}/slip`,
+            {
+                method: "POST",
+                body: JSON.stringify(payload)
+            }
+        );
+
+        salaryLocked = true;
+
+        button.disabled = true;
+
+        showMessage(
+            "salaryMessage",
+            "Salary slip generated successfully for " + month,
+            "success"
+        );
+
+        button.textContent = "Already Generated";
+
+    } catch (error) {
+
+        if (
+            error.message.toLowerCase().includes("already exists")
+        ) {
+
+            salaryLocked = true;
+
+            button.disabled = true;
+
+        } else {
+
+            button.disabled = false;
+
+        }
+
+        showMessage(
+            "salaryMessage",
+            error.message,
+            "error"
+        );
+
+        button.textContent = "Generate Salary Slip";
+
+    }
+
+}
+
+
+/* ============================================================
+   SALARY HISTORY
+============================================================ */
+
+async function loadHistory() {
+
+    if (!currentEmployee) return;
+
+    if (!ensureToken()) return;
+
+    const container = document.getElementById("historyList");
+
+    container.innerHTML = "Loading salary history...";
+
+    try {
+
+        const result = await apiRequest(
+            `${API_BASE}/history/${encodeURIComponent(currentEmployee.mentorId)}`
+        );
+
+        container.innerHTML = "";
+
+        if (!result.history || result.history.length === 0) {
+
+            container.innerHTML = "<p>No salary history found.</p>";
+
+            return;
+
+        }
+
+        result.history.forEach(item => {
+
+            const div = document.createElement("div");
+
+            div.className = "history-item";
+
+            const info = document.createElement("div");
+
+            const title = document.createElement("strong");
+
+            title.textContent = item.month || "Unknown month";
+
+            const details = document.createElement("small");
+
+            details.textContent =
+                "Net Salary: " + formatCurrency(item.netTransfer || 0) +
+                " | Status: " + (item.status || "generated");
+
+            info.append(title, document.createElement("br"), details);
+
+            const viewButton = document.createElement("button");
+
+            viewButton.className = "btn-primary";
+
+            viewButton.textContent = "View Slip";
+
+            viewButton.onclick = () => viewSlip(item.month);
+
+            div.append(info, viewButton);
+
+            container.appendChild(div);
+
+        });
+
+    } catch (error) {
+
+        container.textContent = error.message;
+
+    }
+
+}
+
+
+/* ============================================================
+   VIEW EXISTING SLIP
+============================================================ */
+
+async function viewSlip(month) {
+
+    if (!currentEmployee) return;
+
+    try {
+
+        const result = await apiRequest(
+            `${API_BASE}/slip/${encodeURIComponent(currentEmployee.mentorId)}/${month}`
+        );
+
+        const slip = result.slip;
+
+        const printable = window.open("", "_blank");
+
+        if (!printable) {
+
+            alert("Please allow pop-ups to view the payslip");
+
+            return;
+
+        }
+
+        const rows = (slip.earnings || []).map(item => `
+            <tr>
+                <td>${escapeHTML(item.name)}</td>
+                <td>${formatCurrency(item.amount)}</td>
+            </tr>
+        `).join("");
+
+        const deductionRows = (slip.deductions || []).map(item => `
+            <tr>
+                <td>${escapeHTML(item.name)}</td>
+                <td>${formatCurrency(item.amount)}</td>
+            </tr>
+        `).join("");
+
+        printable.document.write(`
+
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Salary Slip ${escapeHTML(month)}</title>
+
+                <style>
+
+                    body {
+                        font-family: Arial, sans-serif;
+                        padding: 30px;
+                        color: #222;
+                    }
+
+                    h1, h2 {
+                        text-align: center;
+                    }
+
+                    .company {
+                        text-align: center;
+                        margin-bottom: 25px;
+                    }
+
+                    .company p {
+                        font-size: 12px;
+                    }
+
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-top: 15px;
+                    }
+
+                    th, td {
+                        border: 1px solid #ddd;
+                        padding: 9px;
+                        text-align: left;
+                        font-size: 12px;
+                    }
+
+                    th {
+                        background: #f1f5f9;
+                    }
+
+                    .summary {
+                        margin-top: 20px;
+                        border: 1px solid #ddd;
+                        padding: 15px;
+                    }
+
+                    @media print {
+                        button {
+                            display: none;
+                        }
+                    }
+
+                </style>
+
+            </head>
+
+            <body>
+
+                <div class="company">
+
+                    <h1>${escapeHTML(slip.company?.name || "Company")}</h1>
+
+                    <p>
+                        ${escapeHTML(slip.company?.registeredOffice || "")}
+                    </p>
+
+                    <h2>PAY SLIP - ${escapeHTML(month)}</h2>
+
+                </div>
+
+
+                <h3>Employee Information</h3>
+
+                <table>
+
+                    <tr>
+                        <th>Employee Code</th>
+                        <td>${escapeHTML(slip.employee?.employeeCode)}</td>
+
+                        <th>Name</th>
+                        <td>${escapeHTML(slip.employee?.name)}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Mentor ID</th>
+                        <td>${escapeHTML(slip.mentorId)}</td>
+
+                        <th>Designation</th>
+                        <td>${escapeHTML(slip.employee?.designation)}</td>
+                    </tr>
+
+                    <tr>
+                        <th>PAN</th>
+                        <td>${escapeHTML(slip.employee?.pan)}</td>
+
+                        <th>UAN</th>
+                        <td>${escapeHTML(slip.employee?.uan)}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Department</th>
+                        <td>${escapeHTML(slip.employee?.department)}</td>
+
+                        <th>Location</th>
+                        <td>${escapeHTML(slip.employee?.location)}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Bank</th>
+                        <td>${escapeHTML(slip.employee?.bankName)}</td>
+
+                        <th>Account</th>
+                        <td>${escapeHTML(slip.employee?.accountNumber)}</td>
+                    </tr>
+
+                </table>
+
+
+                <h3>Earnings</h3>
+
+                <table>
+
+                    <tr>
+                        <th>Particulars</th>
+                        <th>Amount</th>
+                    </tr>
+
+                    ${rows}
+
+                </table>
+
+
+                <h3>Deductions</h3>
+
+                <table>
+
+                    <tr>
+                        <th>Particulars</th>
+                        <th>Amount</th>
+                    </tr>
+
+                    ${deductionRows}
+
+                </table>
+
+
+                <div class="summary">
+
+                    <p>Gross Earnings:
+                        <strong>${formatCurrency(slip.grossEarnings)}</strong>
+                    </p>
+
+                    <p>Gross Deductions:
+                        <strong>${formatCurrency(slip.grossDeductions)}</strong>
+                    </p>
+
+                    <h2>Net Transfer:
+                        ${formatCurrency(slip.netTransfer)}
+                    </h2>
+
+                    <p>${escapeHTML(slip.amountInWords)}</p>
+
+                </div>
+
+                <button onclick="window.print()">Print / Save PDF</button>
+
+            </body>
+            </html>
+
+        `);
+
+        printable.document.close();
+
+    } catch (error) {
+
+        alert(error.message);
+
+    }
+
+}
+
+
+/* ============================================================
+   BULK SALARY GENERATION
+============================================================ */
+
+async function generateBulkSalary() {
+
+    if (!ensureToken()) return;
+
+    const idsText = document.getElementById("bulkMentorIds").value;
+
+    const mentorIds = [...new Set(
+        idsText
+            .split(/[\n,]+/)
+            .map(id => id.trim())
+            .filter(Boolean)
+    )];
+
+    const month = document.getElementById("bulkMonth").value;
+
+    if (mentorIds.length === 0) {
+
+        showMessage(
+            "bulkMessage",
+            "Please enter mentor IDs",
+            "error"
+        );
+
+        return;
+
+    }
+
+    if (!month) {
+
+        showMessage(
+            "bulkMessage",
+            "Please select salary month",
+            "error"
+        );
+
+        return;
+
+    }
+
+    if (!confirm(
+        `Generate salary for ${mentorIds.length} mentors for ${month}?`
+    )) return;
+
+
+    const button = document.querySelector(
+        'button[onclick="generateBulkSalary()"]'
+    );
+
+    button.disabled = true;
+
+    button.textContent = "Processing...";
+
+    try {
+
+        const commonSalary = collectSalaryData();
+
+        const result = await apiRequest(
+            `${API_BASE}/bulk`,
+            {
+                method: "POST",
+
+                body: JSON.stringify({
+
+                    mentorIds,
+
+                    month,
+
+                    ...commonSalary
+
+                })
+
+            }
+        );
+
+        const created = result.results?.created || [];
+
+        const failed = result.results?.failed || [];
+
+        showMessage(
+            "bulkMessage",
+            `Created: ${created.length} | Failed: ${failed.length}. ` +
+            JSON.stringify(failed),
+            failed.length ? "info" : "success"
+        );
+
+    } catch (error) {
+
+        showMessage(
+            "bulkMessage",
+            error.message,
+            "error"
+        );
+
+    } finally {
+
+        button.disabled = false;
+
+        button.textContent = "Generate Bulk Salary";
+
+    }
+
+}
+
+
+/* ============================================================
+   RESET FORM
+============================================================ */
+
+function resetSalaryForm() {
+
+    if (!confirm("Reset all salary fields?")) return;
+
+    createAttendanceFields();
+
+    loadDefaultEarnings();
+
+    loadDefaultDeductions();
+
+    calculateTotals();
+
+    hideMessage("salaryMessage");
+
+}
+
+
+/* ============================================================
+   MONTH CHANGE DUPLICATE CHECK
+============================================================ */
+
+document.getElementById("salaryMonth").addEventListener(
+    "change",
+    async function() {
+
+        if (!currentEmployee) return;
+
+        salaryLocked = false;
+
+        document.getElementById("generateBtn").disabled = false;
+
+        await checkExistingSalary();
+
+    }
+);
+
+
+/* ============================================================
+   INITIALIZATION
+============================================================ */
+
+function initialize() {
+
+    createAttendanceFields();
+
+    loadDefaultEarnings();
+
+    loadDefaultDeductions();
+
+    const currentMonth = new Date().toISOString().slice(0, 7);
+
+    document.getElementById("salaryMonth").value = currentMonth;
+
+    document.getElementById("bulkMonth").value = currentMonth;
+
+    calculateTotals();
+
+}
+
+
+initialize();
+
+</script>
+
+</body>
+</html>
