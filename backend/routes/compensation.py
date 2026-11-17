@@ -1,14 +1,16 @@
-from flask import Blueprint, request, jsonify, g, make_response
-from db import db
+from flask import Blueprint, request, jsonify
 from datetime import datetime
-from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
-from functools import wraps
-from decimal import Decimal, InvalidOperation
-import os
+from pymongo import ASCENDING
+from bson import ObjectId
+from db import db
+import copy
 import re
-import json
 
+
+# ============================================================
+# BLUEPRINT
+# ============================================================
 
 compensation_bp = Blueprint(
     "compensation_bp",
@@ -18,750 +20,699 @@ compensation_bp = Blueprint(
 
 
 # ============================================================
-# MONGODB COLLECTIONS
+# DATABASE COLLECTIONS
 # ============================================================
 
 mentors_col = db.mentors
-salary_profiles_col = db.salary_profiles
-salary_slips_col = db.salary_slips
-salary_templates_col = db.salary_templates
+
+profiles_col = db.salary_profiles
+
+slips_col = db.salary_slips
+
+templates_col = db.salary_templates
 
 
 # ============================================================
-# COMPANY INFORMATION
+# INDEXES
 # ============================================================
 
-COMPANY = {
-    "name": "TaskUs India Private Limited",
-    "registeredOffice": (
-        "18th & 19th floor, Tower-9, Gigaplex IT Park, MIDC, "
-        "Plot No 1 I.T.5, Airoli Knowledge Park Road, "
-        "TTC Industrial Area, Airoli, Navi Mumbai, "
-        "Maharashtra – 400708, India"
+try:
+
+    profiles_col.create_index(
+        [("mentorId", ASCENDING)],
+        unique=True,
+        name="unique_salary_profile_mentor"
     )
-}
+
+    slips_col.create_index(
+        [
+            ("mentorId", ASCENDING),
+            ("month", ASCENDING)
+        ],
+        unique=True,
+        name="unique_mentor_month_salary"
+    )
+
+    slips_col.create_index(
+        [("createdAt", ASCENDING)]
+    )
+
+    templates_col.create_index(
+        [("templateName", ASCENDING)],
+        unique=True,
+        name="unique_salary_template_name"
+    )
+
+except Exception as e:
+
+    print("COMPENSATION INDEX WARNING:", str(e))
 
 
 # ============================================================
-# SALARY SLIP FIELD DEFINITIONS
-# ============================================================
-
-ATTENDANCE_FIELDS = [
-    "stdDays",
-    "workDays",
-    "lopDays",
-    "previousLopDays",
-    "ndHours",
-    "utHours",
-    "otHours",
-    "nationalHolidayPayHours",
-    "supplementaryPayHours",
-    "publicHolidayPayHours",
-    "newJoinerArrearDays",
-    "plEncashmentDays",
-    "previousOvertimePayHours",
-    "previousSupplementaryPayHours",
-    "previousUtAndTardinessDeduction",
-    "previousPublicHolidayPayHours",
-    "previousUtAndTardinessReversalHours",
-    "previousNationalHolidayPayHours",
-    "managementLevel",
-    "lateDeductionHours",
-    "previousLateDeductionPayHours",
-    "lopReversalDays"
-]
-
-
-EARNING_FIELDS = [
-    "BASIC PAY",
-    "BASIC PAY ARREAR",
-    "HOUSE RENT ALLOWANCE",
-    "HOUSE RENT ALLOWANCE ARREAR",
-    "BONUS",
-    "BONUS ARREAR",
-    "OVERTIME PAY",
-    "PUBLIC HOLIDAY PAY",
-    "SUPPLEMENTARY PAY",
-    "UNDERTIME DEDUCTION",
-    "LATE DEDUCTIONS",
-    "DRIVER_CAR_LEASE_REIMBURSEMENT",
-    "DRIVER SALARY REIMBURSEMENT",
-    "FUEL_CAR_LEASE_REIMBURSEMENT",
-    "LTA REIMBURSEMENT"
-]
-
-
-DEDUCTION_FIELDS = [
-    "PROVIDENT FUND",
-    "ASSET RECOVERY",
-    "EMPLOYEE STATE INSURANCE",
-    "LABOUR WELFARE FUND",
-    "EMPLOYER NPS DEDUCTION",
-    "TELEPHONE REIMBURSEMENT DEDUCTION",
-    "GYM RECOVERY",
-    "DRIVER_CAR_LEASE_REIMBURSEMENT",
-    "DRIVER SALARY REIMBURSEMENT",
-    "FUEL_CAR_LEASE_REIMBURSEMENT",
-    "LTA REIMBURSEMENT",
-    "MEDICLAIM DEDUCTION"
-]
-
-
-PROFILE_FIELDS = [
-    "pan",
-    "uan",
-    "pfNumber",
-    "esiNumber",
-    "dateOfJoining",
-    "bankName",
-    "accountNumber",
-    "ifsc",
-    "department",
-    "location",
-    "employeeCode"
-]
-
-
-# ============================================================
-# BASIC HELPERS
+# HELPERS
 # ============================================================
 
 def now():
+
     return datetime.utcnow()
 
 
-def clean_document(data):
-    if not data:
-        return data
+def clean_id(value):
 
-    if isinstance(data, list):
-        return [clean_document(item) for item in data]
-
-    if isinstance(data, dict):
-        result = {}
-
-        for key, value in data.items():
-            if key == "_id":
-                result[key] = str(value)
-            else:
-                result[key] = clean_document(value)
-
-        return result
-
-    return data
+    return str(value or "").strip()
 
 
-def error(message, status=400):
+def clean_month(value):
+
+    value = str(value or "").strip()
+
+    if not re.fullmatch(r"\d{4}-\d{2}", value):
+
+        raise ValueError(
+            "Month must be in YYYY-MM format"
+        )
+
+    month_number = int(value.split("-")[1])
+
+    if month_number < 1 or month_number > 12:
+
+        raise ValueError("Invalid month")
+
+    return value
+
+
+def serialize(value):
+
+    if isinstance(value, ObjectId):
+
+        return str(value)
+
+    if isinstance(value, datetime):
+
+        return value.isoformat()
+
+    if isinstance(value, dict):
+
+        return {
+            key: serialize(val)
+            for key, val in value.items()
+        }
+
+    if isinstance(value, list):
+
+        return [
+            serialize(item)
+            for item in value
+        ]
+
+    return value
+
+
+def success(message, data=None, status=200):
+
+    response = {
+        "success": True,
+        "message": message
+    }
+
+    if data:
+
+        response.update(data)
+
+    return jsonify(serialize(response)), status
+
+
+def failure(message, status=400):
+
     return jsonify({
         "success": False,
         "message": message
     }), status
 
 
-def get_json():
-    return request.get_json(silent=True) or {}
-
-
-def valid_month(month):
-    return bool(
-        isinstance(month, str)
-        and re.fullmatch(r"\d{4}-(0[1-9]|1[0-2])", month)
-    )
-
-
-def money(value):
-    try:
-        result = Decimal(str(value or 0))
-
-        if not result.is_finite():
-            raise ValueError("Invalid amount")
-
-        return float(result)
-
-    except (InvalidOperation, ValueError, TypeError):
-        raise ValueError("Invalid monetary value")
-
-
-def amount_in_words(amount):
-    # Basic Indian currency wording helper.
-    # For production, use a tested number-to-words library.
-    amount = round(float(amount or 0), 2)
-
-    return f"INR {amount:,.2f} Only"
-
-
-# ============================================================
-# AUTHORIZATION
-# ============================================================
-
-def admin_required(func):
-    """
-    Admin requests must provide:
-    X-Admin-Token: value stored in SALARY_ADMIN_TOKEN env variable.
-
-    Do not expose this token in frontend JavaScript.
-    Admin actions should be performed through a protected backend.
-    """
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-
-        expected = os.getenv("SALARY_ADMIN_TOKEN")
-        supplied = request.headers.get("X-Admin-Token")
-
-        if not expected:
-            return error(
-                "SALARY_ADMIN_TOKEN is not configured",
-                503
-            )
-
-        if not supplied or supplied != expected:
-            return error("Admin authorization required", 401)
-
-        return func(*args, **kwargs)
-
-    return wrapper
-
-
-def mentor_required(func):
-    """
-    Requires existing authentication middleware to populate g.user.
-
-    Expected identity:
-    g.user = {
-        "mentorId": "...",
-        "role": "mentor"
-    }
-
-    Never trust mentorId from localStorage or request body.
-    """
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-
-        user = getattr(g, "user", None)
-
-        if not user:
-            return error("Login required", 401)
-
-        if user.get("role") != "mentor":
-            return error("Mentor access required", 403)
-
-        return func(*args, **kwargs)
-
-    return wrapper
-
-
-def mentor_can_access(mentor_id):
-    user = getattr(g, "user", None)
-
-    return bool(
-        user and user.get("mentorId") == mentor_id
-    )
-
-
-# ============================================================
-# MENTOR PROFILE LOOKUP
-# ============================================================
-
 def get_mentor(mentor_id):
 
-    mentor = mentors_col.find_one({
+    mentor_id = clean_id(mentor_id)
+
+    if not mentor_id:
+
+        return None
+
+    return mentors_col.find_one({
         "mentorId": mentor_id
     })
 
-    return mentor
 
-
-def get_employee_profile(mentor_id):
-
-    mentor = get_mentor(mentor_id)
+def get_employee_data(mentor):
 
     if not mentor:
-        return None
 
-    profile = salary_profiles_col.find_one({
-        "mentorId": mentor_id
-    }) or {}
+        return {}
 
     return {
-        "mentorId": mentor_id,
-        "employeeCode": profile.get(
-            "employeeCode",
-            mentor.get("mentorId")
-        ),
+
+        "mentorId": mentor.get("mentorId"),
+
         "name": mentor.get("name", ""),
-        "designation": mentor.get("designation", ""),
+
         "email": mentor.get("email", ""),
+
         "phone": mentor.get("phone", ""),
+
+        "designation": mentor.get("designation", ""),
+
         "subject": mentor.get("subject", ""),
+
         "branch": mentor.get("branch", ""),
-        "classAssigned": mentor.get("classAssigned", ""),
-        "pan": profile.get("pan", ""),
-        "uan": profile.get("uan", ""),
-        "pfNumber": profile.get("pfNumber", ""),
-        "esiNumber": profile.get("esiNumber", ""),
-        "dateOfJoining": profile.get("dateOfJoining", ""),
-        "bankName": profile.get("bankName", ""),
-        "accountNumber": profile.get("accountNumber", ""),
-        "ifsc": profile.get("ifsc", ""),
-        "department": profile.get(
-            "department",
-            mentor.get("branch", "")
+
+        "classAssigned": mentor.get("classAssigned", "")
+
+    }
+
+
+def calculate_totals(earnings, deductions):
+
+    gross = sum(
+        float(item.get("amount", 0) or 0)
+        for item in earnings
+    )
+
+    total_deductions = sum(
+        float(item.get("amount", 0) or 0)
+        for item in deductions
+    )
+
+    return {
+
+        "grossEarnings": round(gross, 2),
+
+        "totalDeductions": round(
+            total_deductions, 2
         ),
-        "location": profile.get("location", "")
+
+        "netTransfer": round(
+            gross - total_deductions, 2
+        )
+
+    }
+
+
+def normalize_components(items):
+
+    if not isinstance(items, list):
+
+        raise ValueError(
+            "Earnings and deductions must be lists"
+        )
+
+    result = []
+
+    for item in items:
+
+        if not isinstance(item, dict):
+
+            raise ValueError(
+                "Invalid salary component"
+            )
+
+        name = str(
+            item.get("name", "")
+        ).strip()
+
+        if not name:
+
+            raise ValueError(
+                "Salary component name is required"
+            )
+
+        amount = float(
+            item.get("amount", 0) or 0
+        )
+
+        if amount < 0:
+
+            raise ValueError(
+                "Salary amount cannot be negative"
+            )
+
+        result.append({
+
+            "name": name,
+
+            "amount": round(amount, 2),
+
+            "masterAmount": round(
+                float(
+                    item.get("masterAmount", amount) or 0
+                ), 2
+            ),
+
+            "ytd": round(
+                float(item.get("ytd", 0) or 0), 2
+            )
+
+        })
+
+    return result
+
+
+def validate_attendance(attendance):
+
+    if not isinstance(attendance, dict):
+
+        raise ValueError(
+            "Attendance must be an object"
+        )
+
+    result = {}
+
+    for key, value in attendance.items():
+
+        try:
+
+            number = float(value or 0)
+
+        except (TypeError, ValueError):
+
+            raise ValueError(
+                f"Invalid attendance value: {key}"
+            )
+
+        if number < 0:
+
+            raise ValueError(
+                "Attendance values cannot be negative"
+            )
+
+        result[str(key)] = number
+
+    return result
+
+
+def validate_salary_data(data):
+
+    earnings = normalize_components(
+        data.get("earnings", [])
+    )
+
+    deductions = normalize_components(
+        data.get("deductions", [])
+    )
+
+    attendance = validate_attendance(
+        data.get("attendance", {})
+    )
+
+    totals = calculate_totals(
+        earnings,
+        deductions
+    )
+
+    return {
+
+        "earnings": earnings,
+
+        "deductions": deductions,
+
+        "attendance": attendance,
+
+        **totals
+
     }
 
 
 # ============================================================
-# 1. GET MENTOR INFORMATION BY MENTOR ID
+# 1. VALIDATE MENTOR
 # ============================================================
 
 @compensation_bp.route(
     "/mentor/<mentor_id>",
     methods=["GET"]
 )
-@admin_required
-def compensation_mentor_lookup(mentor_id):
+def get_mentor_details(mentor_id):
 
-    profile = get_employee_profile(mentor_id)
+    try:
 
-    if not profile:
-        return error("Mentor not found", 404)
+        mentor = get_mentor(mentor_id)
 
-    return jsonify({
-        "success": True,
-        "employee": profile
-    })
+        if not mentor:
+
+            return failure(
+                "Invalid Mentor ID. Employee not found.",
+                404
+            )
+
+        profile = profiles_col.find_one(
+            {"mentorId": clean_id(mentor_id)},
+            {"_id": 0}
+        )
+
+        employee = get_employee_data(mentor)
+
+        if profile:
+
+            employee.update(profile)
+
+        return success(
+            "Mentor found successfully.",
+            {
+                "employee": employee,
+                "profileExists": bool(profile)
+            }
+        )
+
+    except Exception as e:
+
+        return failure(str(e), 500)
 
 
 # ============================================================
-# 2. SAVE / UPDATE EMPLOYEE PAYROLL PROFILE
+# 2. GET COMPENSATION PROFILE
 # ============================================================
 
 @compensation_bp.route(
     "/profile/<mentor_id>",
-    methods=["GET", "POST"]
+    methods=["GET"]
 )
-@admin_required
-def salary_profile(mentor_id):
+def get_compensation_profile(mentor_id):
 
-    mentor = get_mentor(mentor_id)
+    try:
 
-    if not mentor:
-        return error("Mentor not found", 404)
+        mentor = get_mentor(mentor_id)
 
-    if request.method == "GET":
+        if not mentor:
 
-        profile = get_employee_profile(mentor_id)
+            return failure(
+                "Invalid Mentor ID",
+                404
+            )
 
-        return jsonify({
-            "success": True,
-            "profile": profile
+        profile = profiles_col.find_one({
+            "mentorId": clean_id(mentor_id)
         })
 
-    data = get_json()
+        if not profile:
 
-    update_data = {}
+            return success(
+                "No compensation profile found.",
+                {
+                    "profile": {},
+                    "employee": get_employee_data(mentor)
+                }
+            )
 
-    for field in PROFILE_FIELDS:
-        if field in data:
-            update_data[field] = str(
-                data[field] or ""
-            ).strip()
+        profile.pop("_id", None)
 
-    if "pan" in update_data:
-        pan = update_data["pan"].upper()
-
-        if pan and not re.fullmatch(
-            r"[A-Z]{5}[0-9]{4}[A-Z]",
-            pan
-        ):
-            return error("Invalid PAN format")
-
-        update_data["pan"] = pan
-
-    if not update_data:
-        return error("No profile fields provided")
-
-    update_data["mentorId"] = mentor_id
-    update_data["updatedAt"] = now()
-
-    salary_profiles_col.update_one(
-        {"mentorId": mentor_id},
-        {"$set": update_data},
-        upsert=True
-    )
-
-    return jsonify({
-        "success": True,
-        "message": "Payroll profile saved successfully",
-        "profile": get_employee_profile(mentor_id)
-    })
-
-
-# ============================================================
-# 3. SALARY CALCULATION
-# ============================================================
-
-def calculate_salary(data):
-
-    earnings = data.get("earnings", [])
-    deductions = data.get("deductions", [])
-
-    if not isinstance(earnings, list):
-        raise ValueError("Earnings must be a list")
-
-    if not isinstance(deductions, list):
-        raise ValueError("Deductions must be a list")
-
-    clean_earnings = []
-    clean_deductions = []
-
-    gross_earnings = 0
-    gross_deductions = 0
-
-    for row in earnings:
-
-        if not isinstance(row, dict):
-            raise ValueError("Invalid earning row")
-
-        name = str(row.get("name", "")).strip()
-
-        if not name:
-            raise ValueError("Earning name is required")
-
-        master_amount = money(row.get("masterAmount", 0))
-        amount = money(row.get("amount", 0))
-        ytd = money(row.get("ytd", 0))
-
-        clean_earnings.append({
-            "name": name,
-            "masterAmount": master_amount,
-            "amount": amount,
-            "ytd": ytd
-        })
-
-        gross_earnings += amount
-
-    for row in deductions:
-
-        if not isinstance(row, dict):
-            raise ValueError("Invalid deduction row")
-
-        name = str(row.get("name", "")).strip()
-
-        if not name:
-            raise ValueError("Deduction name is required")
-
-        amount = money(row.get("amount", 0))
-        ytd = money(row.get("ytd", 0))
-
-        clean_deductions.append({
-            "name": name,
-            "amount": amount,
-            "ytd": ytd
-        })
-
-        gross_deductions += amount
-
-    net_transfer = gross_earnings - gross_deductions
-
-    return {
-        "earnings": clean_earnings,
-        "deductions": clean_deductions,
-        "grossEarnings": round(gross_earnings, 2),
-        "grossDeductions": round(gross_deductions, 2),
-        "netTransfer": round(net_transfer, 2),
-        "amountInWords": amount_in_words(net_transfer)
-    }
-
-
-# ============================================================
-# 4. BUILD COMPLETE SALARY SLIP
-# ============================================================
-
-def build_salary_slip(mentor_id, month, data):
-
-    if not valid_month(month):
-        raise ValueError("Month must be YYYY-MM")
-
-    employee = get_employee_profile(mentor_id)
-
-    if not employee:
-        raise ValueError(
-            f"Mentor {mentor_id} does not exist"
+        return success(
+            "Compensation profile fetched.",
+            {
+                "profile": profile,
+                "employee": get_employee_data(mentor)
+            }
         )
 
-    calculated = calculate_salary(data)
+    except Exception as e:
 
-    attendance = data.get("attendance", {})
-
-    if not isinstance(attendance, dict):
-        raise ValueError("Attendance must be an object")
-
-    clean_attendance = {}
-
-    for field in ATTENDANCE_FIELDS:
-        clean_attendance[field] = attendance.get(field, 0)
-
-    slip = {
-        "company": COMPANY,
-
-        "mentorId": mentor_id,
-
-        "month": month,
-        "year": int(month[:4]),
-
-        "employee": employee,
-
-        "attendance": clean_attendance,
-
-        "earnings": calculated["earnings"],
-        "deductions": calculated["deductions"],
-
-        "grossEarnings": calculated["grossEarnings"],
-        "grossDeductions": calculated["grossDeductions"],
-
-        "netTransfer": calculated["netTransfer"],
-
-        "amountInWords": calculated["amountInWords"],
-
-        "status": data.get("status", "generated"),
-
-        "createdAt": now(),
-        "updatedAt": now()
-    }
-
-    return slip
+        return failure(str(e), 500)
 
 
 # ============================================================
-# 5. CREATE INDIVIDUAL MONTHLY SALARY SLIP
+# 3. CREATE / UPDATE COMPENSATION PROFILE
+# ============================================================
+
+@compensation_bp.route(
+    "/profile/<mentor_id>",
+    methods=["POST", "PUT"]
+)
+def save_compensation_profile(mentor_id):
+
+    try:
+
+        mentor_id = clean_id(mentor_id)
+
+        mentor = get_mentor(mentor_id)
+
+        if not mentor:
+
+            return failure(
+                "Invalid Mentor ID. Profile cannot be created.",
+                404
+            )
+
+        data = request.get_json(silent=True) or {}
+
+        allowed_fields = [
+
+            "employeeCode",
+
+            "pan",
+
+            "uan",
+
+            "pfNumber",
+
+            "esiNumber",
+
+            "dateOfJoining",
+
+            "department",
+
+            "location",
+
+            "bankName",
+
+            "accountNumber",
+
+            "ifscCode",
+
+            "accountHolderName",
+
+            "employmentType",
+
+            "grade",
+
+            "costCenter",
+
+            "basicSalary",
+
+            "hra",
+
+            "otherAllowance",
+
+            "monthlyCTC",
+
+            "annualCTC",
+
+            "taxRegime",
+
+            "professionalTax",
+
+            "pfApplicable",
+
+            "esiApplicable",
+
+            "salaryMode",
+
+            "designation",
+
+            "notes"
+
+        ]
+
+        profile_data = {}
+
+        for field in allowed_fields:
+
+            if field in data:
+
+                profile_data[field] = data[field]
+
+        profile_data["mentorId"] = mentor_id
+
+        profile_data["employeeName"] = mentor.get(
+            "name", ""
+        )
+
+        profile_data["updatedAt"] = now()
+
+        existing = profiles_col.find_one({
+            "mentorId": mentor_id
+        })
+
+        if existing:
+
+            profiles_col.update_one(
+                {"mentorId": mentor_id},
+                {
+                    "$set": profile_data
+                }
+            )
+
+            message = "Compensation profile updated."
+
+        else:
+
+            profile_data["createdAt"] = now()
+
+            profiles_col.insert_one(
+                profile_data
+            )
+
+            message = "Compensation profile created."
+
+        profile = profiles_col.find_one(
+            {"mentorId": mentor_id},
+            {"_id": 0}
+        )
+
+        return success(
+            message,
+            {"profile": profile}
+        )
+
+    except Exception as e:
+
+        return failure(str(e), 500)
+
+
+# ============================================================
+# 4. ISSUE INDIVIDUAL SALARY SLIP
 # ============================================================
 
 @compensation_bp.route(
     "/slip",
     methods=["POST"]
 )
-@admin_required
 def create_salary_slip():
 
-    data = get_json()
-
-    mentor_id = data.get("mentorId")
-    month = data.get("month")
-
-    if not mentor_id or not month:
-        return error("mentorId and month are required")
-
     try:
-        slip = build_salary_slip(
-            mentor_id,
-            month,
-            data
+
+        data = request.get_json(silent=True) or {}
+
+        mentor_id = clean_id(
+            data.get("mentorId")
         )
 
-        slip["createdBy"] = "admin"
+        if not mentor_id:
 
-        salary_slips_col.insert_one(slip)
+            return failure(
+                "Mentor ID is required."
+            )
 
-        return jsonify({
-            "success": True,
-            "message": "Salary slip created successfully",
-            "slip": clean_document(slip)
-        }), 201
+        mentor = get_mentor(mentor_id)
+
+        if not mentor:
+
+            return failure(
+                "Invalid Mentor ID. Salary slip cannot be issued.",
+                404
+            )
+
+        month = clean_month(
+            data.get("month")
+        )
+
+        # Duplicate protection
+
+        existing = slips_col.find_one({
+
+            "mentorId": mentor_id,
+
+            "month": month
+
+        })
+
+        if existing:
+
+            return failure(
+                "Salary slip already exists for this mentor and month. Use Edit Salary Slip instead.",
+                409
+            )
+
+        salary_data = validate_salary_data(data)
+
+        profile = profiles_col.find_one(
+            {"mentorId": mentor_id},
+            {"_id": 0}
+        ) or {}
+
+        employee = get_employee_data(mentor)
+
+        employee.update(profile)
+
+        slip = {
+
+            "mentorId": mentor_id,
+
+            "month": month,
+
+            "employee": employee,
+
+            "attendance": salary_data["attendance"],
+
+            "earnings": salary_data["earnings"],
+
+            "deductions": salary_data["deductions"],
+
+            "grossEarnings": salary_data["grossEarnings"],
+
+            "totalDeductions": salary_data["totalDeductions"],
+
+            "netTransfer": salary_data["netTransfer"],
+
+            "status": data.get(
+                "status",
+                "issued"
+            ),
+
+            "paymentDate": data.get(
+                "paymentDate"
+            ),
+
+            "paymentMode": data.get(
+                "paymentMode",
+                "Bank Transfer"
+            ),
+
+            "remarks": data.get(
+                "remarks",
+                ""
+            ),
+
+            "createdAt": now(),
+
+            "updatedAt": now()
+
+        }
+
+        result = slips_col.insert_one(slip)
+
+        slip["_id"] = result.inserted_id
+
+        return success(
+            "Salary slip issued successfully.",
+            {"slip": slip},
+            201
+        )
 
     except DuplicateKeyError:
-        return error(
-            "Salary slip already exists for this month",
+
+        return failure(
+            "Salary slip already exists for this month.",
             409
         )
 
-    except ValueError as exc:
-        return error(str(exc))
+    except ValueError as e:
 
-    except Exception as exc:
-        print("Salary creation error:", exc)
-        return error("Unable to create salary slip", 500)
+        return failure(str(e), 400)
 
+    except Exception as e:
 
-# ============================================================
-# 6. BULK SALARY DISTRIBUTION
-# ============================================================
-
-@compensation_bp.route(
-    "/bulk",
-    methods=["POST"]
-)
-@admin_required
-def bulk_salary_distribution():
-
-    data = get_json()
-
-    mentor_ids = data.get("mentorIds", [])
-    month = data.get("month")
-
-    if not isinstance(mentor_ids, list) or not mentor_ids:
-        return error("mentorIds list is required")
-
-    if not valid_month(month):
-        return error("Valid month is required: YYYY-MM")
-
-    results = {
-        "created": [],
-        "failed": []
-    }
-
-    for mentor_id in mentor_ids:
-
-        try:
-            slip = build_salary_slip(
-                mentor_id,
-                month,
-                data
-            )
-
-            slip["createdBy"] = "admin"
-
-            salary_slips_col.insert_one(slip)
-
-            results["created"].append(mentor_id)
-
-        except DuplicateKeyError:
-
-            results["failed"].append({
-                "mentorId": mentor_id,
-                "reason": "Salary already exists"
-            })
-
-        except Exception as exc:
-
-            results["failed"].append({
-                "mentorId": mentor_id,
-                "reason": str(exc)
-            })
-
-    return jsonify({
-        "success": True,
-        "message": "Bulk salary processing completed",
-        "results": results
-    })
+        return failure(str(e), 500)
 
 
 # ============================================================
-# 7. FIXED SALARY BULK DISTRIBUTION
-# ============================================================
-
-@compensation_bp.route(
-    "/bulk-fixed",
-    methods=["POST"]
-)
-@admin_required
-def bulk_fixed_salary():
-
-    data = get_json()
-
-    mentor_ids = data.get("mentorIds", [])
-    month = data.get("month")
-
-    try:
-        fixed_amount = money(data.get("fixedAmount"))
-    except ValueError as exc:
-        return error(str(exc))
-
-    if fixed_amount < 0:
-        return error("Salary cannot be negative")
-
-    if not isinstance(mentor_ids, list) or not mentor_ids:
-        return error("mentorIds list is required")
-
-    if not valid_month(month):
-        return error("Valid month is required")
-
-    # Common fixed salary template.
-    template = data.get("template", {})
-
-    earnings = template.get("earnings", [])
-
-    if not earnings:
-        earnings = [{
-            "name": "BASIC PAY",
-            "masterAmount": fixed_amount,
-            "amount": fixed_amount,
-            "ytd": 0
-        }]
-    else:
-        # The fixed amount becomes the BASIC PAY amount.
-        found_basic = False
-
-        for row in earnings:
-            if row.get("name", "").upper() == "BASIC PAY":
-                row["masterAmount"] = fixed_amount
-                row["amount"] = fixed_amount
-                found_basic = True
-                break
-
-        if not found_basic:
-            earnings.append({
-                "name": "BASIC PAY",
-                "masterAmount": fixed_amount,
-                "amount": fixed_amount,
-                "ytd": 0
-            })
-
-    common_data = {
-        "month": month,
-        "attendance": template.get("attendance", {}),
-        "earnings": earnings,
-        "deductions": template.get("deductions", []),
-        "status": template.get("status", "generated")
-    }
-
-    results = {
-        "created": [],
-        "failed": []
-    }
-
-    for mentor_id in mentor_ids:
-
-        try:
-            slip = build_salary_slip(
-                mentor_id,
-                month,
-                common_data
-            )
-
-            slip["fixedSalary"] = fixed_amount
-            slip["createdBy"] = "admin"
-
-            salary_slips_col.insert_one(slip)
-
-            results["created"].append(mentor_id)
-
-        except DuplicateKeyError:
-
-            results["failed"].append({
-                "mentorId": mentor_id,
-                "reason": "Salary already exists"
-            })
-
-        except Exception as exc:
-
-            results["failed"].append({
-                "mentorId": mentor_id,
-                "reason": str(exc)
-            })
-
-    return jsonify({
-        "success": True,
-        "message": "Fixed salary distribution completed",
-        "results": results
-    })
-
-
-# ============================================================
-# 8. GET INDIVIDUAL SALARY SLIP
+# 5. GET EXISTING SALARY SLIP
 # ============================================================
 
 @compensation_bp.route(
@@ -770,50 +721,534 @@ def bulk_fixed_salary():
 )
 def get_salary_slip(mentor_id, month):
 
-    user = getattr(g, "user", None)
+    try:
 
-    if not user:
-        return error("Login required", 401)
+        mentor_id = clean_id(mentor_id)
 
-    if user.get("role") == "admin":
+        month = clean_month(month)
 
-        expected = os.getenv("SALARY_ADMIN_TOKEN")
-        supplied = request.headers.get("X-Admin-Token")
+        mentor = get_mentor(mentor_id)
 
-        if not expected or supplied != expected:
-            return error("Admin authorization required", 401)
+        if not mentor:
 
-    elif user.get("role") == "mentor":
+            return failure(
+                "Invalid Mentor ID.",
+                404
+            )
 
-        if not mentor_can_access(mentor_id):
-            return error("Access denied", 403)
+        slip = slips_col.find_one({
 
-    else:
-        return error("Access denied", 403)
+            "mentorId": mentor_id,
 
-    slip = salary_slips_col.find_one({
-        "mentorId": mentor_id,
-        "month": month
-    })
+            "month": month
 
-    if not slip:
-        return error("Salary slip not found", 404)
+        })
 
-    slip = clean_document(slip)
+        if not slip:
 
-    response = jsonify({
-        "success": True,
-        "slip": slip
-    })
+            return failure(
+                "No salary slip found for this month.",
+                404
+            )
 
-    # JSON attachment download.
-    if request.args.get("download") == "1":
-
-        response.headers["Content-Disposition"] = (
-            f'attachment; filename="Salary_{mentor_id}_{month}.json"'
+        return success(
+            "Salary slip fetched successfully.",
+            {"slip": slip}
         )
 
-    return response
+    except ValueError as e:
+
+        return failure(str(e), 400)
+
+    except Exception as e:
+
+        return failure(str(e), 500)
+
+
+# ============================================================
+# 6. EDIT EXISTING SALARY SLIP
+# ============================================================
+
+@compensation_bp.route(
+    "/slip/<mentor_id>/<month>",
+    methods=["PUT"]
+)
+def update_salary_slip(mentor_id, month):
+
+    try:
+
+        mentor_id = clean_id(mentor_id)
+
+        month = clean_month(month)
+
+        mentor = get_mentor(mentor_id)
+
+        if not mentor:
+
+            return failure(
+                "Invalid Mentor ID.",
+                404
+            )
+
+        existing = slips_col.find_one({
+
+            "mentorId": mentor_id,
+
+            "month": month
+
+        })
+
+        if not existing:
+
+            return failure(
+                "Salary slip does not exist. Create it first using the issue salary option.",
+                404
+            )
+
+        data = request.get_json(silent=True) or {}
+
+        # Prevent changing slip identity through request body.
+
+        if (
+            data.get("mentorId")
+            and clean_id(data.get("mentorId")) != mentor_id
+        ):
+
+            return failure(
+                "Mentor ID cannot be changed."
+            )
+
+        if (
+            data.get("month")
+            and clean_month(data.get("month")) != month
+        ):
+
+            return failure(
+                "Salary month cannot be changed."
+            )
+
+        salary_data = validate_salary_data(data)
+
+        update_fields = {
+
+            "attendance": salary_data["attendance"],
+
+            "earnings": salary_data["earnings"],
+
+            "deductions": salary_data["deductions"],
+
+            "grossEarnings": salary_data["grossEarnings"],
+
+            "totalDeductions": salary_data["totalDeductions"],
+
+            "netTransfer": salary_data["netTransfer"],
+
+            "updatedAt": now()
+
+        }
+
+        optional_fields = [
+
+            "status",
+
+            "paymentDate",
+
+            "paymentMode",
+
+            "remarks"
+
+        ]
+
+        for field in optional_fields:
+
+            if field in data:
+
+                update_fields[field] = data[field]
+
+        slips_col.update_one(
+
+            {
+                "mentorId": mentor_id,
+                "month": month
+            },
+
+            {
+                "$set": update_fields
+            }
+
+        )
+
+        updated_slip = slips_col.find_one({
+
+            "mentorId": mentor_id,
+
+            "month": month
+
+        })
+
+        return success(
+            "Existing salary slip updated successfully.",
+            {"slip": updated_slip}
+        )
+
+    except ValueError as e:
+
+        return failure(str(e), 400)
+
+    except Exception as e:
+
+        return failure(str(e), 500)
+
+
+# ============================================================
+# 7. BULK SALARY DISTRIBUTION
+# ============================================================
+
+@compensation_bp.route(
+    "/bulk",
+    methods=["POST"]
+)
+def bulk_salary_distribution():
+
+    try:
+
+        data = request.get_json(silent=True) or {}
+
+        mentor_ids = data.get("mentorIds", [])
+
+        month = clean_month(
+            data.get("month")
+        )
+
+        if not isinstance(mentor_ids, list) or not mentor_ids:
+
+            return failure(
+                "At least one Mentor ID is required."
+            )
+
+        results = {
+
+            "created": [],
+
+            "failed": []
+
+        }
+
+        for raw_id in mentor_ids:
+
+            mentor_id = clean_id(raw_id)
+
+            try:
+
+                mentor = get_mentor(mentor_id)
+
+                if not mentor:
+
+                    raise ValueError(
+                        "Invalid Mentor ID"
+                    )
+
+                existing = slips_col.find_one({
+
+                    "mentorId": mentor_id,
+
+                    "month": month
+
+                })
+
+                if existing:
+
+                    raise ValueError(
+                        "Salary slip already exists"
+                    )
+
+                profile = profiles_col.find_one(
+                    {"mentorId": mentor_id},
+                    {"_id": 0}
+                ) or {}
+
+                employee = get_employee_data(mentor)
+
+                employee.update(profile)
+
+                salary_data = validate_salary_data(data)
+
+                slip = {
+
+                    "mentorId": mentor_id,
+
+                    "month": month,
+
+                    "employee": employee,
+
+                    **salary_data,
+
+                    "status": data.get(
+                        "status",
+                        "issued"
+                    ),
+
+                    "paymentDate": data.get(
+                        "paymentDate"
+                    ),
+
+                    "paymentMode": data.get(
+                        "paymentMode",
+                        "Bank Transfer"
+                    ),
+
+                    "remarks": data.get(
+                        "remarks",
+                        ""
+                    ),
+
+                    "createdAt": now(),
+
+                    "updatedAt": now()
+
+                }
+
+                result = slips_col.insert_one(slip)
+
+                results["created"].append({
+
+                    "mentorId": mentor_id,
+
+                    "slipId": str(result.inserted_id)
+
+                })
+
+            except DuplicateKeyError:
+
+                results["failed"].append({
+
+                    "mentorId": mentor_id,
+
+                    "reason": "Salary slip already exists"
+
+                })
+
+            except Exception as e:
+
+                results["failed"].append({
+
+                    "mentorId": mentor_id,
+
+                    "reason": str(e)
+
+                })
+
+        return success(
+            "Bulk salary distribution completed.",
+            {"results": results}
+        )
+
+    except ValueError as e:
+
+        return failure(str(e), 400)
+
+    except Exception as e:
+
+        return failure(str(e), 500)
+
+
+# ============================================================
+# 8. BULK FIXED SALARY DISTRIBUTION
+# ============================================================
+
+@compensation_bp.route(
+    "/bulk-fixed",
+    methods=["POST"]
+)
+def bulk_fixed_salary_distribution():
+
+    try:
+
+        data = request.get_json(silent=True) or {}
+
+        mentor_ids = data.get("mentorIds", [])
+
+        month = clean_month(
+            data.get("month")
+        )
+
+        if not isinstance(mentor_ids, list) or not mentor_ids:
+
+            return failure(
+                "Mentor IDs are required."
+            )
+
+        template_id = data.get("templateId")
+
+        template = None
+
+        if template_id:
+
+            try:
+
+                template = templates_col.find_one({
+                    "_id": ObjectId(template_id)
+                })
+
+            except Exception:
+
+                return failure(
+                    "Invalid salary template ID."
+                )
+
+        if not template:
+
+            template = {
+
+                "earnings": data.get("earnings", []),
+
+                "deductions": data.get("deductions", []),
+
+                "attendance": data.get("attendance", {})
+
+            }
+
+        results = {
+
+            "created": [],
+
+            "failed": []
+
+        }
+
+        for raw_id in mentor_ids:
+
+            mentor_id = clean_id(raw_id)
+
+            try:
+
+                mentor = get_mentor(mentor_id)
+
+                if not mentor:
+
+                    raise ValueError(
+                        "Invalid Mentor ID"
+                    )
+
+                existing = slips_col.find_one({
+
+                    "mentorId": mentor_id,
+
+                    "month": month
+
+                })
+
+                if existing:
+
+                    raise ValueError(
+                        "Salary slip already exists"
+                    )
+
+                profile = profiles_col.find_one(
+                    {"mentorId": mentor_id},
+                    {"_id": 0}
+                ) or {}
+
+                employee = get_employee_data(mentor)
+
+                employee.update(profile)
+
+                salary_data = validate_salary_data({
+
+                    "earnings": copy.deepcopy(
+                        template.get("earnings", [])
+                    ),
+
+                    "deductions": copy.deepcopy(
+                        template.get("deductions", [])
+                    ),
+
+                    "attendance": copy.deepcopy(
+                        data.get(
+                            "attendance",
+                            template.get("attendance", {})
+                        )
+                    )
+
+                })
+
+                slip = {
+
+                    "mentorId": mentor_id,
+
+                    "month": month,
+
+                    "employee": employee,
+
+                    **salary_data,
+
+                    "status": data.get(
+                        "status",
+                        "issued"
+                    ),
+
+                    "paymentDate": data.get(
+                        "paymentDate"
+                    ),
+
+                    "paymentMode": data.get(
+                        "paymentMode",
+                        "Bank Transfer"
+                    ),
+
+                    "remarks": data.get(
+                        "remarks",
+                        "Fixed salary distribution"
+                    ),
+
+                    "createdAt": now(),
+
+                    "updatedAt": now()
+
+                }
+
+                result = slips_col.insert_one(slip)
+
+                results["created"].append({
+
+                    "mentorId": mentor_id,
+
+                    "slipId": str(result.inserted_id)
+
+                })
+
+            except DuplicateKeyError:
+
+                results["failed"].append({
+
+                    "mentorId": mentor_id,
+
+                    "reason": "Salary slip already exists"
+
+                })
+
+            except Exception as e:
+
+                results["failed"].append({
+
+                    "mentorId": mentor_id,
+
+                    "reason": str(e)
+
+                })
+
+        return success(
+            "Fixed salary distribution completed.",
+            {"results": results}
+        )
+
+    except ValueError as e:
+
+        return failure(str(e), 400)
+
+    except Exception as e:
+
+        return failure(str(e), 500)
 
 
 # ============================================================
@@ -826,276 +1261,363 @@ def get_salary_slip(mentor_id, month):
 )
 def salary_history(mentor_id):
 
-    user = getattr(g, "user", None)
+    try:
 
-    if not user:
-        return error("Login required", 401)
+        mentor_id = clean_id(mentor_id)
 
-    if user.get("role") == "admin":
+        mentor = get_mentor(mentor_id)
 
-        expected = os.getenv("SALARY_ADMIN_TOKEN")
-        supplied = request.headers.get("X-Admin-Token")
+        if not mentor:
 
-        if not expected or supplied != expected:
-            return error("Admin authorization required", 401)
+            return failure(
+                "Invalid Mentor ID.",
+                404
+            )
 
-    elif user.get("role") == "mentor":
+        history = list(
 
-        if not mentor_can_access(mentor_id):
-            return error("Access denied", 403)
+            slips_col.find({
 
-    else:
-        return error("Access denied", 403)
+                "mentorId": mentor_id
 
-    slips = list(
-        salary_slips_col.find(
-            {"mentorId": mentor_id},
+            }).sort(
+
+                "month",
+                -1
+
+            )
+
+        )
+
+        return success(
+            "Salary history fetched.",
             {
-                "mentorId": 1,
-                "month": 1,
-                "year": 1,
-                "grossEarnings": 1,
-                "grossDeductions": 1,
-                "netTransfer": 1,
-                "status": 1,
-                "createdAt": 1
+                "history": history,
+                "totalSlips": len(history)
             }
-        ).sort("month", -1)
-    )
+        )
 
-    return jsonify({
-        "success": True,
-        "mentorId": mentor_id,
-        "totalSlips": len(slips),
-        "history": clean_document(slips)
-    })
+    except Exception as e:
+
+        return failure(str(e), 500)
 
 
 # ============================================================
-# 10. ADMIN: GET ALL SALARY SLIPS FOR A MONTH
+# 10. ALL EMPLOYEE SALARY RECORDS
 # ============================================================
 
 @compensation_bp.route(
-    "/month/<month>",
+    "/all",
     methods=["GET"]
 )
-@admin_required
-def get_monthly_salary_records(month):
-
-    if not valid_month(month):
-        return error("Invalid month format")
-
-    slips = list(
-        salary_slips_col.find({
-            "month": month
-        }).sort("employee.name", 1)
-    )
-
-    return jsonify({
-        "success": True,
-        "month": month,
-        "total": len(slips),
-        "slips": clean_document(slips)
-    })
-
-
-# ============================================================
-# 11. UPDATE EXISTING SALARY SLIP
-# ============================================================
-
-@compensation_bp.route(
-    "/slip/<mentor_id>/<month>",
-    methods=["PUT"]
-)
-@admin_required
-def update_salary_slip(mentor_id, month):
-
-    data = get_json()
-
-    existing = salary_slips_col.find_one({
-        "mentorId": mentor_id,
-        "month": month
-    })
-
-    if not existing:
-        return error("Salary slip not found", 404)
+def all_salary_records():
 
     try:
-        updated = build_salary_slip(
-            mentor_id,
-            month,
-            data
+
+        month = request.args.get("month")
+
+        query = {}
+
+        if month:
+
+            month = clean_month(month)
+
+            query["month"] = month
+
+        records = list(
+
+            slips_col.find(
+                query
+            ).sort(
+                "createdAt",
+                -1
+            )
+
         )
 
-        updated["createdAt"] = existing.get("createdAt")
-        updated["updatedAt"] = now()
-        updated["createdBy"] = existing.get("createdBy", "admin")
-
-        salary_slips_col.replace_one(
-            {"_id": existing["_id"]},
-            updated
+        return success(
+            "Salary records fetched.",
+            {
+                "records": records,
+                "count": len(records)
+            }
         )
 
-        return jsonify({
-            "success": True,
-            "message": "Salary slip updated successfully",
-            "slip": clean_document(updated)
-        })
+    except ValueError as e:
 
-    except ValueError as exc:
-        return error(str(exc))
+        return failure(str(e), 400)
+
+    except Exception as e:
+
+        return failure(str(e), 500)
 
 
 # ============================================================
-# 12. DELETE SALARY SLIP
+# 11. DELETE SALARY SLIP
 # ============================================================
 
 @compensation_bp.route(
     "/slip/<mentor_id>/<month>",
     methods=["DELETE"]
 )
-@admin_required
 def delete_salary_slip(mentor_id, month):
 
-    result = salary_slips_col.delete_one({
-        "mentorId": mentor_id,
-        "month": month
-    })
+    try:
 
-    if result.deleted_count == 0:
-        return error("Salary slip not found", 404)
+        mentor_id = clean_id(mentor_id)
 
-    return jsonify({
-        "success": True,
-        "message": "Salary slip deleted successfully"
-    })
+        month = clean_month(month)
 
+        result = slips_col.delete_one({
 
-# ============================================================
-# 13. DELETE ALL COMPENSATION DATA OF A MENTOR
-# ============================================================
+            "mentorId": mentor_id,
 
-def delete_mentor_compensation(mentor_id):
-    """
-    Import and call this helper from the existing mentor
-    deletion route BEFORE deleting the mentor account.
-    """
+            "month": month
 
-    profiles_deleted = salary_profiles_col.delete_many({
-        "mentorId": mentor_id
-    })
+        })
 
-    slips_deleted = salary_slips_col.delete_many({
-        "mentorId": mentor_id
-    })
+        if result.deleted_count == 0:
 
-    return {
-        "profilesDeleted": profiles_deleted.deleted_count,
-        "salarySlipsDeleted": slips_deleted.deleted_count
-    }
+            return failure(
+                "Salary slip not found.",
+                404
+            )
+
+        return success(
+            "Salary slip deleted successfully."
+        )
+
+    except ValueError as e:
+
+        return failure(str(e), 400)
+
+    except Exception as e:
+
+        return failure(str(e), 500)
 
 
 # ============================================================
-# 14. SAVE COMMON SALARY TEMPLATE
-# ============================================================
-
-@compensation_bp.route(
-    "/template",
-    methods=["POST"]
-)
-@admin_required
-def save_salary_template():
-
-    data = get_json()
-
-    template_name = str(
-        data.get("templateName", "")
-    ).strip()
-
-    if not template_name:
-        return error("Template name is required")
-
-    template = {
-        "templateName": template_name,
-        "attendance": data.get("attendance", {}),
-        "earnings": data.get("earnings", []),
-        "deductions": data.get("deductions", []),
-        "updatedAt": now()
-    }
-
-    salary_templates_col.update_one(
-        {"templateName": template_name},
-        {
-            "$set": template,
-            "$setOnInsert": {
-                "createdAt": now()
-            }
-        },
-        upsert=True
-    )
-
-    return jsonify({
-        "success": True,
-        "message": "Salary template saved successfully"
-    })
-
-
-# ============================================================
-# 15. GET SAVED SALARY TEMPLATES
+# 12. SALARY TEMPLATES
 # ============================================================
 
 @compensation_bp.route(
     "/templates",
-    methods=["GET"]
+    methods=["GET", "POST"]
 )
-@admin_required
-def get_salary_templates():
+def salary_templates():
 
-    templates = list(
-        salary_templates_col.find({}).sort(
-            "updatedAt",
-            -1
+    try:
+
+        if request.method == "GET":
+
+            templates = list(
+                templates_col.find().sort(
+                    "createdAt",
+                    -1
+                )
+            )
+
+            return success(
+                "Salary templates fetched.",
+                {"templates": templates}
+            )
+
+        data = request.get_json(silent=True) or {}
+
+        template_name = str(
+            data.get("templateName", "")
+        ).strip()
+
+        if not template_name:
+
+            return failure(
+                "Template name is required."
+            )
+
+        template = {
+
+            "templateName": template_name,
+
+            "description": data.get(
+                "description",
+                ""
+            ),
+
+            "earnings": normalize_components(
+                data.get("earnings", [])
+            ),
+
+            "deductions": normalize_components(
+                data.get("deductions", [])
+            ),
+
+            "attendance": validate_attendance(
+                data.get("attendance", {})
+            ),
+
+            "updatedAt": now()
+
+        }
+
+        existing = templates_col.find_one({
+            "templateName": template_name
+        })
+
+        if existing:
+
+            templates_col.update_one(
+
+                {"_id": existing["_id"]},
+
+                {"$set": template}
+
+            )
+
+            template["_id"] = existing["_id"]
+
+            message = "Salary template updated."
+
+        else:
+
+            template["createdAt"] = now()
+
+            result = templates_col.insert_one(
+                template
+            )
+
+            template["_id"] = result.inserted_id
+
+            message = "Salary template created."
+
+        return success(
+            message,
+            {"template": template}
         )
-    )
 
-    return jsonify({
-        "success": True,
-        "templates": clean_document(templates)
+    except DuplicateKeyError:
+
+        return failure(
+            "Template already exists.",
+            409
+        )
+
+    except ValueError as e:
+
+        return failure(str(e), 400)
+
+    except Exception as e:
+
+        return failure(str(e), 500)
+
+
+# ============================================================
+# 13. DELETE SALARY TEMPLATE
+# ============================================================
+
+@compensation_bp.route(
+    "/templates/<template_id>",
+    methods=["DELETE"]
+)
+def delete_salary_template(template_id):
+
+    try:
+
+        try:
+
+            object_id = ObjectId(template_id)
+
+        except Exception:
+
+            return failure(
+                "Invalid template ID."
+            )
+
+        result = templates_col.delete_one({
+            "_id": object_id
+        })
+
+        if result.deleted_count == 0:
+
+            return failure(
+                "Template not found.",
+                404
+            )
+
+        return success(
+            "Salary template deleted."
+        )
+
+    except Exception as e:
+
+        return failure(str(e), 500)
+
+
+# ============================================================
+# 14. DELETE MENTOR COMPENSATION DATA
+# ============================================================
+
+def delete_mentor_compensation(mentor_id):
+
+    """
+    Call this helper when a mentor is deleted.
+
+    Deletes:
+    - Compensation profile
+    - All monthly salary slips
+    """
+
+    mentor_id = clean_id(mentor_id)
+
+    if not mentor_id:
+
+        return False
+
+    profiles_col.delete_many({
+
+        "mentorId": mentor_id
+
     })
 
+    slips_col.delete_many({
+
+        "mentorId": mentor_id
+
+    })
+
+    return True
+
 
 # ============================================================
-# 16. INITIALIZE DATABASE INDEXES
+# 15. DELETE COMPENSATION PROFILE
 # ============================================================
 
-def initialize_compensation_indexes():
+@compensation_bp.route(
+    "/profile/<mentor_id>",
+    methods=["DELETE"]
+)
+def delete_compensation_profile(mentor_id):
 
-    # One salary slip per mentor per month.
-    salary_slips_col.create_index(
-        [
-            ("mentorId", 1),
-            ("month", 1)
-        ],
-        unique=True,
-        name="unique_mentor_month_salary"
-    )
+    try:
 
-    salary_profiles_col.create_index(
-        "mentorId",
-        unique=True,
-        name="unique_salary_profile_mentor"
-    )
+        mentor_id = clean_id(mentor_id)
 
-    salary_templates_col.create_index(
-        "templateName",
-        unique=True,
-        name="unique_salary_template_name"
-    )
+        result = profiles_col.delete_one({
 
+            "mentorId": mentor_id
 
-try:
-    initialize_compensation_indexes()
-    print("Compensation indexes initialized")
+        })
 
-except Exception as exc:
-    print("Compensation index initialization error:", exc)
+        if result.deleted_count == 0:
+
+            return failure(
+                "Compensation profile not found.",
+                404
+            )
+
+        return success(
+            "Compensation profile deleted. Salary slips are preserved."
+        )
+
+    except Exception as e:
+
+        return failure(str(e), 500)
