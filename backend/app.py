@@ -84,7 +84,9 @@ connect(db="college_db", alias="db2", host=os.getenv("MONGO_COLLEGE_DB_URI"))
 client = MongoClient(os.getenv("MONGO_COLLEGE_DB_URI"))
 db = client.get_database("college_db", write_concern=WriteConcern(w=1))  # safe write
 students_collection = db["students"]
-
+# Initialize Organizational Hierarchy with existing MongoDB
+init_hierarchy(db)
+print("✅ Hierarchy database initialized successfully")
 # Ensure indexes for faster queries (no majority issue)
 students_collection.create_index("enrollment", background=True)
 students_collection.create_index("branch", background=True)
@@ -114,7 +116,7 @@ for bp in [
       forms_bp, bus_track_bp, per_message_bp, razorpay_bp,
     missing_bp, receipt_bp, canteen_bp, auth_bp, timetable_bp,  signup_bp,
 verification_bp, sme_bp, otp_bp,
-admin_verification_bp, email_bp,hierarchy_bp,
+admin_verification_bp, email_bp, hierarchy_bp,
 cleanup_bp, robot_bp, student_profile_bp,ox_bp
 ]:
     app.register_blueprint(bp)
