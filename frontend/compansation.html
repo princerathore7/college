@@ -575,11 +575,55 @@ td input.component-name {
         font-size: 19px;
     }
 }
+
+</style>
+<style>
+    body {
+        visibility: hidden;
+    }
+
+    #accessDenied {
+        display: none;
+        min-height: 100vh;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        text-align: center;
+        padding: 25px;
+        background: #f5f6fa;
+        font-family: Arial, sans-serif;
+    }
+
+    #accessDenied h1 {
+        color: #dc3545;
+        font-size: 30px;
+        margin-bottom: 12px;
+    }
+
+    #accessDenied p {
+        color: #666;
+        font-size: 16px;
+    }
+
+    #accessDenied .icon {
+        font-size: 65px;
+        margin-bottom: 15px;
+    }
 </style>
 </head>
 
 <body>
+<div id="accessDenied">
+    <div class="icon">🔒</div>
 
+    <h1>Access Denied</h1>
+
+    <p>
+        This page is inaccessible to you.
+        <br>
+        Only Finance designated employees are allowed to access this page.
+    </p>
+</div>
 <div class="layout">
 
 <!-- SIDEBAR -->
@@ -1867,7 +1911,61 @@ td input.component-name {
 
 </div>
 
+<script>
+(function () {
 
+    let designation = "";
+
+    try {
+
+        const profile = JSON.parse(
+            localStorage.getItem("studentProfile") || "{}"
+        );
+
+        designation =
+            profile.designation ||
+            profile.Designation ||
+            profile.role ||
+            profile.position ||
+            localStorage.getItem("designation") ||
+            "";
+
+    } catch (error) {
+
+        console.error("Designation detection error:", error);
+
+    }
+
+    const isFinance = String(designation)
+        .toLowerCase()
+        .includes("finance");
+
+    if (isFinance) {
+
+        // Finance employees can access this page.
+        document.body.style.visibility = "visible";
+
+        console.log("Finance Access Granted:", designation);
+
+    } else {
+
+        // Block all other users.
+        document.body.innerHTML = "";
+
+        document.body.appendChild(
+            document.getElementById("accessDenied")
+        );
+
+        document.getElementById("accessDenied").style.display = "flex";
+
+        document.body.style.visibility = "visible";
+
+        console.log("Access Denied:", designation);
+
+    }
+
+})();
+</script>
 <script>
 
 /* =========================================================
