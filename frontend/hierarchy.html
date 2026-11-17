@@ -1,38 +1,49 @@
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Organizational Hierarchy | Authority Panel</title>
 
-<title>Institutional Organizational Hierarchy</title>
+<script src="https://unpkg.com/lucide@latest"></script>
 
 <style>
+:root{
+    --primary:#4f46e5;
+    --primary-light:#eef2ff;
+    --bg:#f5f7fb;
+    --card:#ffffff;
+    --text:#172033;
+    --muted:#718096;
+    --border:#e5e9f2;
+    --green:#16a34a;
+    --red:#dc2626;
+    --shadow:0 5px 22px rgba(15,23,42,.06);
+}
 
 *{
+    box-sizing:border-box;
     margin:0;
     padding:0;
-    box-sizing:border-box;
 }
 
 body{
-    font-family:Arial, sans-serif;
-    background:#f4f6fa;
-    color:#1e293b;
+    font-family:Inter,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
 }
 
-/* =========================
-HEADER
-========================= */
+/* HEADER */
 
 .header{
-    background:#ffffff;
+    background:#fff;
     padding:18px 30px;
     display:flex;
     align-items:center;
     justify-content:space-between;
-    box-shadow:0 2px 10px rgba(0,0,0,0.06);
+    border-bottom:1px solid var(--border);
+    box-shadow:0 2px 8px rgba(0,0,0,.03);
     position:sticky;
     top:0;
     z-index:100;
@@ -41,23 +52,27 @@ HEADER
 .header-left{
     display:flex;
     align-items:center;
-    gap:15px;
+    gap:13px;
 }
 
 .logo{
-    width:45px;
-    height:45px;
-    object-fit:contain;
+    width:42px;
+    height:42px;
+    border-radius:12px;
+    background:var(--primary-light);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--primary);
 }
 
-.header-title h2{
-    font-size:20px;
-    color:#172554;
+.header h2{
+    font-size:19px;
 }
 
-.header-title p{
+.header p{
+    color:var(--muted);
     font-size:12px;
-    color:#64748b;
     margin-top:4px;
 }
 
@@ -66,613 +81,633 @@ HEADER
     gap:10px;
 }
 
-button{
+/* BUTTONS */
+
+.btn{
+    border:1px solid var(--border);
+    background:white;
+    padding:10px 15px;
+    border-radius:9px;
     cursor:pointer;
-    border:none;
-    border-radius:7px;
-    padding:10px 16px;
-    font-size:13px;
     font-weight:600;
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-size:13px;
 }
 
-.back-btn{
-    background:#e2e8f0;
-    color:#334155;
+.btn:hover{
+    background:#f8fafc;
 }
 
-.refresh-btn{
-    background:#2563eb;
+.btn-primary{
+    background:var(--primary);
     color:white;
+    border-color:var(--primary);
 }
 
-button:hover{
-    opacity:0.85;
+.btn-primary:hover{
+    background:#4338ca;
 }
 
-/* =========================
-MAIN CONTAINER
-========================= */
+/* MAIN */
 
 .container{
-    max-width:1450px;
+    max-width:1500px;
     margin:auto;
-    padding:25px;
+    padding:28px;
 }
 
-/* =========================
-PAGE INTRO
-========================= */
-
-.page-intro{
-    margin-bottom:25px;
+.page-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:22px;
+    gap:15px;
 }
 
-.page-intro h1{
+.page-title h1{
     font-size:25px;
-    color:#172554;
 }
 
-.page-intro p{
-    color:#64748b;
-    font-size:14px;
+.page-title p{
+    color:var(--muted);
+    font-size:13px;
     margin-top:7px;
 }
 
-/* =========================
-STATISTICS
-========================= */
+/* STATS */
 
 .stats{
     display:grid;
     grid-template-columns:repeat(4,1fr);
-    gap:18px;
+    gap:16px;
     margin-bottom:25px;
 }
 
 .stat-card{
     background:white;
-    padding:20px;
-    border-radius:12px;
-    border:1px solid #e2e8f0;
-    box-shadow:0 3px 10px rgba(0,0,0,0.03);
+    border:1px solid var(--border);
+    border-radius:13px;
+    padding:19px;
+    box-shadow:var(--shadow);
 }
 
-.stat-card p{
-    color:#64748b;
-    font-size:13px;
+.stat-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.stat-icon{
+    width:39px;
+    height:39px;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
 
 .stat-card h2{
     font-size:27px;
-    margin-top:10px;
-    color:#172554;
+    margin-top:13px;
 }
 
-/* =========================
-TOOLBAR
-========================= */
+.stat-card p{
+    color:var(--muted);
+    font-size:13px;
+    margin-top:4px;
+}
+
+/* TOOLBAR */
 
 .toolbar{
     background:white;
-    padding:18px;
-    border-radius:12px;
-    border:1px solid #e2e8f0;
+    border:1px solid var(--border);
+    border-radius:13px;
+    padding:16px;
     display:flex;
+    gap:12px;
     align-items:center;
     justify-content:space-between;
-    gap:15px;
-    margin-bottom:20px;
     flex-wrap:wrap;
+    margin-bottom:25px;
 }
 
 .search-box{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:#f8fafc;
+    border:1px solid var(--border);
+    border-radius:9px;
+    padding:11px 13px;
     flex:1;
-    min-width:230px;
+    min-width:220px;
+    max-width:420px;
 }
 
 .search-box input{
-    width:100%;
-    padding:12px 15px;
-    border:1px solid #cbd5e1;
-    border-radius:7px;
+    border:none;
     outline:none;
-    font-size:14px;
-}
-
-.search-box input:focus{
-    border-color:#2563eb;
+    background:transparent;
+    width:100%;
+    font-size:13px;
 }
 
 .toolbar-actions{
     display:flex;
-    gap:8px;
+    gap:9px;
     flex-wrap:wrap;
 }
 
-.expand-btn{
-    background:#eff6ff;
-    color:#1d4ed8;
-}
-
-.collapse-btn{
-    background:#f1f5f9;
-    color:#334155;
-}
-
-/* =========================
-HIERARCHY SECTION
-========================= */
+/* SECTION */
 
 .section{
     background:white;
-    border:1px solid #e2e8f0;
-    border-radius:12px;
-    padding:25px;
+    border:1px solid var(--border);
+    border-radius:15px;
+    padding:22px;
     margin-bottom:25px;
+    box-shadow:var(--shadow);
 }
 
 .section-heading{
     display:flex;
-    justify-content:space-between;
     align-items:center;
+    justify-content:space-between;
     margin-bottom:25px;
-    flex-wrap:wrap;
-    gap:10px;
 }
 
 .section-heading h2{
-    font-size:19px;
-    color:#172554;
+    font-size:18px;
 }
 
-.section-heading span{
+.section-heading p{
+    color:var(--muted);
     font-size:12px;
-    color:#64748b;
+    margin-top:5px;
 }
 
-/* =========================
-TREE STRUCTURE
-========================= */
+/* HIERARCHY TREE */
+
+.tree-container{
+    overflow-x:auto;
+    padding:10px 5px 30px;
+}
 
 .tree{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    min-width:max-content;
+}
+
+.tree-level{
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    gap:35px;
+    position:relative;
     width:100%;
 }
 
 .tree-node{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
     position:relative;
-    margin-bottom:15px;
+    padding-top:30px;
 }
 
-.tree-card{
-    background:#ffffff;
-    border:1px solid #dbe3ef;
-    border-left:5px solid #64748b;
-    border-radius:10px;
-    padding:15px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:15px;
-    transition:0.2s;
+.tree-node:first-child{
+    padding-top:0;
 }
-
-.tree-card:hover{
-    box-shadow:0 4px 15px rgba(0,0,0,0.07);
-    transform:translateY(-1px);
-}
-
-.node-left{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    min-width:0;
-}
-
-.node-icon{
-    width:43px;
-    height:43px;
-    border-radius:10px;
-    background:#eff6ff;
-    color:#2563eb;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-size:19px;
-    flex-shrink:0;
-}
-
-.node-info{
-    min-width:0;
-}
-
-.node-info h3{
-    font-size:14px;
-    color:#1e293b;
-    overflow-wrap:anywhere;
-}
-
-.node-info p{
-    font-size:12px;
-    color:#64748b;
-    margin-top:5px;
-}
-
-.node-meta{
-    display:flex;
-    gap:7px;
-    align-items:center;
-    flex-wrap:wrap;
-    justify-content:flex-end;
-}
-
-.badge{
-    font-size:10px;
-    font-weight:700;
-    padding:5px 8px;
-    border-radius:5px;
-    background:#eff6ff;
-    color:#1d4ed8;
-}
-
-.status-badge{
-    background:#dcfce7;
-    color:#15803d;
-}
-
-.auto-badge{
-    background:#fef3c7;
-    color:#92400e;
-}
-
-.node-actions{
-    display:flex;
-    align-items:center;
-    gap:7px;
-}
-
-.toggle-btn{
-    background:#eff6ff;
-    color:#2563eb;
-    padding:7px 11px;
-    min-width:34px;
-}
-
-.children-count{
-    font-size:11px;
-    color:#64748b;
-}
-
-/* =========================
-DESIGNATION COLORS
-========================= */
-
-.level-1{
-    border-left-color:#7c3aed;
-}
-
-.level-2{
-    border-left-color:#2563eb;
-}
-
-.level-3{
-    border-left-color:#0891b2;
-}
-
-.level-4{
-    border-left-color:#059669;
-}
-
-.level-5{
-    border-left-color:#d97706;
-}
-
-.level-6{
-    border-left-color:#64748b;
-}
-
-.level-99{
-    border-left-color:#94a3b8;
-}
-
-/* =========================
-CHILDREN
-========================= */
 
 .tree-children{
-    margin-left:30px;
-    padding-left:20px;
-    border-left:2px dashed #cbd5e1;
-    margin-top:12px;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    gap:28px;
+    position:relative;
+    padding-top:32px;
 }
 
-.tree-children.collapsed{
+/* CONNECTOR LINES */
+
+.tree-node.has-children > .tree-children::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:50%;
+    height:20px;
+    width:2px;
+    background:#cbd5e1;
+}
+
+.tree-children > .tree-node::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:50%;
+    height:15px;
+    width:2px;
+    background:#cbd5e1;
+}
+
+.tree-children > .tree-node:not(:only-child)::after{
+    content:"";
+    position:absolute;
+    top:0;
+    height:2px;
+    background:#cbd5e1;
+    left:50%;
+    width:calc(100% + 28px);
+}
+
+.tree-children > .tree-node:first-child::after{
+    left:50%;
+    width:50%;
+}
+
+.tree-children > .tree-node:last-child::after{
+    left:0;
+    width:50%;
+}
+
+.tree-children > .tree-node:only-child::after{
     display:none;
 }
 
-/* =========================
-UNASSIGNED
-========================= */
+/* PROFILE CARD */
 
-.unassigned-card{
-    background:#fffaf0;
-    border:1px solid #fde68a;
-    border-radius:9px;
-    padding:14px;
-    margin-bottom:10px;
-    display:flex;
-    justify-content:space-between;
-    gap:10px;
+.profile-card{
+    width:245px;
+    background:white;
+    border:1px solid var(--border);
+    border-radius:13px;
+    overflow:hidden;
+    box-shadow:0 4px 15px rgba(0,0,0,.05);
+    transition:.2s;
+    position:relative;
+    z-index:2;
 }
 
-.unassigned-card h4{
-    font-size:13px;
+.profile-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 10px 25px rgba(0,0,0,.10);
+    border-color:#c7d2fe;
+}
+
+.card-top{
+    height:5px;
+    background:var(--primary);
+}
+
+.card-body{
+    padding:15px;
+    text-align:center;
+}
+
+.avatar{
+    width:52px;
+    height:52px;
+    border-radius:50%;
+    background:#eef2ff;
+    color:var(--primary);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:0 auto 10px;
+    font-weight:800;
+    font-size:18px;
+    border:3px solid white;
+    box-shadow:0 0 0 1px var(--border);
+}
+
+.profile-card h3{
+    font-size:14px;
+    margin-bottom:5px;
+    overflow-wrap:anywhere;
+}
+
+.designation{
+    display:inline-block;
+    padding:5px 9px;
+    border-radius:20px;
+    background:#eef2ff;
+    color:#4338ca;
+    font-size:10px;
+    font-weight:700;
+    margin-bottom:11px;
+}
+
+.details{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+    text-align:left;
+    border-top:1px solid var(--border);
+    padding-top:11px;
+}
+
+.detail{
+    display:flex;
+    gap:8px;
+    color:var(--muted);
+    font-size:11px;
+    align-items:center;
+    overflow-wrap:anywhere;
+}
+
+.detail i{
+    width:13px;
+    height:13px;
+    flex-shrink:0;
+}
+
+.card-footer{
+    border-top:1px solid var(--border);
+    padding:9px 12px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.status{
+    font-size:10px;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    gap:5px;
+}
+
+.status::before{
+    content:"";
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:var(--green);
+}
+
+.status.inactive::before{
+    background:var(--red);
+}
+
+.member-id{
+    font-size:10px;
+    color:var(--muted);
+}
+
+.toggle-btn{
+    border:1px solid var(--border);
+    background:white;
+    border-radius:20px;
+    padding:5px 11px;
+    cursor:pointer;
+    color:var(--primary);
+    font-size:11px;
+    font-weight:700;
+    margin-top:10px;
+    display:flex;
+    align-items:center;
+    gap:5px;
+}
+
+.toggle-btn:hover{
+    background:var(--primary-light);
+}
+
+/* DIFFERENT DESIGNATIONS */
+
+.level-1 .card-top{background:#7c3aed;}
+.level-2 .card-top{background:#2563eb;}
+.level-3 .card-top{background:#0891b2;}
+.level-4 .card-top{background:#059669;}
+.level-5 .card-top{background:#d97706;}
+.level-6 .card-top{background:#64748b;}
+
+/* UNASSIGNED */
+
+.unassigned-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(235px,1fr));
+    gap:15px;
+}
+
+.unassigned-card{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:16px;
+}
+
+.unassigned-card h3{
+    font-size:14px;
+    margin-bottom:7px;
 }
 
 .unassigned-card p{
-    font-size:11px;
-    color:#92400e;
+    color:var(--muted);
+    font-size:12px;
     margin-top:5px;
 }
 
-/* =========================
-EMPTY / LOADING
-========================= */
+/* EMPTY / LOADING */
 
-.loading,
-.empty-state,
-.error-state{
+.loading,.empty{
+    padding:50px 15px;
     text-align:center;
-    padding:45px 15px;
-    color:#64748b;
+    color:var(--muted);
+    font-size:14px;
 }
 
-.error-state{
+.error{
     color:#dc2626;
+    background:#fef2f2;
+    border:1px solid #fecaca;
+    border-radius:10px;
+    padding:15px;
+    margin:15px 0;
+    font-size:13px;
 }
 
-.spinner{
-    width:35px;
-    height:35px;
-    border:4px solid #e2e8f0;
-    border-top-color:#2563eb;
-    border-radius:50%;
-    animation:spin 0.8s linear infinite;
-    margin:0 auto 15px;
+.hidden{
+    display:none!important;
 }
 
-@keyframes spin{
-    to{
-        transform:rotate(360deg);
-    }
-}
-
-/* =========================
-LEGEND
-========================= */
-
-.legend{
-    display:flex;
-    gap:15px;
-    flex-wrap:wrap;
-    margin-top:20px;
-}
-
-.legend-item{
-    display:flex;
-    align-items:center;
-    gap:6px;
-    font-size:11px;
-    color:#64748b;
-}
-
-.legend-color{
-    width:10px;
-    height:10px;
-    border-radius:3px;
-}
-
-/* =========================
-RESPONSIVE
-========================= */
-
-@media(max-width:800px){
-
+@media(max-width:900px){
     .stats{
         grid-template-columns:repeat(2,1fr);
     }
+}
 
+@media(max-width:600px){
     .header{
-        padding:15px;
-        flex-wrap:wrap;
-        gap:15px;
+        padding:14px;
     }
 
-    .header-title h2{
-        font-size:16px;
+    .header p{
+        display:none;
     }
 
     .container{
         padding:15px;
     }
 
-    .section{
-        padding:15px;
+    .page-title{
+        align-items:flex-start;
+        flex-direction:column;
     }
-
-    .tree-children{
-        margin-left:10px;
-        padding-left:12px;
-    }
-
-}
-
-@media(max-width:500px){
 
     .stats{
-        grid-template-columns:1fr 1fr;
         gap:10px;
     }
 
     .stat-card{
-        padding:14px;
+        padding:13px;
     }
 
     .stat-card h2{
         font-size:22px;
     }
 
-    .tree-card{
-        align-items:flex-start;
-        flex-direction:column;
+    .toolbar{
+        align-items:stretch;
     }
 
-    .node-meta{
-        justify-content:flex-start;
+    .search-box{
+        max-width:none;
     }
 
-    .toolbar-actions{
-        width:100%;
+    .toolbar-actions .btn{
+        flex:1;
+        justify-content:center;
     }
 
+    .section{
+        padding:15px;
+    }
 }
-
 </style>
-
 </head>
-
 
 <body>
 
-
-<!-- =========================
-HEADER
-========================= -->
-
-<div class="header">
+<header class="header">
 
     <div class="header-left">
-
-        <img src="logo.jpg" class="logo">
-
-        <div class="header-title">
-
-            <h2>Institutional Authority</h2>
-
-            <p>Organizational Structure Management</p>
-
+        <div class="logo">
+            <i data-lucide="network"></i>
         </div>
 
+        <div>
+            <h2>Authority Panel</h2>
+            <p>Organizational Structure Management</p>
+        </div>
     </div>
-
 
     <div class="header-actions">
-
-        <button class="back-btn" onclick="goBack()">
-            ← Back
+        <button class="btn" onclick="location.reload()">
+            <i data-lucide="refresh-cw"></i>
+            Refresh
         </button>
+    </div>
 
-        <button class="refresh-btn" onclick="loadHierarchy()">
-            ↻ Refresh
+</header>
+
+
+<main class="container">
+
+    <div class="page-title">
+
+        <div>
+            <h1>Organizational Hierarchy</h1>
+            <p>Visual representation of institutional authority and reporting structure.</p>
+        </div>
+
+        <button class="btn btn-primary" onclick="loadHierarchy()">
+            <i data-lucide="refresh-cw"></i>
+            Reload Data
         </button>
 
     </div>
 
-</div>
 
-
-
-<!-- =========================
-MAIN
-========================= -->
-
-<div class="container">
-
-
-    <div class="page-intro">
-
-        <h1>Organizational Hierarchy</h1>
-
-        <p>
-            Complete institutional reporting structure,
-            leadership and departmental organization.
-        </p>
-
-    </div>
-
-
-
-    <!-- STATISTICS -->
+    <!-- STATS -->
 
     <div class="stats">
 
         <div class="stat-card">
-
-            <p>Total People</p>
-
+            <div class="stat-top">
+                <span>Total People</span>
+                <div class="stat-icon" style="background:#eef2ff;color:#4f46e5">
+                    <i data-lucide="users"></i>
+                </div>
+            </div>
             <h2 id="totalPeople">0</h2>
-
+            <p>All registered mentors</p>
         </div>
 
-
         <div class="stat-card">
-
-            <p>Active People</p>
-
+            <div class="stat-top">
+                <span>Active People</span>
+                <div class="stat-icon" style="background:#dcfce7;color:#16a34a">
+                    <i data-lucide="user-check"></i>
+                </div>
+            </div>
             <h2 id="activePeople">0</h2>
-
+            <p>Currently active members</p>
         </div>
 
-
         <div class="stat-card">
-
-            <p>Hierarchy Members</p>
-
-            <h2 id="hierarchyCount">0</h2>
-
+            <div class="stat-top">
+                <span>Hierarchy Members</span>
+                <div class="stat-icon" style="background:#e0f2fe;color:#0284c7">
+                    <i data-lucide="git-branch"></i>
+                </div>
+            </div>
+            <h2 id="hierarchyMembers">0</h2>
+            <p>Members in reporting structure</p>
         </div>
 
-
         <div class="stat-card">
-
-            <p>Unassigned Members</p>
-
-            <h2 id="unassignedCount">0</h2>
-
+            <div class="stat-top">
+                <span>Unassigned</span>
+                <div class="stat-icon" style="background:#ffedd5;color:#ea580c">
+                    <i data-lucide="user-minus"></i>
+                </div>
+            </div>
+            <h2 id="unassignedPeople">0</h2>
+            <p>Members without reporting manager</p>
         </div>
 
     </div>
 
 
-
-    <!-- TOOLBAR -->
+    <!-- SEARCH TOOLBAR -->
 
     <div class="toolbar">
 
         <div class="search-box">
-
+            <i data-lucide="search"></i>
             <input
                 type="text"
                 id="searchInput"
-                placeholder="Search name, mentor ID, designation or department..."
-                oninput="searchHierarchy()"
+                placeholder="Search name, designation, department, mentor ID..."
+                oninput="filterHierarchy()"
             >
-
         </div>
-
 
         <div class="toolbar-actions">
 
-            <button
-                class="expand-btn"
-                onclick="expandAll()"
-            >
+            <button class="btn" onclick="expandAll()">
+                <i data-lucide="maximize-2"></i>
                 Expand All
             </button>
 
-            <button
-                class="collapse-btn"
-                onclick="collapseAll()"
-            >
+            <button class="btn" onclick="collapseAll()">
+                <i data-lucide="minimize-2"></i>
                 Collapse All
             </button>
 
@@ -681,109 +716,56 @@ MAIN
     </div>
 
 
+    <!-- MAIN HIERARCHY -->
 
-    <!-- ORGANIZATIONAL TREE -->
-
-    <div class="section">
+    <section class="section">
 
         <div class="section-heading">
-
-            <h2>Institutional Structure</h2>
-
-            <span id="lastUpdated">
-                Awaiting data...
-            </span>
-
+            <div>
+                <h2>Reporting Structure</h2>
+                <p>Institutional hierarchy and team reporting relationships</p>
+            </div>
         </div>
 
+        <div id="hierarchyError"></div>
 
-        <div id="hierarchyContainer">
+        <div class="tree-container">
 
-            <div class="loading">
-
-                <div class="spinner"></div>
-
-                Loading organizational hierarchy...
-
+            <div id="hierarchyTree" class="tree">
+                <div class="loading">
+                    Loading organizational hierarchy...
+                </div>
             </div>
 
         </div>
 
-
-        <!-- LEGEND -->
-
-        <div class="legend">
-
-            <div class="legend-item">
-                <div class="legend-color" style="background:#7c3aed"></div>
-                Governing Authority
-            </div>
-
-            <div class="legend-item">
-                <div class="legend-color" style="background:#2563eb"></div>
-                Executive Leadership
-            </div>
-
-            <div class="legend-item">
-                <div class="legend-color" style="background:#0891b2"></div>
-                Dean
-            </div>
-
-            <div class="legend-item">
-                <div class="legend-color" style="background:#059669"></div>
-                HOD
-            </div>
-
-            <div class="legend-item">
-                <div class="legend-color" style="background:#d97706"></div>
-                Coordinator
-            </div>
-
-            <div class="legend-item">
-                <div class="legend-color" style="background:#64748b"></div>
-                Faculty
-            </div>
-
-        </div>
-
-    </div>
-
+    </section>
 
 
     <!-- UNASSIGNED MEMBERS -->
 
-    <div class="section">
+    <section class="section">
 
         <div class="section-heading">
-
-            <h2>Unassigned Members</h2>
-
-            <span>
-                Members without a reporting manager
-            </span>
-
-        </div>
-
-
-        <div id="unassignedContainer">
-
-            <div class="loading">
-                Loading unassigned members...
+            <div>
+                <h2>Unassigned Members</h2>
+                <p>Members who are not currently assigned to a reporting manager</p>
             </div>
-
         </div>
 
-    </div>
+        <div id="unassignedGrid" class="unassigned-grid">
+            <div class="loading">Loading members...</div>
+        </div>
 
+    </section>
 
-</div>
-
+</main>
 
 
 <script>
 
 /* =====================================
-CONFIGURATION
+   CONFIGURATION
 ===================================== */
 
 const API_ROOT = "https://college-hwbb.onrender.com";
@@ -793,11 +775,10 @@ const HIERARCHY_API =
 
 
 /* =====================================
-ACCESS CONTROL
+   ACCESS CONTROL
 ===================================== */
 
 const mentorId = localStorage.getItem("mentorId");
-
 const source = sessionStorage.getItem("accessSource");
 
 const ALLOWED_SOURCES = ["ad", "admin"];
@@ -805,21 +786,21 @@ const ALLOWED_SOURCES = ["ad", "admin"];
 if(!mentorId || !ALLOWED_SOURCES.includes(source)){
 
     document.body.innerHTML = `
-
-        <h2 style="
+        <div style="
+            height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            flex-direction:column;
+            font-family:Arial;
             text-align:center;
-            margin-top:20vh;
-            color:red;
+            padding:20px;
         ">
-
-            Access Denied
-
-            <br>
-
-            Please open via Administration Panel
-
-        </h2>
-
+            <h2>Access Denied</h2>
+            <p style="margin-top:10px;color:#64748b">
+                You are not authorized to access this page.
+            </p>
+        </div>
     `;
 
     throw new Error("Unauthorized access");
@@ -828,43 +809,40 @@ if(!mentorId || !ALLOWED_SOURCES.includes(source)){
 
 
 /* =====================================
-GLOBAL DATA
+   GLOBAL DATA
 ===================================== */
 
 let hierarchyData = [];
-
 let unassignedData = [];
 
-let totalPeopleData = 0;
-
-let activePeopleData = 0;
-
 
 /* =====================================
-NAVIGATION
-===================================== */
-
-function goBack(){
-
-    window.history.back();
-
-}
-
-
-/* =====================================
-API FETCH HELPER
+   FETCH JSON SAFELY
 ===================================== */
 
 async function fetchJSON(url){
 
     const response = await fetch(url);
 
-    const data = await response.json();
+    const text = await response.text();
 
-    if(!response.ok || !data.success){
+    let data;
+
+    try{
+        data = JSON.parse(text);
+    }
+    catch(error){
 
         throw new Error(
-            data.message || "API request failed"
+            `Server returned non-JSON response. HTTP ${response.status}. Check Flask route registration.`
+        );
+
+    }
+
+    if(!response.ok || data.success === false){
+
+        throw new Error(
+            data.message || `API Error ${response.status}`
         );
 
     }
@@ -875,50 +853,20 @@ async function fetchJSON(url){
 
 
 /* =====================================
-COUNT TREE MEMBERS
-===================================== */
-
-function countTreeMembers(nodes){
-
-    let count = 0;
-
-    nodes.forEach(node => {
-
-        count++;
-
-        if(node.children){
-
-            count += countTreeMembers(node.children);
-
-        }
-
-    });
-
-    return count;
-
-}
-
-
-/* =====================================
-LOAD COMPLETE HIERARCHY
+   LOAD HIERARCHY
 ===================================== */
 
 async function loadHierarchy(){
 
-    const container =
-        document.getElementById("hierarchyContainer");
+    const tree = document.getElementById("hierarchyTree");
 
-    container.innerHTML = `
-
+    tree.innerHTML = `
         <div class="loading">
-
-            <div class="spinner"></div>
-
             Loading organizational hierarchy...
-
         </div>
-
     `;
+
+    document.getElementById("hierarchyError").innerHTML = "";
 
     try{
 
@@ -926,61 +874,39 @@ async function loadHierarchy(){
 
         hierarchyData = data.hierarchy || [];
 
-        totalPeopleData = data.totalPeople || 0;
+        document.getElementById("totalPeople").textContent =
+            data.totalPeople ?? 0;
 
-        activePeopleData = data.activePeople || 0;
+        document.getElementById("activePeople").textContent =
+            data.activePeople ?? 0;
 
+        const hierarchyCount = countMembers(hierarchyData);
 
-        // Load unassigned members
-
-        await loadUnassigned();
-
-
-        // Update statistics
-
-        updateStatistics();
-
-
-        // Render tree
+        document.getElementById("hierarchyMembers").textContent =
+            hierarchyCount;
 
         renderHierarchy(hierarchyData);
 
+        await loadUnassigned();
 
-        document.getElementById("lastUpdated").textContent =
-
-            "Last updated: " +
-
-            new Date().toLocaleTimeString();
-
-
-        console.log(
-            "Hierarchy Loaded Successfully:",
-            data
-        );
-
+        lucide.createIcons();
 
     }
-
     catch(error){
 
-        console.error("Hierarchy Fetch Error:", error);
+        console.error("Hierarchy Fetch Error:",error);
 
-        container.innerHTML = `
-
-            <div class="error-state">
-
-                <h3>Unable to Load Hierarchy</h3>
-
-                <p>${escapeHTML(error.message)}</p>
-
-                <br>
-
-                <button class="refresh-btn" onclick="loadHierarchy()">
-                    Try Again
-                </button>
-
+        tree.innerHTML = `
+            <div class="empty">
+                Unable to load hierarchy.
             </div>
+        `;
 
+        document.getElementById("hierarchyError").innerHTML = `
+            <div class="error">
+                <strong>API Error:</strong>
+                ${escapeHTML(error.message)}
+            </div>
         `;
 
     }
@@ -989,13 +915,12 @@ async function loadHierarchy(){
 
 
 /* =====================================
-LOAD UNASSIGNED MEMBERS
+   LOAD UNASSIGNED
 ===================================== */
 
 async function loadUnassigned(){
 
-    const container =
-        document.getElementById("unassignedContainer");
+    const container = document.getElementById("unassignedGrid");
 
     try{
 
@@ -1003,28 +928,23 @@ async function loadUnassigned(){
             `${HIERARCHY_API}/unassigned`
         );
 
-        unassignedData = data.people || [];
+        unassignedData = data.unassigned || [];
+
+        document.getElementById("unassignedPeople").textContent =
+            unassignedData.length;
 
         renderUnassigned(unassignedData);
 
     }
-
     catch(error){
 
-        console.error(
-            "Unassigned Fetch Error:",
-            error
-        );
+        console.error("Unassigned API Error:",error);
 
         container.innerHTML = `
-
-            <div class="error-state">
+            <div class="empty">
                 Unable to load unassigned members.
             </div>
-
         `;
-
-        unassignedData = [];
 
     }
 
@@ -1032,228 +952,176 @@ async function loadUnassigned(){
 
 
 /* =====================================
-UPDATE STATISTICS
+   COUNT MEMBERS
 ===================================== */
 
-function updateStatistics(){
+function countMembers(nodes){
 
-    document.getElementById("totalPeople").textContent =
-        totalPeopleData;
+    let total = 0;
 
-    document.getElementById("activePeople").textContent =
-        activePeopleData;
+    nodes.forEach(node=>{
 
-    document.getElementById("hierarchyCount").textContent =
-        countTreeMembers(hierarchyData);
+        total++;
 
-    document.getElementById("unassignedCount").textContent =
-        unassignedData.length;
+        if(node.children && node.children.length){
+
+            total += countMembers(node.children);
+
+        }
+
+    });
+
+    return total;
 
 }
 
 
 /* =====================================
-ESCAPE HTML
+   SAFE HTML
 ===================================== */
 
 function escapeHTML(value){
 
-    return String(value ?? "").replace(
-        /[&<>"']/g,
-        char => ({
-            "&":"&amp;",
-            "<":"&lt;",
-            ">":"&gt;",
-            '"':"&quot;",
-            "'":"&#39;"
-        })[char]
+    return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+}
+
+
+/* =====================================
+   AVATAR INITIALS
+===================================== */
+
+function getInitials(name){
+
+    return String(name || "NA")
+        .trim()
+        .split(/\s+/)
+        .slice(0,2)
+        .map(word=>word.charAt(0).toUpperCase())
+        .join("");
+
+}
+
+
+/* =====================================
+   PROFILE CARD
+===================================== */
+
+function createProfileCard(person){
+
+    const name = escapeHTML(person.name || "Unknown");
+
+    const designation = escapeHTML(
+        person.designation || "Member"
     );
 
-}
+    const department = escapeHTML(
+        person.department || person.branch || "General"
+    );
 
+    const mentorId = escapeHTML(
+        person.mentorId || "N/A"
+    );
 
-/* =====================================
-GET ICON
-===================================== */
+    const subject = escapeHTML(
+        person.subject || "Not specified"
+    );
 
-function getIcon(level){
+    const status = String(person.status || "Active");
 
-    const icons = {
+    const active = ![
+        "inactive",
+        "suspended",
+        "disabled",
+        "false"
+    ].includes(status.toLowerCase());
 
-        1:"♛",
+    const level = Math.min(
+        6,
+        Math.max(1,Number(person.hierarchyLevel) || 6)
+    );
 
-        2:"★",
+    return `
 
-        3:"◆",
+        <div class="profile-card level-${level}">
 
-        4:"▣",
+            <div class="card-top"></div>
 
-        5:"◈",
+            <div class="card-body">
 
-        6:"●",
+                <div class="avatar">
+                    ${escapeHTML(getInitials(person.name))}
+                </div>
 
-        99:"○"
+                <h3>${name}</h3>
 
-    };
+                <span class="designation">
+                    ${designation}
+                </span>
 
-    return icons[level] || "○";
+                <div class="details">
 
-}
+                    <div class="detail">
+                        <i data-lucide="building-2"></i>
+                        <span>${department}</span>
+                    </div>
 
+                    <div class="detail">
+                        <i data-lucide="book-open"></i>
+                        <span>${subject}</span>
+                    </div>
 
-/* =====================================
-RENDER HIERARCHY
-===================================== */
-
-function renderHierarchy(nodes){
-
-    const container =
-        document.getElementById("hierarchyContainer");
-
-    if(!nodes || nodes.length === 0){
-
-        container.innerHTML = `
-
-            <div class="empty-state">
-
-                <h3>No Organizational Hierarchy Found</h3>
-
-                <p>No active members are available.</p>
+                </div>
 
             </div>
 
-        `;
+            <div class="card-footer">
 
-        return;
+                <span class="status ${active ? "" : "inactive"}">
+                    ${active ? "Active" : "Inactive"}
+                </span>
 
-    }
+                <span class="member-id">
+                    ID: ${mentorId}
+                </span>
 
+            </div>
 
-    const tree = document.createElement("div");
+        </div>
 
-    tree.className = "tree";
-
-
-    nodes.forEach(node => {
-
-        tree.appendChild(createNode(node));
-
-    });
-
-
-    container.innerHTML = "";
-
-    container.appendChild(tree);
+    `;
 
 }
 
 
 /* =====================================
-CREATE INDIVIDUAL NODE
+   RENDER NODE
 ===================================== */
 
-function createNode(node){
+function renderNode(person){
 
-    const wrapper = document.createElement("div");
-
-    wrapper.className = "tree-node";
-
-
-    const level = Number(node.hierarchyLevel) || 99;
-
-    const children = node.children || [];
+    const children = Array.isArray(person.children)
+        ? person.children
+        : [];
 
     const hasChildren = children.length > 0;
 
+    const node = document.createElement("div");
 
-    const card = document.createElement("div");
+    node.className = "tree-node";
 
-    card.className = `tree-card level-${level}`;
+    if(hasChildren){
 
-
-    const left = document.createElement("div");
-
-    left.className = "node-left";
-
-
-    const icon = document.createElement("div");
-
-    icon.className = "node-icon";
-
-    icon.textContent = getIcon(level);
-
-
-    const info = document.createElement("div");
-
-    info.className = "node-info";
-
-
-    const name = document.createElement("h3");
-
-    name.textContent = node.name || "Unknown";
-
-
-    const designation = document.createElement("p");
-
-    designation.textContent =
-        node.designation || "Designation Not Assigned";
-
-
-    const department = document.createElement("p");
-
-    department.textContent =
-        `${node.department || "Department Not Assigned"} • ID: ${node.mentorId}`;
-
-
-    info.appendChild(name);
-
-    info.appendChild(designation);
-
-    info.appendChild(department);
-
-
-    left.appendChild(icon);
-
-    left.appendChild(info);
-
-
-    const right = document.createElement("div");
-
-    right.className = "node-meta";
-
-
-    const designationBadge = document.createElement("span");
-
-    designationBadge.className = "badge";
-
-    designationBadge.textContent =
-        node.designation || "Unassigned";
-
-
-    const status = document.createElement("span");
-
-    status.className = "badge status-badge";
-
-    status.textContent = node.status || "Active";
-
-
-    right.appendChild(designationBadge);
-
-    right.appendChild(status);
-
-
-    if(node.assignmentType === "AUTO"){
-
-        const auto = document.createElement("span");
-
-        auto.className = "badge auto-badge";
-
-        auto.textContent = "AUTO";
-
-        right.appendChild(auto);
+        node.classList.add("has-children");
 
     }
 
+    node.innerHTML = createProfileCard(person);
 
     if(hasChildren){
 
@@ -1261,149 +1129,140 @@ function createNode(node){
 
         toggle.className = "toggle-btn";
 
-        toggle.textContent = "−";
+        toggle.innerHTML = `
+            <i data-lucide="chevron-up"></i>
+            Hide ${children.length} Direct Reports
+        `;
 
-        toggle.title = "Collapse children";
-
-        const count = document.createElement("span");
-
-        count.className = "children-count";
-
-        count.textContent =
-            `${children.length} Direct Reports`;
-
-
-        right.appendChild(count);
-
-        right.appendChild(toggle);
-
-        card.addEventListener("click", function(){
-
-            const childContainer =
-                wrapper.querySelector(":scope > .tree-children");
-
-            if(!childContainer) return;
-
-            childContainer.classList.toggle("collapsed");
-
-            const collapsed =
-                childContainer.classList.contains("collapsed");
-
-            toggle.textContent = collapsed ? "+" : "−";
-
-            toggle.title = collapsed
-                ? "Expand children"
-                : "Collapse children";
-
-        });
-
-    }
-
-
-    card.appendChild(left);
-
-    card.appendChild(right);
-
-
-    wrapper.appendChild(card);
-
-
-    if(hasChildren){
-
-        const childContainer =
-            document.createElement("div");
+        const childContainer = document.createElement("div");
 
         childContainer.className = "tree-children";
 
-
-        children.forEach(child => {
+        children.forEach(child=>{
 
             childContainer.appendChild(
-                createNode(child)
+                renderNode(child)
             );
 
         });
 
+        toggle.addEventListener("click",()=>{
 
-        wrapper.appendChild(childContainer);
+            const isHidden = childContainer.classList.toggle("hidden");
+
+            toggle.innerHTML = isHidden
+                ? `<i data-lucide="chevron-down"></i> Show ${children.length} Direct Reports`
+                : `<i data-lucide="chevron-up"></i> Hide ${children.length} Direct Reports`;
+
+            lucide.createIcons();
+
+        });
+
+        node.appendChild(toggle);
+
+        node.appendChild(childContainer);
 
     }
 
-
-    return wrapper;
+    return node;
 
 }
 
 
 /* =====================================
-RENDER UNASSIGNED MEMBERS
+   RENDER COMPLETE HIERARCHY
 ===================================== */
 
-function renderUnassigned(list){
+function renderHierarchy(data){
 
-    const container =
-        document.getElementById("unassignedContainer");
+    const tree = document.getElementById("hierarchyTree");
+
+    tree.innerHTML = "";
+
+    if(!data || !data.length){
+
+        tree.innerHTML = `
+            <div class="empty">
+                <i data-lucide="users"></i>
+                <h3 style="margin-top:12px">
+                    No Hierarchy Found
+                </h3>
+                <p style="margin-top:6px">
+                    No active members are available in the reporting structure.
+                </p>
+            </div>
+        `;
+
+        lucide.createIcons();
+
+        return;
+
+    }
+
+    data.forEach(person=>{
+
+        tree.appendChild(
+            renderNode(person)
+        );
+
+    });
+
+    lucide.createIcons();
+
+}
+
+
+/* =====================================
+   UNASSIGNED CARDS
+===================================== */
+
+function renderUnassigned(data){
+
+    const container = document.getElementById("unassignedGrid");
 
     container.innerHTML = "";
 
-
-    if(!list || list.length === 0){
+    if(!data || !data.length){
 
         container.innerHTML = `
-
-            <div class="empty-state">
-
-                <h3>All Members Assigned</h3>
-
-                <p>No unassigned members found.</p>
-
+            <div class="empty">
+                All members are assigned to the hierarchy.
             </div>
-
         `;
 
         return;
 
     }
 
-
-    list.forEach(person => {
+    data.forEach(person=>{
 
         const card = document.createElement("div");
 
         card.className = "unassigned-card";
 
+        card.innerHTML = `
 
-        const info = document.createElement("div");
+            <div class="avatar" style="margin:0 0 12px">
+                ${escapeHTML(getInitials(person.name))}
+            </div>
 
+            <h3>${escapeHTML(person.name || "Unknown")}</h3>
 
-        const name = document.createElement("h4");
+            <p>
+                ${escapeHTML(person.designation || "Member")}
+            </p>
 
-        name.textContent =
-            `${person.name} (${person.mentorId})`;
+            <p>
+                Department:
+                ${escapeHTML(person.department || person.branch || "General")}
+            </p>
 
+            <p>
+                Mentor ID:
+                ${escapeHTML(person.mentorId || "N/A")}
+            </p>
 
-        const details = document.createElement("p");
-
-        details.textContent =
-            `${person.designation || "No Designation"} • ${person.department}`;
-
-
-        info.appendChild(name);
-
-        info.appendChild(details);
-
-
-        const badge = document.createElement("span");
-
-        badge.className = "badge auto-badge";
-
-        badge.textContent = "UNASSIGNED";
-
-
-        card.appendChild(info);
-
-        card.appendChild(badge);
-
+        `;
 
         container.appendChild(card);
 
@@ -1413,17 +1272,16 @@ function renderUnassigned(list){
 
 
 /* =====================================
-SEARCH HIERARCHY
+   SEARCH
 ===================================== */
 
-function searchHierarchy(){
+function filterHierarchy(){
 
     const query = document
         .getElementById("searchInput")
         .value
-        .trim()
-        .toLowerCase();
-
+        .toLowerCase()
+        .trim();
 
     if(!query){
 
@@ -1433,142 +1291,129 @@ function searchHierarchy(){
 
     }
 
-
     function filterNodes(nodes){
 
-        const result = [];
+        return nodes.map(person=>{
 
+            const text = [
 
-        nodes.forEach(node => {
+                person.name,
+                person.designation,
+                person.department,
+                person.branch,
+                person.mentorId,
+                person.subject
 
-            const matches = [
+            ].join(" ").toLowerCase();
 
-                node.name,
-
-                node.mentorId,
-
-                node.designation,
-
-                node.department,
-
-                node.branch
-
-            ].some(value =>
-
-                String(value || "")
-                .toLowerCase()
-                .includes(query)
-
+            const filteredChildren = filterNodes(
+                person.children || []
             );
 
+            const matches = text.includes(query);
 
-            const filteredChildren =
-                filterNodes(node.children || []);
+            if(matches || filteredChildren.length){
 
-
-            if(matches || filteredChildren.length > 0){
-
-                const filteredNode = {
-
-                    ...node,
-
+                return {
+                    ...person,
                     children: filteredChildren
-
                 };
-
-                result.push(filteredNode);
 
             }
 
-        });
+            return null;
 
-
-        return result;
+        }).filter(Boolean);
 
     }
-
 
     const filtered = filterNodes(hierarchyData);
 
     renderHierarchy(filtered);
 
-
-    if(filtered.length === 0){
-
-        document.getElementById("hierarchyContainer").innerHTML = `
-
-            <div class="empty-state">
-
-                <h3>No Results Found</h3>
-
-                <p>Try searching with another keyword.</p>
-
-            </div>
-
-        `;
-
-    }
-
 }
 
 
 /* =====================================
-EXPAND ALL
+   EXPAND / COLLAPSE ALL
 ===================================== */
 
 function expandAll(){
 
-    document
-        .querySelectorAll(".tree-children")
-        .forEach(element => {
+    document.querySelectorAll(".tree-children").forEach(el=>{
 
-            element.classList.remove("collapsed");
+        el.classList.remove("hidden");
 
-        });
+    });
 
+    document.querySelectorAll(".toggle-btn").forEach(button=>{
 
-    document
-        .querySelectorAll(".toggle-btn")
-        .forEach(button => {
+        const node = button.parentElement;
 
-            button.textContent = "−";
+        const children = node.querySelector(
+            ":scope > .tree-children"
+        );
 
-        });
+        if(children){
+
+            const count = children.children.length;
+
+            button.innerHTML = `
+                <i data-lucide="chevron-up"></i>
+                Hide ${count} Direct Reports
+            `;
+
+        }
+
+    });
+
+    lucide.createIcons();
 
 }
 
-
-/* =====================================
-COLLAPSE ALL
-===================================== */
 
 function collapseAll(){
 
-    document
-        .querySelectorAll(".tree-children")
-        .forEach(element => {
+    document.querySelectorAll(".tree-node.has-children > .tree-children")
+        .forEach(el=>{
 
-            element.classList.add("collapsed");
-
-        });
-
-
-    document
-        .querySelectorAll(".toggle-btn")
-        .forEach(button => {
-
-            button.textContent = "+";
+            el.classList.add("hidden");
 
         });
+
+    document.querySelectorAll(".toggle-btn").forEach(button=>{
+
+        const node = button.parentElement;
+
+        const children = node.querySelector(
+            ":scope > .tree-children"
+        );
+
+        if(children){
+
+            const count = children.children.length;
+
+            button.innerHTML = `
+                <i data-lucide="chevron-down"></i>
+                Show ${count} Direct Reports
+            `;
+
+        }
+
+    });
+
+    lucide.createIcons();
 
 }
 
 
 /* =====================================
-INITIALIZE
+   INITIALIZE
 ===================================== */
 
-document.addEventListener("DOMContentLoaded", function(){
+document.addEventListener("DOMContentLoaded",()=>{
+
+    lucide.createIcons();
 
     loadHierarchy();
 
@@ -1576,7 +1421,5 @@ document.addEventListener("DOMContentLoaded", function(){
 
 </script>
 
-
 </body>
-
 </html>
