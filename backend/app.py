@@ -45,7 +45,7 @@ from routes.otp import otp_bp
 from routes.signup import signup_bp
 from routes.ox import ox_bp
 from routes.verification import verification_bp
-from hierarchy import hierarchy_bp, init_hierarchy
+from routes.hierarchy import hierarchy_bp, init_hierarchy
 from routes.admin_verification import admin_verification_bp
 
 from routes.cleanup import cleanup_bp
