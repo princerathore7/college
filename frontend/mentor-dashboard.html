@@ -374,29 +374,35 @@ if(!mentorId){
   document.getElementById("mentorNameDisplay").textContent = mentorName || "Authorized Mentor";
 }
 /* --- FETCH MENTOR DESIGNATION --- */
-
 async function loadMentorDesignation() {
 
     const designationElement = document.getElementById(
         "mentorDesignationDisplay"
     );
 
+    if (!designationElement) {
+        console.error("mentorDesignationDisplay element not found");
+        return;
+    }
+
     designationElement.textContent = "Designation: Loading...";
 
     try {
 
+        // Fetch mentor details using mentorId
         const response = await fetch(
-            `${API_ROOT}/api/mentor/search?q=${encodeURIComponent(mentorId)}`
+            `${API}/mentor/search?q=${encodeURIComponent(mentorId)}`
         );
 
         const result = await response.json();
 
         if (!response.ok || !result.success) {
-            throw new Error("Unable to fetch mentor details");
+            throw new Error(result.message || "Unable to fetch mentor details");
         }
 
-        const mentor = result.mentors.find(
-            m => m.mentorId === mentorId
+        // Find exact mentor
+        const mentor = result.mentors?.find(
+            m => String(m.mentorId).trim() === String(mentorId).trim()
         );
 
         if (mentor && mentor.designation) {
@@ -406,15 +412,17 @@ async function loadMentorDesignation() {
 
         } else {
 
-            designationElement.textContent = "Designation: Not Assigned";
+            designationElement.textContent =
+                "Designation: Not Assigned";
 
         }
 
     } catch (error) {
 
-        console.error("Designation Fetch Error:", error);
+        console.error("Mentor Designation Fetch Error:", error);
 
-        designationElement.textContent = "Designation: Unavailable";
+        designationElement.textContent =
+            "Designation: Unavailable";
 
     }
 
