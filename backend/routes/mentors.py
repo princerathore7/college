@@ -18,9 +18,9 @@ MENTOR_DESIGNATIONS = [
     "Director",
     "Dean",
     "HOD (Head of Department)",
-    "CDC Departmental Faculty"
-    "Finance Head"
-    "Finance Faculty"
+    "CDC Departmental Faculty",
+    "Finance Head",
+    "Finance Faculty",
     "Professor",
     "Associate Professor",
     "Assistant Professor",
