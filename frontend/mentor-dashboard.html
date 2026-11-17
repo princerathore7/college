@@ -271,6 +271,7 @@
     <div class="user-info">
       <div id="mentorNameDisplay">Authorized Mentor</div>
       <div id="mentorIdDisplay">ID: ---</div>
+      <div id="mentorDesignationDisplay">Designation: ---</div>
     </div>
   </div>
 </header>
@@ -372,7 +373,52 @@ if(!mentorId){
   document.getElementById("mentorIdDisplay").textContent = `ID: ${mentorId}`;
   document.getElementById("mentorNameDisplay").textContent = mentorName || "Authorized Mentor";
 }
+/* --- FETCH MENTOR DESIGNATION --- */
 
+async function loadMentorDesignation() {
+
+    const designationElement = document.getElementById(
+        "mentorDesignationDisplay"
+    );
+
+    designationElement.textContent = "Designation: Loading...";
+
+    try {
+
+        const response = await fetch(
+            `${API_ROOT}/api/mentor/search?q=${encodeURIComponent(mentorId)}`
+        );
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+            throw new Error("Unable to fetch mentor details");
+        }
+
+        const mentor = result.mentors.find(
+            m => m.mentorId === mentorId
+        );
+
+        if (mentor && mentor.designation) {
+
+            designationElement.textContent =
+                `Designation: ${mentor.designation}`;
+
+        } else {
+
+            designationElement.textContent = "Designation: Not Assigned";
+
+        }
+
+    } catch (error) {
+
+        console.error("Designation Fetch Error:", error);
+
+        designationElement.textContent = "Designation: Unavailable";
+
+    }
+
+}
 /* --- SIDEBAR & UI LOGIC --- */
 function toggleMenu() {
   document.getElementById('sidebar').classList.toggle('active');

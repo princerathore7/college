@@ -181,6 +181,40 @@ border-radius:6px;
 cursor:pointer;
 font-size:14px;
 }
+#editMentorForm input,
+#editMentorForm select {
+
+    width:100%;
+    padding:10px;
+    margin-top:5px;
+    box-sizing:border-box;
+    border:1px solid #ccc;
+    border-radius:5px;
+    font-size:14px;
+
+}
+
+#editMentorForm label {
+
+    font-weight:bold;
+    font-size:14px;
+
+}
+
+.edit-btn {
+
+    background:#007bff;
+    color:white;
+
+}
+
+.mentor-designation {
+
+    color:#007bff;
+    font-size:13px;
+    margin-top:5px;
+
+}
 </style>
 </head>
 <body>
@@ -251,6 +285,63 @@ onkeyup="searchMentor()"
 <h3>Mentor Details</h3>
 
 <div id="mentorDetails"></div>
+
+<div id="editMentorForm" style="display:none;">
+
+    <h3>Edit Mentor Information</h3>
+
+    <label>Mentor ID</label>
+    <input type="text" id="editMentorId" disabled>
+
+    <br><br>
+
+    <label>Name</label>
+    <input type="text" id="editName">
+
+    <br><br>
+
+    <label>Email</label>
+    <input type="email" id="editEmail">
+
+    <br><br>
+
+    <label>Phone</label>
+    <input type="text" id="editPhone">
+
+    <br><br>
+
+    <label>Subject</label>
+    <input type="text" id="editSubject">
+
+    <br><br>
+
+    <label>Branch</label>
+    <input type="text" id="editBranch">
+
+    <br><br>
+
+    <label>Class Assigned</label>
+    <input type="text" id="editClass">
+
+    <br><br>
+
+    <label>Designation</label>
+
+    <select id="editDesignation">
+        <option value="">Loading designations...</option>
+    </select>
+
+    <br><br>
+
+    <button class="activate" onclick="saveMentorInfo()">
+        Save Changes
+    </button>
+
+    <button class="close" onclick="cancelEdit()">
+        Cancel
+    </button>
+
+</div>
 
 <button class="suspend" onclick="changeStatus('suspended')">
 Suspend
@@ -370,40 +461,43 @@ renderMentors(allMentors)
 /* ===============================
 RENDER
 ================================ */
-
 function renderMentors(list){
 
-const container=document.getElementById("mentorList")
+const container=document.getElementById("mentorList");
 
-container.innerHTML=""
+container.innerHTML="";
 
 list.forEach(m=>{
 
-const div=document.createElement("div")
+const div=document.createElement("div");
 
-div.className="mentor-card"
+div.className="mentor-card";
 
 div.innerHTML=`
 
 <div>
+
 <b>${m.mentorId}</b> - ${m.name}
+
+<div class="mentor-designation">
+${m.designation || "Designation Not Assigned"}
+</div>
+
 </div>
 
 <div class="status ${m.status}">
 ${m.status}
 </div>
 
-`
+`;
 
-div.onclick=()=>openPopup(m)
+div.onclick=()=>openPopup(m);
 
-container.appendChild(div)
+container.appendChild(div);
 
-})
+});
 
 }
-
-
 /* ===============================
 SEARCH
 ================================ */
@@ -431,12 +525,15 @@ renderMentors(filtered)
 /* ===============================
 POPUP
 ================================ */
-
 function openPopup(mentor){
 
-selectedMentor=mentor
+selectedMentor=mentor;
 
-document.getElementById("popup").style.display="flex"
+document.getElementById("popup").style.display="flex";
+
+document.getElementById("editMentorForm").style.display="none";
+
+document.getElementById("mentorDetails").style.display="block";
 
 document.getElementById("mentorDetails").innerHTML=`
 
@@ -454,20 +551,17 @@ document.getElementById("mentorDetails").innerHTML=`
 
 <p><b>Class:</b> ${mentor.classAssigned}</p>
 
+<p><b>Designation:</b> ${mentor.designation || "Not Assigned"}</p>
+
 <p><b>Status:</b> ${mentor.status}</p>
 
-`
+<button class="edit-btn" onclick="editMentor()">
+Edit Mentor Info
+</button>
+
+`;
 
 }
-
-
-function closePopup(){
-
-document.getElementById("popup").style.display="none"
-
-}
-
-
 /* ===============================
 STATUS CHANGE
 ================================ */
@@ -498,8 +592,142 @@ closePopup()
 loadMentors()
 
 }
+async function editMentor(){
 
+const m=selectedMentor;
 
+document.getElementById("mentorDetails").style.display="none";
+
+document.getElementById("editMentorForm").style.display="block";
+
+document.getElementById("editMentorId").value=m.mentorId;
+
+document.getElementById("editName").value=m.name || "";
+
+document.getElementById("editEmail").value=m.email || "";
+
+document.getElementById("editPhone").value=m.phone || "";
+
+document.getElementById("editSubject").value=m.subject || "";
+
+document.getElementById("editBranch").value=m.branch || "";
+
+document.getElementById("editClass").value=m.classAssigned || "";
+
+await loadEditDesignations();
+
+document.getElementById("editDesignation").value=
+m.designation || "";
+
+}
+async function loadEditDesignations(){
+
+const dropdown=document.getElementById("editDesignation");
+
+try{
+
+const res=await fetch(API+"/mentor/designations");
+
+const data=await res.json();
+
+dropdown.innerHTML='<option value="">Select Designation</option>';
+
+if(data.success){
+
+data.designations.forEach(d=>{
+
+const option=document.createElement("option");
+
+option.value=d;
+
+option.textContent=d;
+
+dropdown.appendChild(option);
+
+});
+
+}
+
+}catch(error){
+
+console.error("Designation loading error:",error);
+
+alert("Unable to load designations");
+
+}
+
+}
+async function saveMentorInfo(){
+
+const updatedData={
+
+mentorId:selectedMentor.mentorId,
+
+name:document.getElementById("editName").value.trim(),
+
+email:document.getElementById("editEmail").value.trim(),
+
+phone:document.getElementById("editPhone").value.trim(),
+
+subject:document.getElementById("editSubject").value.trim(),
+
+branch:document.getElementById("editBranch").value.trim(),
+
+classAssigned:document.getElementById("editClass").value.trim(),
+
+designation:document.getElementById("editDesignation").value
+
+};
+
+if(Object.values(updatedData).some(v=>!v)){
+
+alert("Please fill all fields");
+
+return;
+
+}
+
+try{
+
+const res=await fetch(API+"/mentor/update",{
+
+method:"PUT",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify(updatedData)
+
+});
+
+const data=await res.json();
+
+if(!res.ok || !data.success){
+
+alert(data.message || "Update failed");
+
+return;
+
+}
+
+alert("Mentor information updated successfully!");
+
+closePopup();
+
+await loadMentors();
+
+}catch(error){
+
+console.error(error);
+
+alert("Server error while updating mentor");
+
+}
+
+}
 /* ===============================
 DELETE
 ================================ */
@@ -519,6 +747,13 @@ alert("Mentor deleted")
 closePopup()
 
 loadMentors()
+
+}
+function cancelEdit(){
+
+document.getElementById("editMentorForm").style.display="none";
+
+document.getElementById("mentorDetails").style.display="block";
 
 }
 
