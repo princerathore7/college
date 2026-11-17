@@ -389,18 +389,16 @@ async function loadMentorDesignation() {
 
     try {
 
-        // Fetch mentor details using mentorId
         const response = await fetch(
-            `${API_ROOT}/mentor/search?q=${encodeURIComponent(mentorId)}`
+            `${API_ROOT}/api/mentor/search?q=${encodeURIComponent(mentorId)}`
         );
 
         const result = await response.json();
 
         if (!response.ok || !result.success) {
-            throw new Error(result.message || "Unable to fetch mentor details");
+            throw new Error("Unable to fetch mentor details");
         }
 
-        // Find exact mentor
         const mentor = result.mentors?.find(
             m => String(m.mentorId).trim() === String(mentorId).trim()
         );
@@ -410,22 +408,23 @@ async function loadMentorDesignation() {
             designationElement.textContent =
                 `Designation: ${mentor.designation}`;
 
+            console.log("Mentor Designation Loaded:", mentor.designation);
+
         } else {
 
-            designationElement.textContent =
-                "Designation: Not Assigned";
+            designationElement.textContent = "Designation: Not Assigned";
+
+            console.warn("Mentor found but designation not assigned.");
 
         }
 
     } catch (error) {
 
-        console.error("Mentor Designation Fetch Error:", error);
+        console.error("Designation Fetch Error:", error);
 
-        designationElement.textContent =
-            "Designation: Unavailable";
+        designationElement.textContent = "Designation: Unavailable";
 
     }
-
 }
 /* --- SIDEBAR & UI LOGIC --- */
 function toggleMenu() {
