@@ -391,7 +391,7 @@ async function loadMentorDesignation() {
 
         // Fetch mentor details using mentorId
         const response = await fetch(
-            `${API}/mentor/search?q=${encodeURIComponent(mentorId)}`
+            `${API_ROOT}/mentor/search?q=${encodeURIComponent(mentorId)}`
         );
 
         const result = await response.json();
