@@ -1,315 +1,1207 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mentor Salary Portal | Acropolis</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <style>
-        :root {
-            --primary-navy: #1a2a6c;
-            --secondary-blue: #2a4858;
-            --accent-gold: #f1c40f;
-            --text-dark: #2d3436;
-            --bg-light: #f4f7f6;
-            --white: #ffffff;
-        }
+<title>Mentor Salary Portal | Acropolis</title>
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-light);
-            color: var(--text-dark);
-            line-height: 1.6;
-        }
+<style>
 
-        /* ----------- Header ----------- */
-        header {
-            background: linear-gradient(135deg, var(--primary-navy) 0%, var(--secondary-blue) 100%);
-            color: var(--white);
-            padding: 40px 20px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            position: relative;
-        }
+:root{
+    --primary:#1a2a6c;
+    --secondary:#2a4858;
+    --bg:#f4f7f6;
+    --white:#fff;
+    --text:#2d3436;
+}
 
-        .back-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: var(--white);
-            text-decoration: none;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(255,255,255,0.1);
-            padding: 8px 15px;
-            border-radius: 20px;
-            transition: 0.3s;
-        }
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
 
-        .back-btn:hover {
-            background: rgba(255,255,255,0.2);
-            transform: translateX(-5px);
-        }
+body{
+    font-family:Inter,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+}
 
-        header h1 { 
-            font-size: 2rem; 
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
+/* HEADER */
 
-        header p { opacity: 0.8; font-weight: 300; margin-top: 5px; }
+header{
+    background:linear-gradient(135deg,var(--primary),var(--secondary));
+    color:white;
+    padding:35px 20px;
+    text-align:center;
+    position:relative;
+}
 
-        /* ----------- Main Container ----------- */
-        main {
-            max-width: 600px;
-            margin: -30px auto 40px;
-            background: var(--white);
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            position: relative;
-            z-index: 10;
-        }
+header h1{
+    font-size:27px;
+    letter-spacing:1px;
+}
 
-        h2 { 
-            color: var(--primary-navy); 
-            margin-bottom: 25px; 
-            text-align: center;
-            font-weight: 700;
-        }
+header p{
+    margin-top:7px;
+    opacity:.8;
+    font-size:13px;
+}
 
-        .input-group {
-            margin-bottom: 20px;
-        }
+.back-btn{
+    position:absolute;
+    left:20px;
+    top:20px;
+    color:white;
+    text-decoration:none;
+    background:#ffffff20;
+    padding:9px 15px;
+    border-radius:20px;
+    font-size:13px;
+}
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--secondary-blue);
-        }
+/* MAIN */
 
-        input {
-            width: 100%;
-            padding: 14px 18px;
-            font-size: 1rem;
-            border-radius: 10px;
-            border: 2px solid #e0e0e0;
-            transition: 0.3s;
-        }
+main{
+    max-width:850px;
+    margin:-25px auto 40px;
+    background:white;
+    padding:35px;
+    border-radius:15px;
+    box-shadow:0 10px 30px #00000012;
+    position:relative;
+    z-index:2;
+}
 
-        input:focus { 
-            border-color: var(--primary-navy); 
-            outline: none;
-            box-shadow: 0 0 0 4px rgba(26, 42, 108, 0.1);
-        }
+h2{
+    color:var(--primary);
+    margin-bottom:25px;
+    text-align:center;
+}
 
-        button {
-            width: 100%;
-            padding: 15px;
-            background: var(--primary-navy);
-            color: white;
-            font-size: 1rem;
-            font-weight: 600;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: 0.3s ease;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
+.input-group{
+    margin-bottom:20px;
+}
 
-        button:hover { 
-            background: #0f1a4a;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(26, 42, 108, 0.3);
-        }
+label{
+    display:block;
+    font-size:14px;
+    font-weight:600;
+    margin-bottom:8px;
+}
 
-        /* ----------- Salary Dashboard Display ----------- */
-        .salary-box {
-            display: none;
-            margin-top: 30px;
-            padding: 25px;
-            background: #f8fafc;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            animation: slideUp 0.5s ease;
-        }
+input{
+    width:100%;
+    padding:14px;
+    border:1px solid #ddd;
+    border-radius:9px;
+    outline:none;
+    font-size:15px;
+}
 
-        .salary-header {
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 15px;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+input:focus{
+    border-color:var(--primary);
+}
 
-        .salary-header h3 { color: var(--primary-navy); font-size: 1.2rem; }
+button{
+    border:none;
+    cursor:pointer;
+    border-radius:8px;
+    font-weight:600;
+    transition:.2s;
+}
 
-        .salary-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #edf2f7;
-        }
+.fetch-btn{
+    width:100%;
+    padding:15px;
+    background:var(--primary);
+    color:white;
+    font-size:15px;
+}
 
-        .salary-row:last-child { border-bottom: none; }
+.fetch-btn:hover{
+    background:#101b4b;
+}
 
-        .label-text { color: #64748b; font-weight: 500; }
-        .value-text { color: var(--text-dark); font-weight: 600; }
+#loader{
+    display:none;
+    text-align:center;
+    padding:25px;
+    color:var(--primary);
+}
 
-        .status-pill {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
+.spinner{
+    width:30px;
+    height:30px;
+    border:3px solid #ddd;
+    border-top-color:var(--primary);
+    border-radius:50%;
+    animation:spin .8s linear infinite;
+    margin:auto auto 10px;
+}
 
-        .status-paid { background: #dcfce7; color: #166534; }
-        .status-pending { background: #fef9c3; color: #854d0e; }
+@keyframes spin{
+    to{transform:rotate(360deg);}
+}
 
-        /* ----------- Loader ----------- */
-        #loader {
-            display: none;
-            text-align: center;
-            padding: 20px;
-        }
+/* RESULT */
 
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid var(--primary-navy);
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 10px;
-        }
+.salary-box{
+    display:none;
+    margin-top:25px;
+    background:#f8fafc;
+    border:1px solid #e2e8f0;
+    border-radius:12px;
+    padding:22px;
+}
 
-        @keyframes spin { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
-        @keyframes slideUp { from{opacity:0; transform:translateY(20px);} to{opacity:1; transform:translateY(0);} }
+.salary-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:15px;
+}
 
-        /* ----------- Footer ----------- */
-        footer {
-            text-align: center;
-            font-size: 0.85rem;
-            color: #94a3b8;
-            margin-top: 20px;
-        }
+.salary-header h3{
+    color:var(--primary);
+}
 
-        @media (max-width: 600px) {
-            main { margin: -20px 15px 40px; padding: 25px; }
-            header h1 { font-size: 1.5rem; }
-        }
-    </style>
+.status-pill{
+    padding:6px 13px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:700;
+}
+
+.paid{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.pending{
+    background:#fef9c3;
+    color:#854d0e;
+}
+
+.salary-row{
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+    padding:10px 0;
+    border-bottom:1px solid #e5e7eb;
+    font-size:13px;
+}
+
+.salary-row span:first-child{
+    color:#64748b;
+}
+
+.salary-row span:last-child{
+    font-weight:600;
+    text-align:right;
+}
+
+.net-pay{
+    color:#15803d;
+    font-size:20px;
+}
+
+.view-slip-btn{
+    margin-top:20px;
+    width:100%;
+    padding:14px;
+    background:#15803d;
+    color:white;
+    font-size:14px;
+}
+
+.view-slip-btn:hover{
+    background:#166534;
+}
+
+/* PAYSLIP MODAL */
+
+.modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:#00000099;
+    z-index:999;
+    overflow-y:auto;
+    padding:25px 12px;
+}
+
+.modal-content{
+    max-width:1050px;
+    margin:auto;
+    background:white;
+    border-radius:10px;
+    padding:20px;
+}
+
+.modal-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-bottom:18px;
+}
+
+.action-btn{
+    padding:11px 17px;
+    background:var(--primary);
+    color:white;
+}
+
+.close-btn{
+    background:#dc2626;
+}
+
+/* ACTUAL SALARY SLIP */
+
+#salarySlip{
+    border:1px solid #222;
+    padding:20px;
+    color:#111;
+    background:white;
+    font-family:Arial,sans-serif;
+    font-size:11px;
+}
+
+.company-heading{
+    text-align:center;
+    border-bottom:2px solid #222;
+    padding-bottom:12px;
+    margin-bottom:12px;
+}
+
+.company-heading h2{
+    color:#111;
+    font-size:19px;
+    margin-bottom:6px;
+    text-transform:uppercase;
+}
+
+.company-heading p{
+    font-size:10px;
+    line-height:1.5;
+}
+
+.slip-title{
+    text-align:center;
+    font-weight:bold;
+    font-size:15px;
+    margin:15px 0;
+    text-decoration:underline;
+}
+
+.slip-section-title{
+    background:#e9edf3;
+    padding:7px;
+    font-weight:bold;
+    border:1px solid #777;
+    margin-top:13px;
+    font-size:11px;
+}
+
+.employee-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    border-top:1px solid #777;
+    border-left:1px solid #777;
+}
+
+.info-cell{
+    display:flex;
+    justify-content:space-between;
+    gap:8px;
+    padding:7px;
+    border-right:1px solid #777;
+    border-bottom:1px solid #777;
+    min-width:0;
+}
+
+.info-cell strong{
+    font-weight:bold;
+}
+
+.info-cell span{
+    text-align:right;
+    overflow-wrap:anywhere;
+}
+
+.pay-table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:0;
+    font-size:10px;
+}
+
+.pay-table th,
+.pay-table td{
+    border:1px solid #777;
+    padding:7px 6px;
+    text-align:right;
+}
+
+.pay-table th{
+    background:#e9edf3;
+    font-weight:bold;
+}
+
+.pay-table th:first-child,
+.pay-table td:first-child{
+    text-align:left;
+}
+
+.total-row{
+    background:#edf2f7;
+    font-weight:bold;
+}
+
+.net-transfer{
+    margin-top:15px;
+    border:2px solid #222;
+    padding:13px;
+    display:flex;
+    justify-content:space-between;
+    font-weight:bold;
+    font-size:14px;
+}
+
+.words{
+    border:1px solid #777;
+    padding:10px;
+    margin-top:10px;
+    font-weight:bold;
+}
+
+.slip-footer{
+    text-align:center;
+    margin-top:20px;
+    font-size:10px;
+    border-top:1px solid #777;
+    padding-top:10px;
+}
+
+footer{
+    text-align:center;
+    color:#94a3b8;
+    font-size:12px;
+    padding:20px;
+}
+
+/* MOBILE */
+
+@media(max-width:600px){
+
+    main{
+        margin:-15px 12px 30px;
+        padding:22px;
+    }
+
+    header h1{
+        font-size:20px;
+    }
+
+    .back-btn{
+        position:static;
+        display:inline-block;
+        margin-bottom:15px;
+    }
+
+    .employee-grid{
+        grid-template-columns:1fr;
+    }
+
+    #salarySlip{
+        padding:10px;
+        font-size:9px;
+    }
+
+    .info-cell{
+        padding:5px;
+    }
+
+    .pay-table{
+        font-size:8px;
+    }
+
+    .pay-table th,
+    .pay-table td{
+        padding:5px 3px;
+    }
+
+    .modal-content{
+        padding:10px;
+    }
+}
+
+/* PRINT */
+
+@media print{
+
+    @page{
+        size:A4 portrait;
+        margin:10mm;
+    }
+
+    body{
+        background:white!important;
+    }
+
+    body *{
+        visibility:hidden!important;
+    }
+
+    #salarySlip,
+    #salarySlip *{
+        visibility:visible!important;
+    }
+
+    #salarySlip{
+        position:absolute;
+        left:0;
+        top:0;
+        width:100%;
+        border:1px solid #222;
+        padding:15px;
+        font-size:10px;
+    }
+
+    .modal,
+    .modal-content{
+        display:block!important;
+        position:static!important;
+        background:white!important;
+        padding:0!important;
+        margin:0!important;
+        border:none!important;
+    }
+
+    .modal-actions{
+        display:none!important;
+    }
+
+    .slip-section-title,
+    .pay-table th,
+    .total-row{
+        print-color-adjust:exact;
+        -webkit-print-color-adjust:exact;
+    }
+}
+
+</style>
 </head>
+
 <body>
 
 <header>
-  <a href="javascript:void(0)" class="back-btn" onclick="goBack()">⬅ Back</a>
 
-        <i class="fas fa-arrow-left"></i> Back to Home
+    <a href="javascript:void(0)" class="back-btn" onclick="goBack()">
+        <i class="fas fa-arrow-left"></i> Back
     </a>
+
     <h1>Mentor Salary Portal</h1>
     <p>Acropolis Group of Institutions</p>
+
 </header>
 
+
 <main>
-    <h2>Dashboard Login</h2>
+
+    <h2>Salary Dashboard Login</h2>
 
     <div class="input-group">
-        <label for="mentorId">Enter Employee / Mentor ID</label>
-        <input type="text" id="mentorId" placeholder="e.g. M101" autocomplete="off">
+
+        <label>Employee / Mentor ID</label>
+
+        <input
+            type="text"
+            id="mentorId"
+            placeholder="Enter Employee ID"
+            autocomplete="off"
+        >
+
     </div>
 
-    <button onclick="getSalary()">
-        <i class="fas fa-search"></i> Fetch Salary Details
+    <button class="fetch-btn" onclick="getSalary()">
+        <i class="fas fa-search"></i>
+        Fetch Salary Details
     </button>
+
 
     <div id="loader">
         <div class="spinner"></div>
-        <p>Connecting to secure server...</p>
+        Connecting to secure server...
     </div>
 
+
     <div id="salaryInfo" class="salary-box"></div>
+
 </main>
 
+
+<!-- PAYSLIP MODAL -->
+
+<div class="modal" id="slipModal">
+
+    <div class="modal-content">
+
+        <div class="modal-actions">
+
+            <button class="action-btn" onclick="printSlip()">
+                <i class="fas fa-print"></i>
+                Print / Save PDF
+            </button>
+
+            <button class="action-btn close-btn" onclick="closeSlip()">
+                <i class="fas fa-times"></i>
+                Close
+            </button>
+
+        </div>
+
+
+        <!-- GENERATED PAYSLIP -->
+
+        <div id="salarySlip">
+
+            <div class="company-heading">
+
+                <h2>Acropolis Group of Institutions</h2>
+
+                <p id="companyAddress">
+                    Registered Office Address
+                </p>
+
+            </div>
+
+            <div class="slip-title" id="slipMonth">
+                Pay Slip for the Month
+            </div>
+
+
+            <div class="slip-section-title">
+                EMPLOYEE INFORMATION
+            </div>
+
+            <div class="employee-grid" id="employeeDetails"></div>
+
+
+            <div class="slip-section-title">
+                ATTENDANCE & WORK DETAILS
+            </div>
+
+            <div class="employee-grid" id="attendanceDetails"></div>
+
+
+            <div class="slip-section-title">
+                EARNINGS
+            </div>
+
+            <table class="pay-table">
+
+                <thead>
+                    <tr>
+                        <th>EARNINGS</th>
+                        <th>MASTER AMOUNT</th>
+                        <th>AMOUNT</th>
+                        <th>YTD</th>
+                    </tr>
+                </thead>
+
+                <tbody id="earningsBody"></tbody>
+
+            </table>
+
+
+            <div class="slip-section-title">
+                DEDUCTIONS
+            </div>
+
+            <table class="pay-table">
+
+                <thead>
+                    <tr>
+                        <th>DEDUCTIONS</th>
+                        <th>AMOUNT</th>
+                        <th>YTD</th>
+                    </tr>
+                </thead>
+
+                <tbody id="deductionsBody"></tbody>
+
+            </table>
+
+
+            <div class="slip-section-title">
+                SALARY SUMMARY
+            </div>
+
+            <table class="pay-table">
+
+                <tbody id="summaryBody"></tbody>
+
+            </table>
+
+
+            <div class="net-transfer">
+
+                <span>NET TRANSFER</span>
+
+                <span id="netTransfer">₹0.00</span>
+
+            </div>
+
+
+            <div class="words">
+                IN WORDS:
+                <span id="amountWords">Not Available</span>
+            </div>
+
+
+            <div class="slip-footer">
+                This is a computer generated document, hence no signature is required.
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
 <footer>
-    &copy; 2024 Acropolis College | Managed by Accounts Department
+    &copy; 2026 Acropolis Group of Institutions | Accounts Department
 </footer>
 
+
 <script>
-async function getSalary() {
-    const mentorIdInput = document.getElementById("mentorId");
-    const mentorId = mentorIdInput.value.trim();
+
+const API = "https://college-hwbb.onrender.com/api/salary";
+
+
+let currentSalary = null;
+
+
+/* =====================================
+   SAFE HTML
+===================================== */
+
+function esc(value){
+
+    return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+}
+
+
+/* =====================================
+   CURRENCY
+===================================== */
+
+function money(value){
+
+    const number = Number(value);
+
+    return "₹" + (Number.isFinite(number) ? number.toLocaleString("en-IN",{
+        minimumFractionDigits:2,
+        maximumFractionDigits:2
+    }) : "0.00");
+
+}
+
+
+/* =====================================
+   API FETCH
+===================================== */
+
+async function getSalary(){
+
+    const mentorId = document.getElementById("mentorId").value.trim();
+
     const box = document.getElementById("salaryInfo");
+
     const loader = document.getElementById("loader");
 
-    if(!mentorId) {
-        mentorIdInput.style.borderColor = "#ff4757";
-        return alert("Please enter a valid Mentor ID to proceed.");
+    if(!mentorId){
+
+        alert("Please enter a valid Employee / Mentor ID.");
+
+        return;
+
     }
 
-    mentorIdInput.style.borderColor = "#e0e0e0";
     box.style.display = "none";
+
     loader.style.display = "block";
 
-    try {
-        const res = await fetch(`https://college-hwbb.onrender.com/api/salary/${mentorId}`);
-        const data = await res.json();
+    try{
 
-        loader.style.display = "none";
+        const res = await fetch(
+            `${API}/${encodeURIComponent(mentorId)}`
+        );
 
-        if(data.success) {
-            const s = data.salary;
-            const statusClass = (s.status && s.status.toLowerCase() === 'paid') ? 'status-paid' : 'status-pending';
-            
-            box.innerHTML = `
-                <div class="salary-header">
-                    <h3><i class="fas fa-user-circle"></i> ${s.name || "Employee"}</h3>
-                    <span class="status-pill ${statusClass}">${s.status || "Pending"}</span>
-                </div>
-                <div class="salary-row">
-                    <span class="label-text">Mentor ID</span>
-                    <span class="value-text">${s.mentorId}</span>
-                </div>
-                <div class="salary-row">
-                    <span class="label-text">Designation</span>
-                    <span class="value-text">${s.designation || "Faculty"}</span>
-                </div>
-                <div class="salary-row">
-                    <span class="label-text">Payroll Month</span>
-                    <span class="value-text">${s.month || "Current"}</span>
-                </div>
-                <div class="salary-row">
-                    <span class="label-text">Net Payable</span>
-                    <span class="value-text" style="color:#166534; font-size:1.1rem">₹${s.amount || "0"}</span>
-                </div>
-            `;
-            box.style.display = "block";
-        } else {
-            box.innerHTML = `<div style='color:#d63031; text-align:center; padding:10px; font-weight:600;'>
-                                <i class="fas fa-exclamation-circle"></i> ${data.message}
-                             </div>`;
-            box.style.display = "block";
-            box.style.background = "#fff5f5";
+        const text = await res.text();
+
+        let data;
+
+        try{
+            data = JSON.parse(text);
         }
-    } catch(err) {
+        catch{
+            throw new Error("Server returned an invalid response.");
+        }
+
         loader.style.display = "none";
-        alert("Server connection failed. Please try again later.");
+
+        if(!res.ok || !data.success){
+
+            throw new Error(data.message || "Salary record not found.");
+
+        }
+
+        currentSalary = data.salary;
+
+        renderSalarySummary(currentSalary);
+
     }
+    catch(error){
+
+        loader.style.display = "none";
+
+        box.style.display = "block";
+
+        box.innerHTML = `
+            <div style="color:#dc2626;text-align:center;padding:15px">
+                <i class="fas fa-exclamation-circle"></i>
+                ${esc(error.message)}
+            </div>
+        `;
+
+    }
+
 }
+
+
+/* =====================================
+   DASHBOARD SUMMARY
+===================================== */
+
+function renderSalarySummary(s){
+
+    const box = document.getElementById("salaryInfo");
+
+    const status = String(s.status || "Pending");
+
+    const paid = status.toLowerCase() === "paid";
+
+    box.innerHTML = `
+
+        <div class="salary-header">
+
+            <h3>
+                <i class="fas fa-user-circle"></i>
+                ${esc(s.name || "Employee")}
+            </h3>
+
+            <span class="status-pill ${paid ? "paid" : "pending"}">
+                ${esc(status)}
+            </span>
+
+        </div>
+
+        <div class="salary-row">
+            <span>Employee ID</span>
+            <span>${esc(s.empCode || s.mentorId || "N/A")}</span>
+        </div>
+
+        <div class="salary-row">
+            <span>Designation</span>
+            <span>${esc(s.designation || "N/A")}</span>
+        </div>
+
+        <div class="salary-row">
+            <span>Payroll Month</span>
+            <span>${esc(s.month || "N/A")}</span>
+        </div>
+
+        <div class="salary-row">
+            <span>Net Payable</span>
+            <span class="net-pay">${money(s.netTransfer ?? s.amount)}</span>
+        </div>
+
+        <button class="view-slip-btn" onclick="openSlip()">
+            <i class="fas fa-file-invoice"></i>
+            View Complete Salary Slip
+        </button>
+
+    `;
+
+    box.style.display = "block";
+
+}
+
+
+/* =====================================
+   EMPLOYEE INFORMATION
+===================================== */
+
+function renderEmployeeDetails(s){
+
+    const fields = [
+
+        ["EMP CODE",s.empCode || s.mentorId],
+        ["UAN NO",s.uanNo],
+        ["EMP NAME",s.name],
+        ["PF NO",s.pfNo],
+        ["DESIGNATION",s.designation],
+        ["ESI NO",s.esiNo],
+        ["DOJ",s.doj],
+        ["STD DAYS",s.stdDays],
+        ["PAN",s.pan],
+        ["WRK DAYS",s.wrkDays],
+        ["DEPARTMENT",s.department],
+        ["LOP DAYS",s.lopDays],
+        ["LOCATION",s.location],
+        ["BANK NAME",s.bankName],
+        ["PREVIOUS LOP DAYS",s.previousLopDays],
+        ["ACCOUNT NO",s.accountNo]
+
+    ];
+
+    document.getElementById("employeeDetails").innerHTML =
+
+        fields.map(([label,value])=>`
+
+            <div class="info-cell">
+                <strong>${esc(label)}</strong>
+                <span>${esc(value ?? "-")}</span>
+            </div>
+
+        `).join("");
+
+}
+
+
+/* =====================================
+   ATTENDANCE DETAILS
+===================================== */
+
+function renderAttendance(s){
+
+    const fields = [
+
+        ["ND HOURS",s.ndHours],
+        ["UT HOURS",s.utHours],
+        ["OT HOURS",s.otHours],
+
+        ["NATIONAL HOLIDAY PAY HOURS",s.nationalHolidayHours],
+
+        ["SUPPLEMENTARY PAY HOURS",s.supplementaryPayHours],
+
+        ["PUBLIC HOLIDAY PAY HOURS",s.publicHolidayHours],
+
+        ["NEW JOINER ARREAR DAYS",s.newJoinerArrearDays],
+
+        ["PL ENCASHMENT DAYS",s.plEncashmentDays],
+
+        ["PREV OVERTIME PAY HOURS",s.prevOvertimeHours],
+
+        ["PREV SUPPLEMENTARY PAY HOURS",s.prevSupplementaryHours],
+
+        ["PREV UT AND TARDINESS DEDN",s.prevUtDeduction],
+
+        ["PREV PUBLIC HOLIDAY PAY HOURS",s.prevPublicHolidayHours],
+
+        ["PREV NATIONAL HOLIDAY PAY HOURS",s.prevNationalHolidayHours],
+
+        ["MANAGEMENT LEVEL",s.managementLevel],
+
+        ["LATE DEDUCTIONS HOURS",s.lateDeductionHours],
+
+        ["PREV LATE DEDUCTION PAY HOURS",s.prevLateDeductionHours]
+
+    ];
+
+    document.getElementById("attendanceDetails").innerHTML =
+
+        fields.map(([label,value])=>`
+
+            <div class="info-cell">
+                <strong>${esc(label)}</strong>
+                <span>${esc(value ?? "0")}</span>
+            </div>
+
+        `).join("");
+
+}
+
+
+/* =====================================
+   EARNINGS
+===================================== */
+
+const DEFAULT_EARNINGS = [
+
+    "BASIC PAY",
+    "HOUSE RENT ALLOWANCE",
+    "BONUS",
+    "OVERTIME PAY",
+    "PUBLIC HOLIDAY PAY",
+    "SUPPLEMENTARY PAY",
+    "UNDERTIME AND DEDUCT",
+    "LATE DEDUCTIONS",
+    "DRIVER CAR LEASE REIMBURSEMENT EARNINGS",
+    "DRIVER SALARY REIMBURSEMENT EARNINGS",
+    "FUEL CAR LEASE REIMBURSEMENT EARNINGS",
+    "LTA REIMBURSEMENT EARNINGS"
+
+];
+
+
+function renderEarnings(s){
+
+    const entries = s.earnings || [];
+
+    const map = {};
+
+    entries.forEach(item=>{
+
+        map[String(item.name || "").toUpperCase()] = item;
+
+    });
+
+    const body = document.getElementById("earningsBody");
+
+    body.innerHTML = DEFAULT_EARNINGS.map(name=>{
+
+        const item = map[name] || {};
+
+        return `
+
+            <tr>
+
+                <td>${esc(name)}</td>
+
+                <td>${money(item.masterAmount)}</td>
+
+                <td>${money(item.amount)}</td>
+
+                <td>${money(item.ytd)}</td>
+
+            </tr>
+
+        `;
+
+    }).join("");
+
+}
+
+
+/* =====================================
+   DEDUCTIONS
+===================================== */
+
+const DEFAULT_DEDUCTIONS = [
+
+    "PROVIDENT FUND",
+    "ASSET RECOVERY",
+    "EMPLOYEE STATE INSURANCE",
+    "LABOUR WELFARE FUND",
+    "EMPLOYER NPS DEDUCTION",
+    "TELEPHONE REIMBURSEMENT DEDUCTION",
+    "GYM RECOVERY",
+    "DRIVER CAR LEASE REIMBURSEMENT DEDUCTION",
+    "DRIVER SALARY REIMBURSEMENT DEDUCTION",
+    "FUEL CAR LEASE REIMBURSEMENT DEDUCTION",
+    "LTA REIMBURSEMENT DEDUCTION",
+    "MEDICLAIM DEDUCTION"
+
+];
+
+
+function renderDeductions(s){
+
+    const entries = s.deductions || [];
+
+    const map = {};
+
+    entries.forEach(item=>{
+
+        map[String(item.name || "").toUpperCase()] = item;
+
+    });
+
+    document.getElementById("deductionsBody").innerHTML =
+
+        DEFAULT_DEDUCTIONS.map(name=>{
+
+            const item = map[name] || {};
+
+            return `
+
+                <tr>
+
+                    <td>${esc(name)}</td>
+
+                    <td>${money(item.amount)}</td>
+
+                    <td>${money(item.ytd)}</td>
+
+                </tr>
+
+            `;
+
+        }).join("");
+
+}
+
+
+/* =====================================
+   SALARY SUMMARY
+===================================== */
+
+function renderSummary(s){
+
+    const rows = [
+
+        ["GROSS EARNINGS",s.grossEarnings],
+
+        ["GROSS DEDUCTIONS",s.grossDeduction],
+
+        ["NET TRANSFER",s.netTransfer ?? s.amount]
+
+    ];
+
+    document.getElementById("summaryBody").innerHTML =
+
+        rows.map(([label,value])=>`
+
+            <tr class="total-row">
+
+                <td>${esc(label)}</td>
+
+                <td colspan="3">${money(value)}</td>
+
+            </tr>
+
+        `).join("");
+
+}
+
+
+/* =====================================
+   OPEN SALARY SLIP
+===================================== */
+
+function openSlip(){
+
+    if(!currentSalary){
+
+        alert("Please fetch salary details first.");
+
+        return;
+
+    }
+
+    const s = currentSalary;
+
+    document.getElementById("companyAddress").textContent =
+
+        s.companyAddress ||
+
+        "Reg. Office: Acropolis Group of Institutions";
+
+    document.getElementById("slipMonth").textContent =
+
+        "Pay Slip for the Month of " + (s.month || "N/A");
+
+
+    renderEmployeeDetails(s);
+
+    renderAttendance(s);
+
+    renderEarnings(s);
+
+    renderDeductions(s);
+
+    renderSummary(s);
+
+
+    document.getElementById("netTransfer").textContent =
+
+        money(s.netTransfer ?? s.amount);
+
+
+    document.getElementById("amountWords").textContent =
+
+        s.amountInWords || "Not Available";
+
+
+    document.getElementById("slipModal").style.display = "block";
+
+}
+
+
+/* =====================================
+   PRINT / PDF
+===================================== */
+
+function printSlip(){
+
+    window.print();
+
+}
+
+
+/* =====================================
+   CLOSE SLIP
+===================================== */
+
+function closeSlip(){
+
+    document.getElementById("slipModal").style.display = "none";
+
+}
+
+
+/* =====================================
+   BACK
+===================================== */
+
 function goBack(){
-  window.history.back();
+
+    window.history.back();
+
 }
+
+
+/* =====================================
+   ENTER KEY
+===================================== */
+
+document.getElementById("mentorId").addEventListener("keydown",function(e){
+
+    if(e.key === "Enter"){
+
+        getSalary();
+
+    }
+
+});
+
 </script>
 
 </body>
