@@ -1614,50 +1614,81 @@
       }
 
       /* ==================== API CLIENT ==================== */
-      async function apiFetch(endpoint, options = {}) {
-        const url = `${API_BASE}${endpoint}`;
-        const config = {
-          credentials: "include", // Send & receive secure HttpOnly session cookies
-          headers: {
-            "Content-Type": "application/json",
-            ...(options.headers || {})
-          },
-          ...options
-        };
+async function apiFetch(endpoint, options = {}) {
 
-        let response;
+    const url = `${API_BASE}${endpoint}`;
+
+    const headers = {
+        "Accept": "application/json",
+        ...(options.headers || {})
+    };
+
+    // Content-Type only for requests that actually send JSON
+    if (options.body) {
+        headers["Content-Type"] = "application/json";
+    }
+
+    const config = {
+        ...options,
+        headers,
+        credentials: "include"
+    };
+
+    let response;
+
+    try {
+
+        console.log("API Request:", url);
+
+        response = await fetch(url, config);
+
+        console.log("API Status:", response.status);
+
+    } catch (error) {
+
+        console.error("Network/CORS Error:", error);
+
+        throw new Error(
+            "Backend connection failed. Check CORS settings, Render server and internet connection."
+        );
+    }
+
+    const contentType = response.headers.get("content-type") || "";
+
+    let data = {};
+
+    if (contentType.includes("application/json")) {
+
         try {
-          response = await fetch(url, config);
-        } catch (networkErr) {
-          throw new Error("Unable to connect to the server. Please check your internet connection or try again shortly.");
-        }
-
-        let data = {};
-        const contentType = response.headers.get("content-type") || "";
-        if (contentType.includes("application/json")) {
-          try {
             data = await response.json();
-          } catch (_) {
-            data = {};
-          }
+        } catch (error) {
+            console.error("JSON Parsing Error:", error);
         }
 
-        if (response.status === 401 && !endpoint.includes("/login") && !endpoint.includes("/signup")) {
-          handleSessionExpired();
-          throw new Error("Your session has expired. Please log in again.");
-        }
+    } else {
 
-        if (!response.ok) {
-          const errMsg = data.error || data.message || `Request failed (${response.status})`;
-          const err = new Error(errMsg);
-          err.status = response.status;
-          err.data = data;
-          throw err;
-        }
+        const text = await response.text();
 
-        return data;
-      }
+        console.error("Non-JSON API Response:", text);
 
+    }
+
+    if (!response.ok) {
+
+        const error = new Error(
+            data.error ||
+            data.message ||
+            `Server Error: ${response.status}`
+        );
+
+        error.status = response.status;
+        error.data = data;
+
+        throw error;
+    }
+
+    return data;
+}
       /* ==================== 2. AUTOMATIC MENTOR ID DETECTION ==================== */
       function detectMentorIdFromStorage() {
         const directKeys = ["mentorId", "mentor_id", "mentorID", "mentorid", "mentor"];
