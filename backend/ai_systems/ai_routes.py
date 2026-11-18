@@ -3,29 +3,29 @@ from .ollama_engine import generate_response
 
 ai_bp = Blueprint("ai_bp", __name__, url_prefix="/api/ai")
 
-ADMIN_PROMPT = """
-You are the Admin AI Assistant of a College Management System.
+
+MENTOR_PROMPT = """
+You are the College Management System AI Assistant for mentors.
 
 You can communicate in Hindi and English.
 
-You help administrators understand and manage the college website.
+You help mentors understand their college website and its features.
 
-Currently, you are in CHAT MODE.
-
-You must:
-1. Answer clearly.
+Rules:
+1. Answer clearly and helpfully.
 2. Never invent website functionality.
 3. If information is unavailable, say so.
 4. Never claim that you performed an operation.
 5. Do not pretend to have accessed the database.
+6. Never reveal another mentor's private information.
+7. You are currently in CHAT MODE.
 """
+
 
 STUDENT_PROMPT = """
 You are the Student AI Assistant of a College Management System.
 
 You can communicate in Hindi and English.
-
-You help students understand the website and its features.
 
 Rules:
 1. Give clear and friendly answers.
@@ -36,17 +36,7 @@ Rules:
 """
 
 
-@ai_bp.route("/admin/chat", methods=["POST"])
-def admin_chat():
-
-    # TODO: Replace with your actual admin authentication check.
-    if not session.get("admin_logged_in"):
-        return jsonify({
-            "success": False,
-            "error": "Unauthorized"
-        }), 401
-
-    data = request.get_json(silent=True) or {}
+def process_ai_message(prompt, data):
 
     message = str(data.get("message", "")).strip()
     history = data.get("history", [])
@@ -57,10 +47,23 @@ def admin_chat():
             "error": "Message is required"
         }), 400
 
-    messages = [{"role": "system", "content": ADMIN_PROMPT}]
+    if not isinstance(history, list):
+        history = []
+
+    messages = [
+        {
+            "role": "system",
+            "content": prompt
+        }
+    ]
 
     for item in history[-10:]:
+
+        if not isinstance(item, dict):
+            continue
+
         if item.get("role") in ("user", "assistant"):
+
             messages.append({
                 "role": item["role"],
                 "content": str(item.get("content", ""))[:4000]
@@ -73,50 +76,51 @@ def admin_chat():
 
     result = generate_response(messages)
 
-    if not result["success"]:
+    if not result.get("success"):
         return jsonify(result), 503
 
-    return jsonify(result)
+    return jsonify(result), 200
 
+
+# ============================================================
+# MENTOR AI CHAT
+# ============================================================
+
+@ai_bp.route("/admin/chat", methods=["POST"])
+@ai_bp.route("/mentor/chat", methods=["POST"])
+def mentor_chat():
+
+    # Check mentor login session
+    mentor_id = session.get("mentor_id")
+
+    if not mentor_id:
+        return jsonify({
+            "success": False,
+            "error": "Mentor login required"
+        }), 401
+
+    data = request.get_json(silent=True) or {}
+
+    result = process_ai_message(MENTOR_PROMPT, data)
+
+    return result
+
+
+# ============================================================
+# STUDENT AI CHAT
+# ============================================================
 
 @ai_bp.route("/student/chat", methods=["POST"])
 def student_chat():
 
-    # TODO: Replace with your actual student authentication check.
-    if not session.get("student_id"):
+    student_id = session.get("student_id")
+
+    if not student_id:
         return jsonify({
             "success": False,
-            "error": "Unauthorized"
+            "error": "Student login required"
         }), 401
 
     data = request.get_json(silent=True) or {}
 
-    message = str(data.get("message", "")).strip()
-    history = data.get("history", [])
-
-    if not message:
-        return jsonify({
-            "success": False,
-            "error": "Message is required"
-        }), 400
-
-    messages = [{"role": "system", "content": STUDENT_PROMPT}]
-
-    for item in history[-10:]:
-        if item.get("role") in ("user", "assistant"):
-            messages.append({
-                "role": item["role"],
-                "content": str(item.get("content", ""))[:4000]
-            })
-
-    messages.append({
-        "role": "user",
-        "content": message[:4000]
-    })
-
-    result = generate_response(messages)
-
-    if not result["success"]:
-        return jsonify(result), 503
-
-    return jsonify(result)
+    return process_ai_message(STUDENT_PROMPT, data)
