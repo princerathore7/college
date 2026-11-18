@@ -394,136 +394,325 @@ input:focus + .input-icon {
 /* =====================================================
    IMAGE SLIDER LOGIC
 ===================================================== */
+
 const images = document.querySelectorAll('#slider img');
 let currentIndex = 0;
 
 function nextImage() {
-  images[currentIndex].classList.remove('active');
-  currentIndex = (currentIndex + 1) % images.length;
-  images[currentIndex].classList.add('active');
+    if (!images.length) return;
+
+    images[currentIndex].classList.remove('active');
+    currentIndex = (currentIndex + 1) % images.length;
+    images[currentIndex].classList.add('active');
 }
-setInterval(nextImage, 6000); // Increased time slightly for smoother feel
+
+if (images.length > 1) {
+    setInterval(nextImage, 6000);
+}
 
 
 /* =====================================================
    DYNAMIC PLACEHOLDER BASED ON ROLE
 ===================================================== */
+
 const roleRadios = document.querySelectorAll('input[name="role"]');
 const usernameInput = document.getElementById("username");
 
 roleRadios.forEach(radio => {
-  radio.addEventListener("change", () => {
-    // Add a slight fade effect to input when switching
-    usernameInput.style.opacity = '0.5';
-    
-    setTimeout(() => {
-        if (radio.value === "student") {
-        usernameInput.placeholder = "Enrollment Number";
-        } 
-        else if (radio.value === "mentor") {
-        usernameInput.placeholder = "Mentor ID";
-        } 
-        else if (radio.value === "bus") {
-        usernameInput.placeholder = "Bus Pilot ID (e.g. BUS-101)";
-        }
-        usernameInput.style.opacity = '1';
-    }, 200);
-  });
+
+    radio.addEventListener("change", () => {
+
+        usernameInput.style.opacity = '0.5';
+
+        setTimeout(() => {
+
+            if (radio.value === "student") {
+                usernameInput.placeholder = "Enrollment Number";
+            }
+            else if (radio.value === "mentor") {
+                usernameInput.placeholder = "Mentor ID";
+            }
+            else if (radio.value === "bus") {
+                usernameInput.placeholder = "Bus Pilot ID (e.g. BUS-101)";
+            }
+
+            usernameInput.style.opacity = '1';
+
+        }, 200);
+
+    });
+
 });
 
 
 /* =====================================================
-   LOGIN HANDLER (Logic Untouched)
+   LOGIN HANDLER
 ===================================================== */
+
 const form = document.getElementById("loginForm");
 const btn = document.getElementById("loginBtn");
 
 form.addEventListener("submit", async (e) => {
-  e.preventDefault();
 
-  const originalBtnText = btn.innerText;
-  btn.disabled = true;
-  btn.innerText = "Authenticating..."; // Better text
-  btn.style.opacity = "0.7";
+    e.preventDefault();
 
-  const username = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value.trim();
-  const role = document.querySelector('input[name="role"]:checked').value;
+    const originalBtnText = btn.innerText;
 
-  let url = "";
-  let bodyData = {};
+    btn.disabled = true;
+    btn.innerText = "Authenticating...";
+    btn.style.opacity = "0.7";
 
-  /* ---------- API SELECTION ---------- */
-  if (role === "mentor") {
-    url = "https://college-hwbb.onrender.com/api/login/mentor";
-    bodyData = { mentorId: username, password };
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
 
-  } 
-  else if (role === "bus") {
-    url = "https://college-hwbb.onrender.com/api/bus/login";
-    bodyData = { busId: username, password };
+    const selectedRole = document.querySelector('input[name="role"]:checked');
 
-  } 
-  else {
-    url = "https://college-hwbb.onrender.com/api/students/login";
-    bodyData = { enrollment: username, password };
-  }
-
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(bodyData)
-    });
-
-    const data = await res.json();
-if (role === "student" && data.suspended) {
-  window.location.href = "suspended.html";
-  return;
-}
-    /* ---------- SUCCESS HANDLING ---------- */
-    if (res.ok) {
-/* ---------- STUDENT SUSPENSION CHECK ---------- */
-
-      /* STUDENT */
-      if (role === "student" && data.success) {
-        localStorage.setItem("enrollment", data.enrollment);
-        localStorage.setItem("role", "student");
-        window.location.href = "ewhfihewlbewcbewstudent-dashboard45689";
+    if (!selectedRole) {
+        alert("Please select a role.");
+        btn.disabled = false;
+        btn.innerText = originalBtnText;
+        btn.style.opacity = "1";
         return;
-      }
-
-      /* MENTOR */
-      if (role === "mentor" && data.success) {
-        localStorage.setItem("mentorId", data.mentor.mentorId);
-        localStorage.setItem("mentorName", data.mentor.name || "Mentor");
-        localStorage.setItem("role", "mentor");
-        window.location.href = "uihfewibfasdvkfdbvkbkvbwifowjnfhbfebfuhiufbwfbuid";
-        return;
-      }
-
-      /* 🚌 BUS DRIVER */
-      if (role === "bus") {
-        localStorage.setItem("busId", username);
-        localStorage.setItem("role", "bus");
-        window.location.href = `bus-driver.html?busId=${username}`;
-        return;
-      }
-
-    } else {
-      alert(data.message || data.error || "Invalid credentials");
     }
 
-  } catch (err) {
-    console.error(err);
-    alert("Server connection error. Please try again.");
-  } finally {
-    btn.disabled = false;
-    btn.innerText = originalBtnText;
-    btn.style.opacity = "1";
-  }
+    const role = selectedRole.value;
+
+    let url = "";
+    let bodyData = {};
+
+
+    /* =====================================================
+       API SELECTION
+    ===================================================== */
+
+    if (role === "mentor") {
+
+        url = "https://college-hwbb.onrender.com/api/login/mentor";
+
+        bodyData = {
+            mentorId: username,
+            password: password
+        };
+
+    }
+
+    else if (role === "bus") {
+
+        url = "https://college-hwbb.onrender.com/api/bus/login";
+
+        bodyData = {
+            busId: username,
+            password: password
+        };
+
+    }
+
+    else {
+
+        url = "https://college-hwbb.onrender.com/api/students/login";
+
+        bodyData = {
+            enrollment: username,
+            password: password
+        };
+
+    }
+
+
+    /* =====================================================
+       API REQUEST
+    ===================================================== */
+
+    try {
+
+        const res = await fetch(url, {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify(bodyData)
+
+        });
+
+        const data = await res.json();
+
+        console.log("LOGIN API RESPONSE:", data);
+
+
+        /* =====================================================
+           STUDENT SUSPENSION CHECK
+        ===================================================== */
+
+        if (role === "student" && data.suspended) {
+
+            window.location.href = "suspended.html";
+            return;
+
+        }
+
+
+        /* =====================================================
+           SUCCESS HANDLING
+        ===================================================== */
+
+        if (res.ok && data.success) {
+
+
+            /* =============================================
+               STUDENT LOGIN
+            ============================================= */
+
+            if (role === "student") {
+
+                localStorage.setItem("enrollment", data.enrollment);
+
+                localStorage.setItem("role", "student");
+
+                window.location.href = "ewhfihewlbewcbewstudent-dashboard45689";
+
+                return;
+
+            }
+
+
+            /* =============================================
+               MENTOR LOGIN
+            ============================================= */
+
+            if (role === "mentor") {
+
+                const mentor = data.mentor || {};
+
+                if (!mentor.mentorId) {
+                    throw new Error("Mentor ID missing in login response.");
+                }
+
+                // Mentor basic details
+                localStorage.setItem(
+                    "mentorId",
+                    mentor.mentorId
+                );
+
+                localStorage.setItem(
+                    "mentorName",
+                    mentor.name || "Mentor"
+                );
+
+                localStorage.setItem(
+                    "role",
+                    "mentor"
+                );
+
+
+                // Save designation if available
+                if (mentor.designation) {
+
+                    localStorage.setItem(
+                        "designation",
+                        mentor.designation
+                    );
+
+                } else {
+
+                    localStorage.removeItem("designation");
+
+                }
+
+
+                // Save salary device ID if available
+                if (mentor.salary_device_id) {
+
+                    localStorage.setItem(
+                        "salary_device_id",
+                        mentor.salary_device_id
+                    );
+
+                }
+
+
+                console.log("MENTOR LOGIN DETAILS:", {
+
+                    mentorId: mentor.mentorId,
+
+                    mentorName: mentor.name,
+
+                    designation: mentor.designation || "Not provided",
+
+                    salary_device_id: mentor.salary_device_id || "Not provided"
+
+                });
+
+
+                // Redirect to mentor dashboard
+                window.location.href = "uihfewibfasdvkfdbvkbkvbwifowjnfhbfebfuhiufbwfbuid";
+
+                return;
+
+            }
+
+
+            /* =============================================
+               BUS DRIVER LOGIN
+            ============================================= */
+
+            if (role === "bus") {
+
+                localStorage.setItem("busId", username);
+
+                localStorage.setItem("role", "bus");
+
+                window.location.href = `bus-driver.html?busId=${encodeURIComponent(username)}`;
+
+                return;
+
+            }
+
+        }
+
+
+        /* =====================================================
+           LOGIN FAILED
+        ===================================================== */
+
+        else {
+
+            alert(
+                data.message ||
+                data.error ||
+                "Invalid credentials. Please try again."
+            );
+
+        }
+
+
+    }
+
+    catch (err) {
+
+        console.error("LOGIN ERROR:", err);
+
+        alert(
+            err.message === "Failed to fetch"
+                ? "Server connection error. Please try again."
+                : err.message || "Something went wrong."
+        );
+
+    }
+
+    finally {
+
+        btn.disabled = false;
+
+        btn.innerText = originalBtnText;
+
+        btn.style.opacity = "1";
+
+    }
+
 });
 </script>
-
 </body>
 </html>

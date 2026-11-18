@@ -374,16 +374,15 @@ if(!mentorId){
   document.getElementById("mentorNameDisplay").textContent = mentorName || "Authorized Mentor";
 }
 /* --- FETCH MENTOR DESIGNATION --- */
+/* --- FETCH MENTOR DESIGNATION --- */
+
 async function loadMentorDesignation() {
 
     const designationElement = document.getElementById(
         "mentorDesignationDisplay"
     );
 
-    if (!designationElement) {
-        console.error("mentorDesignationDisplay element not found");
-        return;
-    }
+    if (!designationElement || !mentorId) return;
 
     designationElement.textContent = "Designation: Loading...";
 
@@ -396,34 +395,41 @@ async function loadMentorDesignation() {
         const result = await response.json();
 
         if (!response.ok || !result.success) {
-            throw new Error("Unable to fetch mentor details");
+            throw new Error(result.message || "Unable to fetch mentor details");
         }
 
         const mentor = result.mentors?.find(
             m => String(m.mentorId).trim() === String(mentorId).trim()
         );
 
-        if (mentor && mentor.designation) {
-
-            designationElement.textContent =
-                `Designation: ${mentor.designation}`;
-
-            console.log("Mentor Designation Loaded:", mentor.designation);
-
-        } else {
-
-            designationElement.textContent = "Designation: Not Assigned";
-
-            console.warn("Mentor found but designation not assigned.");
-
+        if (!mentor) {
+            throw new Error("Mentor not found");
         }
+
+        const designation = mentor.designation || "Not Assigned";
+
+        // Update Local Storage
+        localStorage.setItem("designation", designation);
+
+        // Update Dashboard
+        designationElement.textContent =
+            `Designation: ${designation}`;
+
+        console.log("Mentor Details:", {
+            mentorId: mentor.mentorId,
+            mentorName: mentor.name,
+            designation: designation
+        });
 
     } catch (error) {
 
         console.error("Designation Fetch Error:", error);
 
-        designationElement.textContent = "Designation: Unavailable";
+        // Previously saved designation as fallback
+        const savedDesignation = localStorage.getItem("designation");
 
+        designationElement.textContent =
+            `Designation: ${savedDesignation || "Unavailable"}`;
     }
 }
 /* --- SIDEBAR & UI LOGIC --- */
@@ -506,6 +512,7 @@ function logout(){
 window.onload = () => {
   loadEvents();
   loadNoticeCount();
+  loadMentorDesignation();
   handleWeekendReminder();
 };
 </script>
