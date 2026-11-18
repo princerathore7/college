@@ -2,7 +2,7 @@ import json
 import urllib.request
 import urllib.error
 
-OLLAMA_URL = "http://127.0.0.1:11434/api/chat"
+OLLAMA_URL = "https://college-hwbb.onrender.com/api/chat"
 MODEL_NAME = "qwen3:8b"
 
 
