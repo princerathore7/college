@@ -1,3667 +1,2662 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Compensation Management | College Dashboard</title>
-
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
-:root {
-    --primary: #536dfe;
-    --primary-dark: #4055d8;
-    --bg: #f4f6fb;
-    --card: #ffffff;
-    --text: #20283d;
-    --muted: #7b8499;
-    --border: #e8ebf2;
-    --green: #15966b;
-    --red: #dc4545;
-    --orange: #d98a19;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
-}
-
-body {
-    background: var(--bg);
-    color: var(--text);
-}
-
-button, input, select, textarea {
-    font: inherit;
-}
-
-button {
-    cursor: pointer;
-}
-
-.layout {
-    display: flex;
-    min-height: 100vh;
-}
-
-/* SIDEBAR */
-
-.sidebar {
-    width: 250px;
-    background: #171e35;
-    color: white;
-    padding: 25px 16px;
-    flex-shrink: 0;
-}
-
-.brand {
-    font-size: 21px;
-    font-weight: 800;
-    padding: 5px 12px 30px;
-}
-
-.brand span {
-    color: #8193ff;
-}
-
-.sidebar-label {
-    color: #7e89a9;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    padding: 10px 12px;
-}
-
-.nav-btn {
-    width: 100%;
-    background: transparent;
-    color: #aeb8d0;
-    border: none;
-    padding: 13px 12px;
-    text-align: left;
-    border-radius: 9px;
-    margin-bottom: 5px;
-    font-size: 13px;
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    transition: .2s;
-}
-
-.nav-btn:hover,
-.nav-btn.active {
-    background: #293454;
-    color: white;
-}
-
-.nav-btn.active {
-    border-left: 3px solid #8193ff;
-}
-
-.nav-icon {
-    font-size: 17px;
-    width: 22px;
-}
-
-/* MAIN */
-
-.main {
-    flex: 1;
-    min-width: 0;
-}
-
-.topbar {
-    height: 75px;
-    background: white;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 30px;
-}
-
-.topbar h2 {
-    font-size: 17px;
-}
-
-.topbar small {
-    color: var(--muted);
-}
-
-.top-right {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    font-size: 12px;
-    color: var(--muted);
-}
-
-.avatar {
-    width: 36px;
-    height: 36px;
-    background: #e9edff;
-    color: var(--primary);
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    font-weight: 800;
-}
-
-.content {
-    padding: 28px;
-    max-width: 1500px;
-    margin: auto;
-}
-
-.page {
-    display: none;
-}
-
-.page.active {
-    display: block;
-}
-
-.page-heading {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-bottom: 24px;
-}
-
-.page-heading h1 {
-    font-size: 24px;
-    font-weight: 800;
-}
-
-.page-heading p {
-    color: var(--muted);
-    font-size: 13px;
-    margin-top: 7px;
-}
-
-/* CARDS */
-
-.card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 13px;
-    padding: 23px;
-    margin-bottom: 20px;
-    box-shadow: 0 3px 15px rgba(20,30,60,.025);
-}
-
-.card-title {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 18px;
-}
-
-.stats {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 22px;
-}
-
-.stat-card {
-    background: white;
-    border: 1px solid var(--border);
-    padding: 20px;
-    border-radius: 12px;
-}
-
-.stat-card small {
-    color: var(--muted);
-    font-size: 12px;
-}
-
-.stat-card h2 {
-    font-size: 25px;
-    margin-top: 12px;
-}
-
-.stat-card .icon {
-    font-size: 20px;
-    float: right;
-}
-
-/* FORMS */
-
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 17px;
-}
-
-.form-grid.two {
-    grid-template-columns: repeat(2, 1fr);
-}
-
-.field label {
-    display: block;
-    font-size: 12px;
-    font-weight: 700;
-    margin-bottom: 8px;
-}
-
-.field input,
-.field select,
-.field textarea {
-    width: 100%;
-    border: 1px solid #dfe3ed;
-    background: white;
-    border-radius: 8px;
-    padding: 11px 12px;
-    outline: none;
-    font-size: 13px;
-    color: var(--text);
-}
-
-.field input:focus,
-.field select:focus,
-.field textarea:focus {
-    border-color: var(--primary);
-}
-
-.field textarea {
-    resize: vertical;
-    min-height: 80px;
-}
-
-.full {
-    grid-column: 1 / -1;
-}
-
-/* BUTTONS */
-
-.btn {
-    border: none;
-    border-radius: 8px;
-    padding: 11px 17px;
-    font-size: 12px;
-    font-weight: 700;
-    transition: .2s;
-}
-
-.btn-primary {
-    background: var(--primary);
-    color: white;
-}
-
-.btn-primary:hover {
-    background: var(--primary-dark);
-}
-
-.btn-success {
-    background: var(--green);
-    color: white;
-}
-
-.btn-danger {
-    background: #fff0f0;
-    color: var(--red);
-}
-
-.btn-light {
-    background: #edf0f7;
-    color: #3b4661;
-}
-
-.btn-orange {
-    background: #fff4e4;
-    color: #b77913;
-}
-
-.btn-sm {
-    padding: 7px 11px;
-    font-size: 11px;
-}
-
-.actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 20px;
-}
-
-/* SEARCH */
-
-.search-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr auto;
-    gap: 13px;
-    align-items: end;
-}
-
-.search-row input,
-.search-row select {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    outline: none;
-}
-
-/* TABLE */
-
-.table-wrap {
-    width: 100%;
-    overflow-x: auto;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 650px;
-}
-
-th {
-    background: #f7f8fc;
-    color: #78839a;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: .4px;
-    text-align: left;
-    padding: 14px;
-}
-
-td {
-    padding: 14px;
-    border-bottom: 1px solid #edf0f5;
-    font-size: 12px;
-}
-
-td input {
-    width: 110px;
-    padding: 8px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-}
-
-td input.component-name {
-    width: 150px;
-}
-
-.status-badge {
-    display: inline-block;
-    padding: 6px 10px;
-    border-radius: 20px;
-    font-size: 10px;
-    font-weight: 700;
-    background: #e7f8f0;
-    color: var(--green);
-}
-
-.muted {
-    color: var(--muted);
-}
-
-.hidden {
-    display: none !important;
-}
-
-.message {
-    margin-top: 14px;
-    padding: 11px 13px;
-    border-radius: 7px;
-    font-size: 12px;
-    display: none;
-}
-
-.message.show {
-    display: block;
-}
-
-.message.error {
-    background: #fff0f0;
-    color: var(--red);
-}
-
-.message.success {
-    background: #e8f8f0;
-    color: var(--green);
-}
-
-/* EMPLOYEE DETAILS */
-
-.employee-details {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 13px;
-}
-
-.info-box {
-    padding: 14px;
-    background: #f7f8fc;
-    border-radius: 9px;
-}
-
-.info-box small {
-    display: block;
-    color: var(--muted);
-    font-size: 11px;
-    margin-bottom: 7px;
-}
-
-.info-box strong {
-    font-size: 13px;
-    word-break: break-word;
-}
-
-/* TOTALS */
-
-.total-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 13px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-}
-
-.total-row.final {
-    font-size: 20px;
-    font-weight: 800;
-    color: var(--green);
-}
-
-/* MODAL */
-
-.modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(10,15,30,.55);
-    z-index: 100;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 15px;
-}
-
-.modal.show {
-    display: flex;
-}
-
-.modal-content {
-    width: 100%;
-    max-width: 550px;
-    max-height: 90vh;
-    overflow-y: auto;
-    background: white;
-    padding: 25px;
-    border-radius: 13px;
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-}
-
-.close {
-    background: none;
-    border: none;
-    font-size: 22px;
-}
-
-/* RESPONSIVE */
-
-@media(max-width: 1000px) {
-    .sidebar {
-        width: 210px;
-    }
-
-    .stats {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .form-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media(max-width: 700px) {
-    .sidebar {
-        width: 65px;
-        padding: 15px 7px;
-    }
-
-    .brand {
-        font-size: 0;
-        padding: 10px;
-    }
-
-    .brand span {
-        font-size: 20px;
-    }
-
-    .sidebar-label,
-    .nav-text {
-        display: none;
-    }
-
-    .nav-btn {
-        justify-content: center;
-        padding: 13px 5px;
-    }
-
-    .topbar {
-        padding: 0 15px;
-    }
-
-    .content {
-        padding: 16px;
-    }
-
-    .search-row,
-    .form-grid,
-    .form-grid.two,
-    .employee-details {
-        grid-template-columns: 1fr;
-    }
-
-    .stats {
-        gap: 10px;
-    }
-
-    .stat-card {
-        padding: 14px;
-    }
-
-    .stat-card h2 {
-        font-size: 19px;
-    }
-}
-
-
-</style>
-
-</head>
-
-<body>
-
-<div class="layout">
-
-<!-- SIDEBAR -->
-
-<aside class="sidebar">
-
-    <div class="brand">COMPEN<span>SATE</span></div>
-
-    <div class="sidebar-label">MAIN MENU</div>
-
-    <button class="nav-btn active" data-page="dashboard">
-        <span class="nav-icon">▦</span>
-        <span class="nav-text">Dashboard</span>
-    </button>
-
-    <button class="nav-btn" data-page="profile">
-        <span class="nav-icon">♙</span>
-        <span class="nav-text">Employee Profile</span>
-    </button>
-
-    <button class="nav-btn" data-page="issue">
-        <span class="nav-icon">＋</span>
-        <span class="nav-text">Issue Salary</span>
-    </button>
-
-    <button class="nav-btn" data-page="edit">
-        <span class="nav-icon">✎</span>
-        <span class="nav-text">Edit Salary Slip</span>
-    </button>
-
-    <div class="sidebar-label">DISTRIBUTION</div>
-
-    <button class="nav-btn" data-page="bulk">
-        <span class="nav-icon">⇧</span>
-        <span class="nav-text">Bulk Salary</span>
-    </button>
-
-    <button class="nav-btn" data-page="fixed">
-        <span class="nav-icon">₹</span>
-        <span class="nav-text">Fixed Salary</span>
-    </button>
-
-    <div class="sidebar-label">MANAGEMENT</div>
-
-    <button class="nav-btn" data-page="templates">
-        <span class="nav-icon">▤</span>
-        <span class="nav-text">Salary Templates</span>
-    </button>
-
-    <button class="nav-btn" data-page="history">
-        <span class="nav-icon">◷</span>
-        <span class="nav-text">Salary History</span>
-    </button>
-
-    <button class="nav-btn" data-page="records">
-        <span class="nav-icon">▣</span>
-        <span class="nav-text">All Records</span>
-    </button>
-
-</aside>
-
-
-<!-- MAIN CONTENT -->
-
-<main class="main">
-
-<header class="topbar">
+\<!DOCTYPE html>
 
+\<html lang="en"> \<head> \<meta charset="UTF-8"> \<meta name="viewport" content="width=device-width, initial-scale=1.0"> \<title>Compensation Management\</title>
+
+\<style> \:root{     --bg:#f5f7fb;     --card:#ffffff;     --text:#182230;     --muted:#667085;     --primary:#5145e5;     --primary-light:#eeedff;     --border:#e7eaf0;     --green:#159b69;     --red:#dc3545;     --orange:#e58a16;     --shadow:0 5px 22px rgba(20,30,60,.06); }  \*{box-sizing\:border-box}  body{     margin:0;     font-family\:Inter,Arial,sans-serif;     background\:var(--bg);     color\:var(--text); }  button,input,select,textarea{     font\:inherit; }  button{cursor\:pointer}  .layout{     display\:flex;     min-height:100vh; }  .sidebar{     width:245px;     background:#17172d;     color\:white;     padding:25px 16px;     position\:fixed;     top:0;     bottom:0;     left:0;     overflow-y\:auto;     z-index:20; }  .brand{     font-size:21px;     font-weight:800;     padding:8px 12px 28px; }  .brand span{color:#a9a1ff}  .nav-label{     font-size:10px;     letter-spacing:1.5px;     color:#9292aa;     padding:16px 12px 8px; }  .nav-item{     display\:flex;     align-items\:center;     gap:12px;     width:100%;     padding:12px;     border:0;     border-radius:9px;     background\:transparent;     color:#c8c8da;     text-align\:left;     margin:3px 0;     font-size:13px;     transition:.2s; }  .nav-item\:hover,.nav-item.active{     background:#343252;     color\:white; }  .nav-item.active{     box-shadow\:inset 3px 0 #9388ff; }  .nav-icon{     width:20px;     text-align\:center;     font-size:17px; }  .main{     margin-left:245px;     width\:calc(100% - 245px);     min-width:0; }  .topbar{     height:72px;     background\:white;     border-bottom:1px solid var(--border);     display\:flex;     justify-content\:space-between;     align-items\:center;     padding:0 30px;     position\:sticky;     top:0;     z-index:10; }  .topbar h2{     font-size:17px;     margin:0; }  .topbar-right{     display\:flex;     align-items\:center;     gap:12px;     font-size:12px;     color\:var(--muted); }  .status-dot{     width:8px;     height:8px;     background:#20b77d;     border-radius:50%;     display\:inline-block; }  .content{     padding:28px;     max-width:1600px;     margin\:auto; }  .page{display\:none} .page.active{display\:block}  .page-heading{     display\:flex;     justify-content\:space-between;     align-items\:center;     flex-wrap\:wrap;     gap:15px;     margin-bottom:24px; }  .page-heading h1{     margin:0 0 6px;     font-size:24px; }  .page-heading p{     margin:0;     color\:var(--muted);     font-size:13px; }  .cards{     display\:grid;     grid-template-columns\:repeat(4,minmax(0,1fr));     gap:16px;     margin-bottom:24px; }  .stat-card{     background\:white;     padding:21px;     border:1px solid var(--border);     border-radius:13px;     box-shadow\:var(--shadow); }  .stat-title{     color\:var(--muted);     font-size:12px; }  .stat-value{     font-size:25px;     font-weight:800;     margin-top:12px;     word-break\:break-word; }  .stat-icon{     float\:right;     background\:var(--primary-light);     color\:var(--primary);     padding:10px;     border-radius:10px; }  .panel{     background\:white;     border:1px solid var(--border);     border-radius:13px;     padding:22px;     margin-bottom:20px;     box-shadow\:var(--shadow);     min-width:0; }  .panel-title{     display\:flex;     justify-content\:space-between;     align-items\:center;     flex-wrap\:wrap;     gap:12px;     margin-bottom:19px; }  .panel-title h3{     font-size:16px;     margin:0; }  .grid{     display\:grid;     grid-template-columns\:repeat(3,minmax(0,1fr));     gap:15px; }  .grid.two{grid-template-columns\:repeat(2,minmax(0,1fr))} .grid.four{grid-template-columns\:repeat(4,minmax(0,1fr))}  .field{     display\:flex;     flex-direction\:column;     gap:7px;     min-width:0; }  .field.full{grid-column:1/-1}  label{     font-size:12px;     color:#475467;     font-weight:600; }  input,select,textarea{     width:100%;     padding:11px 12px;     border:1px solid #dfe3eb;     border-radius:8px;     outline\:none;     background\:white;     color\:var(--text);     font-size:13px; }  input\:focus,select\:focus,textarea\:focus{     border-color\:var(--primary);     box-shadow:0 0 0 3px rgba(81,69,229,.09); }  textarea{     resize\:vertical;     min-height:75px; }  .btn{     padding:10px 15px;     border:0;     border-radius:8px;     font-size:12px;     font-weight:700;     display\:inline-flex;     align-items\:center;     justify-content\:center;     gap:7px; }  .btn-primary{background\:var(--primary);color\:white} .btn-primary\:hover{background:#4035ca} .btn-light{background:#f0f1f6;color:#344054} .btn-danger{background:#fff0f0;color\:var(--red)} .btn-success{background:#e8f8f0;color\:var(--green)} .btn-orange{background:#fff5e7;color:#b66a00} .btn-small{padding:7px 10px;font-size:11px}  .actions{     display\:flex;     flex-wrap\:wrap;     gap:9px;     margin-top:20px; }  .toolbar{     display\:flex;     align-items\:center;     flex-wrap\:wrap;     gap:10px;     margin-bottom:15px; }  .toolbar input,.toolbar select{     width\:auto;     min-width:150px; }  .table-wrap{     width:100%;     overflow-x\:auto; }  table{     width:100%;     border-collapse\:collapse;     min-width:650px; }  th{     background:#f8f9fc;     color:#667085;     text-align\:left;     font-size:11px;     padding:13px;     white-space\:nowrap; }  td{     border-bottom:1px solid #eef0f4;     padding:13px;     font-size:12px;     vertical-align\:middle; }  tr\:last-child td{border-bottom:0}  .badge{     display\:inline-block;     padding:5px 9px;     border-radius:20px;     font-size:10px;     font-weight:700;     background:#edf0f5;     color:#475467; }  .badge.green{background:#e6f8ef;color:#16865d} .badge.red{background:#fff0f0;color:#d63b48} .badge.orange{background:#fff4e5;color:#b66a00}  .empty{     text-align\:center;     color:#98a2b3;     padding:35px!important; }  .component-box{     border:1px solid var(--border);     padding:16px;     border-radius:10px;     margin-bottom:15px; }  .component-header{     display\:flex;     justify-content\:space-between;     align-items\:center;     margin-bottom:13px; }  .component-header h4{     margin:0;     font-size:13px; }  .component-row{     display\:grid;     grid-template-columns:1fr 150px 45px;     gap:9px;     margin-bottom:9px; }  .remove-btn{     border:0;     border-radius:7px;     background:#fff0f0;     color\:var(--red);     font-size:18px; }  .total-box{     display\:grid;     grid-template-columns\:repeat(3,1fr);     gap:12px;     margin-top:15px; }  .total-item{     padding:17px;     border-radius:10px;     background:#f7f7fc; }  .total-item span{     display\:block;     font-size:11px;     color\:var(--muted); }  .total-item strong{     display\:block;     margin-top:8px;     font-size:19px; }  .total-item.net{     background:#eaf8f1;     color:#14835b; }  .employee-card{     background:#f7f7ff;     border:1px solid #e6e4ff;     border-radius:10px;     padding:16px;     margin-top:15px;     display\:none; }  .employee-card h3{margin:0 0 10px;font-size:16px}  .employee-details{     display\:grid;     grid-template-columns\:repeat(3,1fr);     gap:12px;     font-size:12px; }  .employee-details span{     color\:var(--muted);     display\:block;     margin-bottom:4px; }  .employee-details strong{word-break\:break-word}  .hidden{display\:none!important}  .toast-container{     position\:fixed;     right:20px;     top:85px;     z-index:1000;     display\:flex;     flex-direction\:column;     gap:10px; }  .toast{     background:#202238;     color\:white;     padding:14px 18px;     border-radius:9px;     font-size:12px;     box-shadow\:var(--shadow);     max-width:350px;     animation\:fadein .2s; }  .toast.error{background:#b52d3c} .toast.success{background:#13845b}  @keyframes fadein{     from{opacity:0;transform\:translateY(-8px)}     to{opacity:1;transform\:translateY(0)} }  .modal{     position\:fixed;     inset:0;     background\:rgba(15,18,35,.55);     z-index:100;     display\:none;     align-items\:center;     justify-content\:center;     padding:15px; }  .modal.show{display\:flex}  .modal-content{     background\:white;     width:100%;     max-width:700px;     max-height:90vh;     overflow-y\:auto;     padding:23px;     border-radius:14px; }  .modal-header{     display\:flex;     justify-content\:space-between;     align-items\:center;     margin-bottom:20px; }  .modal-header h3{margin:0}  .close-modal{     border:0;     background:#f1f2f6;     width:32px;     height:32px;     border-radius:7px;     font-size:18px; }  .loading{     opacity:.6;     pointer-events\:none; }  .menu-toggle{     display\:none;     background:#f0efff;     border:0;     padding:8px 12px;     border-radius:7px; }  @media(max-width:1100px){     .cards{grid-template-columns\:repeat(2,1fr)}     .grid.four{grid-template-columns\:repeat(2,1fr)} }  @media(max-width:750px){     .sidebar{         transform\:translateX(-100%);         transition:.25s;     }     .sidebar.open{transform\:translateX(0)}     .main{margin-left:0;width:100%}     .content{padding:17px}     .topbar{padding:0 17px}     .menu-toggle{display\:block}     .topbar-left{display\:flex;align-items\:center;gap:12px}     .grid,.grid.two,.grid.four{grid-template-columns:1fr}     .cards{grid-template-columns\:repeat(2,minmax(0,1fr));gap:10px}     .stat-card{padding:15px}     .stat-value{font-size:19px}     .panel{padding:15px}     .employee-details{grid-template-columns\:repeat(2,1fr)}     .total-box{grid-template-columns:1fr}     .component-row{grid-template-columns:1fr 110px 38px}     .page-heading h1{font-size:20px} }  @media(max-width:400px){     .cards{grid-template-columns:1fr}     .employee-details{grid-template-columns:1fr} } \</style>
+
+\</head>
+
+\<body>
+
+\<div class="layout">
+
+\<!-- SIDEBAR -->
+
+\<aside class="sidebar" id="sidebar">
+
+```
+<div class="brand">ACROPOLIS <span>PAY</span></div>
+
+<div class="nav-label">OVERVIEW</div>
+
+<button class="nav-item active" data-page="dashboard">
+    <span class="nav-icon">▦</span> Dashboard
+</button>
+
+<div class="nav-label">EMPLOYEE PAYROLL</div>
+
+<button class="nav-item" data-page="employee">
+    <span class="nav-icon">♙</span> Employee Search
+</button>
+
+<button class="nav-item" data-page="profile">
+    <span class="nav-icon">▤</span> Compensation Profile
+</button>
+
+<button class="nav-item" data-page="issue">
+    <span class="nav-icon">＋</span> Issue Salary Slip
+</button>
+
+<button class="nav-item" data-page="history">
+    <span class="nav-icon">◷</span> Salary History
+</button>
+
+<button class="nav-item" data-page="records">
+    <span class="nav-icon">▣</span> All Salary Records
+</button>
+
+<div class="nav-label">BULK OPERATIONS</div>
+
+<button class="nav-item" data-page="bulk">
+    <span class="nav-icon">♧</span> Bulk Distribution
+</button>
+
+<button class="nav-item" data-page="fixed">
+    <span class="nav-icon">▧</span> Fixed Salary
+</button>
+
+<div class="nav-label">CONFIGURATION</div>
+
+<button class="nav-item" data-page="templates">
+    <span class="nav-icon">▤</span> Salary Templates
+</button>
+
+<div class="nav-label">SETTINGS</div>
+
+<button class="nav-item" data-page="settings">
+    <span class="nav-icon">⚙</span> API Settings
+</button>
+```
+
+\</aside>
+
+\<!-- MAIN -->
+
+\<main class="main">
+
+\<header class="topbar">
+
+```
+<div class="topbar-left">
+    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+    <h2 id="topTitle">Dashboard</h2>
+</div>
+
+<div class="topbar-right">
+    <span class="status-dot"></span>
+    Compensation System
+</div>
+```
+
+\</header>
+
+\<div class="content">
+
+\<!-- =====================================================
+DASHBOARD
+\===================================================== -->
+
+\<section class="page active" id="page-dashboard">
+
+```
+<div class="page-heading">
     <div>
-        <h2>Compensation Management</h2>
-        <small>College Dashboard / Payroll</small>
+        <h1>Compensation Dashboard</h1>
+        <p>Manage employee salaries and monthly payroll.</p>
     </div>
 
-    <div class="top-right">
-        <span>Payroll Administration</span>
-        <div class="avatar">P</div>
+    <button class="btn btn-primary" onclick="loadDashboard()">
+        ↻ Refresh
+    </button>
+</div>
+
+<div class="cards">
+
+    <div class="stat-card">
+        <span class="stat-icon">▣</span>
+        <div class="stat-title">Total Salary Slips</div>
+        <div class="stat-value" id="statSlips">0</div>
     </div>
 
-</header>
+    <div class="stat-card">
+        <span class="stat-icon">₹</span>
+        <div class="stat-title">Total Net Payroll</div>
+        <div class="stat-value" id="statPayroll">₹0</div>
+    </div>
 
+    <div class="stat-card">
+        <span class="stat-icon">♙</span>
+        <div class="stat-title">Employees Paid</div>
+        <div class="stat-value" id="statEmployees">0</div>
+    </div>
 
-<div class="content">
+    <div class="stat-card">
+        <span class="stat-icon">◷</span>
+        <div class="stat-title">Latest Salary Month</div>
+        <div class="stat-value" id="statMonth">--</div>
+    </div>
 
+</div>
 
-<!-- =====================================================
-     DASHBOARD
-===================================================== -->
+<div class="panel">
 
-<section class="page active" id="page-dashboard">
-
-    <div class="page-heading">
-        <div>
-            <h1>Compensation Overview</h1>
-            <p>Manage employee compensation, salary slips and payroll.</p>
-        </div>
-
-        <button class="btn btn-primary" onclick="navigate('issue')">
-            + Issue Salary
+    <div class="panel-title">
+        <h3>Recent Salary Records</h3>
+        <button class="btn btn-light btn-small" onclick="navigate('records')">
+            View All
         </button>
     </div>
 
-    <div class="stats">
-
-        <div class="stat-card">
-            <span class="icon">♙</span>
-            <small>Total Employees</small>
-            <h2 id="statEmployees">--</h2>
-        </div>
-
-        <div class="stat-card">
-            <span class="icon">▤</span>
-            <small>Total Salary Slips</small>
-            <h2 id="statSlips">--</h2>
-        </div>
-
-        <div class="stat-card">
-            <span class="icon">₹</span>
-            <small>Total Payroll</small>
-            <h2 id="statPayroll">₹0</h2>
-        </div>
-
-        <div class="stat-card">
-            <span class="icon">◷</span>
-            <small>Current Month Slips</small>
-            <h2 id="statCurrent">--</h2>
-        </div>
-
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>EMPLOYEE</th>
+                    <th>MENTOR ID</th>
+                    <th>MONTH</th>
+                    <th>GROSS</th>
+                    <th>DEDUCTIONS</th>
+                    <th>NET TRANSFER</th>
+                    <th>STATUS</th>
+                </tr>
+            </thead>
+            <tbody id="dashboardTable">
+                <tr><td colspan="7" class="empty">Loading records...</td></tr>
+            </tbody>
+        </table>
     </div>
 
-    <div class="card">
+</div>
+```
 
-        <div class="card-title">Recent Salary Records</div>
+\</section>
 
-        <div class="table-wrap">
+\<!-- =====================================================
+EMPLOYEE SEARCH
+\===================================================== -->
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Mentor ID</th>
-                        <th>Employee</th>
-                        <th>Month</th>
-                        <th>Gross</th>
-                        <th>Net Transfer</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
+\<section class="page" id="page-employee">
 
-                <tbody id="dashboardRecords">
-                    <tr>
-                        <td colspan="7">Loading records...</td>
-                    </tr>
-                </tbody>
-            </table>
+```
+<div class="page-heading">
+    <div>
+        <h1>Employee Search</h1>
+        <p>Find a mentor using their Mentor ID.</p>
+    </div>
+</div>
 
-        </div>
+<div class="panel">
 
+    <div class="panel-title">
+        <h3>Find Employee</h3>
     </div>
 
-</section>
+    <div class="grid two">
 
-
-<!-- =====================================================
-     EMPLOYEE PROFILE
-===================================================== -->
-
-<section class="page" id="page-profile">
-
-    <div class="page-heading">
-        <div>
-            <h1>Employee Compensation Profile</h1>
-            <p>Create or edit complete employee payroll information.</p>
-        </div>
-    </div>
-
-    <div class="card">
-
-        <h3 class="card-title">Find Employee</h3>
-
-        <div class="search-row">
-
-            <div class="field">
-                <label>Mentor ID</label>
-                <input id="profileMentorId" placeholder="Enter Mentor ID">
-            </div>
-
-            <div class="field">
-                <label>Action</label>
-                <select id="profileAction">
-                    <option value="load">Load Existing Profile</option>
-                    <option value="new">Create / Edit Profile</option>
-                </select>
-            </div>
-
-            <button class="btn btn-primary" onclick="loadProfile()">
-                Find Employee
-            </button>
-
+        <div class="field">
+            <label>Mentor ID</label>
+            <input id="searchMentorId" placeholder="Example: MH1">
         </div>
 
-        <div id="profileMessage" class="message"></div>
-
-    </div>
-
-
-    <div id="profileFormSection" class="hidden">
-
-        <div class="card">
-
-            <h3 class="card-title">Employee Information</h3>
-
-            <div class="employee-details" id="profileEmployeeInfo"></div>
-
-        </div>
-
-
-        <div class="card">
-
-            <h3 class="card-title">Personal & Employment Details</h3>
-
-            <div class="form-grid" id="profileFields">
-
-                <div class="field">
-                    <label>Employee Code</label>
-                    <input data-profile="employeeCode">
-                </div>
-
-                <div class="field">
-                    <label>PAN Number</label>
-                    <input data-profile="pan">
-                </div>
-
-                <div class="field">
-                    <label>UAN Number</label>
-                    <input data-profile="uan">
-                </div>
-
-                <div class="field">
-                    <label>PF Number</label>
-                    <input data-profile="pfNumber">
-                </div>
-
-                <div class="field">
-                    <label>ESI Number</label>
-                    <input data-profile="esiNumber">
-                </div>
-
-                <div class="field">
-                    <label>Date of Joining</label>
-                    <input type="date" data-profile="dateOfJoining">
-                </div>
-
-                <div class="field">
-                    <label>Department</label>
-                    <input data-profile="department">
-                </div>
-
-                <div class="field">
-                    <label>Location</label>
-                    <input data-profile="location">
-                </div>
-
-                <div class="field">
-                    <label>Employment Type</label>
-                    <select data-profile="employmentType">
-                        <option value="">Select</option>
-                        <option>Full Time</option>
-                        <option>Part Time</option>
-                        <option>Contract</option>
-                        <option>Intern</option>
-                    </select>
-                </div>
-
-                <div class="field">
-                    <label>Grade</label>
-                    <input data-profile="grade">
-                </div>
-
-                <div class="field">
-                    <label>Cost Center</label>
-                    <input data-profile="costCenter">
-                </div>
-
-                <div class="field">
-                    <label>Designation</label>
-                    <input data-profile="designation">
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="card">
-
-            <h3 class="card-title">Bank Account Details</h3>
-
-            <div class="form-grid">
-
-                <div class="field">
-                    <label>Bank Name</label>
-                    <input data-profile="bankName">
-                </div>
-
-                <div class="field">
-                    <label>Account Holder Name</label>
-                    <input data-profile="accountHolderName">
-                </div>
-
-                <div class="field">
-                    <label>Account Number</label>
-                    <input data-profile="accountNumber">
-                </div>
-
-                <div class="field">
-                    <label>IFSC Code</label>
-                    <input data-profile="ifscCode">
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="card">
-
-            <h3 class="card-title">Salary Structure</h3>
-
-            <div class="form-grid">
-
-                <div class="field">
-                    <label>Basic Salary</label>
-                    <input type="number" data-profile="basicSalary">
-                </div>
-
-                <div class="field">
-                    <label>HRA</label>
-                    <input type="number" data-profile="hra">
-                </div>
-
-                <div class="field">
-                    <label>Other Allowance</label>
-                    <input type="number" data-profile="otherAllowance">
-                </div>
-
-                <div class="field">
-                    <label>Monthly CTC</label>
-                    <input type="number" data-profile="monthlyCTC">
-                </div>
-
-                <div class="field">
-                    <label>Annual CTC</label>
-                    <input type="number" data-profile="annualCTC">
-                </div>
-
-                <div class="field">
-                    <label>Professional Tax</label>
-                    <input type="number" data-profile="professionalTax">
-                </div>
-
-                <div class="field">
-                    <label>Tax Regime</label>
-                    <select data-profile="taxRegime">
-                        <option value="">Select</option>
-                        <option>Old Regime</option>
-                        <option>New Regime</option>
-                    </select>
-                </div>
-
-                <div class="field">
-                    <label>Salary Mode</label>
-                    <select data-profile="salaryMode">
-                        <option value="">Select</option>
-                        <option>Bank Transfer</option>
-                        <option>Cash</option>
-                        <option>Cheque</option>
-                    </select>
-                </div>
-
-                <div class="field">
-                    <label>PF Applicable</label>
-                    <select data-profile="pfApplicable">
-                        <option value="true">Yes</option>
-                        <option value="false">No</option>
-                    </select>
-                </div>
-
-                <div class="field">
-                    <label>ESI Applicable</label>
-                    <select data-profile="esiApplicable">
-                        <option value="true">Yes</option>
-                        <option value="false">No</option>
-                    </select>
-                </div>
-
-                <div class="field full">
-                    <label>Notes</label>
-                    <textarea data-profile="notes"></textarea>
-                </div>
-
-            </div>
-
-            <div class="actions">
-                <button class="btn btn-success" onclick="saveProfile()">
-                    Save Compensation Profile
-                </button>
-
-                <button class="btn btn-light" onclick="clearProfileForm()">
-                    Clear Form
-                </button>
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     ISSUE SALARY
-===================================================== -->
-
-<section class="page" id="page-issue">
-
-    <div class="page-heading">
-        <div>
-            <h1>Issue Salary Slip</h1>
-            <p>Create a new monthly salary slip for a valid employee.</p>
-        </div>
-    </div>
-
-    <div class="card">
-
-        <h3 class="card-title">Employee Selection</h3>
-
-        <div class="search-row">
-
-            <div class="field">
-                <label>Mentor ID</label>
-                <input id="issueMentorId" placeholder="Enter Mentor ID">
-            </div>
-
-            <div class="field">
-                <label>Salary Month</label>
-                <input type="month" id="issueMonth">
-            </div>
-
-            <button class="btn btn-primary" onclick="validateIssueEmployee()">
-                Validate Employee
-            </button>
-
-        </div>
-
-        <div id="issueMessage" class="message"></div>
-
-    </div>
-
-
-    <div id="issueForm" class="hidden">
-
-        <div class="card">
-
-            <h3 class="card-title">Employee Details</h3>
-
-            <div class="employee-details" id="issueEmployeeInfo"></div>
-
-        </div>
-
-        <div class="card">
-
-            <div class="section-title">
-                <h3 class="card-title">Attendance Details</h3>
-            </div>
-
-            <div class="form-grid" id="issueAttendance">
-
-                <div class="field">
-                    <label>Working Days</label>
-                    <input type="number" data-attendance="workingDays" value="30">
-                </div>
-
-                <div class="field">
-                    <label>Present Days</label>
-                    <input type="number" data-attendance="presentDays" value="30">
-                </div>
-
-                <div class="field">
-                    <label>Paid Leaves</label>
-                    <input type="number" data-attendance="paidLeaves" value="0">
-                </div>
-
-                <div class="field">
-                    <label>Unpaid Leaves</label>
-                    <input type="number" data-attendance="unpaidLeaves" value="0">
-                </div>
-
-                <div class="field">
-                    <label>Holidays</label>
-                    <input type="number" data-attendance="holidays" value="0">
-                </div>
-
-                <div class="field">
-                    <label>Overtime Days</label>
-                    <input type="number" data-attendance="overtimeDays" value="0">
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="card">
-
-            <div class="section-title">
-                <h3 class="card-title">Earnings</h3>
-                <button class="btn btn-light btn-sm" onclick="addComponent('issueEarnings')">
-                    + Add Earning
-                </button>
-            </div>
-
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Component</th>
-                            <th>Master Amount</th>
-                            <th>Current Amount</th>
-                            <th>YTD</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-
-                    <tbody id="issueEarnings"></tbody>
-                </table>
-            </div>
-
-        </div>
-
-
-        <div class="card">
-
-            <div class="section-title">
-                <h3 class="card-title">Deductions</h3>
-                <button class="btn btn-light btn-sm" onclick="addComponent('issueDeductions')">
-                    + Add Deduction
-                </button>
-            </div>
-
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Component</th>
-                            <th>Amount</th>
-                            <th>YTD</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-
-                    <tbody id="issueDeductions"></tbody>
-                </table>
-            </div>
-
-        </div>
-
-
-        <div class="card">
-
-            <h3 class="card-title">Payment Information</h3>
-
-            <div class="form-grid">
-
-                <div class="field">
-                    <label>Payment Date</label>
-                    <input type="date" id="issuePaymentDate">
-                </div>
-
-                <div class="field">
-                    <label>Payment Mode</label>
-                    <select id="issuePaymentMode">
-                        <option>Bank Transfer</option>
-                        <option>Cash</option>
-                        <option>Cheque</option>
-                    </select>
-                </div>
-
-                <div class="field">
-                    <label>Status</label>
-                    <select id="issueStatus">
-                        <option value="issued">Issued</option>
-                        <option value="paid">Paid</option>
-                        <option value="pending">Pending</option>
-                    </select>
-                </div>
-
-                <div class="field full">
-                    <label>Remarks</label>
-                    <textarea id="issueRemarks"></textarea>
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="card">
-
-            <h3 class="card-title">Salary Summary</h3>
-
-            <div class="total-row">
-                <span>Gross Earnings</span>
-                <strong id="issueGross">₹0.00</strong>
-            </div>
-
-            <div class="total-row">
-                <span>Total Deductions</span>
-                <strong id="issueDeduction">₹0.00</strong>
-            </div>
-
-            <div class="total-row final">
-                <span>Net Transfer</span>
-                <strong id="issueNet">₹0.00</strong>
-            </div>
-
-            <div class="actions">
-                <button class="btn btn-success" onclick="issueSalary()">
-                    Issue Salary Slip
-                </button>
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     EDIT SALARY
-===================================================== -->
-
-<section class="page" id="page-edit">
-
-    <div class="page-heading">
-        <div>
-            <h1>Edit Salary Slip</h1>
-            <p>Find and update an already-issued salary slip.</p>
-        </div>
-    </div>
-
-    <div class="card">
-
-        <div class="search-row">
-
-            <div class="field">
-                <label>Mentor ID</label>
-                <input id="editMentorId" placeholder="Enter Mentor ID">
-            </div>
-
-            <div class="field">
-                <label>Salary Month</label>
-                <input type="month" id="editMonth">
-            </div>
-
-            <button class="btn btn-primary" onclick="loadEditSlip()">
-                Search Existing Slip
-            </button>
-
-        </div>
-
-        <div id="editMessage" class="message"></div>
-
-    </div>
-
-
-    <div id="editForm" class="hidden">
-
-        <div class="card">
-
-            <h3 class="card-title">Employee Information</h3>
-
-            <div class="employee-details" id="editEmployeeInfo"></div>
-
-        </div>
-
-        <div class="card">
-
-            <h3 class="card-title">Attendance</h3>
-
-            <div class="form-grid" id="editAttendance"></div>
-
-        </div>
-
-        <div class="card">
-
-            <div class="section-title">
-                <h3 class="card-title">Earnings</h3>
-                <button class="btn btn-light btn-sm" onclick="addComponent('editEarnings')">
-                    + Add Earning
-                </button>
-            </div>
-
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Component</th>
-                            <th>Master Amount</th>
-                            <th>Current Amount</th>
-                            <th>YTD</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="editEarnings"></tbody>
-                </table>
-            </div>
-
-        </div>
-
-        <div class="card">
-
-            <div class="section-title">
-                <h3 class="card-title">Deductions</h3>
-                <button class="btn btn-light btn-sm" onclick="addComponent('editDeductions')">
-                    + Add Deduction
-                </button>
-            </div>
-
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Component</th>
-                            <th>Amount</th>
-                            <th>YTD</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="editDeductions"></tbody>
-                </table>
-            </div>
-
-        </div>
-
-        <div class="card">
-
-            <h3 class="card-title">Payment Details</h3>
-
-            <div class="form-grid">
-
-                <div class="field">
-                    <label>Payment Date</label>
-                    <input type="date" id="editPaymentDate">
-                </div>
-
-                <div class="field">
-                    <label>Payment Mode</label>
-                    <select id="editPaymentMode">
-                        <option>Bank Transfer</option>
-                        <option>Cash</option>
-                        <option>Cheque</option>
-                    </select>
-                </div>
-
-                <div class="field">
-                    <label>Status</label>
-                    <select id="editStatus">
-                        <option value="issued">Issued</option>
-                        <option value="paid">Paid</option>
-                        <option value="pending">Pending</option>
-                    </select>
-                </div>
-
-                <div class="field full">
-                    <label>Remarks</label>
-                    <textarea id="editRemarks"></textarea>
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="card">
-
-            <h3 class="card-title">Updated Salary Summary</h3>
-
-            <div class="total-row">
-                <span>Gross Earnings</span>
-                <strong id="editGross">₹0.00</strong>
-            </div>
-
-            <div class="total-row">
-                <span>Total Deductions</span>
-                <strong id="editDeduction">₹0.00</strong>
-            </div>
-
-            <div class="total-row final">
-                <span>Net Transfer</span>
-                <strong id="editNet">₹0.00</strong>
-            </div>
-
-            <div class="actions">
-                <button class="btn btn-success" onclick="updateExistingSlip()">
-                    Save Changes
-                </button>
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     BULK SALARY
-===================================================== -->
-
-<section class="page" id="page-bulk">
-
-    <div class="page-heading">
-        <div>
-            <h1>Bulk Salary Distribution</h1>
-            <p>Issue salary to multiple valid employees at once.</p>
-        </div>
-    </div>
-
-    <div class="card">
-
-        <h3 class="card-title">Distribution Details</h3>
-
-        <div class="form-grid">
-
-            <div class="field full">
-                <label>Mentor IDs (comma separated)</label>
-                <textarea id="bulkMentorIds" placeholder="M001, M002, M003"></textarea>
-            </div>
-
-            <div class="field">
-                <label>Salary Month</label>
-                <input type="month" id="bulkMonth">
-            </div>
-
-            <div class="field">
-                <label>Status</label>
-                <select id="bulkStatus">
-                    <option value="issued">Issued</option>
-                    <option value="paid">Paid</option>
-                    <option value="pending">Pending</option>
-                </select>
-            </div>
-
-            <div class="field">
-                <label>Payment Mode</label>
-                <select id="bulkPaymentMode">
-                    <option>Bank Transfer</option>
-                    <option>Cash</option>
-                    <option>Cheque</option>
-                </select>
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="card">
-
-        <div class="section-title">
-            <h3 class="card-title">Common Earnings</h3>
-            <button class="btn btn-light btn-sm" onclick="addComponent('bulkEarnings')">
-                + Add Earning
+        <div class="field" style="justify-content:end">
+            <button class="btn btn-primary" onclick="searchEmployee()">
+                Search Employee
             </button>
         </div>
 
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Component</th>
-                        <th>Master Amount</th>
-                        <th>Current Amount</th>
-                        <th>YTD</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="bulkEarnings"></tbody>
-            </table>
-        </div>
-
     </div>
 
-    <div class="card">
+    <div class="employee-card" id="searchEmployeeCard">
 
-        <div class="section-title">
-            <h3 class="card-title">Common Deductions</h3>
-            <button class="btn btn-light btn-sm" onclick="addComponent('bulkDeductions')">
-                + Add Deduction
-            </button>
-        </div>
+        <h3 id="searchEmployeeName">Employee Name</h3>
 
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Component</th>
-                        <th>Amount</th>
-                        <th>YTD</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="bulkDeductions"></tbody>
-            </table>
-        </div>
-
-    </div>
-
-    <div class="card">
-
-        <h3 class="card-title">Common Attendance</h3>
-
-        <div class="form-grid">
-
-            <div class="field">
-                <label>Working Days</label>
-                <input type="number" id="bulkWorkingDays" value="30">
-            </div>
-
-            <div class="field">
-                <label>Present Days</label>
-                <input type="number" id="bulkPresentDays" value="30">
-            </div>
-
-            <div class="field">
-                <label>Paid Leaves</label>
-                <input type="number" id="bulkPaidLeaves" value="0">
-            </div>
-
-            <div class="field">
-                <label>Unpaid Leaves</label>
-                <input type="number" id="bulkUnpaidLeaves" value="0">
-            </div>
-
-            <div class="field">
-                <label>Holidays</label>
-                <input type="number" id="bulkHolidays" value="0">
-            </div>
-
-            <div class="field">
-                <label>Overtime Days</label>
-                <input type="number" id="bulkOvertime" value="0">
-            </div>
-
-        </div>
+        <div class="employee-details" id="searchEmployeeDetails"></div>
 
         <div class="actions">
-            <button class="btn btn-success" onclick="distributeBulkSalary()">
-                Distribute Salary to All
+            <button class="btn btn-primary" onclick="openProfileFromSearch()">
+                Manage Compensation Profile
             </button>
-        </div>
 
-        <div id="bulkMessage" class="message"></div>
-
-        <div id="bulkResults"></div>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     FIXED SALARY
-===================================================== -->
-
-<section class="page" id="page-fixed">
-
-    <div class="page-heading">
-        <div>
-            <h1>Fixed Salary Distribution</h1>
-            <p>Use an existing salary template for bulk payroll.</p>
-        </div>
-    </div>
-
-    <div class="card">
-
-        <div class="form-grid">
-
-            <div class="field full">
-                <label>Mentor IDs (comma separated)</label>
-                <textarea id="fixedMentorIds" placeholder="M001, M002, M003"></textarea>
-            </div>
-
-            <div class="field">
-                <label>Salary Month</label>
-                <input type="month" id="fixedMonth">
-            </div>
-
-            <div class="field">
-                <label>Salary Template</label>
-                <select id="fixedTemplate">
-                    <option value="">Select Template</option>
-                </select>
-            </div>
-
-            <div class="field">
-                <label>Payment Status</label>
-                <select id="fixedStatus">
-                    <option value="issued">Issued</option>
-                    <option value="paid">Paid</option>
-                    <option value="pending">Pending</option>
-                </select>
-            </div>
-
-            <div class="field">
-                <label>Payment Mode</label>
-                <select id="fixedPaymentMode">
-                    <option>Bank Transfer</option>
-                    <option>Cash</option>
-                    <option>Cheque</option>
-                </select>
-            </div>
-
-        </div>
-
-        <div class="actions">
-            <button class="btn btn-success" onclick="distributeFixedSalary()">
-                Distribute Fixed Salary
+            <button class="btn btn-success" onclick="issueFromSearch()">
+                Issue Salary
             </button>
-        </div>
 
-        <div id="fixedMessage" class="message"></div>
-
-        <div id="fixedResults"></div>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     TEMPLATES
-===================================================== -->
-
-<section class="page" id="page-templates">
-
-    <div class="page-heading">
-        <div>
-            <h1>Salary Templates</h1>
-            <p>Create reusable salary structures for bulk distribution.</p>
-        </div>
-
-        <button class="btn btn-primary" onclick="openTemplateModal()">
-            + Create Template
-        </button>
-    </div>
-
-    <div class="card">
-
-        <div class="table-wrap">
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Template Name</th>
-                        <th>Description</th>
-                        <th>Earnings</th>
-                        <th>Deductions</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-
-                <tbody id="templateRecords">
-                    <tr>
-                        <td colspan="5">Loading templates...</td>
-                    </tr>
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     HISTORY
-===================================================== -->
-
-<section class="page" id="page-history">
-
-    <div class="page-heading">
-        <div>
-            <h1>Salary History</h1>
-            <p>View monthly salary records of an employee.</p>
-        </div>
-    </div>
-
-    <div class="card">
-
-        <div class="search-row">
-
-            <div class="field">
-                <label>Mentor ID</label>
-                <input id="historyMentorId" placeholder="Enter Mentor ID">
-            </div>
-
-            <div></div>
-
-            <button class="btn btn-primary" onclick="loadHistory()">
+            <button class="btn btn-light" onclick="historyFromSearch()">
                 View History
             </button>
-
-        </div>
-
-        <div id="historyMessage" class="message"></div>
-
-    </div>
-
-    <div class="card hidden" id="historyCard">
-
-        <div class="table-wrap">
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Month</th>
-                        <th>Gross Earnings</th>
-                        <th>Deductions</th>
-                        <th>Net Transfer</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-
-                <tbody id="historyRecords"></tbody>
-
-            </table>
-
         </div>
 
     </div>
 
-</section>
+</div>
+```
 
+\</section>
 
-<!-- =====================================================
-     ALL RECORDS
-===================================================== -->
+\<!-- =====================================================
+COMPENSATION PROFILE
+\===================================================== -->
 
-<section class="page" id="page-records">
+\<section class="page" id="page-profile">
 
-    <div class="page-heading">
-        <div>
-            <h1>All Salary Records</h1>
-            <p>View and manage all issued salary slips.</p>
+```
+<div class="page-heading">
+    <div>
+        <h1>Compensation Profile</h1>
+        <p>Create or update employee compensation details.</p>
+    </div>
+</div>
+
+<div class="panel">
+
+    <div class="grid two">
+
+        <div class="field">
+            <label>Mentor ID *</label>
+            <input id="profileMentorId" placeholder="Enter Mentor ID">
         </div>
 
-        <button class="btn btn-light" onclick="loadAllRecords()">
+        <div class="field" style="justify-content:end">
+            <button class="btn btn-primary" onclick="loadProfile()">
+                Fetch Profile
+            </button>
+        </div>
+
+    </div>
+
+    <div id="profileEmployeeCard" class="employee-card">
+        <h3 id="profileEmployeeName"></h3>
+        <div id="profileEmployeeDetails" class="employee-details"></div>
+    </div>
+
+</div>
+
+
+<div class="panel">
+
+    <div class="panel-title">
+        <h3>Employment Information</h3>
+    </div>
+
+    <div class="grid">
+
+        <div class="field">
+            <label>Employee Code</label>
+            <input id="employeeCode">
+        </div>
+
+        <div class="field">
+            <label>Designation</label>
+            <input id="designation">
+        </div>
+
+        <div class="field">
+            <label>Department</label>
+            <input id="department">
+        </div>
+
+        <div class="field">
+            <label>Date of Joining</label>
+            <input id="dateOfJoining" type="date">
+        </div>
+
+        <div class="field">
+            <label>Employment Type</label>
+            <select id="employmentType">
+                <option value="">Select</option>
+                <option>Full Time</option>
+                <option>Part Time</option>
+                <option>Contract</option>
+                <option>Visiting Faculty</option>
+                <option>Intern</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label>Grade</label>
+            <input id="grade">
+        </div>
+
+        <div class="field">
+            <label>Location</label>
+            <input id="location">
+        </div>
+
+        <div class="field">
+            <label>Cost Center</label>
+            <input id="costCenter">
+        </div>
+
+        <div class="field">
+            <label>PAN</label>
+            <input id="pan">
+        </div>
+
+        <div class="field">
+            <label>UAN</label>
+            <input id="uan">
+        </div>
+
+        <div class="field">
+            <label>PF Number</label>
+            <input id="pfNumber">
+        </div>
+
+        <div class="field">
+            <label>ESI Number</label>
+            <input id="esiNumber">
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="panel">
+
+    <div class="panel-title">
+        <h3>Salary Structure</h3>
+    </div>
+
+    <div class="grid">
+
+        <div class="field">
+            <label>Basic Salary</label>
+            <input id="basicSalary" type="number" min="0">
+        </div>
+
+        <div class="field">
+            <label>HRA</label>
+            <input id="hra" type="number" min="0">
+        </div>
+
+        <div class="field">
+            <label>Other Allowance</label>
+            <input id="otherAllowance" type="number" min="0">
+        </div>
+
+        <div class="field">
+            <label>Monthly CTC</label>
+            <input id="monthlyCTC" type="number" min="0">
+        </div>
+
+        <div class="field">
+            <label>Annual CTC</label>
+            <input id="annualCTC" type="number" min="0">
+        </div>
+
+        <div class="field">
+            <label>Tax Regime</label>
+            <select id="taxRegime">
+                <option value="">Select</option>
+                <option>Old Regime</option>
+                <option>New Regime</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label>Professional Tax</label>
+            <input id="professionalTax" type="number" min="0">
+        </div>
+
+        <div class="field">
+            <label>Salary Mode</label>
+            <select id="salaryMode">
+                <option>Bank Transfer</option>
+                <option>Cheque</option>
+                <option>Cash</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label>PF Applicable</label>
+            <select id="pfApplicable">
+                <option value="false">No</option>
+                <option value="true">Yes</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label>ESI Applicable</label>
+            <select id="esiApplicable">
+                <option value="false">No</option>
+                <option value="true">Yes</option>
+            </select>
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="panel">
+
+    <div class="panel-title">
+        <h3>Bank Details</h3>
+    </div>
+
+    <div class="grid">
+
+        <div class="field">
+            <label>Bank Name</label>
+            <input id="bankName">
+        </div>
+
+        <div class="field">
+            <label>Account Holder Name</label>
+            <input id="accountHolderName">
+        </div>
+
+        <div class="field">
+            <label>Account Number</label>
+            <input id="accountNumber">
+        </div>
+
+        <div class="field">
+            <label>IFSC Code</label>
+            <input id="ifscCode">
+        </div>
+
+        <div class="field full">
+            <label>Notes</label>
+            <textarea id="notes"></textarea>
+        </div>
+
+    </div>
+
+    <div class="actions">
+
+        <button class="btn btn-primary" onclick="saveProfile()">
+            Save Compensation Profile
+        </button>
+
+        <button class="btn btn-danger" onclick="deleteProfile()">
+            Delete Profile
+        </button>
+
+        <button class="btn btn-light" onclick="clearProfile()">
+            Clear Form
+        </button>
+
+    </div>
+
+</div>
+```
+
+\</section>
+
+\<!-- =====================================================
+ISSUE SALARY SLIP
+\===================================================== -->
+
+\<section class="page" id="page-issue">
+
+```
+<div class="page-heading">
+    <div>
+        <h1>Issue Salary Slip</h1>
+        <p>Create or edit an employee's monthly salary slip.</p>
+    </div>
+</div>
+
+<div class="panel">
+
+    <div class="panel-title">
+        <h3>Employee & Salary Period</h3>
+        <span class="badge orange" id="slipMode">NEW SALARY SLIP</span>
+    </div>
+
+    <div class="grid">
+
+        <div class="field">
+            <label>Mentor ID *</label>
+            <input id="slipMentorId" placeholder="Enter Mentor ID">
+        </div>
+
+        <div class="field">
+            <label>Salary Month *</label>
+            <input id="slipMonth" type="month">
+        </div>
+
+        <div class="field">
+            <label>Payment Date</label>
+            <input id="paymentDate" type="date">
+        </div>
+
+        <div class="field">
+            <label>Payment Mode</label>
+            <select id="paymentMode">
+                <option>Bank Transfer</option>
+                <option>Cheque</option>
+                <option>Cash</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label>Status</label>
+            <select id="slipStatus">
+                <option value="issued">Issued</option>
+                <option value="paid">Paid</option>
+                <option value="pending">Pending</option>
+                <option value="cancelled">Cancelled</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label>Remarks</label>
+            <input id="slipRemarks" placeholder="Optional remarks">
+        </div>
+
+    </div>
+
+    <div class="actions">
+        <button class="btn btn-light" onclick="fetchExistingSlip()">
+            Fetch Existing Slip
+        </button>
+
+        <button class="btn btn-light" onclick="resetSlipForm()">
+            Reset Form
+        </button>
+    </div>
+
+</div>
+
+
+<div class="panel">
+
+    <div class="panel-title">
+        <h3>Attendance</h3>
+        <button class="btn btn-light btn-small" onclick="addAttendanceField()">
+            + Add Field
+        </button>
+    </div>
+
+    <div class="grid" id="attendanceFields">
+
+        <div class="field">
+            <label>Working Days</label>
+            <input class="attendance-input" data-name="workingDays" type="number" min="0" value="0">
+        </div>
+
+        <div class="field">
+            <label>Present Days</label>
+            <input class="attendance-input" data-name="presentDays" type="number" min="0" value="0">
+        </div>
+
+        <div class="field">
+            <label>Leave Days</label>
+            <input class="attendance-input" data-name="leaveDays" type="number" min="0" value="0">
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="panel">
+
+    <div class="panel-title">
+        <h3>Earnings</h3>
+        <button class="btn btn-success btn-small" onclick="addComponent('earnings')">
+            + Add Earning
+        </button>
+    </div>
+
+    <div id="earningsList"></div>
+
+</div>
+
+
+<div class="panel">
+
+    <div class="panel-title">
+        <h3>Deductions</h3>
+        <button class="btn btn-orange btn-small" onclick="addComponent('deductions')">
+            + Add Deduction
+        </button>
+    </div>
+
+    <div id="deductionsList"></div>
+
+</div>
+
+
+<div class="panel">
+
+    <div class="panel-title">
+        <h3>Salary Calculation</h3>
+    </div>
+
+    <div class="total-box">
+
+        <div class="total-item">
+            <span>Gross Earnings</span>
+            <strong id="grossTotal">₹0.00</strong>
+        </div>
+
+        <div class="total-item">
+            <span>Total Deductions</span>
+            <strong id="deductionTotal">₹0.00</strong>
+        </div>
+
+        <div class="total-item net">
+            <span>Net Transfer</span>
+            <strong id="netTotal">₹0.00</strong>
+        </div>
+
+    </div>
+
+    <div class="actions">
+
+        <button class="btn btn-primary" id="saveSlipBtn" onclick="saveSlip()">
+            Issue Salary Slip
+        </button>
+
+        <button class="btn btn-light" onclick="calculateSalary()">
+            Recalculate
+        </button>
+
+    </div>
+
+</div>
+```
+
+\</section>
+
+\<!-- =====================================================
+SALARY HISTORY
+\===================================================== -->
+
+\<section class="page" id="page-history">
+
+```
+<div class="page-heading">
+    <div>
+        <h1>Salary History</h1>
+        <p>View all monthly salary slips of an employee.</p>
+    </div>
+</div>
+
+<div class="panel">
+
+    <div class="toolbar">
+        <input id="historyMentorId" placeholder="Enter Mentor ID">
+        <button class="btn btn-primary" onclick="loadHistory()">
+            Search History
+        </button>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>MONTH</th>
+                    <th>EMPLOYEE</th>
+                    <th>GROSS</th>
+                    <th>DEDUCTIONS</th>
+                    <th>NET TRANSFER</th>
+                    <th>STATUS</th>
+                    <th>ACTIONS</th>
+                </tr>
+            </thead>
+
+            <tbody id="historyTable">
+                <tr><td colspan="7" class="empty">Search an employee to view history.</td></tr>
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
+```
+
+\</section>
+
+\<!-- =====================================================
+ALL SALARY RECORDS
+\===================================================== -->
+
+\<section class="page" id="page-records">
+
+```
+<div class="page-heading">
+    <div>
+        <h1>All Salary Records</h1>
+        <p>Manage all employee salary slips.</p>
+    </div>
+
+    <button class="btn btn-light" onclick="loadAllRecords()">
+        ↻ Refresh
+    </button>
+</div>
+
+<div class="panel">
+
+    <div class="toolbar">
+
+        <input type="month" id="recordsMonth">
+
+        <button class="btn btn-primary" onclick="loadAllRecords()">
+            Apply Filter
+        </button>
+
+        <button class="btn btn-light" onclick="clearRecordsFilter()">
+            Clear Filter
+        </button>
+
+    </div>
+
+    <div class="table-wrap">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>EMPLOYEE</th>
+                    <th>MENTOR ID</th>
+                    <th>MONTH</th>
+                    <th>GROSS</th>
+                    <th>DEDUCTIONS</th>
+                    <th>NET TRANSFER</th>
+                    <th>STATUS</th>
+                    <th>ACTIONS</th>
+                </tr>
+            </thead>
+
+            <tbody id="recordsTable">
+                <tr><td colspan="8" class="empty">Loading records...</td></tr>
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+```
+
+\</section>
+
+\<!-- =====================================================
+BULK DISTRIBUTION
+\===================================================== -->
+
+\<section class="page" id="page-bulk">
+
+```
+<div class="page-heading">
+    <div>
+        <h1>Bulk Salary Distribution</h1>
+        <p>Issue the same salary structure to multiple mentors.</p>
+    </div>
+</div>
+
+<div class="panel">
+
+    <div class="grid two">
+
+        <div class="field">
+            <label>Mentor IDs *</label>
+            <textarea id="bulkMentorIds" placeholder="Enter one Mentor ID per line&#10;MH1&#10;MH2&#10;MH3"></textarea>
+        </div>
+
+        <div class="field">
+            <label>Salary Month *</label>
+            <input id="bulkMonth" type="month">
+
+            <label style="margin-top:8px">Payment Date</label>
+            <input id="bulkPaymentDate" type="date">
+
+            <label style="margin-top:8px">Payment Mode</label>
+            <select id="bulkPaymentMode">
+                <option>Bank Transfer</option>
+                <option>Cheque</option>
+                <option>Cash</option>
+            </select>
+
+            <label style="margin-top:8px">Status</label>
+            <select id="bulkStatus">
+                <option value="issued">Issued</option>
+                <option value="paid">Paid</option>
+                <option value="pending">Pending</option>
+            </select>
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="panel">
+
+    <div class="panel-title">
+        <h3>Common Attendance</h3>
+    </div>
+
+    <div class="grid">
+        <div class="field">
+            <label>Working Days</label>
+            <input id="bulkWorkingDays" type="number" value="0" min="0">
+        </div>
+
+        <div class="field">
+            <label>Present Days</label>
+            <input id="bulkPresentDays" type="number" value="0" min="0">
+        </div>
+
+        <div class="field">
+            <label>Leave Days</label>
+            <input id="bulkLeaveDays" type="number" value="0" min="0">
+        </div>
+    </div>
+
+</div>
+
+
+<div class="panel">
+
+    <div class="panel-title">
+        <h3>Common Earnings</h3>
+        <button class="btn btn-success btn-small" onclick="addComponent('bulkEarnings')">
+            + Add Earning
+        </button>
+    </div>
+
+    <div id="bulkEarningsList"></div>
+
+</div>
+
+
+<div class="panel">
+
+    <div class="panel-title">
+        <h3>Common Deductions</h3>
+        <button class="btn btn-orange btn-small" onclick="addComponent('bulkDeductions')">
+            + Add Deduction
+        </button>
+    </div>
+
+    <div id="bulkDeductionsList"></div>
+
+    <div class="actions">
+        <button class="btn btn-primary" onclick="runBulkDistribution()">
+            Distribute Salary to All
+        </button>
+    </div>
+
+</div>
+
+<div class="panel hidden" id="bulkResultPanel">
+
+    <div class="panel-title">
+        <h3>Distribution Results</h3>
+    </div>
+
+    <div id="bulkResult"></div>
+
+</div>
+```
+
+\</section>
+
+\<!-- =====================================================
+FIXED SALARY
+\===================================================== -->
+
+\<section class="page" id="page-fixed">
+
+```
+<div class="page-heading">
+    <div>
+        <h1>Fixed Salary Distribution</h1>
+        <p>Use a saved salary template to distribute salary.</p>
+    </div>
+</div>
+
+<div class="panel">
+
+    <div class="grid">
+
+        <div class="field">
+            <label>Mentor IDs *</label>
+            <textarea id="fixedMentorIds" placeholder="MH1&#10;MH2&#10;MH3"></textarea>
+        </div>
+
+        <div class="field">
+            <label>Salary Month *</label>
+            <input type="month" id="fixedMonth">
+        </div>
+
+        <div class="field">
+            <label>Salary Template</label>
+            <select id="fixedTemplate">
+                <option value="">Use Manual Structure</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label>Payment Date</label>
+            <input type="date" id="fixedPaymentDate">
+        </div>
+
+        <div class="field">
+            <label>Payment Mode</label>
+            <select id="fixedPaymentMode">
+                <option>Bank Transfer</option>
+                <option>Cheque</option>
+                <option>Cash</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label>Status</label>
+            <select id="fixedStatus">
+                <option value="issued">Issued</option>
+                <option value="paid">Paid</option>
+                <option value="pending">Pending</option>
+            </select>
+        </div>
+
+    </div>
+
+    <div class="actions">
+        <button class="btn btn-primary" onclick="runFixedDistribution()">
+            Distribute Fixed Salary
+        </button>
+    </div>
+
+</div>
+
+
+<div class="panel">
+
+    <div class="panel-title">
+        <h3>Manual Earnings</h3>
+        <button class="btn btn-success btn-small" onclick="addComponent('fixedEarnings')">
+            + Add Earning
+        </button>
+    </div>
+
+    <div id="fixedEarningsList"></div>
+
+</div>
+
+
+<div class="panel">
+
+    <div class="panel-title">
+        <h3>Manual Deductions</h3>
+        <button class="btn btn-orange btn-small" onclick="addComponent('fixedDeductions')">
+            + Add Deduction
+        </button>
+    </div>
+
+    <div id="fixedDeductionsList"></div>
+
+</div>
+
+<div class="panel">
+    <div class="panel-title">
+        <h3>Common Attendance</h3>
+    </div>
+
+    <div class="grid">
+        <div class="field">
+            <label>Working Days</label>
+            <input id="fixedWorkingDays" type="number" value="0" min="0">
+        </div>
+
+        <div class="field">
+            <label>Present Days</label>
+            <input id="fixedPresentDays" type="number" value="0" min="0">
+        </div>
+
+        <div class="field">
+            <label>Leave Days</label>
+            <input id="fixedLeaveDays" type="number" value="0" min="0">
+        </div>
+    </div>
+</div>
+
+<div class="panel hidden" id="fixedResultPanel">
+    <div class="panel-title">
+        <h3>Distribution Results</h3>
+    </div>
+    <div id="fixedResult"></div>
+</div>
+```
+
+\</section>
+
+\<!-- =====================================================
+SALARY TEMPLATES
+\===================================================== -->
+
+\<section class="page" id="page-templates">
+
+```
+<div class="page-heading">
+    <div>
+        <h1>Salary Templates</h1>
+        <p>Create reusable salary structures for bulk distribution.</p>
+    </div>
+</div>
+
+<div class="panel">
+
+    <div class="panel-title">
+        <h3>Create / Update Template</h3>
+    </div>
+
+    <input type="hidden" id="templateId">
+
+    <div class="grid two">
+
+        <div class="field">
+            <label>Template Name *</label>
+            <input id="templateName" placeholder="Example: Faculty Salary">
+        </div>
+
+        <div class="field">
+            <label>Description</label>
+            <input id="templateDescription" placeholder="Optional description">
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="panel">
+
+    <div class="panel-title">
+        <h3>Template Earnings</h3>
+        <button class="btn btn-success btn-small" onclick="addComponent('templateEarnings')">
+            + Add Earning
+        </button>
+    </div>
+
+    <div id="templateEarningsList"></div>
+
+</div>
+
+
+<div class="panel">
+
+    <div class="panel-title">
+        <h3>Template Deductions</h3>
+        <button class="btn btn-orange btn-small" onclick="addComponent('templateDeductions')">
+            + Add Deduction
+        </button>
+    </div>
+
+    <div id="templateDeductionsList"></div>
+
+    <div class="actions">
+        <button class="btn btn-primary" onclick="saveTemplate()">
+            Save Template
+        </button>
+
+        <button class="btn btn-light" onclick="clearTemplateForm()">
+            Clear
+        </button>
+    </div>
+
+</div>
+
+
+<div class="panel">
+
+    <div class="panel-title">
+        <h3>Saved Templates</h3>
+        <button class="btn btn-light btn-small" onclick="loadTemplates()">
             ↻ Refresh
         </button>
     </div>
 
-    <div class="card">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>TEMPLATE NAME</th>
+                    <th>DESCRIPTION</th>
+                    <th>EARNINGS</th>
+                    <th>DEDUCTIONS</th>
+                    <th>ACTIONS</th>
+                </tr>
+            </thead>
 
-        <div class="search-row">
-
-            <div class="field">
-                <label>Filter by Month</label>
-                <input type="month" id="recordsMonth">
-            </div>
-
-            <div></div>
-
-            <button class="btn btn-primary" onclick="loadAllRecords()">
-                Apply Filter
-            </button>
-
-        </div>
-
-    </div>
-
-    <div class="card">
-
-        <div class="table-wrap">
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Mentor ID</th>
-                        <th>Employee</th>
-                        <th>Month</th>
-                        <th>Gross</th>
-                        <th>Deductions</th>
-                        <th>Net Transfer</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-
-                <tbody id="allRecords">
-                    <tr>
-                        <td colspan="8">Loading records...</td>
-                    </tr>
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-</div>
-</main>
-</div>
-
-
-<!-- TEMPLATE MODAL -->
-
-<div class="modal" id="templateModal">
-
-    <div class="modal-content">
-
-        <div class="modal-header">
-            <h3>Create Salary Template</h3>
-            <button class="close" onclick="closeTemplateModal()">×</button>
-        </div>
-
-        <div class="field">
-            <label>Template Name</label>
-            <input id="templateName" placeholder="Example: Full Time Faculty">
-        </div>
-
-        <div class="field" style="margin-top:15px">
-            <label>Description</label>
-            <input id="templateDescription" placeholder="Salary structure description">
-        </div>
-
-        <div style="margin-top:20px">
-            <div class="section-title">
-                <h4>Earnings</h4>
-                <button class="btn btn-light btn-sm" onclick="addComponent('templateEarnings')">
-                    + Add
-                </button>
-            </div>
-
-            <div class="table-wrap">
-                <table>
-                    <tbody id="templateEarnings"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div style="margin-top:20px">
-            <div class="section-title">
-                <h4>Deductions</h4>
-                <button class="btn btn-light btn-sm" onclick="addComponent('templateDeductions')">
-                    + Add
-                </button>
-            </div>
-
-            <div class="table-wrap">
-                <table>
-                    <tbody id="templateDeductions"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="actions">
-            <button class="btn btn-success" onclick="saveTemplate()">
-                Save Template
-            </button>
-            <button class="btn btn-light" onclick="closeTemplateModal()">
-                Cancel
-            </button>
-        </div>
-
-        <div id="templateMessage" class="message"></div>
-
+            <tbody id="templatesTable">
+                <tr><td colspan="5" class="empty">Loading templates...</td></tr>
+            </tbody>
+        </table>
     </div>
 
 </div>
+```
+
+\</section>
+
+\<!-- =====================================================
+SETTINGS
+\===================================================== -->
+
+\<section class="page" id="page-settings">
+
+```
+<div class="page-heading">
+    <div>
+        <h1>API Settings</h1>
+        <p>Configure the compensation backend URL.</p>
+    </div>
+</div>
+
+<div class="panel">
+
+    <div class="field">
+        <label>Backend API Base URL</label>
+        <input id="apiBaseInput" placeholder="https://college-hwbb.onrender.com">
+    </div>
+
+    <div class="actions">
+        <button class="btn btn-primary" onclick="saveApiBase()">
+            Save API URL
+        </button>
+
+        <button class="btn btn-light" onclick="testApi()">
+            Test Connection
+        </button>
+    </div>
+
+    <p style="font-size:12px;color:#667085;margin-top:17px">
+        API endpoints are called under /api/compensation.
+        Change the URL only if your backend is hosted elsewhere.
+    </p>
+
+</div>
+```
+
+\</section>
+
+\</div>
+\</main>
+\</div>
+
+\<!-- TOAST -->
+
+\<div class="toast-container" id="toastContainer">\</div>
+
+\<!-- SLIP VIEW MODAL -->
+
+\<div class="modal" id="slipModal">
+
+```
+<div class="modal-content">
+
+    <div class="modal-header">
+        <h3>Salary Slip Details</h3>
+        <button class="close-modal" onclick="closeModal()">×</button>
+    </div>
+
+    <div id="slipModalBody"></div>
+
+    <div class="actions">
+        <button class="btn btn-light" onclick="window.print()">
+            Print
+        </button>
+        <button class="btn btn-primary" onclick="closeModal()">
+            Close
+        </button>
+    </div>
+
+</div>
+```
+
+\</div>
+
+\<script>
+
+/\* =========================================================
+CONFIGURATION
+\========================================================= \*/
+
+const DEFAULT_API = "[https://college-hwbb.onrender.com](https://college-hwbb.onrender.com)";
+
+let API_BASE = localStorage.getItem("compensationApiBase") || DEFAULT_API;
+
+const API = () => API_BASE.replace(/\\/+$/,"") + "/api/compensation";
+
+let selectedEmployee = null;
+let editingSlip = false;
+let currentTemplates = [];
+
+const PROFILE_FIELDS = [
+&#x20;   "employeeCode","pan","uan","pfNumber","esiNumber",
+&#x20;   "dateOfJoining","department","location","bankName",
+&#x20;   "accountNumber","ifscCode","accountHolderName",
+&#x20;   "employmentType","grade","costCenter","basicSalary",
+&#x20;   "hra","otherAllowance","monthlyCTC","annualCTC",
+&#x20;   "taxRegime","professionalTax","pfApplicable",
+&#x20;   "esiApplicable","salaryMode","designation","notes"
+];
+
+const componentContainers = {
+&#x20;   earnings:"earningsList",
+&#x20;   deductions:"deductionsList",
+&#x20;   bulkEarnings:"bulkEarningsList",
+&#x20;   bulkDeductions:"bulkDeductionsList",
+&#x20;   fixedEarnings:"fixedEarningsList",
+&#x20;   fixedDeductions:"fixedDeductionsList",
+&#x20;   templateEarnings:"templateEarningsList",
+&#x20;   templateDeductions:"templateDeductionsList"
+};
 
 
-<script>
+/\* =========================================================
+COMMON HELPERS
+\========================================================= \*/
 
-/* =========================================================
-   CONFIGURATION
-========================================================= */
+function toast(message,type="success"){
+&#x20;   const box=document.createElement("div");
+&#x20;   box.className="toast "+type;
+&#x20;   box.textContent=message;
 
-const API = "https://college-hwbb.onrender.com/api/compensation";
+&#x20;   document.getElementById("toastContainer").appendChild(box);
 
-let currentProfileMentor = null;
-let issueEmployee = null;
-let editingSlip = null;
-let editingTemplateId = null;
-let templatesCache = [];
+&#x20;   setTimeout(()=>box.remove(),3500);
+}
 
-const $ = id => document.getElementById(id);
+function money(value){
+&#x20;   return "₹"+Number(value||0).toLocaleString("en-IN",{
+&#x20;       minimumFractionDigits:2,
+&#x20;       maximumFractionDigits:2
+&#x20;   });
+}
 
-const today = new Date();
+function esc(value){
+&#x20;   return String(value??"").replace(/[&<>"']/g,char=>({
+&#x20;       "&":"&amp;",
+&#x20;       "<":"&lt;",
+&#x20;       ">":"&gt;",
+&#x20;       '"':"&quot;",
+&#x20;       "'":"&#039;"
+&#x20;   })[char]);
+}
 
-const currentMonth =
-    today.getFullYear() + "-" +
-    String(today.getMonth() + 1).padStart(2, "0");
+function getValue(id){
+&#x20;   return document.getElementById(id)?.value?.trim() || "";
+}
 
-[
-    "issueMonth",
-    "editMonth",
-    "bulkMonth",
-    "fixedMonth"
-].forEach(id => $(id).value = currentMonth);
+function setValue(id,value){
+&#x20;   const element=document.getElementById(id);
+&#x20;   if(element) element.value=value??"";
+}
 
+function currentMonth(){
+&#x20;   const d=new Date();
+&#x20;   return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+}
 
-/* =========================================================
-   API HELPER
-========================================================= */
+function showError(error){
+&#x20;   console.error(error);
+&#x20;   toast(error.message||"Something went wrong","error");
+}
 
-async function api(url, options = {}) {
+async function api(path,options={}){
 
-    const response = await fetch(API + url, {
+&#x20;   const response=await fetch(API()+path,{
+&#x20;       ...options,
+&#x20;       headers:{
+&#x20;           "Content-Type":"application/json",
+&#x20;           ...(options.headers||{})
+&#x20;       }
+&#x20;   });
 
-        ...options,
+&#x20;   let result;
 
-        headers: {
-            "Content-Type": "application/json",
-            ...(options.headers || {})
-        }
+&#x20;   try{
+&#x20;       result=await response.json();
+&#x20;   }catch{
+&#x20;       throw new Error("Backend returned an invalid response. Check API URL and server logs.");
+&#x20;   }
 
-    });
+&#x20;   if(!response.ok || result.success===false){
+&#x20;       throw new Error(result.message||result.error||"API request failed");
+&#x20;   }
 
-    let data = {};
+&#x20;   return result;
+}
 
-    try {
-        data = await response.json();
-    } catch(e) {}
+function post(path,data){
+&#x20;   return api(path,{
+&#x20;       method:"POST",
+&#x20;       body\:JSON.stringify(data)
+&#x20;   });
+}
 
-    if (!response.ok || data.success === false) {
+function put(path,data){
+&#x20;   return api(path,{
+&#x20;       method:"PUT",
+&#x20;       body\:JSON.stringify(data)
+&#x20;   });
+}
 
-        throw new Error(
-            data.message || "Something went wrong."
-        );
-
-    }
-
-    return data;
+function deleteRequest(path){
+&#x20;   return api(path,{method:"DELETE"});
 }
 
 
-function showMessage(id, message, type = "success") {
+/\* =========================================================
+NAVIGATION
+\========================================================= \*/
 
-    const element = $(id);
+const pageTitles={
+&#x20;   dashboard:"Dashboard",
+&#x20;   employee:"Employee Search",
+&#x20;   profile:"Compensation Profile",
+&#x20;   issue:"Issue Salary Slip",
+&#x20;   history:"Salary History",
+&#x20;   records:"All Salary Records",
+&#x20;   bulk:"Bulk Salary Distribution",
+&#x20;   fixed:"Fixed Salary Distribution",
+&#x20;   templates:"Salary Templates",
+&#x20;   settings:"API Settings"
+};
 
-    element.textContent = message;
+function navigate(page){
 
-    element.className = "message show " + type;
+&#x20;   document.querySelectorAll(".page").forEach(el=>{
+&#x20;       el.classList.remove("active");
+&#x20;   });
+
+&#x20;   document.querySelectorAll(".nav-item").forEach(el=>{
+&#x20;       el.classList.remove("active");
+&#x20;   });
+
+&#x20;   document.getElementById("page-"+page)?.classList.add("active");
+
+&#x20;   document.querySelector(\`[data-page="${page}"]\`)?.classList.add("active");
+
+&#x20;   document.getElementById("topTitle").textContent=pageTitles[page]||"Dashboard";
+
+&#x20;   document.getElementById("sidebar").classList.remove("open");
+
+&#x20;   if(page==="dashboard") loadDashboard();
+&#x20;   if(page==="records") loadAllRecords();
+&#x20;   if(page==="templates") loadTemplates();
+&#x20;   if(page==="fixed") loadTemplates();
+
+}
+
+document.querySelectorAll(".nav-item").forEach(button=>{
+&#x20;   button.addEventListener("click",()=>{
+&#x20;       navigate(button.dataset.page);
+&#x20;   });
+});
+
+function toggleSidebar(){
+&#x20;   document.getElementById("sidebar").classList.toggle("open");
+}
+
+
+/\* =========================================================
+COMPONENTS
+\========================================================= \*/
+
+function addComponent(type,name="",amount=""){
+
+&#x20;   const container=document.getElementById(componentContainers[type]);
+
+&#x20;   if(!container)return;
+
+&#x20;   const row=document.createElement("div");
+&#x20;   row\.className="component-row";
+
+&#x20;   row\.innerHTML=\`
+&#x20;       \<input class="component-name" placeholder="Component name" value="${esc(name)}">
+
+&#x20;       \<input class="component-amount" type="number" min="0" step="0.01" placeholder="Amount" value="${esc(amount)}">
+
+&#x20;       \<button type="button" class="remove-btn" title="Remove">×\</button>
+&#x20;   \`;
+
+&#x20;   row\.querySelector(".remove-btn").addEventListener("click",()=>{
+&#x20;       row\.remove();
+&#x20;       calculateSalary();
+&#x20;   });
+
+&#x20;   row\.querySelectorAll("input").forEach(input=>{
+&#x20;       input.addEventListener("input",calculateSalary);
+&#x20;   });
+
+&#x20;   container.appendChild(row);
+
+&#x20;   calculateSalary();
+}
+
+function getComponents(type){
+
+&#x20;   const container=document.getElementById(componentContainers[type]);
+
+&#x20;   if(!container)return [];
+
+&#x20;   const result=[];
+
+&#x20;   container.querySelectorAll(".component-row").forEach(row=>{
+
+&#x20;       const name=row\.querySelector(".component-name").value.trim();
+&#x20;       const amount=Number(row\.querySelector(".component-amount").value||0);
+
+&#x20;       if(name){
+&#x20;           result.push({
+&#x20;               name,
+&#x20;               amount,
+&#x20;               masterAmount\:amount,
+&#x20;               ytd:0
+&#x20;           });
+&#x20;       }
+
+&#x20;   });
+
+&#x20;   return result;
+}
+
+function clearComponents(type){
+
+&#x20;   const container=document.getElementById(componentContainers[type]);
+
+&#x20;   if(container)container.innerHTML="";
+}
+
+function calculateSalary(){
+
+&#x20;   const earnings=getComponents("earnings");
+&#x20;   const deductions=getComponents("deductions");
+
+&#x20;   const gross=earnings.reduce((sum,item)=>sum+item.amount,0);
+&#x20;   const deduction=deductions.reduce((sum,item)=>sum+item.amount,0);
+
+&#x20;   document.getElementById("grossTotal").textContent=money(gross);
+&#x20;   document.getElementById("deductionTotal").textContent=money(deduction);
+&#x20;   document.getElementById("netTotal").textContent=money(gross-deduction);
 
 }
 
 
-function hideMessage(id) {
+/\* =========================================================
+ATTENDANCE
+\========================================================= \*/
 
-    $(id).className = "message";
+function getAttendance(){
 
+&#x20;   const result={};
+
+&#x20;   document.querySelectorAll("#attendanceFields .attendance-input").forEach(input=>{
+&#x20;       result[input.dataset.name]=Number(input.value||0);
+&#x20;   });
+
+&#x20;   return result;
+}
+
+function addAttendanceField(){
+
+&#x20;   const name=prompt("Enter attendance field name:");
+
+&#x20;   if(!name)return;
+
+&#x20;   const key=name.replace(/[^a-zA-Z0-9]/g,"");
+
+&#x20;   if(!key)return;
+
+&#x20;   if(
+&#x20;       [...document.querySelectorAll("#attendanceFields .attendance-input")]
+&#x20;       .some(input=>input.dataset.name===key)
+&#x20;   ){
+&#x20;       toast("This attendance field already exists","error");
+&#x20;       return;
+&#x20;   }
+
+&#x20;   const field=document.createElement("div");
+&#x20;   field.className="field";
+
+&#x20;   const label=document.createElement("label");
+&#x20;   label.textContent=name;
+
+&#x20;   const input=document.createElement("input");
+&#x20;   input.type="number";
+&#x20;   input.min="0";
+&#x20;   input.value="0";
+&#x20;   input.className="attendance-input";
+&#x20;   input.dataset.name=key;
+
+&#x20;   field.append(label,input);
+
+&#x20;   document.getElementById("attendanceFields").appendChild(field);
 }
 
 
-function escapeHTML(value) {
+/\* =========================================================
+EMPLOYEE SEARCH
+\========================================================= \*/
 
-    return String(value ?? "").replace(/[&<>"']/g, char => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;"
-    })[char]);
+async function searchEmployee(){
 
+&#x20;   const mentorId=getValue("searchMentorId");
+
+&#x20;   if(!mentorId){
+&#x20;       toast("Enter Mentor ID","error");
+&#x20;       return;
+&#x20;   }
+
+&#x20;   try{
+
+&#x20;       const result=await api("/mentor/"+encodeURIComponent(mentorId));
+
+&#x20;       selectedEmployee=result.employee;
+
+&#x20;       const employee=result.employee||{};
+
+&#x20;       document.getElementById("searchEmployeeName").textContent=employee.name||"Employee";
+
+&#x20;       const details=[
+&#x20;           ["Mentor ID",employee.mentorId],
+&#x20;           ["Email",employee.email],
+&#x20;           ["Phone",employee.phone],
+&#x20;           ["Designation",employee.designation],
+&#x20;           ["Subject",employee.subject],
+&#x20;           ["Branch",employee.branch],
+&#x20;           ["Class Assigned",employee.classAssigned]
+&#x20;       ];
+
+&#x20;       document.getElementById("searchEmployeeDetails").innerHTML=details.map(item=>\`
+&#x20;           \<div>
+&#x20;               \<span>${esc(item[0])}\</span>
+&#x20;               \<strong>${esc(item[1]||"--")}\</strong>
+&#x20;           \</div>
+&#x20;       \`).join("");
+
+&#x20;       document.getElementById("searchEmployeeCard").style.display="block";
+
+&#x20;       toast("Employee found successfully");
+
+&#x20;   }catch(error){
+&#x20;       document.getElementById("searchEmployeeCard").style.display="none";
+&#x20;       showError(error);
+&#x20;   }
+}
+
+function openProfileFromSearch(){
+&#x20;   if(!selectedEmployee)return;
+&#x20;   setValue("profileMentorId",selectedEmployee.mentorId);
+&#x20;   navigate("profile");
+&#x20;   loadProfile();
+}
+
+function issueFromSearch(){
+&#x20;   if(!selectedEmployee)return;
+&#x20;   setValue("slipMentorId",selectedEmployee.mentorId);
+&#x20;   navigate("issue");
+}
+
+function historyFromSearch(){
+&#x20;   if(!selectedEmployee)return;
+&#x20;   setValue("historyMentorId",selectedEmployee.mentorId);
+&#x20;   navigate("history");
+&#x20;   loadHistory();
 }
 
 
-function formatMoney(value) {
+/\* =========================================================
+PROFILE
+\========================================================= \*/
 
-    return "₹" + Number(value || 0).toLocaleString("en-IN", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    });
+function clearProfile(){
 
+&#x20;   PROFILE_FIELDS.forEach(field=>setValue(field,""));
+
+&#x20;   setValue("pfApplicable","false");
+&#x20;   setValue("esiApplicable","false");
+&#x20;   setValue("salaryMode","Bank Transfer");
+
+&#x20;   document.getElementById("profileEmployeeCard").style.display="none";
+}
+
+function showProfileEmployee(employee){
+
+&#x20;   document.getElementById("profileEmployeeName").textContent=employee.name||"Employee";
+
+&#x20;   const details=[
+&#x20;       ["Mentor ID",employee.mentorId],
+&#x20;       ["Email",employee.email],
+&#x20;       ["Phone",employee.phone],
+&#x20;       ["Designation",employee.designation],
+&#x20;       ["Branch",employee.branch],
+&#x20;       ["Subject",employee.subject]
+&#x20;   ];
+
+&#x20;   document.getElementById("profileEmployeeDetails").innerHTML=details.map(item=>\`
+&#x20;       \<div>
+&#x20;           \<span>${esc(item[0])}\</span>
+&#x20;           \<strong>${esc(item[1]||"--")}\</strong>
+&#x20;       \</div>
+&#x20;   \`).join("");
+
+&#x20;   document.getElementById("profileEmployeeCard").style.display="block";
+}
+
+async function loadProfile(){
+
+&#x20;   const mentorId=getValue("profileMentorId");
+
+&#x20;   if(!mentorId){
+&#x20;       toast("Enter Mentor ID","error");
+&#x20;       return;
+&#x20;   }
+
+&#x20;   try{
+
+&#x20;       const result=await api("/profile/"+encodeURIComponent(mentorId));
+
+&#x20;       clearProfile();
+
+&#x20;       setValue("profileMentorId",mentorId);
+
+&#x20;       const employee=result.employee||{};
+
+&#x20;       showProfileEmployee(employee);
+
+&#x20;       const profile=result.profile||{};
+
+&#x20;       PROFILE_FIELDS.forEach(field=>{
+
+&#x20;           if(profile[field]!==undefined){
+
+&#x20;               if(field==="pfApplicable"||field==="esiApplicable"){
+&#x20;                   setValue(field,String(profile[field]));
+&#x20;               }else{
+&#x20;                   setValue(field,profile[field]);
+&#x20;               }
+
+&#x20;           }
+
+&#x20;       });
+
+&#x20;       toast("Profile fetched successfully");
+
+&#x20;   }catch(error){
+&#x20;       showError(error);
+&#x20;   }
+}
+
+async function saveProfile(){
+
+&#x20;   const mentorId=getValue("profileMentorId");
+
+&#x20;   if(!mentorId){
+&#x20;       toast("Mentor ID is required","error");
+&#x20;       return;
+&#x20;   }
+
+&#x20;   const data={};
+
+&#x20;   PROFILE_FIELDS.forEach(field=>{
+
+&#x20;       const element=document.getElementById(field);
+
+&#x20;       if(!element)return;
+
+&#x20;       if(field==="pfApplicable"||field==="esiApplicable"){
+&#x20;           data[field]=element.value==="true";
+&#x20;       }else if([
+&#x20;           "basicSalary","hra","otherAllowance",
+&#x20;           "monthlyCTC","annualCTC","professionalTax"
+&#x20;       ].includes(field)){
+&#x20;           data[field]=Number(element.value||0);
+&#x20;       }else{
+&#x20;           data[field]=element.value.trim();
+&#x20;       }
+
+&#x20;   });
+
+&#x20;   try{
+
+&#x20;       const result=await post("/profile/"+encodeURIComponent(mentorId),data);
+
+&#x20;       toast(result.message||"Profile saved");
+
+&#x20;       await loadProfile();
+
+&#x20;   }catch(error){
+&#x20;       showError(error);
+&#x20;   }
+}
+
+async function deleteProfile(){
+
+&#x20;   const mentorId=getValue("profileMentorId");
+
+&#x20;   if(!mentorId)return toast("Enter Mentor ID","error");
+
+&#x20;   if(!confirm("Delete this compensation profile? Existing salary slips will remain محفوظ."))return;
+
+&#x20;   try{
+
+&#x20;       const result=await deleteRequest("/profile/"+encodeURIComponent(mentorId));
+
+&#x20;       toast(result.message||"Profile deleted");
+
+&#x20;       clearProfile();
+
+&#x20;   }catch(error){
+&#x20;       showError(error);
+&#x20;   }
 }
 
 
-function formatLabel(value) {
+/\* =========================================================
+SALARY SLIP
+\========================================================= \*/
 
-    return String(value)
-        .replace(/([A-Z])/g, " $1")
-        .replace(/^./, x => x.toUpperCase());
+function resetSlipForm(){
+
+&#x20;   editingSlip=false;
+
+&#x20;   setValue("slipMentorId","");
+&#x20;   setValue("slipMonth",currentMonth());
+&#x20;   setValue("paymentDate","");
+&#x20;   setValue("paymentMode","Bank Transfer");
+&#x20;   setValue("slipStatus","issued");
+&#x20;   setValue("slipRemarks","");
+
+&#x20;   clearComponents("earnings");
+&#x20;   clearComponents("deductions");
+
+&#x20;   document.getElementById("attendanceFields").innerHTML=\`
+&#x20;       \<div class="field">
+&#x20;           \<label>Working Days\</label>
+&#x20;           \<input class="attendance-input" data-name="workingDays" type="number" min="0" value="0">
+&#x20;       \</div>
+&#x20;       \<div class="field">
+&#x20;           \<label>Present Days\</label>
+&#x20;           \<input class="attendance-input" data-name="presentDays" type="number" min="0" value="0">
+&#x20;       \</div>
+&#x20;       \<div class="field">
+&#x20;           \<label>Leave Days\</label>
+&#x20;           \<input class="attendance-input" data-name="leaveDays" type="number" min="0" value="0">
+&#x20;       \</div>
+&#x20;   \`;
+
+&#x20;   document.getElementById("slipMode").textContent="NEW SALARY SLIP";
+&#x20;   document.getElementById("saveSlipBtn").textContent="Issue Salary Slip";
+
+&#x20;   calculateSalary();
 
 }
 
+function slipPayload(){
 
-/* =========================================================
-   NAVIGATION
-========================================================= */
+&#x20;   const mentorId=getValue("slipMentorId");
+&#x20;   const month=getValue("slipMonth");
 
-function navigate(page) {
+&#x20;   if(!mentorId)throw new Error("Mentor ID is required");
+&#x20;   if(!month)throw new Error("Salary month is required");
 
-    document.querySelectorAll(".page").forEach(p => {
-        p.classList.remove("active");
-    });
+&#x20;   const earnings=getComponents("earnings");
+&#x20;   const deductions=getComponents("deductions");
 
-    document.querySelectorAll(".nav-btn").forEach(btn => {
-        btn.classList.remove("active");
-    });
+&#x20;   if(!earnings.length)throw new Error("Add at least one earning component");
 
-    $("page-" + page).classList.add("active");
+&#x20;   return {
+&#x20;       mentorId,
+&#x20;       month,
+&#x20;       earnings,
+&#x20;       deductions,
+&#x20;       attendance\:getAttendance(),
+&#x20;       status\:getValue("slipStatus"),
+&#x20;       paymentDate\:getValue("paymentDate")||null,
+&#x20;       paymentMode\:getValue("paymentMode"),
+&#x20;       remarks\:getValue("slipRemarks")
+&#x20;   };
+}
 
-    document.querySelector(
-        `[data-page="${page}"]`
-    ).classList.add("active");
+async function saveSlip(){
 
-    if (page === "dashboard") loadDashboard();
-    if (page === "templates") loadTemplates();
-    if (page === "records") loadAllRecords();
+&#x20;   try{
+
+&#x20;       const data=slipPayload();
+
+&#x20;       let result;
+
+&#x20;       if(editingSlip){
+
+&#x20;           result=await put(
+&#x20;               "/slip/"+encodeURIComponent(data.mentorId)+"/"+encodeURIComponent(data.month),
+&#x20;               data
+&#x20;           );
+
+&#x20;       }else{
+
+&#x20;           result=await post("/slip",data);
+
+&#x20;       }
+
+&#x20;       toast(result.message||"Salary slip saved");
+
+&#x20;       editingSlip=false;
+
+&#x20;       document.getElementById("slipMode").textContent="NEW SALARY SLIP";
+&#x20;       document.getElementById("saveSlipBtn").textContent="Issue Salary Slip";
+
+&#x20;       if(result.slip)viewSlip(result.slip);
+
+&#x20;       loadDashboard();
+
+&#x20;   }catch(error){
+&#x20;       showError(error);
+&#x20;   }
+}
+
+async function fetchExistingSlip(){
+
+&#x20;   const mentorId=getValue("slipMentorId");
+&#x20;   const month=getValue("slipMonth");
+
+&#x20;   if(!mentorId||!month){
+&#x20;       toast("Enter Mentor ID and month","error");
+&#x20;       return;
+&#x20;   }
+
+&#x20;   try{
+
+&#x20;       const result=await api(
+&#x20;           "/slip/"+encodeURIComponent(mentorId)+"/"+encodeURIComponent(month)
+&#x20;       );
+
+&#x20;       const slip=result.slip;
+
+&#x20;       clearComponents("earnings");
+&#x20;       clearComponents("deductions");
+
+&#x20;       (slip.earnings||[]).forEach(item=>{
+&#x20;           addComponent("earnings",item.name,item.amount);
+&#x20;       });
+
+&#x20;       (slip.deductions||[]).forEach(item=>{
+&#x20;           addComponent("deductions",item.name,item.amount);
+&#x20;       });
+
+&#x20;       setValue("paymentDate",slip.paymentDate||"");
+&#x20;       setValue("paymentMode",slip.paymentMode||"Bank Transfer");
+&#x20;       setValue("slipStatus",slip.status||"issued");
+&#x20;       setValue("slipRemarks",slip.remarks||"");
+
+&#x20;       const attendance=slip.attendance||{};
+
+&#x20;       document.getElementById("attendanceFields").innerHTML="";
+
+&#x20;       Object.entries(attendance).forEach(([key,value])=>{
+
+&#x20;           const field=document.createElement("div");
+&#x20;           field.className="field";
+
+&#x20;           const label=document.createElement("label");
+&#x20;           label.textContent=key;
+
+&#x20;           const input=document.createElement("input");
+&#x20;           input.type="number";
+&#x20;           input.min="0";
+&#x20;           input.value=value;
+&#x20;           input.className="attendance-input";
+&#x20;           input.dataset.name=key;
+
+&#x20;           field.append(label,input);
+
+&#x20;           document.getElementById("attendanceFields").appendChild(field);
+
+&#x20;       });
+
+&#x20;       editingSlip=true;
+
+&#x20;       document.getElementById("slipMode").textContent="EDIT EXISTING SLIP";
+&#x20;       document.getElementById("saveSlipBtn").textContent="Update Salary Slip";
+
+&#x20;       calculateSalary();
+
+&#x20;       toast("Existing salary slip loaded");
+
+&#x20;   }catch(error){
+&#x20;       showError(error);
+&#x20;   }
+}
+
+
+/\* =========================================================
+SALARY HISTORY
+\========================================================= \*/
+
+async function loadHistory(){
+
+&#x20;   const mentorId=getValue("historyMentorId");
+
+&#x20;   if(!mentorId){
+&#x20;       toast("Enter Mentor ID","error");
+&#x20;       return;
+&#x20;   }
+
+&#x20;   try{
+
+&#x20;       const result=await api("/history/"+encodeURIComponent(mentorId));
+
+&#x20;       const history=result.history||[];
+
+&#x20;       const tbody=document.getElementById("historyTable");
+
+&#x20;       if(!history.length){
+&#x20;           tbody.innerHTML=\`\<tr>\<td colspan="7" class="empty">No salary history found.\</td>\</tr>\`;
+&#x20;           return;
+&#x20;       }
+
+&#x20;       tbody.innerHTML=history.map(slip=>\`
+
+&#x20;           \<tr>
+&#x20;               \<td>${esc(slip.month)}\</td>
+&#x20;               \<td>${esc(slip.employee?.name||"--")}\</td>
+&#x20;               \<td>${money(slip.grossEarnings)}\</td>
+&#x20;               \<td>${money(slip.totalDeductions)}\</td>
+&#x20;               \<td>\<strong>${money(slip.netTransfer)}\</strong>\</td>
+&#x20;               \<td>${statusBadge(slip.status)}\</td>
+&#x20;               \<td>
+&#x20;                   \<button class="btn btn-light btn-small" onclick='viewSlipById(${JSON.stringify(slip.\_id)})'>
+&#x20;                       View
+&#x20;                   \</button>
+&#x20;                   \<button class="btn btn-primary btn-small" onclick='editSlipFromHistory(${JSON.stringify(slip.mentorId)},${JSON.stringify(slip.month)})'>
+&#x20;                       Edit
+&#x20;                   \</button>
+&#x20;               \</td>
+&#x20;           \</tr>
+
+&#x20;       \`).join("");
+
+&#x20;   }catch(error){
+&#x20;       showError(error);
+&#x20;   }
+}
+
+
+/\* =========================================================
+ALL RECORDS
+\========================================================= \*/
+
+async function loadAllRecords(){
+
+&#x20;   const month=getValue("recordsMonth");
+
+&#x20;   const query=month?"?month="+encodeURIComponent(month):"";
+
+&#x20;   try{
+
+&#x20;       const result=await api("/all"+query);
+
+&#x20;       const records=result.records||[];
+
+&#x20;       const tbody=document.getElementById("recordsTable");
+
+&#x20;       if(!records.length){
+&#x20;           tbody.innerHTML=\`\<tr>\<td colspan="8" class="empty">No salary records found.\</td>\</tr>\`;
+&#x20;           return;
+&#x20;       }
+
+&#x20;       tbody.innerHTML=records.map(slip=>\`
+
+&#x20;           \<tr>
+&#x20;               \<td>${esc(slip.employee?.name||"--")}\</td>
+&#x20;               \<td>${esc(slip.mentorId)}\</td>
+&#x20;               \<td>${esc(slip.month)}\</td>
+&#x20;               \<td>${money(slip.grossEarnings)}\</td>
+&#x20;               \<td>${money(slip.totalDeductions)}\</td>
+&#x20;               \<td>\<strong>${money(slip.netTransfer)}\</strong>\</td>
+&#x20;               \<td>${statusBadge(slip.status)}\</td>
+&#x20;               \<td>
+&#x20;                   \<button class="btn btn-light btn-small" onclick='viewSlipById(${JSON.stringify(slip.\_id)})'>
+&#x20;                       View
+&#x20;                   \</button>
+&#x20;                   \<button class="btn btn-primary btn-small" onclick='editSlipFromHistory(${JSON.stringify(slip.mentorId)},${JSON.stringify(slip.month)})'>
+&#x20;                       Edit
+&#x20;                   \</button>
+&#x20;                   \<button class="btn btn-danger btn-small" onclick='deleteSlip(${JSON.stringify(slip.mentorId)},${JSON.stringify(slip.month)})'>
+&#x20;                       Delete
+&#x20;                   \</button>
+&#x20;               \</td>
+&#x20;           \</tr>
+
+&#x20;       \`).join("");
+
+&#x20;   }catch(error){
+&#x20;       showError(error);
+&#x20;   }
+}
+
+function clearRecordsFilter(){
+&#x20;   setValue("recordsMonth","");
+&#x20;   loadAllRecords();
+}
+
+function statusBadge(status){
+
+&#x20;   const value=String(status||"issued").toLowerCase();
+
+&#x20;   let cls="orange";
+
+&#x20;   if(value==="paid"||value==="issued")cls="green";
+&#x20;   if(value==="cancelled")cls="red";
+
+&#x20;   return \`\<span class="badge ${cls}">${esc(status||"issued")}\</span>\`;
+}
+
+async function deleteSlip(mentorId,month){
+
+&#x20;   if(!confirm(\`Delete salary slip for ${mentorId} - ${month}?\`))return;
+
+&#x20;   try{
+
+&#x20;       const result=await deleteRequest(
+&#x20;           "/slip/"+encodeURIComponent(mentorId)+"/"+encodeURIComponent(month)
+&#x20;       );
+
+&#x20;       toast(result.message||"Salary slip deleted");
+
+&#x20;       loadAllRecords();
+&#x20;       loadDashboard();
+
+&#x20;   }catch(error){
+&#x20;       showError(error);
+&#x20;   }
+}
+
+function editSlipFromHistory(mentorId,month){
+
+&#x20;   navigate("issue");
+
+&#x20;   setValue("slipMentorId",mentorId);
+&#x20;   setValue("slipMonth",month);
+
+&#x20;   fetchExistingSlip();
+}
+
+
+/\* =========================================================
+SLIP DETAILS MODAL
+\========================================================= \*/
+
+async function viewSlipById(id){
+
+&#x20;   try{
+
+&#x20;       const result=await api("/all");
+
+&#x20;       const slip=(result.records||[]).find(item=>String(item.\_id)===String(id));
+
+&#x20;       if(!slip){
+&#x20;           toast("Salary slip not found","error");
+&#x20;           return;
+&#x20;       }
+
+&#x20;       viewSlip(slip);
+
+&#x20;   }catch(error){
+&#x20;       showError(error);
+&#x20;   }
+}
+
+function viewSlip(slip){
+
+&#x20;   const employee=slip.employee||{};
+
+&#x20;   const earnings=slip.earnings||[];
+&#x20;   const deductions=slip.deductions||[];
+
+&#x20;   const rows=(items)=>items.map(item=>\`
+&#x20;       \<tr>
+&#x20;           \<td>${esc(item.name)}\</td>
+&#x20;           \<td>${money(item.amount)}\</td>
+&#x20;       \</tr>
+&#x20;   \`).join("");
+
+&#x20;   document.getElementById("slipModalBody").innerHTML=\`
+
+&#x20;       \<div style="text-align\:center;padding:12px;border-bottom:1px solid #eee">
+&#x20;           \<h2 style="margin:0 0 6px">ACROPOLIS\</h2>
+&#x20;           \<p style="margin:0;color:#667085;font-size:12px">SALARY SLIP\</p>
+&#x20;       \</div>
+
+&#x20;       \<div class="grid two" style="margin:20px 0">
+
+&#x20;           \<div>\<small>Employee Name\</small>\<br>\<strong>${esc(employee.name||"--")}\</strong>\</div>
+&#x20;           \<div>\<small>Mentor ID\</small>\<br>\<strong>${esc(slip.mentorId)}\</strong>\</div>
+&#x20;           \<div>\<small>Designation\</small>\<br>\<strong>${esc(employee.designation||"--")}\</strong>\</div>
+&#x20;           \<div>\<small>Salary Month\</small>\<br>\<strong>${esc(slip.month)}\</strong>\</div>
+&#x20;           \<div>\<small>Department\</small>\<br>\<strong>${esc(employee.department||"--")}\</strong>\</div>
+&#x20;           \<div>\<small>Status\</small>\<br>${statusBadge(slip.status)}\</div>
+
+&#x20;       \</div>
+
+&#x20;       \<h4>Earnings\</h4>
+
+&#x20;       \<table>
+&#x20;           \<thead>\<tr>\<th>Component\</th>\<th>Amount\</th>\</tr>\</thead>
+&#x20;           \<tbody>${rows(earnings)}\</tbody>
+&#x20;       \</table>
+
+&#x20;       \<h4>Deductions\</h4>
+
+&#x20;       \<table>
+&#x20;           \<thead>\<tr>\<th>Component\</th>\<th>Amount\</th>\</tr>\</thead>
+&#x20;           \<tbody>${rows(deductions)}\</tbody>
+&#x20;       \</table>
+
+&#x20;       \<div class="total-box">
+
+&#x20;           \<div class="total-item">
+&#x20;               \<span>Gross Earnings\</span>
+&#x20;               \<strong>${money(slip.grossEarnings)}\</strong>
+&#x20;           \</div>
+
+&#x20;           \<div class="total-item">
+&#x20;               \<span>Total Deductions\</span>
+&#x20;               \<strong>${money(slip.totalDeductions)}\</strong>
+&#x20;           \</div>
+
+&#x20;           \<div class="total-item net">
+&#x20;               \<span>Net Transfer\</span>
+&#x20;               \<strong>${money(slip.netTransfer)}\</strong>
+&#x20;           \</div>
+
+&#x20;       \</div>
+
+&#x20;       \<div style="margin-top:20px;font-size:12px;color:#667085">
+&#x20;           Payment Date: ${esc(slip.paymentDate||"--")}\<br>
+&#x20;           Payment Mode: ${esc(slip.paymentMode||"--")}\<br>
+&#x20;           Remarks: ${esc(slip.remarks||"--")}
+&#x20;       \</div>
+&#x20;   \`;
+
+&#x20;   document.getElementById("slipModal").classList.add("show");
+}
+
+function closeModal(){
+&#x20;   document.getElementById("slipModal").classList.remove("show");
+}
+
+
+/\* =========================================================
+BULK DISTRIBUTION
+\========================================================= \*/
+
+function parseMentorIds(id){
+
+&#x20;   return getValue(id)
+&#x20;       .split(/[\n,;]+/)
+&#x20;       .map(item=>item.trim())
+&#x20;       .filter(Boolean);
+}
+
+function getBulkAttendance(){
+
+&#x20;   return {
+&#x20;       workingDays\:Number(getValue("bulkWorkingDays")||0),
+&#x20;       presentDays\:Number(getValue("bulkPresentDays")||0),
+&#x20;       leaveDays\:Number(getValue("bulkLeaveDays")||0)
+&#x20;   };
+}
+
+async function runBulkDistribution(){
+
+&#x20;   const mentorIds=parseMentorIds("bulkMentorIds");
+
+&#x20;   const month=getValue("bulkMonth");
+
+&#x20;   if(!mentorIds.length)return toast("Enter Mentor IDs","error");
+&#x20;   if(!month)return toast("Select salary month","error");
+
+&#x20;   const data={
+&#x20;       mentorIds,
+&#x20;       month,
+&#x20;       earnings\:getComponents("bulkEarnings"),
+&#x20;       deductions\:getComponents("bulkDeductions"),
+&#x20;       attendance\:getBulkAttendance(),
+&#x20;       status\:getValue("bulkStatus"),
+&#x20;       paymentDate\:getValue("bulkPaymentDate")||null,
+&#x20;       paymentMode\:getValue("bulkPaymentMode"),
+&#x20;       remarks:"Bulk salary distribution"
+&#x20;   };
+
+&#x20;   if(!data.earnings.length){
+&#x20;       return toast("Add at least one earning component","error");
+&#x20;   }
+
+&#x20;   if(!confirm(\`Distribute salary to ${mentorIds.length} employees for ${month}?\`))return;
+
+&#x20;   try{
+
+&#x20;       const result=await post("/bulk",data);
+
+&#x20;       showDistributionResults("bulkResultPanel","bulkResult",result.results);
+
+&#x20;       toast(result.message||"Bulk distribution completed");
+
+&#x20;       loadDashboard();
+
+&#x20;   }catch(error){
+&#x20;       showError(error);
+&#x20;   }
+}
+
+
+/\* =========================================================
+FIXED DISTRIBUTION
+\========================================================= \*/
+
+async function runFixedDistribution(){
+
+&#x20;   const mentorIds=parseMentorIds("fixedMentorIds");
+
+&#x20;   const month=getValue("fixedMonth");
+
+&#x20;   if(!mentorIds.length)return toast("Enter Mentor IDs","error");
+&#x20;   if(!month)return toast("Select salary month","error");
+
+&#x20;   const templateId=getValue("fixedTemplate");
+
+&#x20;   const data={
+&#x20;       mentorIds,
+&#x20;       month,
+&#x20;       templateId\:templateId||null,
+&#x20;       earnings\:getComponents("fixedEarnings"),
+&#x20;       deductions\:getComponents("fixedDeductions"),
+&#x20;       attendance:{
+&#x20;           workingDays\:Number(getValue("fixedWorkingDays")||0),
+&#x20;           presentDays\:Number(getValue("fixedPresentDays")||0),
+&#x20;           leaveDays\:Number(getValue("fixedLeaveDays")||0)
+&#x20;       },
+&#x20;       status\:getValue("fixedStatus"),
+&#x20;       paymentDate\:getValue("fixedPaymentDate")||null,
+&#x20;       paymentMode\:getValue("fixedPaymentMode"),
+&#x20;       remarks:"Fixed salary distribution"
+&#x20;   };
+
+&#x20;   if(!templateId&&!data.earnings.length){
+&#x20;       return toast("Select a template or add manual earnings","error");
+&#x20;   }
+
+&#x20;   if(!confirm(\`Distribute fixed salary to ${mentorIds.length} employees?\`))return;
+
+&#x20;   try{
+
+&#x20;       const result=await post("/bulk-fixed",data);
+
+&#x20;       showDistributionResults("fixedResultPanel","fixedResult",result.results);
+
+&#x20;       toast(result.message||"Fixed salary distribution completed");
+
+&#x20;       loadDashboard();
+
+&#x20;   }catch(error){
+&#x20;       showError(error);
+&#x20;   }
+}
+
+function showDistributionResults(panelId,resultId,results){
+
+&#x20;   results=results||{created:[],failed:[]};
+
+&#x20;   document.getElementById(panelId).classList.remove("hidden");
+
+&#x20;   const created=results.created||[];
+&#x20;   const failed=results.failed||[];
+
+&#x20;   let html=\`
+&#x20;       \<div class="cards" style="margin-bottom:15px">
+&#x20;           \<div class="stat-card">
+&#x20;               \<div class="stat-title">Successfully Created\</div>
+&#x20;               \<div class="stat-value" style="color\:var(--green)">${created.length}\</div>
+&#x20;           \</div>
+&#x20;           \<div class="stat-card">
+&#x20;               \<div class="stat-title">Failed\</div>
+&#x20;               \<div class="stat-value" style="color\:var(--red)">${failed.length}\</div>
+&#x20;           \</div>
+&#x20;       \</div>
+&#x20;   \`;
+
+&#x20;   if(created.length){
+
+&#x20;       html+=\`
+&#x20;           \<h4>Created\</h4>
+&#x20;           \<div class="table-wrap">
+&#x20;           \<table>
+&#x20;               \<thead>\<tr>\<th>Mentor ID\</th>\<th>Slip ID\</th>\</tr>\</thead>
+&#x20;               \<tbody>
+&#x20;               ${created.map(item=>\`
+&#x20;                   \<tr>
+&#x20;                       \<td>${esc(item.mentorId)}\</td>
+&#x20;                       \<td>${esc(item.slipId)}\</td>
+&#x20;                   \</tr>
+&#x20;               \`).join("")}
+&#x20;               \</tbody>
+&#x20;           \</table>
+&#x20;           \</div>
+&#x20;       \`;
+
+&#x20;   }
+
+&#x20;   if(failed.length){
+
+&#x20;       html+=\`
+&#x20;           \<h4>Failed Records\</h4>
+&#x20;           \<div class="table-wrap">
+&#x20;           \<table>
+&#x20;               \<thead>\<tr>\<th>Mentor ID\</th>\<th>Reason\</th>\</tr>\</thead>
+&#x20;               \<tbody>
+&#x20;               ${failed.map(item=>\`
+&#x20;                   \<tr>
+&#x20;                       \<td>${esc(item.mentorId)}\</td>
+&#x20;                       \<td style="color\:var(--red)">${esc(item.reason)}\</td>
+&#x20;                   \</tr>
+&#x20;               \`).join("")}
+&#x20;               \</tbody>
+&#x20;           \</table>
+&#x20;           \</div>
+&#x20;       \`;
+
+&#x20;   }
+
+&#x20;   document.getElementById(resultId).innerHTML=html;
+}
+
+
+/\* =========================================================
+TEMPLATES
+\========================================================= \*/
+
+async function loadTemplates(){
+
+&#x20;   try{
+
+&#x20;       const result=await api("/templates");
+
+&#x20;       currentTemplates=result.templates||[];
+
+&#x20;       const tbody=document.getElementById("templatesTable");
+
+&#x20;       if(!currentTemplates.length){
+&#x20;           tbody.innerHTML=\`\<tr>\<td colspan="5" class="empty">No templates created yet.\</td>\</tr>\`;
+&#x20;       }else{
+
+&#x20;           tbody.innerHTML=currentTemplates.map(template=>\`
+
+&#x20;               \<tr>
+&#x20;                   \<td>\<strong>${esc(template.templateName)}\</strong>\</td>
+&#x20;                   \<td>${esc(template.description||"--")}\</td>
+&#x20;                   \<td>${(template.earnings||[]).length} components\</td>
+&#x20;                   \<td>${(template.deductions||[]).length} components\</td>
+&#x20;                   \<td>
+&#x20;                       \<button class="btn btn-primary btn-small" onclick='editTemplate(${JSON.stringify(template.\_id)})'>
+&#x20;                           Edit
+&#x20;                       \</button>
+&#x20;                       \<button class="btn btn-danger btn-small" onclick='deleteTemplate(${JSON.stringify(template.\_id)})'>
+&#x20;                           Delete
+&#x20;                       \</button>
+&#x20;                   \</td>
+&#x20;               \</tr>
+
+&#x20;           \`).join("");
+
+&#x20;       }
+
+&#x20;       const select=document.getElementById("fixedTemplate");
+
+&#x20;       const selected=select.value;
+
+&#x20;       select.innerHTML=\`
+&#x20;           \<option value="">Use Manual Structure\</option>
+&#x20;           ${currentTemplates.map(template=>\`
+&#x20;               \<option value="${esc(template.\_id)}">${esc(template.templateName)}\</option>
+&#x20;           \`).join("")}
+&#x20;       \`;
+
+&#x20;       if(selected)select.value=selected;
+
+&#x20;   }catch(error){
+&#x20;       showError(error);
+&#x20;   }
+}
+
+async function saveTemplate(){
+
+&#x20;   const templateName=getValue("templateName");
+
+&#x20;   if(!templateName){
+&#x20;       toast("Template name is required","error");
+&#x20;       return;
+&#x20;   }
+
+&#x20;   const data={
+&#x20;       templateName,
+&#x20;       description\:getValue("templateDescription"),
+&#x20;       earnings\:getComponents("templateEarnings"),
+&#x20;       deductions\:getComponents("templateDeductions"),
+&#x20;       attendance:{
+&#x20;           workingDays:0,
+&#x20;           presentDays:0,
+&#x20;           leaveDays:0
+&#x20;       }
+&#x20;   };
+
+&#x20;   if(!data.earnings.length){
+&#x20;       toast("Add at least one earning component","error");
+&#x20;       return;
+&#x20;   }
+
+&#x20;   try{
+
+&#x20;       const result=await post("/templates",data);
+
+&#x20;       toast(result.message||"Template saved");
+
+&#x20;       clearTemplateForm();
+
+&#x20;       loadTemplates();
+
+&#x20;   }catch(error){
+&#x20;       showError(error);
+&#x20;   }
+}
+
+function editTemplate(id){
+
+&#x20;   const template=currentTemplates.find(item=>String(item.\_id)===String(id));
+
+&#x20;   if(!template)return;
+
+&#x20;   clearTemplateForm();
+
+&#x20;   setValue("templateId",template.\_id);
+&#x20;   setValue("templateName",template.templateName);
+&#x20;   setValue("templateDescription",template.description);
+
+&#x20;   (template.earnings||[]).forEach(item=>{
+&#x20;       addComponent("templateEarnings",item.name,item.amount);
+&#x20;   });
+
+&#x20;   (template.deductions||[]).forEach(item=>{
+&#x20;       addComponent("templateDeductions",item.name,item.amount);
+&#x20;   });
+
+&#x20;   window\.scrollTo({top:0,behavior:"smooth"});
 
 }
 
-document.querySelectorAll(".nav-btn").forEach(btn => {
+async function deleteTemplate(id){
 
-    btn.addEventListener("click", () => {
-        navigate(btn.dataset.page);
-    });
+&#x20;   if(!confirm("Delete this salary template?"))return;
+
+&#x20;   try{
+
+&#x20;       const result=await deleteRequest("/templates/"+encodeURIComponent(id));
+
+&#x20;       toast(result.message||"Template deleted");
+
+&#x20;       loadTemplates();
+
+&#x20;   }catch(error){
+&#x20;       showError(error);
+&#x20;   }
+}
+
+function clearTemplateForm(){
+
+&#x20;   setValue("templateId","");
+&#x20;   setValue("templateName","");
+&#x20;   setValue("templateDescription","");
+
+&#x20;   clearComponents("templateEarnings");
+&#x20;   clearComponents("templateDeductions");
+}
+
+
+/\* =========================================================
+DASHBOARD
+\========================================================= \*/
+
+async function loadDashboard(){
+
+&#x20;   try{
+
+&#x20;       const result=await api("/all");
+
+&#x20;       const records=result.records||[];
+
+&#x20;       const total=records.reduce((sum,item)=>{
+&#x20;           return sum+Number(item.netTransfer||0);
+&#x20;       },0);
+
+&#x20;       const employees=new Set(records.map(item=>item.mentorId));
+
+&#x20;       const months=records.map(item=>item.month).filter(Boolean).sort().reverse();
+
+&#x20;       document.getElementById("statSlips").textContent=records.length;
+
+&#x20;       document.getElementById("statPayroll").textContent=money(total);
+
+&#x20;       document.getElementById("statEmployees").textContent=employees.size;
+
+&#x20;       document.getElementById("statMonth").textContent=months[0]||"--";
+
+&#x20;       const recent=records.slice(0,10);
+
+&#x20;       const tbody=document.getElementById("dashboardTable");
+
+&#x20;       if(!recent.length){
+&#x20;           tbody.innerHTML=\`\<tr>\<td colspan="7" class="empty">No salary records available.\</td>\</tr>\`;
+&#x20;           return;
+&#x20;       }
+
+&#x20;       tbody.innerHTML=recent.map(slip=>\`
+
+&#x20;           \<tr>
+&#x20;               \<td>${esc(slip.employee?.name||"--")}\</td>
+&#x20;               \<td>${esc(slip.mentorId)}\</td>
+&#x20;               \<td>${esc(slip.month)}\</td>
+&#x20;               \<td>${money(slip.grossEarnings)}\</td>
+&#x20;               \<td>${money(slip.totalDeductions)}\</td>
+&#x20;               \<td>\<strong>${money(slip.netTransfer)}\</strong>\</td>
+&#x20;               \<td>${statusBadge(slip.status)}\</td>
+&#x20;           \</tr>
+
+&#x20;       \`).join("");
+
+&#x20;   }catch(error){
+&#x20;       showError(error);
+&#x20;   }
+}
+
+
+/\* =========================================================
+SETTINGS
+\========================================================= \*/
+
+function saveApiBase(){
+
+&#x20;   const value=getValue("apiBaseInput");
+
+&#x20;   if(!value){
+&#x20;       toast("Enter API URL","error");
+&#x20;       return;
+&#x20;   }
+
+&#x20;   try{
+
+&#x20;       const url=new URL(value);
+
+&#x20;       if(!["http:","https:"].includes(url.protocol)){
+&#x20;           throw new Error("Invalid URL");
+&#x20;       }
+
+&#x20;       API_BASE=url.origin;
+
+&#x20;       localStorage.setItem("compensationApiBase",API_BASE);
+
+&#x20;       setValue("apiBaseInput",API_BASE);
+
+&#x20;       toast("API URL saved successfully");
+
+&#x20;   }catch(error){
+&#x20;       toast("Please enter a valid backend URL","error");
+&#x20;   }
+}
+
+async function testApi(){
+
+&#x20;   try{
+
+&#x20;       const result=await api("/all");
+
+&#x20;       toast("Backend connection successful");
+
+&#x20;   }catch(error){
+&#x20;       showError(error);
+&#x20;   }
+}
+
+
+/\* =========================================================
+INITIALIZATION
+\========================================================= \*/
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+&#x20;   setValue("apiBaseInput",API_BASE);
+
+&#x20;   setValue("slipMonth",currentMonth());
+&#x20;   setValue("bulkMonth",currentMonth());
+&#x20;   setValue("fixedMonth",currentMonth());
+
+&#x20;   addComponent("earnings","Basic Salary","");
+&#x20;   addComponent("deductions","PF","");
+
+&#x20;   addComponent("bulkEarnings","Basic Salary","");
+&#x20;   addComponent("bulkDeductions","PF","");
+
+&#x20;   addComponent("fixedEarnings","Basic Salary","");
+&#x20;   addComponent("fixedDeductions","PF","");
+
+&#x20;   addComponent("templateEarnings","Basic Salary","");
+&#x20;   addComponent("templateDeductions","PF","");
+
+&#x20;   calculateSalary();
+
+&#x20;   loadDashboard();
 
 });
 
+\</script>
 
-/* =========================================================
-   EMPLOYEE DISPLAY
-========================================================= */
-
-function renderEmployeeInfo(containerId, employee) {
-
-    const fields = {
-
-        "Employee Name": employee.name,
-
-        "Mentor ID": employee.mentorId,
-
-        "Employee Code": employee.employeeCode,
-
-        "Designation": employee.designation,
-
-        "Department": employee.department,
-
-        "Location": employee.location
-
-    };
-
-    $(containerId).innerHTML = Object.entries(fields).map(
-        ([key, value]) => `
-
-            <div class="info-box">
-                <small>${escapeHTML(key)}</small>
-                <strong>${escapeHTML(value || "-")}</strong>
-            </div>
-
-        `
-    ).join("");
-
-}
-
-
-/* =========================================================
-   COMPONENT BUILDER
-========================================================= */
-
-function addComponent(containerId, item = {}) {
-
-    const container = $(containerId);
-
-    const isDeduction = containerId.toLowerCase().includes("deduction");
-
-    const tr = document.createElement("tr");
-
-    if (isDeduction) {
-
-        tr.innerHTML = `
-
-            <td>
-                <input class="component-name"
-                    placeholder="PF / ESI / Tax">
-            </td>
-
-            <td>
-                <input type="number"
-                    class="component-amount"
-                    value="0" min="0" step="any">
-            </td>
-
-            <td>
-                <input type="number"
-                    class="component-ytd"
-                    value="0" min="0" step="any">
-            </td>
-
-            <td>
-                <button class="btn btn-danger btn-sm"
-                    onclick="removeComponent(this)">
-                    Remove
-                </button>
-            </td>
-
-        `;
-
-    } else {
-
-        tr.innerHTML = `
-
-            <td>
-                <input class="component-name"
-                    placeholder="Basic Salary">
-            </td>
-
-            <td>
-                <input type="number"
-                    class="component-master"
-                    value="0" min="0" step="any">
-            </td>
-
-            <td>
-                <input type="number"
-                    class="component-amount"
-                    value="0" min="0" step="any">
-            </td>
-
-            <td>
-                <input type="number"
-                    class="component-ytd"
-                    value="0" min="0" step="any">
-            </td>
-
-            <td>
-                <button class="btn btn-danger btn-sm"
-                    onclick="removeComponent(this)">
-                    Remove
-                </button>
-            </td>
-
-        `;
-
-    }
-
-    container.appendChild(tr);
-
-    tr.querySelector(".component-name").value =
-        item.name || "";
-
-    tr.querySelector(".component-amount").value =
-        item.amount ?? 0;
-
-    if (tr.querySelector(".component-master")) {
-
-        tr.querySelector(".component-master").value =
-            item.masterAmount ?? item.amount ?? 0;
-
-    }
-
-    if (tr.querySelector(".component-ytd")) {
-
-        tr.querySelector(".component-ytd").value =
-            item.ytd ?? 0;
-
-    }
-
-    tr.querySelectorAll("input").forEach(input => {
-
-        input.addEventListener("input", updateAllTotals);
-
-    });
-
-    updateAllTotals();
-
-}
-
-
-function removeComponent(button) {
-
-    button.closest("tr").remove();
-
-    updateAllTotals();
-
-}
-
-
-function getComponents(containerId) {
-
-    return [...$(containerId).querySelectorAll("tr")].map(tr => {
-
-        const result = {
-
-            name: tr.querySelector(".component-name").value.trim(),
-
-            amount: Number(
-                tr.querySelector(".component-amount").value || 0
-            ),
-
-            ytd: Number(
-                tr.querySelector(".component-ytd").value || 0
-            )
-
-        };
-
-        const master = tr.querySelector(".component-master");
-
-        if (master) {
-
-            result.masterAmount = Number(master.value || 0);
-
-        }
-
-        return result;
-
-    });
-
-}
-
-
-function renderComponents(containerId, items = []) {
-
-    $(containerId).innerHTML = "";
-
-    items.forEach(item => addComponent(containerId, item));
-
-}
-
-
-function getAttendance(containerId) {
-
-    const result = {};
-
-    $(containerId).querySelectorAll("[data-attendance]").forEach(input => {
-
-        result[input.dataset.attendance] =
-            Number(input.value || 0);
-
-    });
-
-    return result;
-
-}
-
-
-function renderAttendance(containerId, attendance = {}) {
-
-    const container = $(containerId);
-
-    const defaults = {
-
-        workingDays: 30,
-
-        presentDays: 30,
-
-        paidLeaves: 0,
-
-        unpaidLeaves: 0,
-
-        holidays: 0,
-
-        overtimeDays: 0
-
-    };
-
-    const merged = {
-        ...defaults,
-        ...attendance
-    };
-
-    container.innerHTML = Object.entries(merged).map(
-        ([key, value]) => `
-
-            <div class="field">
-                <label>${escapeHTML(formatLabel(key))}</label>
-
-                <input type="number"
-                    min="0"
-                    step="any"
-                    data-attendance="${escapeHTML(key)}"
-                    value="${Number(value) || 0}">
-            </div>
-
-        `
-    ).join("");
-
-}
-
-
-/* =========================================================
-   TOTAL CALCULATIONS
-========================================================= */
-
-function getTotals(earnings, deductions) {
-
-    const gross = earnings.reduce(
-        (sum, item) => sum + Number(item.amount || 0), 0
-    );
-
-    const deduction = deductions.reduce(
-        (sum, item) => sum + Number(item.amount || 0), 0
-    );
-
-    return {
-
-        gross,
-
-        deduction,
-
-        net: gross - deduction
-
-    };
-
-}
-
-
-function updateAllTotals() {
-
-    const groups = [
-
-        {
-            earnings: "issueEarnings",
-            deductions: "issueDeductions",
-            gross: "issueGross",
-            deduction: "issueDeduction",
-            net: "issueNet"
-        },
-
-        {
-            earnings: "editEarnings",
-            deductions: "editDeductions",
-            gross: "editGross",
-            deduction: "editDeduction",
-            net: "editNet"
-        }
-
-    ];
-
-    groups.forEach(group => {
-
-        if (!$(group.earnings)) return;
-
-        const totals = getTotals(
-            getComponents(group.earnings),
-            getComponents(group.deductions)
-        );
-
-        $(group.gross).textContent =
-            formatMoney(totals.gross);
-
-        $(group.deduction).textContent =
-            formatMoney(totals.deduction);
-
-        $(group.net).textContent =
-            formatMoney(totals.net);
-
-    });
-
-}
-
-
-/* =========================================================
-   EMPLOYEE PROFILE
-========================================================= */
-
-async function loadProfile() {
-
-    hideMessage("profileMessage");
-
-    const mentorId = $("profileMentorId").value.trim();
-
-    if (!mentorId) {
-
-        showMessage(
-            "profileMessage",
-            "Please enter Mentor ID.",
-            "error"
-        );
-
-        return;
-
-    }
-
-    try {
-
-        const data = await api(
-            `/mentor/${encodeURIComponent(mentorId)}`
-        );
-
-        const employee = data.employee;
-
-        currentProfileMentor = mentorId;
-
-        renderEmployeeInfo(
-            "profileEmployeeInfo",
-            employee
-        );
-
-        const profileData = await api(
-            `/profile/${encodeURIComponent(mentorId)}`
-        );
-
-        const profile = profileData.profile || {};
-
-        document.querySelectorAll("[data-profile]").forEach(input => {
-
-            const key = input.dataset.profile;
-
-            if (input.type === "checkbox") {
-
-                input.checked = Boolean(profile[key]);
-
-            } else if (input.tagName === "SELECT" &&
-                       ["pfApplicable", "esiApplicable"].includes(key)) {
-
-                input.value = String(profile[key] ?? true);
-
-            } else {
-
-                input.value = profile[key] ?? "";
-
-            }
-
-        });
-
-        $("profileFormSection").classList.remove("hidden");
-
-        showMessage(
-            "profileMessage",
-            data.profileExists
-                ? "Employee found. Existing profile loaded."
-                : "Employee found. Create a new compensation profile.",
-            "success"
-        );
-
-    } catch(error) {
-
-        $("profileFormSection").classList.add("hidden");
-
-        showMessage(
-            "profileMessage",
-            error.message,
-            "error"
-        );
-
-    }
-
-}
-
-
-async function saveProfile() {
-
-    if (!currentProfileMentor) return;
-
-    const payload = {};
-
-    document.querySelectorAll("[data-profile]").forEach(input => {
-
-        const key = input.dataset.profile;
-
-        let value = input.value;
-
-        if (["pfApplicable", "esiApplicable"].includes(key)) {
-
-            value = value === "true";
-
-        } else if (
-            [
-                "basicSalary",
-                "hra",
-                "otherAllowance",
-                "monthlyCTC",
-                "annualCTC",
-                "professionalTax"
-            ].includes(key)
-        ) {
-
-            value = Number(value || 0);
-
-        }
-
-        payload[key] = value;
-
-    });
-
-    try {
-
-        await api(
-            `/profile/${encodeURIComponent(currentProfileMentor)}`,
-            {
-                method: "PUT",
-                body: JSON.stringify(payload)
-            }
-        );
-
-        showMessage(
-            "profileMessage",
-            "Compensation profile saved successfully.",
-            "success"
-        );
-
-    } catch(error) {
-
-        showMessage(
-            "profileMessage",
-            error.message,
-            "error"
-        );
-
-    }
-
-}
-
-
-function clearProfileForm() {
-
-    document.querySelectorAll("[data-profile]").forEach(input => {
-        input.value = "";
-    });
-
-}
-
-
-/* =========================================================
-   ISSUE SALARY
-========================================================= */
-
-async function validateIssueEmployee() {
-
-    hideMessage("issueMessage");
-
-    $("issueForm").classList.add("hidden");
-
-    const mentorId = $("issueMentorId").value.trim();
-
-    const month = $("issueMonth").value;
-
-    if (!mentorId || !month) {
-
-        showMessage(
-            "issueMessage",
-            "Mentor ID and month are required.",
-            "error"
-        );
-
-        return;
-
-    }
-
-    try {
-
-        const data = await api(
-            `/mentor/${encodeURIComponent(mentorId)}`
-        );
-
-        // Check duplicate before displaying the issue form.
-
-        try {
-
-            await api(
-                `/slip/${encodeURIComponent(mentorId)}/${encodeURIComponent(month)}`
-            );
-
-            throw new Error(
-                "Salary slip already exists for this month. Use Edit Salary Slip."
-            );
-
-        } catch(error) {
-
-            if (
-                !error.message.toLowerCase().includes("no salary slip") &&
-                !error.message.toLowerCase().includes("not found")
-            ) {
-
-                throw error;
-
-            }
-
-        }
-
-        issueEmployee = data.employee;
-
-        renderEmployeeInfo(
-            "issueEmployeeInfo",
-            issueEmployee
-        );
-
-        $("issueForm").classList.remove("hidden");
-
-        renderComponents("issueEarnings", []);
-        renderComponents("issueDeductions", []);
-
-        renderAttendance("issueAttendance");
-
-        showMessage(
-            "issueMessage",
-            "Valid employee. You can now create the salary slip.",
-            "success"
-        );
-
-    } catch(error) {
-
-        showMessage(
-            "issueMessage",
-            error.message,
-            "error"
-        );
-
-    }
-
-}
-
-
-async function issueSalary() {
-
-    if (!issueEmployee) {
-
-        alert("Validate employee first.");
-
-        return;
-
-    }
-
-    const earnings = getComponents("issueEarnings");
-
-    const deductions = getComponents("issueDeductions");
-
-    if (
-        earnings.some(item => !item.name) ||
-        deductions.some(item => !item.name)
-    ) {
-
-        alert("Please enter all salary component names.");
-
-        return;
-
-    }
-
-    const payload = {
-
-        mentorId: $("issueMentorId").value.trim(),
-
-        month: $("issueMonth").value,
-
-        attendance: getAttendance("issueAttendance"),
-
-        earnings,
-
-        deductions,
-
-        paymentDate: $("issuePaymentDate").value,
-
-        paymentMode: $("issuePaymentMode").value,
-
-        status: $("issueStatus").value,
-
-        remarks: $("issueRemarks").value
-
-    };
-
-    if (!confirm("Are you sure you want to issue this salary slip?")) {
-        return;
-    }
-
-    try {
-
-        await api("/slip", {
-
-            method: "POST",
-
-            body: JSON.stringify(payload)
-
-        });
-
-        alert("Salary slip issued successfully!");
-
-        $("issueForm").classList.add("hidden");
-
-        showMessage(
-            "issueMessage",
-            "Salary slip issued successfully.",
-            "success"
-        );
-
-        loadDashboard();
-
-    } catch(error) {
-
-        showMessage(
-            "issueMessage",
-            error.message,
-            "error"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   EDIT EXISTING SLIP
-========================================================= */
-
-async function loadEditSlip() {
-
-    hideMessage("editMessage");
-
-    $("editForm").classList.add("hidden");
-
-    const mentorId = $("editMentorId").value.trim();
-
-    const month = $("editMonth").value;
-
-    if (!mentorId || !month) {
-
-        showMessage(
-            "editMessage",
-            "Mentor ID and salary month are required.",
-            "error"
-        );
-
-        return;
-
-    }
-
-    try {
-
-        const mentorData = await api(
-            `/mentor/${encodeURIComponent(mentorId)}`
-        );
-
-        const data = await api(
-            `/slip/${encodeURIComponent(mentorId)}/${encodeURIComponent(month)}`
-        );
-
-        editingSlip = data.slip;
-
-        if (
-            String(editingSlip.mentorId) !== mentorId ||
-            String(editingSlip.month) !== month
-        ) {
-
-            throw new Error("Salary slip identity mismatch.");
-
-        }
-
-        renderEmployeeInfo(
-            "editEmployeeInfo",
-            {
-                ...mentorData.employee,
-                ...(editingSlip.employee || {})
-            }
-        );
-
-        renderAttendance(
-            "editAttendance",
-            editingSlip.attendance || {}
-        );
-
-        renderComponents(
-            "editEarnings",
-            editingSlip.earnings || []
-        );
-
-        renderComponents(
-            "editDeductions",
-            editingSlip.deductions || []
-        );
-
-        $("editPaymentDate").value =
-            editingSlip.paymentDate || "";
-
-        $("editPaymentMode").value =
-            editingSlip.paymentMode || "Bank Transfer";
-
-        $("editStatus").value =
-            editingSlip.status || "issued";
-
-        $("editRemarks").value =
-            editingSlip.remarks || "";
-
-        $("editForm").classList.remove("hidden");
-
-        updateAllTotals();
-
-        showMessage(
-            "editMessage",
-            "Existing salary slip loaded successfully.",
-            "success"
-        );
-
-    } catch(error) {
-
-        editingSlip = null;
-
-        showMessage(
-            "editMessage",
-            error.message,
-            "error"
-        );
-
-    }
-
-}
-
-
-async function updateExistingSlip() {
-
-    if (!editingSlip) {
-
-        alert("No salary slip loaded.");
-
-        return;
-
-    }
-
-    const earnings = getComponents("editEarnings");
-
-    const deductions = getComponents("editDeductions");
-
-    if (
-        earnings.some(item => !item.name) ||
-        deductions.some(item => !item.name)
-    ) {
-
-        alert("Please enter all salary component names.");
-
-        return;
-
-    }
-
-    const mentorId = $("editMentorId").value.trim();
-
-    const month = $("editMonth").value;
-
-    const payload = {
-
-        mentorId,
-
-        month,
-
-        attendance: getAttendance("editAttendance"),
-
-        earnings,
-
-        deductions,
-
-        paymentDate: $("editPaymentDate").value,
-
-        paymentMode: $("editPaymentMode").value,
-
-        status: $("editStatus").value,
-
-        remarks: $("editRemarks").value
-
-    };
-
-    if (!confirm("Update the existing salary slip?")) return;
-
-    try {
-
-        await api(
-            `/slip/${encodeURIComponent(mentorId)}/${encodeURIComponent(month)}`,
-            {
-                method: "PUT",
-                body: JSON.stringify(payload)
-            }
-        );
-
-        showMessage(
-            "editMessage",
-            "Existing salary slip updated successfully.",
-            "success"
-        );
-
-        alert("Salary slip updated successfully!");
-
-        loadDashboard();
-
-    } catch(error) {
-
-        showMessage(
-            "editMessage",
-            error.message,
-            "error"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   BULK SALARY
-========================================================= */
-
-function parseMentorIds(value) {
-
-    return [...new Set(
-        value.split(/[\n,;]+/)
-            .map(id => id.trim())
-            .filter(Boolean)
-    )];
-
-}
-
-
-async function distributeBulkSalary() {
-
-    const mentorIds = parseMentorIds(
-        $("bulkMentorIds").value
-    );
-
-    if (!mentorIds.length) {
-
-        showMessage(
-            "bulkMessage",
-            "Enter at least one Mentor ID.",
-            "error"
-        );
-
-        return;
-
-    }
-
-    const earnings = getComponents("bulkEarnings");
-
-    const deductions = getComponents("bulkDeductions");
-
-    if (
-        earnings.some(item => !item.name) ||
-        deductions.some(item => !item.name)
-    ) {
-
-        alert("Please enter all component names.");
-
-        return;
-
-    }
-
-    const payload = {
-
-        mentorIds,
-
-        month: $("bulkMonth").value,
-
-        earnings,
-
-        deductions,
-
-        attendance: {
-
-            workingDays: Number($("bulkWorkingDays").value),
-
-            presentDays: Number($("bulkPresentDays").value),
-
-            paidLeaves: Number($("bulkPaidLeaves").value),
-
-            unpaidLeaves: Number($("bulkUnpaidLeaves").value),
-
-            holidays: Number($("bulkHolidays").value),
-
-            overtimeDays: Number($("bulkOvertime").value)
-
-        },
-
-        status: $("bulkStatus").value,
-
-        paymentMode: $("bulkPaymentMode").value
-
-    };
-
-    if (!confirm(`Distribute salary to ${mentorIds.length} employees?`)) {
-        return;
-    }
-
-    try {
-
-        const data = await api("/bulk", {
-
-            method: "POST",
-
-            body: JSON.stringify(payload)
-
-        });
-
-        renderBulkResults(
-            "bulkResults",
-            data.results
-        );
-
-        showMessage(
-            "bulkMessage",
-            "Bulk distribution completed.",
-            "success"
-        );
-
-        loadDashboard();
-
-    } catch(error) {
-
-        showMessage(
-            "bulkMessage",
-            error.message,
-            "error"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   FIXED SALARY
-========================================================= */
-
-async function distributeFixedSalary() {
-
-    const mentorIds = parseMentorIds(
-        $("fixedMentorIds").value
-    );
-
-    const templateId = $("fixedTemplate").value;
-
-    if (!mentorIds.length || !templateId || !$("fixedMonth").value) {
-
-        showMessage(
-            "fixedMessage",
-            "Mentor IDs, salary month and template are required.",
-            "error"
-        );
-
-        return;
-
-    }
-
-    if (!confirm(`Distribute fixed salary to ${mentorIds.length} employees?`)) {
-        return;
-    }
-
-    try {
-
-        const data = await api("/bulk-fixed", {
-
-            method: "POST",
-
-            body: JSON.stringify({
-
-                mentorIds,
-
-                month: $("fixedMonth").value,
-
-                templateId,
-
-                status: $("fixedStatus").value,
-
-                paymentMode: $("fixedPaymentMode").value
-
-            })
-
-        });
-
-        renderBulkResults(
-            "fixedResults",
-            data.results
-        );
-
-        showMessage(
-            "fixedMessage",
-            "Fixed salary distribution completed.",
-            "success"
-        );
-
-        loadDashboard();
-
-    } catch(error) {
-
-        showMessage(
-            "fixedMessage",
-            error.message,
-            "error"
-        );
-
-    }
-
-}
-
-
-function renderBulkResults(containerId, results = {}) {
-
-    const created = results.created || [];
-
-    const failed = results.failed || [];
-
-    $(containerId).innerHTML = `
-
-        <div class="stats" style="margin-top:20px">
-
-            <div class="stat-card">
-                <small>Successfully Created</small>
-                <h2 style="color:var(--green)">
-                    ${created.length}
-                </h2>
-            </div>
-
-            <div class="stat-card">
-                <small>Failed</small>
-                <h2 style="color:var(--red)">
-                    ${failed.length}
-                </h2>
-            </div>
-
-        </div>
-
-        <div class="table-wrap">
-
-            <table>
-
-                <thead>
-                    <tr>
-                        <th>Mentor ID</th>
-                        <th>Result</th>
-                        <th>Details</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-
-                    ${created.map(item => `
-
-                        <tr>
-                            <td>${escapeHTML(item.mentorId)}</td>
-                            <td><span class="status-badge">Created</span></td>
-                            <td>${escapeHTML(item.slipId)}</td>
-                        </tr>
-
-                    `).join("")}
-
-                    ${failed.map(item => `
-
-                        <tr>
-                            <td>${escapeHTML(item.mentorId)}</td>
-                            <td style="color:var(--red)">Failed</td>
-                            <td>${escapeHTML(item.reason)}</td>
-                        </tr>
-
-                    `).join("")}
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    `;
-
-}
-
-
-/* =========================================================
-   SALARY TEMPLATES
-========================================================= */
-
-function openTemplateModal(template = null) {
-
-    editingTemplateId = template?._id || null;
-
-    $("templateName").value =
-        template?.templateName || "";
-
-    $("templateDescription").value =
-        template?.description || "";
-
-    renderComponents(
-        "templateEarnings",
-        template?.earnings || []
-    );
-
-    renderComponents(
-        "templateDeductions",
-        template?.deductions || []
-    );
-
-    $("templateModal").classList.add("show");
-
-}
-
-
-function closeTemplateModal() {
-
-    $("templateModal").classList.remove("show");
-
-}
-
-
-async function saveTemplate() {
-
-    const templateName = $("templateName").value.trim();
-
-    if (!templateName) {
-
-        showMessage(
-            "templateMessage",
-            "Template name is required.",
-            "error"
-        );
-
-        return;
-
-    }
-
-    const payload = {
-
-        templateName,
-
-        description: $("templateDescription").value,
-
-        earnings: getComponents("templateEarnings"),
-
-        deductions: getComponents("templateDeductions"),
-
-        attendance: {
-
-            workingDays: 30,
-
-            presentDays: 30,
-
-            paidLeaves: 0,
-
-            unpaidLeaves: 0,
-
-            holidays: 0,
-
-            overtimeDays: 0
-
-        }
-
-    };
-
-    if (
-        payload.earnings.some(item => !item.name) ||
-        payload.deductions.some(item => !item.name)
-    ) {
-
-        alert("Please enter all component names.");
-
-        return;
-
-    }
-
-    try {
-
-        await api("/templates", {
-
-            method: "POST",
-
-            body: JSON.stringify(payload)
-
-        });
-
-        showMessage(
-            "templateMessage",
-            "Template saved successfully.",
-            "success"
-        );
-
-        await loadTemplates();
-
-        setTimeout(closeTemplateModal, 800);
-
-    } catch(error) {
-
-        showMessage(
-            "templateMessage",
-            error.message,
-            "error"
-        );
-
-    }
-
-}
-
-
-async function loadTemplates() {
-
-    try {
-
-        const data = await api("/templates");
-
-        templatesCache = data.templates || [];
-
-        $("templateRecords").innerHTML =
-            templatesCache.length
-            ? templatesCache.map(template => `
-
-                <tr>
-
-                    <td><strong>${escapeHTML(template.templateName)}</strong></td>
-
-                    <td>${escapeHTML(template.description || "-")}</td>
-
-                    <td>${(template.earnings || []).length} Components</td>
-
-                    <td>${(template.deductions || []).length} Components</td>
-
-                    <td>
-
-                        <button class="btn btn-light btn-sm"
-                            onclick="editTemplate('${template._id}')">
-                            Edit
-                        </button>
-
-                        <button class="btn btn-danger btn-sm"
-                            onclick="deleteTemplate('${template._id}')">
-                            Delete
-                        </button>
-
-                    </td>
-
-                </tr>
-
-            `).join("")
-            : `<tr><td colspan="5">No salary templates found.</td></tr>`;
-
-        $("fixedTemplate").innerHTML = `
-            <option value="">Select Template</option>
-            ${templatesCache.map(template => `
-                <option value="${template._id}">
-                    ${escapeHTML(template.templateName)}
-                </option>
-            `).join("")}
-        `;
-
-    } catch(error) {
-
-        $("templateRecords").innerHTML =
-            `<tr><td colspan="5">${escapeHTML(error.message)}</td></tr>`;
-
-    }
-
-}
-
-
-function editTemplate(id) {
-
-    const template = templatesCache.find(
-        item => String(item._id) === String(id)
-    );
-
-    if (!template) return;
-
-    openTemplateModal(template);
-
-}
-
-
-async function deleteTemplate(id) {
-
-    if (!confirm("Delete this salary template?")) return;
-
-    try {
-
-        await api(
-            `/templates/${encodeURIComponent(id)}`,
-            { method: "DELETE" }
-        );
-
-        loadTemplates();
-
-    } catch(error) {
-
-        alert(error.message);
-
-    }
-
-}
-
-
-/* =========================================================
-   SALARY HISTORY
-========================================================= */
-
-async function loadHistory() {
-
-    const mentorId = $("historyMentorId").value.trim();
-
-    $("historyCard").classList.add("hidden");
-
-    if (!mentorId) {
-
-        showMessage(
-            "historyMessage",
-            "Enter Mentor ID.",
-            "error"
-        );
-
-        return;
-
-    }
-
-    try {
-
-        const data = await api(
-            `/history/${encodeURIComponent(mentorId)}`
-        );
-
-        const records = data.history || [];
-
-        $("historyRecords").innerHTML =
-            records.length
-            ? records.map(slip => `
-
-                <tr>
-
-                    <td>${escapeHTML(slip.month)}</td>
-
-                    <td>${formatMoney(slip.grossEarnings)}</td>
-
-                    <td>${formatMoney(slip.totalDeductions)}</td>
-
-                    <td><strong>${formatMoney(slip.netTransfer)}</strong></td>
-
-                    <td>${escapeHTML(slip.status || "issued")}</td>
-
-                    <td>
-                        <button class="btn btn-light btn-sm"
-                            onclick="openEditFromRecord('${slip.mentorId}','${slip.month}')">
-                            Edit
-                        </button>
-                    </td>
-
-                </tr>
-
-            `).join("")
-            : `<tr><td colspan="6">No salary history found.</td></tr>`;
-
-        $("historyCard").classList.remove("hidden");
-
-        showMessage(
-            "historyMessage",
-            `${records.length} salary records found.`,
-            "success"
-        );
-
-    } catch(error) {
-
-        showMessage(
-            "historyMessage",
-            error.message,
-            "error"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   ALL RECORDS
-========================================================= */
-
-async function loadAllRecords() {
-
-    const month = $("recordsMonth").value;
-
-    const query = month
-        ? `?month=${encodeURIComponent(month)}`
-        : "";
-
-    $("allRecords").innerHTML =
-        `<tr><td colspan="8">Loading...</td></tr>`;
-
-    try {
-
-        const data = await api(
-            `/all${query}`
-        );
-
-        const records = data.records || [];
-
-        $("allRecords").innerHTML =
-            records.length
-            ? records.map(slip => `
-
-                <tr>
-
-                    <td>${escapeHTML(slip.mentorId)}</td>
-
-                    <td>${escapeHTML(slip.employee?.name || "-")}</td>
-
-                    <td>${escapeHTML(slip.month)}</td>
-
-                    <td>${formatMoney(slip.grossEarnings)}</td>
-
-                    <td>${formatMoney(slip.totalDeductions)}</td>
-
-                    <td><strong>${formatMoney(slip.netTransfer)}</strong></td>
-
-                    <td>${escapeHTML(slip.status || "issued")}</td>
-
-                    <td>
-
-                        <button class="btn btn-light btn-sm"
-                            onclick="openEditFromRecord('${slip.mentorId}','${slip.month}')">
-                            Edit
-                        </button>
-
-                        <button class="btn btn-danger btn-sm"
-                            onclick="deleteSlip('${slip.mentorId}','${slip.month}')">
-                            Delete
-                        </button>
-
-                    </td>
-
-                </tr>
-
-            `).join("")
-            : `<tr><td colspan="8">No records found.</td></tr>`;
-
-    } catch(error) {
-
-        $("allRecords").innerHTML =
-            `<tr><td colspan="8">${escapeHTML(error.message)}</td></tr>`;
-
-    }
-
-}
-
-
-async function deleteSlip(mentorId, month) {
-
-    if (!confirm(
-        `Delete salary slip of ${mentorId} for ${month}?`
-    )) return;
-
-    try {
-
-        await api(
-            `/slip/${encodeURIComponent(mentorId)}/${encodeURIComponent(month)}`,
-            {
-                method: "DELETE"
-            }
-        );
-
-        alert("Salary slip deleted.");
-
-        loadAllRecords();
-
-        loadDashboard();
-
-    } catch(error) {
-
-        alert(error.message);
-
-    }
-
-}
-
-
-function openEditFromRecord(mentorId, month) {
-
-    navigate("edit");
-
-    $("editMentorId").value = mentorId;
-
-    $("editMonth").value = month;
-
-    loadEditSlip();
-
-}
-
-
-/* =========================================================
-   DASHBOARD
-========================================================= */
-
-async function loadDashboard() {
-
-    try {
-
-        const data = await api("/all");
-
-        const records = data.records || [];
-
-        const totalPayroll = records.reduce(
-            (sum, item) => sum + Number(item.netTransfer || 0),
-            0
-        );
-
-        const currentRecords = records.filter(
-            item => item.month === currentMonth
-        );
-
-        const employeeIds = new Set(
-            records.map(item => item.mentorId)
-        );
-
-        $("statEmployees").textContent =
-            employeeIds.size;
-
-        $("statSlips").textContent =
-            records.length;
-
-        $("statPayroll").textContent =
-            formatMoney(totalPayroll);
-
-        $("statCurrent").textContent =
-            currentRecords.length;
-
-        $("dashboardRecords").innerHTML =
-            records.slice(0, 8).map(slip => `
-
-                <tr>
-
-                    <td>${escapeHTML(slip.mentorId)}</td>
-
-                    <td>${escapeHTML(slip.employee?.name || "-")}</td>
-
-                    <td>${escapeHTML(slip.month)}</td>
-
-                    <td>${formatMoney(slip.grossEarnings)}</td>
-
-                    <td><strong>${formatMoney(slip.netTransfer)}</strong></td>
-
-                    <td>
-                        <span class="status-badge">
-                            ${escapeHTML(slip.status || "issued")}
-                        </span>
-                    </td>
-
-                    <td>
-                        <button class="btn btn-light btn-sm"
-                            onclick="openEditFromRecord('${slip.mentorId}','${slip.month}')">
-                            Edit
-                        </button>
-                    </td>
-
-                </tr>
-
-            `).join("")
-            || `<tr><td colspan="7">No salary records available.</td></tr>`;
-
-    } catch(error) {
-
-        console.error("Dashboard error:", error);
-
-    }
-
-}
-
-
-/* =========================================================
-   INITIALIZATION
-========================================================= */
-
-async function initializeDashboard() {
-
-    await Promise.allSettled([
-
-        loadDashboard(),
-
-        loadTemplates()
-
-    ]);
-
-}
-
-initializeDashboard();
-
-</script>
-
-</body>
-</html>
+\</body>
+\</html>
