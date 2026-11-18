@@ -1,879 +1,466 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" href="https://i.ibb.co/8tZSKKT/logo-with-bg.webp">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta property="og:image" content="https://i.ibb.co/Ld87p8x9/acropolis-logo.png">
+<link rel="icon" href="https://i.ibb.co/8tZSKKT/logo-with-bg.webp">
 <title>Student Dashboard — Acropolis</title>
 
-<!-- Fonts & icons -->
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+:root{
+  --navy:#0b1f3a;
+  --navy-2:#1a3a5f;
+  --red:#e10600;
+  --red-dark:#b00000;
+  --bg:#f0f2f5;
+  --card:#ffffff;
+  --text:#0b1f3a;
+  --muted:#6b7280;
+  --line:#eceff3;
+  --green:#16a34a;
+  --orange:#f59e0b;
+  --radius:14px;
+  --shadow:0 6px 18px rgba(11,31,58,.07);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+button{font-family:inherit}
+
+/* ============ HEADER ============ */
+header{
+  position:sticky;top:0;z-index:1000;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 20px;
+  background:linear-gradient(135deg,var(--navy),var(--navy-2));
+  color:#fff;box-shadow:0 4px 15px rgba(0,0,0,.2);
+}
+.logo-area{display:flex;align-items:center;gap:12px}
+.menu-btn{
+  background:rgba(255,255,255,.12);border:none;color:#fff;
+  width:40px;height:40px;border-radius:10px;font-size:18px;cursor:pointer;transition:.2s;
+}
+.menu-btn:hover{background:rgba(255,255,255,.22)}
+.logo-area img{height:40px;object-fit:contain;filter:brightness(0) invert(1)}
+.brand-text{line-height:1.15}
+.brand-text strong{display:block;font-family:'Playfair Display',serif;font-size:1.05rem}
+.brand-text span{font-size:.72rem;opacity:.75;letter-spacing:.4px}
+
+.notif-btn{
+  position:relative;display:flex;align-items:center;gap:8px;
+  background:#fff;color:var(--navy);border:none;cursor:pointer;
+  padding:9px 16px;border-radius:50px;font-weight:600;font-size:14px;
+  box-shadow:0 4px 12px rgba(0,0,0,.15);transition:.25s;
+}
+.notif-btn:hover{background:var(--red);color:#fff;transform:translateY(-2px)}
+.notif-count{
+  position:absolute;top:-6px;right:-4px;min-width:22px;height:22px;padding:0 6px;
+  display:none;align-items:center;justify-content:center;
+  background:var(--red);color:#fff;font-size:11px;font-weight:700;
+  border-radius:50px;border:2px solid var(--navy);
+}
+.notif-count.show{display:flex}
+
+/* ============ SIDEBAR ============ */
+.sidebar{
+  position:fixed;top:0;left:0;width:280px;height:100vh;
+  background:var(--navy);color:#fff;z-index:1500;overflow-y:auto;
+  transform:translateX(-100%);transition:transform .3s ease;
+  overscroll-behavior:contain;display:flex;flex-direction:column;
+}
+.sidebar.sidebar-open{transform:translateX(0)}
+.sb-head{padding:24px 20px 16px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:12px}
+.sb-avatar{
+  width:46px;height:46px;border-radius:50%;background:var(--red);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;flex-shrink:0;
+}
+.sb-user strong{display:block;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:170px}
+.sb-user span{font-size:.75rem;opacity:.7}
+.sb-close{margin-left:auto;background:none;border:none;color:#fff;font-size:20px;cursor:pointer;opacity:.7}
+.sb-links{padding:10px 0;flex:1}
+.sidebar a{
+  display:flex;align-items:center;gap:12px;padding:12px 20px;
+  color:#e5e9f0;text-decoration:none;font-size:14.5px;
+  border-left:4px solid transparent;transition:.2s;
+}
+.sidebar a i{width:18px;text-align:center;opacity:.85}
+.sidebar a:hover{background:rgba(225,6,0,.12);border-left-color:var(--red);color:#fff}
+.sidebar a.logout{color:#ffb3b0;margin-top:6px;border-top:1px solid rgba(255,255,255,.08)}
+.notice-badge{
+  margin-left:auto;background:var(--red);color:#fff;font-size:11px;font-weight:700;
+  padding:2px 8px;border-radius:50px;display:none;
+}
+.notice-badge.show{display:inline-block}
+.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:1400;backdrop-filter:blur(2px)}
+.backdrop.show{display:block}
+
+/* ============ LAYOUT ============ */
+main{max-width:1200px;margin:24px auto;padding:0 20px 40px}
+.greeting{margin-bottom:18px}
+.greeting h1{font-family:'Playfair Display',serif;font-size:1.6rem}
+.greeting p{color:var(--muted);font-size:.9rem;margin-top:2px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
+.col-4{grid-column:span 4}
+.col-8{grid-column:span 8}
+.stack{display:flex;flex-direction:column;gap:18px}
+
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px}
+.section-title{font-family:'Playfair Display',serif;font-size:1.15rem;display:flex;align-items:center;gap:8px}
+.section-title i{color:var(--red);font-size:.95rem}
+
+/* Profile */
+.profile-card{text-align:center;position:relative;overflow:hidden}
+.profile-card::before{content:"";position:absolute;inset:0 0 auto 0;height:70px;background:linear-gradient(135deg,var(--navy),var(--navy-2))}
+.avatar{
+  position:relative;width:84px;height:84px;border-radius:50%;margin:20px auto 10px;
+  background:var(--red);color:#fff;border:4px solid #fff;
+  display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;
+  box-shadow:0 6px 14px rgba(0,0,0,.18);
+}
+.profile-card h2{font-size:1.15rem;margin-bottom:10px}
+.info-row{display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid var(--line);font-size:.88rem}
+.info-row span:first-child{color:var(--muted)}
+.info-row span:last-child{font-weight:600}
+
+/* Refresh */
+.refresh-btn{
+  width:100%;display:flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--navy);color:#fff;border:none;padding:12px;font-size:14.5px;font-weight:600;
+  border-radius:12px;cursor:pointer;transition:.25s;box-shadow:0 4px 12px rgba(11,31,58,.25);
+}
+.refresh-btn:hover{background:var(--red);transform:translateY(-2px)}
+.refresh-btn:disabled{opacity:.7;cursor:wait;transform:none}
+.refresh-btn.loading i{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Fine card */
+.fine-card{
+  background:linear-gradient(135deg,#fff,#fff5f4);border-left:5px solid var(--red);
+}
+.fine-card h4{font-size:.85rem;color:var(--muted);font-weight:500}
+.fine-amount{font-size:2rem;font-weight:700;color:var(--red);margin:4px 0}
+.fine-subtext{font-size:.78rem;color:var(--muted)}
+.fine-card.clear{border-left-color:var(--green);background:linear-gradient(135deg,#fff,#f0fdf4)}
+.fine-card.clear .fine-amount{color:var(--green)}
+
+/* Attendance */
+.att-ring{display:flex;align-items:center;gap:16px;margin-bottom:14px}
+.att-percent{font-size:2rem;font-weight:700}
+.att-percent.good{color:var(--green)}
+.att-percent.low{color:var(--red)}
+.progress{height:10px;background:#e5e7eb;border-radius:50px;overflow:hidden;flex:1}
+.progress-bar{height:100%;width:0;border-radius:50px;background:var(--green);transition:width .8s ease}
+.progress-bar.low{background:var(--red)}
+.att-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:#f7f9fc;border-radius:10px;padding:10px;text-align:center}
+.stat b{display:block;font-size:1.2rem}
+.stat span{font-size:.75rem;color:var(--muted)}
+
+/* Quick actions */
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.quick-btn{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  background:#f7f9fc;border:1px solid var(--line);border-radius:12px;
+  padding:14px 8px;font-size:.82rem;font-weight:600;color:var(--navy);cursor:pointer;transition:.2s;
+}
+.quick-btn i{font-size:18px;color:var(--red)}
+.quick-btn:hover{background:var(--navy);color:#fff;transform:translateY(-2px)}
+.quick-btn:hover i{color:#fff}
+
+/* Events */
+#eventsBanner{display:flex;gap:12px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x proximity}
+#eventsBanner::-webkit-scrollbar{height:6px}
+#eventsBanner::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:6px}
+.event-item{flex:0 0 auto;scroll-snap-align:start;position:relative;border-radius:12px;overflow:hidden;cursor:pointer}
+.event-item img{display:block;width:230px;height:135px;object-fit:cover;transition:transform .3s}
+.event-item:hover img{transform:scale(1.06)}
+.event-item span{
+  position:absolute;left:0;right:0;bottom:0;padding:18px 10px 8px;color:#fff;font-size:.78rem;font-weight:600;
+  background:linear-gradient(transparent,rgba(0,0,0,.75));
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 
-body {
-    font-family: 'Poppins', sans-serif;
-    background: #f0f2f5;
-    color: #0b1f3a;
-    overflow-y: auto;
+/* Assignments */
+.assign-list{display:flex;flex-direction:column;gap:10px}
+.assign-item{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fcfdff;
 }
-
-/* HEADER */
-/* ===== HEADER (NAVY & RED THEME) ===== */
-header {
-    background: linear-gradient(135deg, #0b1f3a, #1a3a5f);
-    color: #fff;
-    padding: 14px 18px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    width: 100%;
+.assign-item h4{font-size:.92rem;word-break:break-word}
+.assign-item small{color:var(--muted);font-size:.78rem}
+.pill{
+  flex-shrink:0;font-size:.72rem;font-weight:600;padding:4px 10px;border-radius:50px;
+  background:#fff4e0;color:#b45309;
 }
-
-
-
-/* .logo-area img {
-    height: 44px;
-    border-radius: 6px;
-    background: white; /* Contrast for logo 
-    padding: 2px;
-} */
-
-.logo-area img {
-    height: 50px;
-    filter: brightness(0) invert(1);
-    object-fit: contain;
+.primary-btn{
+  position:relative;overflow:hidden;border:none;cursor:pointer;color:#fff;
+  padding:10px 22px;font-size:.85rem;font-weight:600;border-radius:50px;
+  background:linear-gradient(135deg,var(--navy),#132f55);transition:.3s;
+  box-shadow:0 6px 14px rgba(0,0,0,.2);
 }
-.logo-area h1 {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 1.6rem;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    margin: 0;
+.primary-btn:hover{background:linear-gradient(135deg,var(--red),var(--red-dark));transform:translateY(-2px)}
+
+/* Table */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:.78rem;color:var(--muted);font-weight:600;padding:10px 8px;border-bottom:2px solid #e6e6e6;text-transform:uppercase;letter-spacing:.4px}
+td{padding:12px 8px;font-size:.88rem;border-bottom:1px solid var(--line)}
+tbody tr:hover{background:#f7f9fc}
+
+.empty{text-align:center;color:var(--muted);padding:22px 10px;font-size:.88rem}
+.empty i{display:block;font-size:26px;margin-bottom:8px;opacity:.5}
+
+/* Skeleton */
+.skeleton{background:linear-gradient(90deg,#eceff3 25%,#f6f7f9 37%,#eceff3 63%);background-size:400% 100%;animation:shimmer 1.4s infinite;border-radius:8px;color:transparent!important}
+@keyframes shimmer{0%{background-position:100% 50%}100%{background-position:0 50%}}
+
+/* Toast */
+#toast{
+  position:fixed;left:50%;bottom:24px;transform:translate(-50%,40px);opacity:0;pointer-events:none;
+  background:var(--navy);color:#fff;padding:12px 20px;border-radius:50px;font-size:.88rem;
+  box-shadow:0 10px 25px rgba(0,0,0,.3);transition:.3s;z-index:3000;max-width:90%;text-align:center;
 }
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#toast.error{background:var(--red)}
 
-.top-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+/* ============ RESPONSIVE ============ */
+@media (max-width:900px){
+  .col-4,.col-8{grid-column:span 12}
+  .event-item img{width:180px;height:110px}
 }
-
-.action-btn {
-    background: none;
-    border: none;
-    padding: 0;
-    color: #002382;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-    transition: color 0.25s ease;
-}
-
-.action-btn:hover {
-    color: #e10600;
-    text-decoration: underline;
-}
-
-
-/* SIDEBAR BASE */
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 260px;
-  height: 100vh;
-  background: #0b1f3a; /* Solid Navy */
-  color: #fff;
-  padding-top: 70px;
-  transform: translateX(-260px);
-  transition: 0.3s ease;
-  z-index: 1500;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-
-/* Sidebar visible */
-.sidebar-open {
-  transform: translateX(0);
-}
-
-/* Backdrop */
-.backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.4);
-  display: none;
-  z-index: 1400;
-}
-
-/* Sidebar links */
-.sidebar a {
-  display: block;
-  padding: 14px 18px;
-  color: #fff;
-  text-decoration: none;
-  font-size: 16px;
-  border-left: 4px solid transparent;
-  transition: 0.2s;
-}
-
-.sidebar a:hover {
-  background: rgba(225, 6, 0, 0.1);
-  border-left: 4px solid #e10600;
-}
-
-/* MAIN */
-main {
-    max-width: 1200px;
-    margin: 28px auto;
-    padding: 24px;
-}
-
-.grid {
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    gap: 18px;
-}
-
-.col-4 { grid-column: span 4; }
-.col-8 { grid-column: span 8; }
-
-/* SECTIONS */
-.section {
-    background: #fff;
-    padding: 18px;
-    border-radius: 12px;
-    box-shadow: 0 6px 14px rgba(0,0,0,0.06);
-}
-
-.profile-box {
-    text-align: center;
-    padding: 20px;
-    border-radius: 12px;
-}
-
-.profile-box h2{
-  color:#0b1f3a;
-  font-weight:700;
-  border-bottom:2px solid #e10600;
-  display:inline-block;
-  padding-bottom:4px;
-}
-
-.profile-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    margin-top: 8px;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 8px;
-}
-
-table th,
-table td {
-    padding: 8px;
-    border-bottom: 1px solid #eee;
-    text-align: left;
-}
-
-h2.section-title {
-    font-family: 'Playfair Display', serif;
-    color: #000000;
-    margin-bottom: 10px;
-}
-
-/* EVENT BANNER */
-#eventsBanner {
-    display: flex;
-    overflow-x: auto;
-    gap: 12px;
-    padding: 12px;
-    border-radius: 10px;
-    background: #e0f2f1;
-    border: 1px solid #b2dfdb;
-}
-
-#eventsBanner img {
-    width: 220px;
-    height: 130px;
-    object-fit: cover;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: transform .25s;
-}
-
-#eventsBanner img:hover {
-    transform: scale(1.04);
-}
-.assignment-title {
-  max-width: 250px;
-  word-wrap: break-word;
-  white-space: normal;
-}
-
-
-/* BADGES */
-.badge { 
-    display: inline-block;
-    padding: 5px 10px;
-    border-radius: 6px;
-    color: #fff;
-    font-weight: 600;
-    font-size: 12px;
-}
-.badge.pending { background: #ff9800; }
-.badge.paid { background: #28a745; }
-/* MODAL */
-.modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0,0,0,0.45);
-    z-index: 1300;
-}
-
-.modal.show {
-    display: flex;
-}
-
-.modal-box {
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    width: 360px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-    position: relative;
-}
-
-.close-x {
-    position: absolute;
-    right: 14px;
-    top: 10px;
-    cursor: pointer;
-    font-size: 20px;
-}
-
-/* ----------------------------- */
-/*         RESPONSIVE            */
-/* ----------------------------- */
-
-/* Tablet + Small Laptops */
-@media (max-width: 900px) {
-    .logo-area h1 {
-        font-size: 1.1rem;
-    }
-
-    .col-4, .col-8 {
-        grid-column: span 12;
-    }
-
-    #eventsBanner img {
-        width: 160px;
-        height: 100px;
-    }
-}
-
-/* Phones */
-@media (max-width: 600px) {
-    header {
-        padding: 10px 14px;
-    }
-
-    .logo-area img {
-        height: 36px;
-    }
-
-    .logo-area h1 {
-        font-size: 1rem;
-    }
-
-    .top-actions {
-        gap: 6px;
-    }
-
-    .action-btn {
-        padding: 7px 12px;
-        font-size: 0.85rem;
-    }
-
-    main {
-        padding: 14px;
-    }
-
-    .section {
-        padding: 14px;
-    }
-
-    table th, table td {
-        padding: 6px;
-        font-size: 0.85rem;
-    }
-
-    #eventsBanner img {
-        width: 140px;
-        height: 90px;
-    }
-}
-
-
-.refresh-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
- background: #0b1f3a;
-  color: #fff;
-  border: none;
-  padding: 10px 18px;
-  font-size: 15px;
-  font-weight: 600;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: 0.25s ease;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-}
-
-.refresh-btn svg {
-  stroke: white;
-  transition: 0.25s ease;
-}
-
-.refresh-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 18px rgba(79, 70, 229, 0.4);
-  background: #e10600;
-}
-input:checked + .slider {
-  background-color: #e10600; /* Red when active */
-}
-.refresh-btn:active {
-  transform: scale(0.95);
-}
-
-.refresh-btn:hover svg {
-  rotate: 180deg;
-}
-.notification-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #fff;
-  padding: 14px 16px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  margin: 16px 0;
-  font-weight: 600;
-  
-}
-
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 52px;
-  height: 28px;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  background-color: #ccc;
-  border-radius: 28px;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  transition: 0.3s;
-}
-
-.slider:before {
-  content: "";
-  position: absolute;
-  height: 22px;
-  width: 22px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  border-radius: 50%;
-  transition: 0.3s;
-}
-
-input:checked + .slider {
-  background-color: #4f46e5;
-}
-
-input:checked + .slider:before {
-  transform: translateX(24px);
-}
-/* Notifications button */
-.notif-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #ffffff; /* Contrast for Navy Header */
-  color: #003366;      /* Primary Navy Text */
-  border: none;
-  padding: 10px 18px;
-  border-radius: 50px; /* Pill shape matching Portal style */
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 14px;
-  transition: all 0.3s ease;
-  position: relative;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.notif-btn:hover {
-  background: #e10600; /* Red hover */
-  color: #ffffff;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(225, 6, 0, 0.3);
-}
-
-.notif-count {
-  background: #e10600; /* Red badge */
-  color: white;
-  font-size: 11px;
-  font-weight: 800;
-  padding: 2px 7px;
-  border-radius: 50px;
-  position: absolute;
-  top: -5px;
-  right: -2px;
-  border: 2px solid #003366; /* Matching Header Background */
-}
-
-/* Responsive tweaks */
-@media (max-width: 600px) {
-  header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .header-actions {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .notif-btn {
-    padding: 8px 12px;
-    font-size: 13px;
-  }
-
-  .logo-img {
-    height: 40px;
-  }
-}
-/* ===== FINE TABLE (MATCHES ASSIGNMENTS SECTION) ===== */
-
-.fine-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 8px;
-    font-family: 'Poppins', sans-serif;
-}
-
-.fine-table th {
-    text-align: left;
-    font-size: 13px;
-    font-weight: 600;
-    color: #555;
-    padding: 10px 8px;
-    border-bottom: 2px solid #e6e6e6;
-}
-
-.fine-table td {
-    padding: 10px 8px;
-    font-size: 14px;
-    color: #333;
-    border-bottom: 1px solid #eee;
-}
-
-.fine-table tr:hover {
-    background: #f7f9fc;
-}
-
-/* Fine amount highlight */
-.fine-amount {
-    font-weight: 700;
-    color: #e10600;
-}
-
-/* Paid / Pending badge (already matching) */
-.badge.pending {
-    background: #ff9800;
-}
-
-.badge.paid {
-    background: #28a745;
-}
-.assignment-btn{
-    position: relative;
-    padding: 12px 28px;
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    color: white;
-    background: linear-gradient(135deg, #0b1f3a, #132f55); /* Navy gradient */
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    overflow: hidden;
-    transition: all 0.35s ease;
-    box-shadow: 0 8px 18px rgba(0,0,0,0.25);
-}
-
-.assignment-btn::before{
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.3), transparent);
-    transition: 0.5s;
-}
-
-.assignment-btn:hover::before{
-    left: 100%;
-}
-
-.assignment-btn:hover{
-    background: linear-gradient(135deg, #e10600, #b00000); /* Red hover */
-    transform: translateY(-3px);
-    box-shadow: 0 12px 25px rgba(0,0,0,0.35);
-}
-
-.assignment-btn:active{
-    transform: scale(0.97);
-    box-shadow: 0 5px 12px rgba(0,0,0,0.3);
-}
-.profile-icon{
-position:absolute;
-top:20px;
-right:25px;
-background:#0a2c5a;
-color:white;
-width:45px;
-height:45px;
-border-radius:50%;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:20px;
-cursor:pointer;
-box-shadow:0 4px 10px rgba(0,0,0,0.2);
-transition:0.3s;
-}
-
-.profile-icon:hover{
-background:#d32f2f;
-transform:scale(1.05);
+@media (max-width:600px){
+  header{padding:10px 14px}
+  .brand-text span{display:none}
+  .notif-btn{padding:8px 12px;font-size:13px}
+  .notif-label{display:none}
+  main{padding:0 14px 30px;margin-top:16px}
+  .greeting h1{font-size:1.3rem}
+  .card{padding:16px}
+  .assign-item{flex-direction:column;align-items:flex-start}
 }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
+<!-- ================= HEADER ================= -->
 <header>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
   <div class="logo-area">
-    <span style="font-size:22px;cursor:pointer;margin-right:6px" id="menuToggle">☰</span>
-    <img src="logo.jpg" alt="logo">
- <p class="fine-subtext">Acropolis Student</p>
-
-</div>
+    <button class="menu-btn" id="menuToggle" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+    <img src="logo.jpg" alt="Acropolis logo">
+    <div class="brand-text">
+      <strong>Acropolis</strong>
+      <span>Student Portal</span>
+    </div>
   </div>
-<!-- 🔔 Notifications Button -->
-<!-- <button id="openNotifications" class="notif-btn">
-  🔔 Notifications
-</button>
-  <div class="top-actions">
-    <div id="mentorIdDisplay" style="color:#fff;margin-right:8px">Student</div>
-    <!-- <button class="action-btn" id="logoutBtn">Logout</button> -->
-  </div> -->
-  
-  <div class="header-actions">
-    <!-- Notifications -->
-  <button id="openNotifications" class="notif-btn">
- 🔔 Notifications <span id="notifCount" class="notif-count">0</span>
-</button>
 
+  <button id="openNotifications" class="notif-btn" aria-label="Notifications">
+    <i class="fa-solid fa-bell"></i>
+    <span class="notif-label">Notifications</span>
+    <span id="notifCount" class="notif-count">0</span>
+  </button>
 </header>
 
+<!-- ================= SIDEBAR ================= -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-head">
+    <div class="sb-avatar" id="sbAvatar">S</div>
+    <div class="sb-user">
+      <strong id="sbName">Student</strong>
+      <span id="sbEnroll">—</span>
+    </div>
+    <button class="sb-close" id="sidebarClose" aria-label="Close menu"><i class="fa-solid fa-xmark"></i></button>
+  </div>
 
-<div class="sidebar" id="sidebar">
-<h2 style="text-align:center;margin:0 0 12px 0;font-family:'Playfair Display',serif">Menu</h2>
+  <nav class="sb-links">
+    <a href="/ewhfihewlbewcbewstudent-dashboard45689"><i class="fa-solid fa-house"></i> Dashboard</a>
+    <a href="#" id="inboxBtn"><i class="fa-solid fa-inbox"></i> Messages</a>
+    <a href="/aiwhfuiwhfiuwhefuiwhefnotesportal932"><i class="fa-solid fa-book-open"></i> Notes</a>
+    <a href="/jbciuwehfiuwhefuiwhefuicanteenportal223"><i class="fa-solid fa-utensils"></i> Canteen</a>
+    <a href="/aiuwhefiuwhefiuwhefiuresultsportal882"><i class="fa-solid fa-trophy"></i> Results</a>
+    <a href="/whefiuwhefiuwhefiuwhefinoticesportal992?userType=students"><i class="fa-solid fa-bullhorn"></i> Notices <span class="notice-badge" id="noticeBadge">0</span></a>
+    <a href="/whefiuwhefiuwhefiuwhefiFormsportal662"><i class="fa-solid fa-file-lines"></i> Forms</a>
+    <a href="/iuwhfiuwhefiuwhefiuwhefimysubmissionsportal883"><i class="fa-solid fa-folder-open"></i> My Submissions</a>
+    <a href="https://aitr.ac.in/" target="_blank" rel="noopener"><i class="fa-solid fa-circle-question"></i> Enquiry</a>
+    <a href="/aiuwhefiuwhefiuwhefiuwhefsettingsportal551"><i class="fa-solid fa-gear"></i> Settings</a>
+    <a href="/iuwhfiuwhefiuwhefiuwhefirulesportal331"><i class="fa-solid fa-scale-balanced"></i> Rules</a>
+    <a href="/iuwhfiuwhefiuwhefiuwhefibussportal772"><i class="fa-solid fa-bus"></i> Bus</a>
+    <a href="/iuwhfiuwhefiuwhefiuwhefimissingportal882"><i class="fa-solid fa-magnifying-glass"></i> Missing Portal</a>
+    <a href="/iuwhfiuwhefiuwhefiuwhefimymissingportal993"><i class="fa-solid fa-box-open"></i> My Missing Complaints</a>
+    <a href="/my-shedule.html"><i class="fa-solid fa-calendar-days"></i> My Schedule</a>
+    <a href="/m-shedule.html"><i class="fa-solid fa-calendar-check"></i> M Schedule</a>
+    <a href="/iuwhfiuwhefiuwhefiuwhefeesportal773"><i class="fa-solid fa-wallet"></i> Fees</a>
+    <a href="/iuwhfiuwhefiuwhefiuwheficomplaintportal551"><i class="fa-solid fa-triangle-exclamation"></i> File Complaint</a>
+    <a href="/iuwhfiuwhefiuwhefiuwhefireceiptsportal663"><i class="fa-solid fa-receipt"></i> My Receipts</a>
+    <a href="/Hierarchy-for-students"><i class="fa-solid fa-sitemap"></i> Management Map (Hierarchy)</a>
+    <a href="/iuwhfiuwhefiuwhefiuwhefiaboutdevportal992"><i class="fa-solid fa-code"></i> About Dev</a>
+    <a href="/student-profile.html"><i class="fa-solid fa-user"></i> Profile</a>
+    <a href="#" id="finesBtn"><i class="fa-solid fa-credit-card"></i> Your Fines</a>
+    <a href="#" class="logout" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+  </nav>
+</aside>
+<div class="backdrop" id="backdrop"></div>
 
-<a href="/ewhfihewlbewcbewstudent-dashboard45689">
-<i class="fa-solid fa-house"></i> Dashboard
-</a>
-
-<a href="#" id="inboxBtn">
-<i class="fa-solid fa-inbox"></i> Messages
-</a>
-
-<a href="/aiwhfuiwhfiuwhefuiwhefnotesportal932">
-<i class="fa-solid fa-book-open"></i> Notes
-</a>
-
-<a href="/jbciuwehfiuwhefuiwhefuicanteenportal223">
-<i class="fa-solid fa-utensils"></i> Canteen
-</a>
-
-<a href="/aiuwhefiuwhefiuwhefiuresultsportal882">
-<i class="fa-solid fa-trophy"></i> Results
-</a>
-
-<a href="/whefiuwhefiuwhefiuwhefinoticesportal992?userType=students">
-<i class="fa-solid fa-bullhorn"></i> Notices
-<span class="notice-badge">0</span>
-</a>
-
-<a href="/whefiuwhefiuwhefiuwhefiFormsportal662">
-<i class="fa-solid fa-file-lines"></i> Forms
-</a>
-
-<a href="/iuwhfiuwhefiuwhefiuwhefimysubmissionsportal883">
-<i class="fa-solid fa-folder-open"></i> My Submissions
-</a>
-
-<a href="https://aitr.ac.in/" target="_blank">
-<i class="fa-solid fa-circle-question"></i> Enquiry
-</a>
-
-<a href="/aiuwhefiuwhefiuwhefiuwhefsettingsportal551">
-<i class="fa-solid fa-gear"></i> Settings
-</a>
-
-<a href="/iuwhfiuwhefiuwhefiuwhefirulesportal331">
-<i class="fa-solid fa-scale-balanced"></i> Rules
-</a>
-
-<a href="/iuwhfiuwhefiuwhefiuwhefibussportal772">
-<i class="fa-solid fa-bus"></i> Bus
-</a>
-
-<a href="/iuwhfiuwhefiuwhefiuwhefimissingportal882">
-<i class="fa-solid fa-circle-question"></i> Missing Portal
-</a>
-
-<a href="/iuwhfiuwhefiuwhefiuwhefimymissingportal993">
-<i class="fa-solid fa-box-open"></i> My Missing Complaints
-</a>
-<a href="/my-shedule.html">
-<i class="fa-solid fa-box-open"></i> My Shedule
-</a>
-<a href="/m-shedule.html">
-<i class="fa-solid fa-box-open"></i> M Shedule
-</a>
-<a href="/iuwhfiuwhefiuwhefiuwhefeesportal773">
-<i class="fa-solid fa-wallet"></i> Fees
-</a>
-
-<a href="/iuwhfiuwhefiuwhefiuwheficomplaintportal551">
-<i class="fa-solid fa-triangle-exclamation"></i> File Complaint
-</a>
-
-<a href="/iuwhfiuwhefiuwhefiuwhefireceiptsportal663">
-<i class="fa-solid fa-receipt"></i> My Receipts
-</a>
-<a href="/Hierarchy-for-students">
-<i class="fa-solid fa-receipt"></i> Management Map(Hierarchy
-)
-</a>
-
-<a href="/iuwhfiuwhefiuwhefiuwhefiaboutdevportal992">
-<i class="fa-solid fa-code"></i> About Dev
-</a>
-<a href="/student-profile.html">
-  <i class="fa-solid fa-user"></i> Profile
-</a>
-
-
-  <!-- NEW FINES BUTTON -->
-  <a href="#" id="finesBtn">💳 Your Fines</a>
-
-  <a href="#" onclick="logout()">🚪 Logout</a>
-</div>
-
-<div class="backdrop" id="backdrop" onclick="closeSidebar()"></div>
-
-<!-- MAIN -->
+<!-- ================= MAIN ================= -->
 <main>
+  <div class="greeting">
+    <h1>Welcome back, <span id="greetName">Student</span> 👋</h1>
+    <p id="todayDate"></p>
+  </div>
+
   <div class="grid">
-    <!-- left -->
-    <div class="col-4">
-      <div class="section profile-box">
-        
-        <h2 id="studentName">Loading...</h2>
-        <p><strong>Enrollment:</strong> <span id="studentEnrollment">—</span></p>
-        <p><strong>Class:</strong> <span id="studentClass">—</span></p>
-      </div>
-      
-
-<button id="refreshDashboard" class="refresh-btn">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-    <path d="M4 4v6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-      stroke-linejoin="round"/>
-    <path d="M20 20v-6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-      stroke-linejoin="round"/>
-    <path d="M5 19a9 9 0 0 1 0-14l5 5H4" stroke="currentColor" stroke-width="2"
-      stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M19 5a9 9 0 0 1 0 14l-5-5h6" stroke="currentColor" stroke-width="2"
-      stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
-  Refresh
-</button>
-<!-- STUDENT TOTAL FINE CARD -->
-<div class="fine-card" id="fineCard">
-    <h4>Total Pending Fine</h4>
-    <p class="fine-amount">₹ <span id="totalFine">0</span></p>
-    <p class="fine-subtext">Check the Reason of this in Quick actions</p>
-</div>
-      <div class="section" id="attendanceSection">
-        
-        <h2 class="section-title">Attendance</h2>
-        <p><strong>Total:</strong> <span id="attTotal">0</span></p>
-        <p><strong>Present:</strong> <span id="attPresent">0</span></p>
-        <p><strong>Percent:</strong> <span id="attPercent">0%</span></p>
+    <!-- LEFT -->
+    <div class="col-4 stack">
+      <div class="card profile-card">
+        <div class="avatar" id="avatar">S</div>
+        <h2 id="studentName" class="skeleton">Loading name</h2>
+        <div class="info-row"><span>Enrollment</span><span id="studentEnrollment">—</span></div>
+        <div class="info-row"><span>Class</span><span id="studentClass">—</span></div>
       </div>
 
-      <div class="section">
-        <h2 class="section-title">Quick Actions</h2>
-        <button class="action-btn" onclick="window.location.href='notes-view.html'">Notes</button>|
-        <button class="action-btn" id="openFeesBtn">.</button>
-             <button class="action-btn" onclick="window.location.href='fees.html'">fees</button>|
-        <button class="action-btn" onclick="window.location.href='fines.html'">Check fine on you</button>
+      <button id="refreshDashboard" class="refresh-btn">
+        <i class="fa-solid fa-rotate"></i> <span>Refresh</span>
+      </button>
+
+      <div class="card fine-card" id="fineCard">
+        <h4><i class="fa-solid fa-circle-exclamation"></i> Total Pending Fine</h4>
+        <p class="fine-amount">₹ <span id="totalFine">0</span></p>
+        <p class="fine-subtext">Tap "Fines" in Quick Actions for the details.</p>
       </div>
-      
+
+      <div class="card" id="attendanceSection">
+        <div class="card-head"><h2 class="section-title"><i class="fa-solid fa-chart-line"></i> Attendance</h2></div>
+        <div class="att-ring">
+          <div class="att-percent" id="attPercent">0%</div>
+          <div class="progress"><div class="progress-bar" id="attBar"></div></div>
+        </div>
+        <div class="att-stats">
+          <div class="stat"><b id="attTotal">0</b><span>Total classes</span></div>
+          <div class="stat"><b id="attPresent">0</b><span>Present</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2 class="section-title"><i class="fa-solid fa-bolt"></i> Quick Actions</h2></div>
+        <div class="quick-grid">
+          <button class="quick-btn" onclick="go('notes-view.html')"><i class="fa-solid fa-book-open"></i>Notes</button>
+          <button class="quick-btn" onclick="go('fees.html')"><i class="fa-solid fa-wallet"></i>Fees</button>
+          <button class="quick-btn" onclick="go('fines.html')"><i class="fa-solid fa-credit-card"></i>Fines</button>
+          <button class="quick-btn" onclick="go('events.html')"><i class="fa-solid fa-calendar-star"></i>Events</button>
+        </div>
+      </div>
     </div>
 
-    <!-- right -->
-    <div class="col-8">
-      <h2 class="section-title">Events</h2>
-      <div id="eventsBanner" class="section"></div>
-      
-
-        <!-- Assignments Section -->
-  <div class="section" id="assignmentsSection">
-   <h2 class="section-title">Assignments</h2>
-   <table class="assignment-table">
-  <!-- <thead>
-    <tr>
-      <th>Title</th>
-      <th>Subject</th>
-      <th>Deadline</th>
-      <th>Status</th>
-    </tr>
-  </thead> -->
-     <button class="assignment-btn" onclick="openAssignments()">
-  📚 View Assignments
-</button>
-  <tbody id="assignmentBody"></tbody>
-</table>
-
-  </div>
-
-
-      <div class="section" id="examsSection">
-        <h2 class="section-title">Upcoming Exams</h2>
-        <table>
-          <thead><tr><th>Exam</th><th>Subject</th><th>Date</th><th>Info</th></tr></thead>
-          <tbody id="examsBody">
-            <tr><td colspan="4" style="text-align:center;color:#888">Loading exams...</td></tr>
-          </tbody>
-        </table>
+    <!-- RIGHT -->
+    <div class="col-8 stack">
+      <div class="card">
+        <div class="card-head"><h2 class="section-title"><i class="fa-solid fa-calendar-days"></i> Events</h2></div>
+        <div id="eventsBanner"><div class="empty">Loading events…</div></div>
       </div>
 
-<div class="modal" id="feesModal" aria-hidden="true">
-  <div class="modal-box">
-    <span class="close-x" id="feesClose">&times;</span>
-    <h3>Check Pending Fees</h3>
-    <p>Enrollment</p>
-    <input id="feeEnrollment" type="text" placeholder="Enter Enrollment" style="width:100%;padding:8px;border-radius:6px;border:1px solid #ddd" />
-    <button style="margin-top:10px;padding:10px 12px;border-radius:8px;background:#007bff;color:#fff;border:none;width:100%" id="checkFeeBtn">Check</button>
-    <div id="feeResult" style="margin-top:12px"></div>
+      <div class="card" id="assignmentsSection">
+        <div class="card-head">
+          <h2 class="section-title"><i class="fa-solid fa-book"></i> Assignments</h2>
+          <button class="primary-btn" id="viewAssignmentsBtn"><i class="fa-solid fa-arrow-right"></i> View all</button>
+        </div>
+        <div class="assign-list" id="assignmentBody"><div class="empty">Loading assignments…</div></div>
+      </div>
+
+      <div class="card" id="examsSection">
+        <div class="card-head"><h2 class="section-title"><i class="fa-solid fa-pen-to-square"></i> Upcoming Exams</h2></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Exam</th><th>Subject</th><th>Date</th><th>Room</th></tr></thead>
+            <tbody id="examsBody"><tr><td colspan="4" class="empty">Loading exams…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
+</main>
 
+<div id="toast"></div>
+
+<script src="/static/js/notifications.js"></script>
 <script>
-
-/* ------------------------------------------
-      CONFIG
-------------------------------------------- */
+/* =========================================================
+   CONFIG
+========================================================= */
 const API_ROOT = "https://college-hwbb.onrender.com";
+const PUBLIC_VAPID_KEY = "BNubnwV8CTYrdDmpyhdl4f8kHXQ8Q9XpTDYNsuN59eEgDXDgsm3ecXvO-rRWbQH6MR25RJWUm3-_813aDEHpzZ8";
 
-/* ------------------------------------------
-      LOCAL STORAGE HELPERS
-------------------------------------------- */
+/* =========================================================
+   HELPERS
+========================================================= */
+const $ = id => document.getElementById(id);
+
 function saveLS(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { console.warn(e); }
 }
 function getLS(key) {
   const v = localStorage.getItem(key);
   if (!v) return null;
   try { return JSON.parse(v); } catch { return null; }
 }
+function esc(str) {
+  return String(str ?? "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[c]));
+}
+function go(url) { window.location.href = url; }
 
-/* ------------------------------------------
-      LOAD FROM API (REFRESH BUTTON ONLY)
-------------------------------------------- */
-async function refreshDashboard() {
-  const enrollment = localStorage.getItem("enrollment");
-  if (!enrollment) return;
-
-  console.log("🔄 Refreshing dashboard from API...");
-
-  await loadStudentProfileAPI(enrollment);
-  await loadAttendanceAPI(enrollment);
-  await loadAssignmentsAPI(enrollment);
-  await loadExamsAPI();
-  await loadEventsAPI();
-  await loadNoticesAPI(enrollment);
-
-  alert("Dashboard refreshed!");
+let toastTimer;
+function toast(msg, isError = false) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.className = "show" + (isError ? " error" : "");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => (t.className = ""), 2800);
 }
 
-/* ------------------------------------------
-      PROFILE — API + SAVE
-------------------------------------------- */
+async function fetchJSON(url, options) {
+  const res = await fetch(url, options);
+  if (!res.ok) throw new Error("HTTP " + res.status);
+  return res.json();
+}
+
+/* Student info is ALWAYS read from here — one place, never missing */
+function getStudent() {
+  const p = getLS("studentProfile") || {};
+  return {
+    enrollment: localStorage.getItem("enrollment") || p.enrollment || "",
+    studentClass: localStorage.getItem("studentClass") || p.class || "",
+    roll: localStorage.getItem("roll") || p.roll || "",
+    name: p.name || ""
+  };
+}
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+function openSidebar() {
+  $("sidebar").classList.add("sidebar-open");
+  $("backdrop").classList.add("show");
+  document.body.style.overflow = "hidden";
+}
+function closeSidebar() {
+  $("sidebar").classList.remove("sidebar-open");
+  $("backdrop").classList.remove("show");
+  document.body.style.overflow = "";
+}
+
+/* =========================================================
+   PROFILE  (FIX: studentClass + roll are now saved)
+========================================================= */
 async function loadStudentProfileAPI(enrollment) {
   try {
-    const res = await fetch(`${API_ROOT}/api/students/${enrollment}/class`);
-    const data = await res.json();
-
-    if (data.success) {
-      saveLS("studentProfile", data.student);
+    const data = await fetchJSON(`${API_ROOT}/api/students/${encodeURIComponent(enrollment)}/class`);
+    if (data.success && data.student) {
       renderProfile(data.student);
     }
   } catch (err) {
@@ -884,29 +471,37 @@ async function loadStudentProfileAPI(enrollment) {
 function renderProfile(s) {
   if (!s) return;
 
-  document.getElementById("studentName").textContent = s.name || "Student";
-  document.getElementById("studentEnrollment").textContent = s.enrollment;
-  document.getElementById("studentClass").textContent = s.class || s.branch;
+  const cls = s.class || s.branch || "";
+  const roll = s.roll || s.rollNo || s.roll_no || "";
+  const name = s.name || "Student";
 
-  // 🔥 SINGLE SOURCE OF TRUTH
-  localStorage.setItem("studentProfile", JSON.stringify({
-    name: s.name,
-    enrollment: s.enrollment,
-    class: s.class || s.branch
-  }));
+  /* ✅ Single source of truth — notification.html & assignments depend on these */
+  const profile = { name, enrollment: s.enrollment, class: cls, roll };
+  saveLS("studentProfile", profile);
+  if (s.enrollment) localStorage.setItem("enrollment", s.enrollment);
+  if (cls) localStorage.setItem("studentClass", cls);
+  if (roll) localStorage.setItem("roll", roll);
 
-  // (optional legacy support)
-  localStorage.setItem("enrollment", s.enrollment);
+  const nameEl = $("studentName");
+  nameEl.classList.remove("skeleton");
+  nameEl.textContent = name;
+  $("studentEnrollment").textContent = s.enrollment || "—";
+  $("studentClass").textContent = cls || "—";
+
+  const initial = name.trim().charAt(0).toUpperCase() || "S";
+  $("avatar").textContent = initial;
+  $("sbAvatar").textContent = initial;
+  $("sbName").textContent = name;
+  $("sbEnroll").textContent = s.enrollment || "—";
+  $("greetName").textContent = name.split(" ")[0];
 }
 
-/* ------------------------------------------
-      ATTENDANCE — API + SAVE
-------------------------------------------- */
+/* =========================================================
+   ATTENDANCE
+========================================================= */
 async function loadAttendanceAPI(enrollment) {
   try {
-    const res = await fetch(`${API_ROOT}/api/attendance/student/${enrollment}`);
-    const data = await res.json();
-
+    const data = await fetchJSON(`${API_ROOT}/api/attendance/student/${encodeURIComponent(enrollment)}`);
     if (data.success) {
       saveLS("studentAttendance", data.attendance);
       renderAttendance(data.attendance);
@@ -916,32 +511,29 @@ async function loadAttendanceAPI(enrollment) {
 
 function renderAttendance(a) {
   if (!a) return;
-  document.getElementById("attTotal").textContent = a.total;
-  document.getElementById("attPresent").textContent = a.present;
-  document.getElementById("attPercent").textContent = a.percentage + "%";
+  const pct = Math.round(Number(a.percentage) || 0);
+  $("attTotal").textContent = a.total ?? 0;
+  $("attPresent").textContent = a.present ?? 0;
+  $("attPercent").textContent = pct + "%";
+
+  const low = pct < 75;
+  $("attPercent").className = "att-percent " + (low ? "low" : "good");
+  const bar = $("attBar");
+  bar.className = "progress-bar" + (low ? " low" : "");
+  bar.style.width = Math.min(pct, 100) + "%";
 }
 
-/* ------------------------------------------
-      ASSIGNMENTS — API + SAVE
-------------------------------------------- */
+/* =========================================================
+   ASSIGNMENTS
+========================================================= */
 async function loadAssignmentsAPI() {
-  // EXACT class like "1IT1"
-  const className = localStorage.getItem("studentClass");
-
-  if (!className) {
-    console.warn("studentClass not found in localStorage");
+  const { studentClass } = getStudent();
+  if (!studentClass) {
     renderAssignments([]);
     return;
   }
-
   try {
-    const res = await fetch(
-      `${API_ROOT}/api/assignments/class/${encodeURIComponent(className)}`
-    );
-
-    const data = await res.json();
-    console.log("Assignments fetched:", data);
-
+    const data = await fetchJSON(`${API_ROOT}/api/assignments/class/${encodeURIComponent(studentClass)}`);
     if (data.success && Array.isArray(data.assignments)) {
       saveLS("studentAssignments", data.assignments);
       renderAssignments(data.assignments);
@@ -950,54 +542,41 @@ async function loadAssignmentsAPI() {
     }
   } catch (err) {
     console.error("Assignment fetch failed:", err);
-    renderAssignments([]);
   }
 }
 
 function renderAssignments(list) {
-  const tbody = document.getElementById("assignmentBody");
-  tbody.innerHTML = "";
-
-
+  const box = $("assignmentBody");
   if (!list || list.length === 0) {
-    tbody.innerHTML = `
-
-`;
+    box.innerHTML = `<div class="empty"><i class="fa-solid fa-circle-check"></i>No pending assignments</div>`;
     return;
   }
-
-  list.forEach(a => {
-    tbody.innerHTML += `
-      <tr>
-      <td class="assignment-title" title="${a.title}">
-  ${a.title}
-</td>
-
-        <td>${a.subject}</td>
-        <td>${a.deadline}</td>
-        <td style="color:orange;font-weight:600;">Pending</td>
-      </tr>
-    `;
-  });
+  box.innerHTML = list.map(a => `
+    <div class="assign-item">
+      <div>
+        <h4>${esc(a.title)}</h4>
+        <small><i class="fa-solid fa-book"></i> ${esc(a.subject)} &nbsp;•&nbsp; <i class="fa-regular fa-clock"></i> ${esc(a.deadline)}</small>
+      </div>
+      <span class="pill">Pending</span>
+    </div>
+  `).join("");
 }
 
 function openAssignments() {
-  const profile = JSON.parse(localStorage.getItem("studentProfile"));
-  if (!profile || !profile.class) {
-    alert("Student class not found");
+  const { studentClass } = getStudent();
+  if (!studentClass) {
+    toast("Student class not found. Please refresh.", true);
     return;
   }
-  window.location.href = "assignments";
+  go("assignments");
 }
 
-/* ------------------------------------------
-      EXAMS — API + SAVE
-------------------------------------------- */
+/* =========================================================
+   EXAMS
+========================================================= */
 async function loadExamsAPI() {
   try {
-    const res = await fetch(`${API_ROOT}/api/exams`);
-    const data = await res.json();
-
+    const data = await fetchJSON(`${API_ROOT}/api/exams`);
     if (data.success) {
       saveLS("studentExams", data.exams);
       renderExams(data.exams);
@@ -1006,34 +585,27 @@ async function loadExamsAPI() {
 }
 
 function renderExams(list) {
-  const tbody = document.getElementById("examsBody");
-  tbody.innerHTML = "";
-
+  const tbody = $("examsBody");
   if (!list || list.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#888">No upcoming exams</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4" class="empty">No upcoming exams</td></tr>`;
     return;
   }
-
-  list.forEach(e => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${e.examName}</td>
-      <td>${e.subject}</td>
-      <td>${e.date}</td>
-      <td>${e.room}</td>
-    `;
-    tbody.appendChild(tr);
-  });
+  tbody.innerHTML = list.map(e => `
+    <tr>
+      <td><strong>${esc(e.examName)}</strong></td>
+      <td>${esc(e.subject)}</td>
+      <td>${esc(e.date)}</td>
+      <td>${esc(e.room)}</td>
+    </tr>
+  `).join("");
 }
 
-/* ------------------------------------------
-      EVENTS — API + SAVE
-------------------------------------------- */
+/* =========================================================
+   EVENTS
+========================================================= */
 async function loadEventsAPI() {
   try {
-    const res = await fetch(`${API_ROOT}/api/events`);
-    const data = await res.json();
-
+    const data = await fetchJSON(`${API_ROOT}/api/events`);
     if (data.success) {
       saveLS("studentEvents", data.events);
       renderEvents(data.events);
@@ -1042,31 +614,27 @@ async function loadEventsAPI() {
 }
 
 function renderEvents(events) {
-  const b = document.getElementById("eventsBanner");
-  b.innerHTML = "";
-
+  const b = $("eventsBanner");
   if (!events || events.length === 0) {
-    b.innerHTML = `<p>No upcoming events</p>`;
+    b.innerHTML = `<div class="empty">No upcoming events</div>`;
     return;
   }
-
+  b.innerHTML = "";
   events.forEach(ev => {
-    const img = document.createElement("img");
-    img.src = ev.image;
-    img.title = ev.title;
-    img.onclick = () => (location.href = `events.html?eventId=${ev.eventId}`);
-    b.appendChild(img);
+    const item = document.createElement("div");
+    item.className = "event-item";
+    item.innerHTML = `<img src="${esc(ev.image)}" alt="${esc(ev.title)}" loading="lazy"><span>${esc(ev.title)}</span>`;
+    item.onclick = () => go(`events.html?eventId=${encodeURIComponent(ev.eventId)}`);
+    b.appendChild(item);
   });
 }
 
-/* ------------------------------------------
-      NOTICES — API + SAVE
-------------------------------------------- */
+/* =========================================================
+   NOTICES
+========================================================= */
 async function loadNoticesAPI(enrollment) {
   try {
-    const res = await fetch(`${API_ROOT}/api/notices/get/students`);
-    const data = await res.json();
-
+    const data = await fetchJSON(`${API_ROOT}/api/notices/get/students`);
     if (data.success) {
       saveLS("studentNotices", data.notices);
       renderUnreadNotices(data.notices, enrollment);
@@ -1075,29 +643,135 @@ async function loadNoticesAPI(enrollment) {
 }
 
 function renderUnreadNotices(list, enrollment) {
-  const unread = list.filter(n => !n.readBy?.includes(enrollment)).length;
-  const badge = document.querySelector(".notice-badge");
-  if (badge) badge.textContent = unread;
+  const unread = (list || []).filter(n => !n.readBy?.includes(enrollment)).length;
+  const badge = $("noticeBadge");
+  badge.textContent = unread;
+  badge.classList.toggle("show", unread > 0);
 }
 
-/* ------------------------------------------
-    FINE BUTTON 
-------------------------------------------- */
-document.getElementById("finesBtn").addEventListener("click", function () {
-    const enrollment = localStorage.getItem("studentEnrollment") 
-                    || localStorage.getItem("enrollment");
+/* =========================================================
+   FINES
+========================================================= */
+async function loadDashboardFine() {
+  const { enrollment } = getStudent();
+  if (!enrollment) return;
+  try {
+    const fines = await fetchJSON(`${API_ROOT}/api/fines/${encodeURIComponent(enrollment)}`);
+    let total = 0;
+    if (Array.isArray(fines)) {
+      fines.forEach(f => {
+        if (!f.status || f.status.toLowerCase() !== "paid") total += Number(f.fine) || 0;
+      });
+    }
+    $("totalFine").textContent = total;
+    $("fineCard").classList.toggle("clear", total === 0);
+  } catch (err) { console.error("Error loading fine:", err); }
+}
 
-    if (!enrollment) {
-        alert("Enrollment number missing! Please login again.");
-        return;
+/* =========================================================
+   NOTIFICATION COUNT  (FIX: class is sent too)
+========================================================= */
+async function loadNotificationCount() {
+  const { enrollment, studentClass } = getStudent();
+  if (!enrollment) return;
+  try {
+    const url = `${API_ROOT}/api/notifications/count/${encodeURIComponent(enrollment)}` +
+                `?class=${encodeURIComponent(studentClass)}`;
+    const data = await fetchJSON(url);
+    if (data.success) {
+      const el = $("notifCount");
+      el.textContent = data.count > 99 ? "99+" : data.count;
+      el.classList.toggle("show", data.count > 0);
+    }
+  } catch (error) { console.error("Notification count error:", error); }
+}
+
+/* =========================================================
+   REFRESH
+========================================================= */
+async function refreshDashboard(showMessage = true) {
+  const enrollment = localStorage.getItem("enrollment");
+  if (!enrollment) return;
+
+  const btn = $("refreshDashboard");
+  btn.disabled = true;
+  btn.classList.add("loading");
+
+  try {
+    /* Profile first — it provides studentClass for the rest */
+    await loadStudentProfileAPI(enrollment);
+
+    await Promise.allSettled([
+      loadAttendanceAPI(enrollment),
+      loadAssignmentsAPI(),
+      loadExamsAPI(),
+      loadEventsAPI(),
+      loadNoticesAPI(enrollment),
+      loadDashboardFine(),
+      loadNotificationCount()
+    ]);
+    if (showMessage) toast("Dashboard refreshed ✔");
+  } catch (e) {
+    if (showMessage) toast("Refresh failed. Check your connection.", true);
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove("loading");
+  }
+}
+
+/* =========================================================
+   PUSH SUBSCRIPTION  (FIX: student info sent with it)
+========================================================= */
+function urlBase64ToUint8Array(base64String) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = window.atob(base64);
+  const out = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) out[i] = rawData.charCodeAt(i);
+  return out;
+}
+
+async function subscribeUserToPush() {
+  try {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+    if (!("Notification" in window) || Notification.permission !== "granted") return;
+
+    const registration = await navigator.serviceWorker.ready;
+    let subscription = await registration.pushManager.getSubscription();
+    if (!subscription) {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY)
+      });
     }
 
-    window.location.href = "fines.html";
-});
+    const { enrollment, studentClass, roll } = getStudent();
+    /* Subscription fields stay at top level, student info is added beside them */
+    await fetch(`${API_ROOT}/api/subscribe`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...subscription.toJSON(), enrollment, studentClass, roll })
+    });
+  } catch (err) {
+    console.error("Push subscription failed:", err);
+  }
+}
 
-/* ------------------------------------------
-      ON PAGE LOAD → LOAD ONLY FROM LOCALSTORAGE
-------------------------------------------- */
+/* =========================================================
+   LOGOUT
+========================================================= */
+function logout() {
+  [
+    "enrollment", "studentProfile", "studentAttendance", "studentAssignments",
+    "studentExams", "studentEvents", "studentNotices", "studentClass",
+    "roll", "notificationsEnabled", "admin_students"
+  ].forEach(k => localStorage.removeItem(k));
+  window.location.href = "login.html";
+}
+
+/* =========================================================
+   INIT
+========================================================= */
 document.addEventListener("DOMContentLoaded", () => {
   const enrollment = localStorage.getItem("enrollment");
   if (!enrollment) {
@@ -1105,245 +779,75 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  console.log("⚡ Dashboard loaded instantly from LocalStorage");
+  $("todayDate").textContent = new Date().toLocaleDateString("en-IN", {
+    weekday: "long", day: "numeric", month: "long", year: "numeric"
+  });
 
-  renderProfile(getLS("studentProfile"));
+  /* 1) Instant render from cache */
+  const cached = getLS("studentProfile");
+  if (cached) renderProfile(cached);
   renderAttendance(getLS("studentAttendance"));
   renderAssignments(getLS("studentAssignments"));
   renderExams(getLS("studentExams"));
   renderEvents(getLS("studentEvents"));
   renderUnreadNotices(getLS("studentNotices") || [], enrollment);
-  loadDashboardFine(); 
-  // Refresh button event
-  const btn = document.getElementById("refreshDashboard");
-  if (btn) btn.addEventListener("click", refreshDashboard);
-});
-function openSidebar() {
-  document.getElementById("sidebar").classList.add("sidebar-open");
-  document.getElementById("backdrop").style.display = "block";
-}
 
-function closeSidebar() {
-  document.getElementById("sidebar").classList.remove("sidebar-open");
-  document.getElementById("backdrop").style.display = "none";
-}
+  /* 2) Silent background refresh (no alert popup) */
+  refreshDashboard(false);
 
-document.getElementById("menuToggle").addEventListener("click", openSidebar);
-</script>
+  /* Events */
+  $("menuToggle").addEventListener("click", openSidebar);
+  $("sidebarClose").addEventListener("click", closeSidebar);
+  $("backdrop").addEventListener("click", closeSidebar);
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeSidebar(); });
+  $("sidebar").querySelectorAll("a[href]:not([href='#'])").forEach(a => a.addEventListener("click", closeSidebar));
 
- <!-- Your notification logic -->
-<script src="/static/js/notifications.js"></script>
-<script>
-  window.addEventListener("load", () => {
-    enableNotifications();
+  $("refreshDashboard").addEventListener("click", () => refreshDashboard(true));
+  $("viewAssignmentsBtn").addEventListener("click", openAssignments);
+  $("logoutBtn").addEventListener("click", e => { e.preventDefault(); logout(); });
+
+  $("finesBtn").addEventListener("click", e => {
+    e.preventDefault();
+    if (!getStudent().enrollment) { toast("Enrollment missing. Please login again.", true); return; }
+    go("fines.html");
   });
-  /* =========================================================
-   PUSH SUBSCRIPTION (CLIENT SIDE)
-   ========================================================= */
 
-const PUBLIC_VAPID_KEY = "BNubnwV8CTYrdDmpyhdl4f8kHXQ8Q9XpTDYNsuN59eEgDXDgsm3ecXvO-rRWbQH6MR25RJWUm3-_813aDEHpzZ8";
+  $("inboxBtn").addEventListener("click", e => {
+    e.preventDefault();
+    const enr = getStudent().enrollment;
+    if (!enr) { toast("Enrollment number not found", true); return; }
+    go(`inbox.html?enr=${encodeURIComponent(enr)}`);
+  });
 
-/* ---------- Base64 → Uint8Array ---------- */
-function urlBase64ToUint8Array(base64String) {
-  const padding = "=".repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding)
-    .replace(/-/g, "+")
-    .replace(/_/g, "/");
+  /* Notifications — student info always re-saved from the single source */
+  $("openNotifications").addEventListener("click", () => {
+    const s = getStudent();
+    if (!s.enrollment) { toast("Student info missing. Please login again.", true); return; }
+    if (!s.studentClass) { toast("Class not loaded yet. Tap Refresh and try again.", true); return; }
+    localStorage.setItem("enrollment", s.enrollment);
+    localStorage.setItem("studentClass", s.studentClass);
+    if (s.roll) localStorage.setItem("roll", s.roll);
+    go("notification.html");
+  });
 
-  const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-
-  for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
-  }
-  return outputArray;
-}
-
-/* ---------- Subscribe User ---------- */
-async function subscribeUserToPush() {
-  try {
-    if (!("serviceWorker" in navigator)) {
-      console.log("Service Worker not supported");
-      return;
-    }
-
-    if (!("PushManager" in window)) {
-      console.log("Push not supported");
-      return;
-    }
-
-    const permission = Notification.permission;
-    if (permission !== "granted") {
-      console.log("Notification permission not granted");
-      return;
-    }
-
-    const registration = await navigator.serviceWorker.ready;
-
-    let subscription = await registration.pushManager.getSubscription();
-
-    if (!subscription) {
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY)
-      });
-
-      console.log("✅ New Push Subscription:", subscription);
-    } else {
-      console.log("ℹ️ Already subscribed");
-    }
-
-    // Send subscription to backend
-    await fetch("https://college-hwbb.onrender.com/api/subscribe", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(subscription)
-    });
-
-    console.log("📡 Subscription sent to backend");
-
-  } catch (err) {
-    console.error("❌ Push subscription failed:", err);
-  }
-}
-
-/* ---------- Auto Subscribe ----------*/
-document.addEventListener("DOMContentLoaded", () => {
   subscribeUserToPush();
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-    loadNotificationCount();
+/* Optional external notification helper — guarded so it can't crash the page */
+window.addEventListener("load", () => {
+  if (typeof enableNotifications === "function") {
+    try { enableNotifications(); } catch (e) { console.warn(e); }
+  }
 });
+
+/* Service worker */
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("/service-worker.js")
-      .then(reg => {
-        console.log("✅ Service Worker registered:", reg.scope);
-      })
-      .catch(err => {
-        console.error("❌ SW registration failed:", err);
-      });
+      .then(reg => console.log("✅ Service Worker registered:", reg.scope))
+      .catch(err => console.error("❌ SW registration failed:", err));
   });
 }
-/* ===========================
-   LOAD TOTAL FINE ON DASHBOARD
-=========================== */
-async function loadDashboardFine() {
-    const enrollment = localStorage.getItem("enrollment");
-
-    if (!enrollment) {
-        console.warn("Enrollment not found in localStorage");
-        return;
-    }
-
-    try {
-        const res = await fetch(`${API_ROOT}/api/fines/${enrollment}`);
-        const fines = await res.json();
-
-        let total = 0;
-
-        if (Array.isArray(fines)) {
-            fines.forEach(f => {
-                if (!f.status || f.status.toLowerCase() !== "paid") {
-                    total += Number(f.fine);
-                }
-            });
-        }
-
-        document.getElementById("totalFine").innerText = total;
-
-    } catch (err) {
-        console.error("Error loading fine:", err);
-    }
-}
-
-function logout() {
-  // 🔴 Clear all student related data
-  localStorage.removeItem("enrollment");
-  localStorage.removeItem("studentProfile");
-  localStorage.removeItem("studentAttendance");
-  localStorage.removeItem("studentAssignments");
-  localStorage.removeItem("studentExams");
-  localStorage.removeItem("studentEvents");
-  localStorage.removeItem("studentNotices");
-  localStorage.removeItem("studentClass");
-
-  // Optional: notification preference
-  localStorage.removeItem("notificationsEnabled");
-
-  // (Optional) Clear everything if you want full reset
-  // localStorage.clear();
-
-  // 🔁 Redirect to login page
-  window.location.href = "login.html";
-}
-localStorage.removeItem("admin_students");
-
-refreshDashboard(); // agar force refresh chahiye
-document.getElementById("openNotifications").addEventListener("click", () => {
-
-  // 👇 ye values dashboard me already hoti hain
-  const enrollment   = localStorage.getItem("enrollment");
-  const studentClass = localStorage.getItem("studentClass");
-  const roll         = localStorage.getItem("roll");
-
-  if(!enrollment || !studentClass){
-    alert("Student info missing. Please login again.");
-    return;
-  }
-
-  // extra safety ke liye dobara store kar rahe hain
-  localStorage.setItem("enrollment", enrollment);
-  localStorage.setItem("studentClass", studentClass);
-  localStorage.setItem("roll", roll);
-
-  // 🚀 redirect
-  window.location.href = "notification.html";
-});
-document.addEventListener("DOMContentLoaded", () => {
-
-  const inboxBtn = document.getElementById("inboxBtn");
-  if(!inboxBtn) return;
-
-  inboxBtn.addEventListener("click", (e) => {
-    e.preventDefault(); // '#' ke default behavior ko roke
-
-    const enrollment =
-      localStorage.getItem("enrollment") ||
-      document.getElementById("enrollment")?.innerText;
-
-    if(!enrollment){
-      alert("Enrollment number not found");
-      return;
-    }
-
-    window.location.href = `inbox.html?enr=${enrollment}`;
-  });
-
-});
-
- async function loadNotificationCount() {
-
-    const enrollment = localStorage.getItem("enrollment");
-
-    if (!enrollment) return;
-
-    try {
-
-        const res = await fetch(`https://college-hwbb.onrender.com/api/notifications/count/${enrollment}`);
-        const data = await res.json();
-
-        if (data.success) {
-            document.getElementById("notifCount").innerText = data.count;
-        }
-
-    } catch (error) {
-        console.error("Notification count error:", error);
-    }
-}
-
-loadNotificationCount();
 </script>
 </body>
 </html>
