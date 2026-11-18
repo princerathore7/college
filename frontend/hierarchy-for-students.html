@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Organization Hierarchy | Acropolis</title>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+:root{
+    --primary:#4f46e5;
+    --primary-light:#eef2ff;
+    --dark:#172033;
+    --muted:#64748b;
+    --border:#e5e7eb;
+    --background:#f5f7fb;
+    --white:#ffffff;
+    --green:#16a34a;
+    --red:#dc2626;
+}
+
+body{
+    font-family:Inter,Arial,sans-serif;
+    background:var(--background);
+    color:var(--dark);
+}
+
+/* HEADER */
+
+.header{
+    background:white;
+    border-bottom:1px solid var(--border);
+    padding:17px 5%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    position:sticky;
+    top:0;
+    z-index:100;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.brand-icon{
+    width:43px;
+    height:43px;
+    background:var(--primary);
+    color:white;
+    border-radius:13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.brand h2{
+    font-size:19px;
+    font-weight:800;
+}
+
+.brand p{
+    font-size:12px;
+    color:var(--muted);
+    margin-top:3px;
+}
+
+.header-badge{
+    background:#ecfdf5;
+    color:#15803d;
+    padding:9px 14px;
+    border-radius:30px;
+    font-size:12px;
+    font-weight:700;
+}
+
+/* MAIN */
+
+.container{
+    max-width:1450px;
+    margin:auto;
+    padding:35px 5%;
+}
+
+.hero{
+    margin-bottom:28px;
+}
+
+.hero-tag{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    background:var(--primary-light);
+    color:var(--primary);
+    padding:8px 12px;
+    border-radius:30px;
+    font-size:12px;
+    font-weight:700;
+    margin-bottom:14px;
+}
+
+.hero h1{
+    font-size:32px;
+    font-weight:850;
+    letter-spacing:-1px;
+}
+
+.hero p{
+    color:var(--muted);
+    font-size:14px;
+    margin-top:9px;
+    line-height:1.6;
+}
+
+/* STATS */
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:17px;
+    margin-bottom:28px;
+}
+
+.stat-card{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:17px;
+    padding:21px;
+    display:flex;
+    align-items:center;
+    gap:15px;
+    box-shadow:0 3px 12px rgba(0,0,0,.025);
+}
+
+.stat-icon{
+    width:48px;
+    height:48px;
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.stat-icon svg{
+    width:22px;
+}
+
+.stat-icon.purple{
+    background:#eef2ff;
+    color:#4f46e5;
+}
+
+.stat-icon.green{
+    background:#ecfdf5;
+    color:#16a34a;
+}
+
+.stat-icon.orange{
+    background:#fff7ed;
+    color:#ea580c;
+}
+
+.stat-icon.blue{
+    background:#eff6ff;
+    color:#2563eb;
+}
+
+.stat-number{
+    font-size:25px;
+    font-weight:850;
+}
+
+.stat-label{
+    color:var(--muted);
+    font-size:12px;
+    margin-top:4px;
+}
+
+/* MAIN PANEL */
+
+.panel{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:19px;
+    overflow:hidden;
+    margin-bottom:25px;
+}
+
+.panel-header{
+    padding:22px 24px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:15px;
+}
+
+.panel-title{
+    display:flex;
+    align-items:center;
+    gap:11px;
+}
+
+.panel-title-icon{
+    width:40px;
+    height:40px;
+    background:var(--primary-light);
+    color:var(--primary);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    border-radius:12px;
+}
+
+.panel-title h2{
+    font-size:17px;
+}
+
+.panel-title p{
+    font-size:12px;
+    color:var(--muted);
+    margin-top:4px;
+}
+
+.controls{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    flex-wrap:wrap;
+}
+
+.search-box{
+    position:relative;
+}
+
+.search-box svg{
+    position:absolute;
+    left:12px;
+    top:50%;
+    transform:translateY(-50%);
+    width:17px;
+    color:#94a3b8;
+}
+
+.search-box input{
+    width:230px;
+    padding:11px 12px 11px 38px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    outline:none;
+    font-size:13px;
+}
+
+.search-box input:focus{
+    border-color:var(--primary);
+}
+
+.btn{
+    padding:11px 13px;
+    border:1px solid var(--border);
+    background:white;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:12px;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    gap:7px;
+    color:var(--dark);
+}
+
+.btn:hover{
+    background:#f8fafc;
+}
+
+.btn-primary{
+    background:var(--primary);
+    color:white;
+    border-color:var(--primary);
+}
+
+.btn-primary:hover{
+    background:#4338ca;
+}
+
+/* TREE */
+
+.tree-area{
+    padding:30px 20px 40px;
+    overflow-x:auto;
+}
+
+#hierarchyTree{
+    min-width:min-content;
+    width:100%;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    gap:25px;
+}
+
+.tree-node{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    position:relative;
+    min-width:245px;
+}
+
+.tree-children{
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    gap:22px;
+    padding-top:40px;
+    position:relative;
+}
+
+.tree-children:before{
+    content:"";
+    position:absolute;
+    height:20px;
+    width:2px;
+    background:#cbd5e1;
+    top:0;
+    left:50%;
+}
+
+.tree-children > .tree-node:before{
+    content:"";
+    position:absolute;
+    top:-20px;
+    height:20px;
+    width:2px;
+    background:#cbd5e1;
+}
+
+.tree-children > .tree-node:after{
+    content:"";
+    position:absolute;
+    top:-20px;
+    width:calc(100% + 22px);
+    height:2px;
+    background:#cbd5e1;
+    left:50%;
+}
+
+.tree-children > .tree-node:first-child:after{
+    width:50%;
+}
+
+.tree-children > .tree-node:last-child:after{
+    width:50%;
+    left:0;
+}
+
+.tree-children > .tree-node:only-child:after{
+    display:none;
+}
+
+.tree-children.hidden{
+    display:none;
+}
+
+/* PROFILE CARD */
+
+.profile-card{
+    width:245px;
+    background:white;
+    border:1px solid #e2e8f0;
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 5px 18px rgba(15,23,42,.055);
+    transition:.2s;
+    position:relative;
+    z-index:2;
+}
+
+.profile-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 12px 25px rgba(15,23,42,.10);
+}
+
+.card-top{
+    height:5px;
+    background:var(--primary);
+}
+
+.level-1 .card-top{background:#4f46e5;}
+.level-2 .card-top{background:#0284c7;}
+.level-3 .card-top{background:#0891b2;}
+.level-4 .card-top{background:#16a34a;}
+.level-5 .card-top{background:#d97706;}
+.level-6 .card-top{background:#64748b;}
+
+.card-body{
+    padding:19px 16px 14px;
+    text-align:center;
+}
+
+.avatar{
+    width:53px;
+    height:53px;
+    background:var(--primary-light);
+    color:var(--primary);
+    border-radius:50%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    margin:0 auto 11px;
+    font-size:17px;
+    font-weight:850;
+}
+
+.card-body h3{
+    font-size:15px;
+    font-weight:800;
+    word-break:break-word;
+}
+
+.designation{
+    display:inline-block;
+    color:var(--primary);
+    background:#eef2ff;
+    padding:5px 10px;
+    border-radius:30px;
+    font-size:11px;
+    font-weight:700;
+    margin-top:8px;
+}
+
+.details{
+    border-top:1px solid #f1f5f9;
+    margin-top:14px;
+    padding-top:12px;
+    text-align:left;
+}
+
+.detail{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:var(--muted);
+    font-size:11px;
+    margin:8px 0;
+    overflow-wrap:anywhere;
+}
+
+.detail svg{
+    width:14px;
+    height:14px;
+    flex-shrink:0;
+}
+
+.card-footer{
+    border-top:1px solid #f1f5f9;
+    background:#fafbfc;
+    padding:11px 13px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:5px;
+}
+
+.status{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    color:var(--green);
+    font-size:10px;
+    font-weight:800;
+}
+
+.status:before{
+    content:"";
+    width:7px;
+    height:7px;
+    background:var(--green);
+    border-radius:50%;
+}
+
+.status.inactive{
+    color:var(--red);
+}
+
+.status.inactive:before{
+    background:var(--red);
+}
+
+.member-id{
+    font-size:10px;
+    color:var(--muted);
+    font-weight:700;
+}
+
+/* TOGGLE */
+
+.toggle-btn{
+    position:relative;
+    z-index:3;
+    margin-top:11px;
+    border:1px solid #e0e7ff;
+    background:#f5f7ff;
+    color:var(--primary);
+    border-radius:30px;
+    padding:8px 12px;
+    font-size:10px;
+    font-weight:800;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:5px;
+    white-space:nowrap;
+}
+
+.toggle-btn:hover{
+    background:#e9edff;
+}
+
+.toggle-btn svg{
+    width:13px;
+    height:13px;
+}
+
+/* EMPTY / LOADING */
+
+.loading,.empty{
+    text-align:center;
+    padding:65px 20px;
+    color:var(--muted);
+    font-size:14px;
+    width:100%;
+}
+
+.empty svg{
+    width:38px;
+    height:38px;
+    color:#94a3b8;
+    margin-bottom:12px;
+}
+
+.error{
+    margin:15px 22px;
+    padding:14px;
+    background:#fef2f2;
+    border:1px solid #fecaca;
+    border-radius:12px;
+    color:#b91c1c;
+    font-size:13px;
+    line-height:1.6;
+}
+
+/* UNASSIGNED */
+
+.unassigned-grid{
+    padding:22px;
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:15px;
+}
+
+.unassigned-card{
+    border:1px solid var(--border);
+    border-radius:15px;
+    padding:18px;
+    background:#fff;
+}
+
+.unassigned-card h3{
+    font-size:14px;
+    margin-bottom:7px;
+}
+
+.unassigned-card p{
+    font-size:12px;
+    color:var(--muted);
+    margin-top:6px;
+    line-height:1.5;
+}
+
+.unassigned-card .avatar{
+    margin:0 0 12px;
+}
+
+/* FOOTER */
+
+.footer{
+    text-align:center;
+    padding:25px 10px;
+    color:#94a3b8;
+    font-size:11px;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:900px){
+    .stats{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .panel-header{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+
+    .controls{
+        width:100%;
+    }
+
+    .search-box{
+        flex:1;
+    }
+
+    .search-box input{
+        width:100%;
+    }
+}
+
+@media(max-width:600px){
+    .header{
+        padding:13px 16px;
+    }
+
+    .brand h2{
+        font-size:16px;
+    }
+
+    .header-badge{
+        font-size:10px;
+        padding:8px 10px;
+    }
+
+    .container{
+        padding:25px 14px;
+    }
+
+    .hero h1{
+        font-size:26px;
+    }
+
+    .stats{
+        gap:10px;
+    }
+
+    .stat-card{
+        padding:14px 11px;
+        gap:9px;
+    }
+
+    .stat-icon{
+        width:38px;
+        height:38px;
+    }
+
+    .stat-number{
+        font-size:21px;
+    }
+
+    .stat-label{
+        font-size:10px;
+    }
+
+    .panel-header{
+        padding:17px;
+    }
+
+    .controls{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+    }
+
+    .search-box{
+        grid-column:1/-1;
+    }
+
+    .btn{
+        justify-content:center;
+        font-size:11px;
+    }
+
+    .tree-area{
+        padding:25px 12px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+
+<header class="header">
+
+    <div class="brand">
+
+        <div class="brand-icon">
+            <i data-lucide="network"></i>
+        </div>
+
+        <div>
+            <h2>Acropolis</h2>
+            <p>Organization Directory</p>
+        </div>
+
+    </div>
+
+    <div class="header-badge">
+        <i data-lucide="globe" style="width:13px;vertical-align:middle"></i>
+        Public View
+    </div>
+
+</header>
+
+
+<main class="container">
+
+    <!-- HERO -->
+
+    <section class="hero">
+
+        <div class="hero-tag">
+            <i data-lucide="git-branch" style="width:14px"></i>
+            ORGANIZATIONAL STRUCTURE
+        </div>
+
+        <h1>Hierarchy Directory</h1>
+
+        <p>
+            Explore the organizational structure of Acropolis.
+            Discover team members, their roles, departments
+            and reporting relationships.
+        </p>
+
+    </section>
+
+
+    <!-- STATS -->
+
+    <section class="stats">
+
+        <div class="stat-card">
+
+            <div class="stat-icon purple">
+                <i data-lucide="users"></i>
+            </div>
+
+            <div>
+                <div class="stat-number" id="totalPeople">0</div>
+                <div class="stat-label">Total Members</div>
+            </div>
+
+        </div>
+
+        <div class="stat-card">
+
+            <div class="stat-icon green">
+                <i data-lucide="user-check"></i>
+            </div>
+
+            <div>
+                <div class="stat-number" id="activePeople">0</div>
+                <div class="stat-label">Active Members</div>
+            </div>
+
+        </div>
+
+        <div class="stat-card">
+
+            <div class="stat-icon blue">
+                <i data-lucide="git-branch"></i>
+            </div>
+
+            <div>
+                <div class="stat-number" id="hierarchyMembers">0</div>
+                <div class="stat-label">Hierarchy Members</div>
+            </div>
+
+        </div>
+
+        <div class="stat-card">
+
+            <div class="stat-icon orange">
+                <i data-lucide="user-minus"></i>
+            </div>
+
+            <div>
+                <div class="stat-number" id="unassignedPeople">0</div>
+                <div class="stat-label">Unassigned Members</div>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- HIERARCHY PANEL -->
+
+    <section class="panel">
+
+        <div class="panel-header">
+
+            <div class="panel-title">
+
+                <div class="panel-title-icon">
+                    <i data-lucide="network"></i>
+                </div>
+
+                <div>
+                    <h2>Reporting Structure</h2>
+                    <p>Explore the complete hierarchy tree</p>
+                </div>
+
+            </div>
+
+
+            <div class="controls">
+
+                <div class="search-box">
+                    <i data-lucide="search"></i>
+
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Search members..."
+                        oninput="filterHierarchy()"
+                    >
+                </div>
+
+                <button class="btn" onclick="expandAll()">
+                    <i data-lucide="maximize-2"></i>
+                    Expand All
+                </button>
+
+                <button class="btn" onclick="collapseAll()">
+                    <i data-lucide="minimize-2"></i>
+                    Collapse All
+                </button>
+
+                <button class="btn btn-primary" onclick="loadHierarchy()">
+                    <i data-lucide="refresh-cw"></i>
+                    Refresh
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div id="hierarchyError"></div>
+
+        <div class="tree-area">
+
+            <div id="hierarchyTree">
+
+                <div class="loading">
+                    Loading organizational hierarchy...
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- UNASSIGNED PANEL -->
+
+    <section class="panel">
+
+        <div class="panel-header">
+
+            <div class="panel-title">
+
+                <div class="panel-title-icon">
+                    <i data-lucide="users"></i>
+                </div>
+
+                <div>
+                    <h2>Other Members</h2>
+                    <p>Members not currently assigned to the reporting structure</p>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div id="unassignedGrid" class="unassigned-grid">
+
+            <div class="loading">
+                Loading members...
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<footer class="footer">
+    © Acropolis | Organization Hierarchy Directory
+</footer>
+
+
+<script>
+
+/* =====================================
+   CONFIGURATION
+===================================== */
+
+const API_ROOT = "https://college-hwbb.onrender.com";
+
+const HIERARCHY_API =
+    `${API_ROOT}/api/authority/hierarchy`;
+
+
+/* =====================================
+   GLOBAL DATA
+===================================== */
+
+let hierarchyData = [];
+let unassignedData = [];
+
+
+/* =====================================
+   FETCH JSON SAFELY
+===================================== */
+
+async function fetchJSON(url){
+
+    const response = await fetch(url);
+
+    const text = await response.text();
+
+    let data;
+
+    try{
+        data = JSON.parse(text);
+    }
+    catch(error){
+        throw new Error(
+            `Server returned non-JSON response. HTTP ${response.status}.`
+        );
+    }
+
+    if(!response.ok || data.success === false){
+        throw new Error(
+            data.message || `API Error ${response.status}`
+        );
+    }
+
+    return data;
+
+}
+
+
+/* =====================================
+   ESCAPE HTML
+===================================== */
+
+function escapeHTML(value){
+
+    return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+}
+
+
+/* =====================================
+   INITIALS
+===================================== */
+
+function getInitials(name){
+
+    return String(name || "NA")
+        .trim()
+        .split(/\s+/)
+        .slice(0,2)
+        .map(word=>word.charAt(0).toUpperCase())
+        .join("");
+
+}
+
+
+/* =====================================
+   LOAD HIERARCHY
+===================================== */
+
+async function loadHierarchy(){
+
+    const tree = document.getElementById("hierarchyTree");
+
+    tree.innerHTML = `
+        <div class="loading">
+            Loading organizational hierarchy...
+        </div>
+    `;
+
+    document.getElementById("hierarchyError").innerHTML = "";
+
+    try{
+
+        const data = await fetchJSON(HIERARCHY_API);
+
+        hierarchyData = Array.isArray(data.hierarchy)
+            ? data.hierarchy
+            : [];
+
+        document.getElementById("totalPeople").textContent =
+            data.totalPeople ?? 0;
+
+        document.getElementById("activePeople").textContent =
+            data.activePeople ?? 0;
+
+        document.getElementById("hierarchyMembers").textContent =
+            countMembers(hierarchyData);
+
+        renderHierarchy(hierarchyData);
+
+        await loadUnassigned();
+
+        lucide.createIcons();
+
+    }
+    catch(error){
+
+        console.error("Hierarchy Fetch Error:",error);
+
+        tree.innerHTML = `
+            <div class="empty">
+                <i data-lucide="alert-circle"></i>
+                <h3>Unable to load hierarchy</h3>
+                <p>Please try again later.</p>
+            </div>
+        `;
+
+        document.getElementById("hierarchyError").innerHTML = `
+            <div class="error">
+                <strong>API Error:</strong>
+                ${escapeHTML(error.message)}
+            </div>
+        `;
+
+        lucide.createIcons();
+
+    }
+
+}
+
+
+/* =====================================
+   LOAD UNASSIGNED MEMBERS
+===================================== */
+
+async function loadUnassigned(){
+
+    const container = document.getElementById("unassignedGrid");
+
+    try{
+
+        const data = await fetchJSON(
+            `${HIERARCHY_API}/unassigned`
+        );
+
+        unassignedData = Array.isArray(data.unassigned)
+            ? data.unassigned
+            : [];
+
+        document.getElementById("unassignedPeople").textContent =
+            unassignedData.length;
+
+        renderUnassigned(unassignedData);
+
+    }
+    catch(error){
+
+        console.error("Unassigned API Error:",error);
+
+        container.innerHTML = `
+            <div class="empty">
+                Unable to load unassigned members.
+            </div>
+        `;
+
+    }
+
+}
+
+
+/* =====================================
+   COUNT MEMBERS
+===================================== */
+
+function countMembers(nodes){
+
+    let total = 0;
+
+    nodes.forEach(node=>{
+
+        total++;
+
+        if(Array.isArray(node.children)){
+            total += countMembers(node.children);
+        }
+
+    });
+
+    return total;
+
+}
+
+
+/* =====================================
+   PROFILE CARD
+===================================== */
+
+function createProfileCard(person){
+
+    const name = escapeHTML(person.name || "Unknown");
+
+    const designation = escapeHTML(
+        person.designation || "Member"
+    );
+
+    const department = escapeHTML(
+        person.department || person.branch || "General"
+    );
+
+    const memberId = escapeHTML(
+        person.mentorId || person.studentId || person.id || "N/A"
+    );
+
+    const subject = escapeHTML(
+        person.subject || "Not specified"
+    );
+
+    const status = String(person.status || "Active");
+
+    const active = ![
+        "inactive",
+        "suspended",
+        "disabled",
+        "false"
+    ].includes(status.toLowerCase());
+
+    const level = Math.min(
+        6,
+        Math.max(1,Number(person.hierarchyLevel) || 6)
+    );
+
+    return `
+
+        <div class="profile-card level-${level}">
+
+            <div class="card-top"></div>
+
+            <div class="card-body">
+
+                <div class="avatar">
+                    ${escapeHTML(getInitials(person.name))}
+                </div>
+
+                <h3>${name}</h3>
+
+                <span class="designation">
+                    ${designation}
+                </span>
+
+                <div class="details">
+
+                    <div class="detail">
+                        <i data-lucide="building-2"></i>
+                        <span>${department}</span>
+                    </div>
+
+                    <div class="detail">
+                        <i data-lucide="book-open"></i>
+                        <span>${subject}</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card-footer">
+
+                <span class="status ${active ? "" : "inactive"}">
+                    ${active ? "Active" : "Inactive"}
+                </span>
+
+                <span class="member-id">
+                    ID: ${memberId}
+                </span>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =====================================
+   RENDER NODE
+===================================== */
+
+function renderNode(person){
+
+    const children = Array.isArray(person.children)
+        ? person.children
+        : [];
+
+    const hasChildren = children.length > 0;
+
+    const node = document.createElement("div");
+
+    node.className = "tree-node";
+
+    if(hasChildren){
+        node.classList.add("has-children");
+    }
+
+    node.innerHTML = createProfileCard(person);
+
+    if(hasChildren){
+
+        const toggle = document.createElement("button");
+
+        toggle.className = "toggle-btn";
+
+        toggle.innerHTML = `
+            <i data-lucide="chevron-up"></i>
+            Hide ${children.length} Direct Reports
+        `;
+
+        const childContainer = document.createElement("div");
+
+        childContainer.className = "tree-children";
+
+        children.forEach(child=>{
+            childContainer.appendChild(renderNode(child));
+        });
+
+        toggle.addEventListener("click",()=>{
+
+            const isHidden =
+                childContainer.classList.toggle("hidden");
+
+            toggle.innerHTML = isHidden
+                ? `<i data-lucide="chevron-down"></i> Show ${children.length} Direct Reports`
+                : `<i data-lucide="chevron-up"></i> Hide ${children.length} Direct Reports`;
+
+            lucide.createIcons();
+
+        });
+
+        node.appendChild(toggle);
+
+        node.appendChild(childContainer);
+
+    }
+
+    return node;
+
+}
+
+
+/* =====================================
+   RENDER COMPLETE HIERARCHY
+===================================== */
+
+function renderHierarchy(data){
+
+    const tree = document.getElementById("hierarchyTree");
+
+    tree.innerHTML = "";
+
+    if(!data || !data.length){
+
+        tree.innerHTML = `
+            <div class="empty">
+                <i data-lucide="users"></i>
+                <h3>No Hierarchy Found</h3>
+                <p>No members are currently available in the reporting structure.</p>
+            </div>
+        `;
+
+        lucide.createIcons();
+
+        return;
+
+    }
+
+    data.forEach(person=>{
+        tree.appendChild(renderNode(person));
+    });
+
+    lucide.createIcons();
+
+}
+
+
+/* =====================================
+   RENDER UNASSIGNED MEMBERS
+===================================== */
+
+function renderUnassigned(data){
+
+    const container = document.getElementById("unassignedGrid");
+
+    container.innerHTML = "";
+
+    if(!data || !data.length){
+
+        container.innerHTML = `
+            <div class="empty">
+                All members are assigned to the hierarchy.
+            </div>
+        `;
+
+        return;
+
+    }
+
+    data.forEach(person=>{
+
+        const card = document.createElement("div");
+
+        card.className = "unassigned-card";
+
+        card.innerHTML = `
+
+            <div class="avatar">
+                ${escapeHTML(getInitials(person.name))}
+            </div>
+
+            <h3>${escapeHTML(person.name || "Unknown")}</h3>
+
+            <p>
+                ${escapeHTML(person.designation || "Member")}
+            </p>
+
+            <p>
+                Department:
+                ${escapeHTML(person.department || person.branch || "General")}
+            </p>
+
+            <p>
+                ID:
+                ${escapeHTML(person.mentorId || person.studentId || person.id || "N/A")}
+            </p>
+
+        `;
+
+        container.appendChild(card);
+
+    });
+
+}
+
+
+/* =====================================
+   SEARCH
+===================================== */
+
+function filterHierarchy(){
+
+    const query = document
+        .getElementById("searchInput")
+        .value
+        .toLowerCase()
+        .trim();
+
+    if(!query){
+        renderHierarchy(hierarchyData);
+        return;
+    }
+
+    function filterNodes(nodes){
+
+        return nodes.map(person=>{
+
+            const text = [
+
+                person.name,
+                person.designation,
+                person.department,
+                person.branch,
+                person.mentorId,
+                person.studentId,
+                person.subject
+
+            ].join(" ").toLowerCase();
+
+            const filteredChildren = filterNodes(
+                person.children || []
+            );
+
+            const matches = text.includes(query);
+
+            if(matches || filteredChildren.length){
+
+                return {
+                    ...person,
+                    children:filteredChildren
+                };
+
+            }
+
+            return null;
+
+        }).filter(Boolean);
+
+    }
+
+    const filtered = filterNodes(hierarchyData);
+
+    renderHierarchy(filtered);
+
+}
+
+
+/* =====================================
+   EXPAND ALL
+===================================== */
+
+function expandAll(){
+
+    document.querySelectorAll(".tree-children").forEach(el=>{
+        el.classList.remove("hidden");
+    });
+
+    document.querySelectorAll(".toggle-btn").forEach(button=>{
+
+        const children = button.parentElement.querySelector(
+            ":scope > .tree-children"
+        );
+
+        if(children){
+
+            const count = children.children.length;
+
+            button.innerHTML = `
+                <i data-lucide="chevron-up"></i>
+                Hide ${count} Direct Reports
+            `;
+
+        }
+
+    });
+
+    lucide.createIcons();
+
+}
+
+
+/* =====================================
+   COLLAPSE ALL
+===================================== */
+
+function collapseAll(){
+
+    document.querySelectorAll(
+        ".tree-node.has-children > .tree-children"
+    ).forEach(el=>{
+        el.classList.add("hidden");
+    });
+
+    document.querySelectorAll(".toggle-btn").forEach(button=>{
+
+        const children = button.parentElement.querySelector(
+            ":scope > .tree-children"
+        );
+
+        if(children){
+
+            const count = children.children.length;
+
+            button.innerHTML = `
+                <i data-lucide="chevron-down"></i>
+                Show ${count} Direct Reports
+            `;
+
+        }
+
+    });
+
+    lucide.createIcons();
+
+}
+
+
+/* =====================================
+   INITIALIZE
+===================================== */
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+    lucide.createIcons();
+
+    loadHierarchy();
+
+});
+
+</script>
+
+</body>
+</html>
