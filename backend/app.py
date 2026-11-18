@@ -51,6 +51,8 @@ from routes.compensation import compensation_bp
 from routes.cleanup import cleanup_bp
 from routes.sme import sme_bp
 from routes.email import email_bp
+from ai_systems.ai_routes import ai_bp
+
 from routes.student_profile import student_profile_bp
 # ---------------------------------------------
 # FLASK APP SETUP
@@ -117,7 +119,7 @@ for bp in [
     missing_bp, receipt_bp, canteen_bp, auth_bp, timetable_bp,  signup_bp,
 verification_bp, sme_bp, otp_bp,
 admin_verification_bp, email_bp, hierarchy_bp, compensation_bp,
-cleanup_bp, robot_bp, student_profile_bp,ox_bp
+cleanup_bp, robot_bp, student_profile_bp,ox_bp, ai_bp
 ]:
     app.register_blueprint(bp)
 
