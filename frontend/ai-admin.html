@@ -1137,12 +1137,29 @@ const response = await fetch(
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            mentor_id: mentorId,
+            mentor_id: localStorage.getItem("mentorId"),
             message: message,
             history: oldHistory.slice(-10)
         })
     }
 );
+
+const responseText = await response.text();
+
+console.log("HTTP STATUS:", response.status);
+console.log("SERVER RESPONSE:", responseText);
+
+let result;
+
+try {
+    result = JSON.parse(responseText);
+} catch (error) {
+    throw new Error("Backend returned HTML instead of JSON. Check API route and server logs.");
+}
+
+if (!response.ok) {
+    throw new Error(result.error || "AI request failed");
+}
 
         const data = await response.json();
 
