@@ -1122,19 +1122,25 @@ async function sendMessage(){
 
     try{
 
-        const response = await fetch(
+        const mentorId = localStorage.getItem("mentorId");
+
+if (!mentorId) {
+    addMessage("Mentor ID not found. Please login first.", "error");
+    return;
+}
+
+const response = await fetch(
     "https://college-hwbb.onrender.com/api/ai/mentor/chat",
     {
         method: "POST",
-        credentials: "include",
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
+            mentor_id: mentorId,
             message: message,
             history: oldHistory.slice(-10)
-        }),
-        signal: activeController.signal
+        })
     }
 );
 

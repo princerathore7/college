@@ -90,21 +90,19 @@ def process_ai_message(prompt, data):
 @ai_bp.route("/mentor/chat", methods=["POST"])
 def mentor_chat():
 
-    # Check mentor login session
-    mentor_id = session.get("mentor_id")
+    data = request.get_json(silent=True) or {}
+
+    mentor_id = data.get("mentor_id")
 
     if not mentor_id:
         return jsonify({
             "success": False,
-            "error": "Mentor login required"
+            "error": "Mentor ID not found"
         }), 401
-
-    data = request.get_json(silent=True) or {}
 
     result = process_ai_message(MENTOR_PROMPT, data)
 
-    return result
-
+    return jsonify(result)
 
 # ============================================================
 # STUDENT AI CHAT
