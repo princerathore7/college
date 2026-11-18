@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify, session
 from .ollama_engine import generate_response
-from flask_cors import cross_origin
 
 ai_bp = Blueprint("ai_bp", __name__, url_prefix="/api/ai")
 
@@ -88,25 +87,30 @@ def process_ai_message(prompt, data):
 # ============================================================
 
 @ai_bp.route("/admin/chat", methods=["POST"])
-@ai_bp.route("/mentor/chat", methods=["POST", "OPTIONS"])
-@cross_origin(
-    origins=["https://acropoliss.netlify.app"],
-    methods=["POST", "OPTIONS"],
-    allow_headers=["Content-Type"]
-)
+@ai_bp.route("/mentor/chat", methods=["POST"])
 def mentor_chat():
 
-    data = request.get_json(silent=True) or {}
+    try:
+        data = request.get_json(silent=True) or {}
 
-    mentor_id = data.get("mentor_id")
+        mentor_id = data.get("mentor_id")
 
-    if not mentor_id:
+        if not mentor_id:
+            return jsonify({
+                "success": False,
+                "error": "Mentor ID not found"
+            }), 401
+
+        return process_ai_message(MENTOR_PROMPT, data)
+
+    except Exception as e:
+
+        print("MENTOR AI ERROR:", repr(e))
+
         return jsonify({
             "success": False,
-            "error": "Mentor ID not found"
-        }), 401
-
-    return process_ai_message(MENTOR_PROMPT, data)
+            "error": str(e)
+        }), 500
 # ============================================================
 # STUDENT AI CHAT
 # ============================================================
