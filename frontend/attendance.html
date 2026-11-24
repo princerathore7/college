@@ -3,452 +3,503 @@
 <head>
 <meta charset="UTF-8">
 <title>Attendance Engine</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0b1f3a">
 
 <style>
-body{
-  font-family:Arial;
-  background:#f4f7fb;
-  margin:0;
-  padding:15px
+:root{
+  --navy:#0b1f3a;
+  --navy-2:#13335c;
+  --blue:#2f6fed;
+  --bg:#f3f6fb;
+  --card:#ffffff;
+  --line:#e3e9f2;
+  --text:#14213d;
+  --muted:#6b7a90;
+  --green:#16a34a;
+  --green-soft:#e7f7ee;
+  --red:#dc2626;
+  --red-soft:#fdeaea;
+  --amber:#d97706;
+  --b1:#2f6fed;
+  --b2:#8b5cf6;
+  --radius:14px;
+  --shadow:0 8px 24px rgba(11,31,58,.08);
 }
 
-h2{
-  color:#0b1f3a
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  padding-bottom:110px;
 }
+
+/* ============ HEADER ============ */
+.topbar{
+  background:linear-gradient(135deg,var(--navy),var(--navy-2));
+  color:#fff;
+  padding:18px 16px 56px;
+}
+.topbar-inner{
+  max-width:1100px;margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-icon{
+  width:42px;height:42px;border-radius:12px;
+  background:rgba(255,255,255,.14);
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+}
+.brand h1{margin:0;font-size:20px;font-weight:700;letter-spacing:.2px}
+.brand p{margin:2px 0 0;font-size:12px;color:#b8c7de}
+.mentor-chip{
+  background:rgba(255,255,255,.14);
+  padding:8px 14px;border-radius:999px;font-size:13px;font-weight:600;
+  display:flex;align-items:center;gap:8px;
+}
+.dot{width:8px;height:8px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 3px rgba(74,222,128,.25)}
+
+.wrap{max-width:1100px;margin:-38px auto 0;padding:0 14px}
 
 .card{
-  background:#fff;
-  padding:15px;
-  border-radius:10px;
-  box-shadow:0 6px 15px rgba(0,0,0,.08)
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:16px;
+  margin-bottom:14px;
 }
 
-.controls{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-bottom:15px
+.section-title{
+  margin:0 0 12px;font-size:12px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.8px;
 }
 
-select,input{
-  padding:8px;
-  border-radius:6px;
-  border:1px solid #ccc
+/* ============ FILTERS ============ */
+.filters{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:12px;
 }
-
-table{
+.field label{
+  display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px;
+}
+select,input[type=text],input:not([type]){
   width:100%;
-  border-collapse:collapse
+  height:44px;
+  padding:0 12px;
+  border:1.5px solid var(--line);
+  border-radius:10px;
+  background:#fff;
+  font-size:15px;
+  color:var(--text);
+  outline:none;
+  transition:border-color .15s, box-shadow .15s;
+  font-family:inherit;
 }
+select:focus,input:focus{
+  border-color:var(--blue);
+  box-shadow:0 0 0 3px rgba(47,111,237,.15);
+}
+.lecture-field input{border-color:#c7d6f5;background:#f8faff;font-weight:600}
 
-th,td{
-  border:1px solid #ddd;
-  padding:8px;
-  text-align:center
+/* ============ CLASS BANNER ============ */
+.class-banner{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  background:linear-gradient(135deg,#eef4ff,#f6f0ff);
+  border:1px solid #d9e4fb;
+  border-radius:var(--radius);
+  padding:14px 16px;
+  margin-bottom:14px;
 }
+.class-banner .label{font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.8px}
+.class-banner .title{font-size:17px;font-weight:700;color:var(--navy);margin-top:3px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{
+  background:#fff;border:1px solid #d9e4fb;color:var(--navy);
+  font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;
+}
+.count-box{text-align:right}
+.count-box .num{font-size:28px;font-weight:800;color:var(--navy);line-height:1}
+.count-box .sub{font-size:12px;color:var(--muted);margin-top:4px}
 
-th{
-  background:#0b1f3a;
-  color:#fff
+/* ============ TOOLBAR ============ */
+.toolbar{
+  display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px;
 }
+.search{flex:1;min-width:180px;position:relative}
+.search input{padding-left:38px}
+.search span{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;opacity:.55}
+
+.seg{
+  display:inline-flex;background:#eef2f8;border-radius:10px;padding:3px;gap:2px;
+}
+.seg button{
+  background:transparent;color:var(--muted);
+  padding:8px 12px;border-radius:8px;font-size:12.5px;font-weight:600;
+}
+.seg button.active{background:#fff;color:var(--navy);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+
+.bulk{display:flex;gap:8px}
 
 button{
-  padding:6px 12px;
-  border:none;
-  border-radius:5px;
-  cursor:pointer
+  font-family:inherit;border:none;cursor:pointer;font-size:14px;
+  transition:transform .08s, opacity .15s, background .15s;
 }
+button:active{transform:scale(.96)}
 
-.p{
-  background:#2ecc71;
-  color:#fff
+.btn{
+  height:40px;padding:0 14px;border-radius:10px;font-weight:700;font-size:13px;
 }
+.btn-green{background:var(--green-soft);color:var(--green)}
+.btn-red{background:var(--red-soft);color:var(--red)}
+.btn-ghost{background:#eef2f8;color:var(--navy)}
 
-.a{
-  background:#e74c3c;
-  color:#fff
-}
+/* ============ STUDENT LIST ============ */
+.list{display:flex;flex-direction:column}
 
-.selected{
-  outline:3px solid #000
-}
-
-.no-data{
-  text-align:center;
-  color:#888
-}
-
-/* ===============================
-   BATCH BADGES
-================================ */
-
-.batch-b1{
-  background:#3498db;
-  color:#fff;
-  padding:4px 8px;
-  border-radius:5px;
-  font-size:12px;
-  font-weight:bold;
-}
-
-.batch-b2{
-  background:#9b59b6;
-  color:#fff;
-  padding:4px 8px;
-  border-radius:5px;
-  font-size:12px;
-  font-weight:bold;
-}
-
-/* Loading button */
-
-.loading{
-  pointer-events:none;
-  opacity:.7;
-}
-
-.spinner{
-  width:16px;
-  height:16px;
-  border:3px solid #fff;
-  border-top:3px solid transparent;
-  border-radius:50%;
-  animation:spin 1s linear infinite;
-  display:inline-block
-}
-
-@keyframes spin{
-  to{
-    transform:rotate(360deg)
-  }
-}
-
-/* Popup modal */
-
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.5);
-  display:none;
+.row{
+  display:grid;
   align-items:center;
-  justify-content:center;
+  gap:12px;
+  padding:12px 6px;
+  border-bottom:1px solid var(--line);
+  grid-template-columns:1fr auto;
 }
+.row:last-child{border-bottom:none}
+.row.is-p{background:linear-gradient(90deg,var(--green-soft),transparent 70%)}
+.row.is-a{background:linear-gradient(90deg,var(--red-soft),transparent 70%)}
 
+.info{display:flex;align-items:center;gap:12px;min-width:0}
+.avatar{
+  flex:0 0 40px;height:40px;border-radius:50%;
+  background:linear-gradient(135deg,var(--navy),var(--blue));
+  color:#fff;font-weight:700;font-size:14px;
+  display:flex;align-items:center;justify-content:center;
+}
+.txt{min-width:0}
+.enr{font-weight:700;font-size:15px;color:var(--navy);letter-spacing:.2px}
+.nm{font-size:13.5px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px;align-items:center}
+.pill{
+  font-size:11px;font-weight:600;color:var(--muted);
+  background:#f0f3f9;padding:2px 8px;border-radius:999px;
+}
+.bb{font-size:11px;font-weight:700;color:#fff;padding:2px 9px;border-radius:999px}
+.bb-b1{background:var(--b1)}
+.bb-b2{background:var(--b2)}
+
+/* view modes */
+.list.v-compact .avatar,
+.list.v-compact .nm,
+.list.v-compact .meta{display:none}
+.list.v-names .meta{display:none}
+.list.v-compact .row{padding:8px 6px}
+
+/* P / A toggle */
+.pa{display:flex;gap:8px}
+.pa button{
+  width:54px;height:46px;border-radius:12px;
+  font-size:16px;font-weight:800;
+  background:#f0f3f9;color:var(--muted);
+  border:2px solid transparent;
+}
+.pa .p.selected{background:var(--green);color:#fff;box-shadow:0 4px 12px rgba(22,163,74,.35)}
+.pa .a.selected{background:var(--red);color:#fff;box-shadow:0 4px 12px rgba(220,38,38,.35)}
+.pa .p:not(.selected):hover{background:var(--green-soft);color:var(--green)}
+.pa .a:not(.selected):hover{background:var(--red-soft);color:var(--red)}
+
+.empty{text-align:center;color:var(--muted);padding:40px 10px;font-size:14px}
+.empty .big{font-size:34px;margin-bottom:6px}
+
+/* ============ BOTTOM BAR ============ */
+.bar{
+  position:fixed;left:0;right:0;bottom:0;z-index:20;
+  background:#fff;border-top:1px solid var(--line);
+  box-shadow:0 -8px 24px rgba(11,31,58,.1);
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+}
+.bar-inner{
+  max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.stats{display:flex;gap:8px;flex-wrap:wrap}
+.stat{
+  display:flex;flex-direction:column;align-items:center;min-width:56px;
+  padding:6px 10px;border-radius:10px;background:#f3f6fb;
+}
+.stat b{font-size:17px;line-height:1.1}
+.stat small{font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.stat.sp b{color:var(--green)}
+.stat.sa b{color:var(--red)}
+.stat.su b{color:var(--amber)}
+
+#submitBtn{
+  height:48px;padding:0 26px;border-radius:12px;
+  background:linear-gradient(135deg,var(--blue),#1d4fd6);
+  color:#fff;font-weight:700;font-size:15px;
+  box-shadow:0 6px 16px rgba(47,111,237,.4);
+  display:flex;align-items:center;gap:8px;
+}
+.loading{pointer-events:none;opacity:.75}
+.spinner{
+  width:16px;height:16px;border:3px solid #fff;border-top-color:transparent;
+  border-radius:50%;animation:spin 1s linear infinite;display:inline-block;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ============ MODAL ============ */
+.modal{
+  position:fixed;inset:0;background:rgba(11,31,58,.55);
+  display:none;align-items:center;justify-content:center;z-index:50;padding:16px;
+  backdrop-filter:blur(3px);
+}
+.modal.show{display:flex}
 .modal-content{
-  background:#fff;
-  padding:20px;
-  border-radius:10px;
-  width:300px;
-  text-align:center;
-  box-shadow:0 10px 25px rgba(0,0,0,.2);
+  background:#fff;border-radius:18px;padding:24px 22px;width:100%;max-width:340px;
+  text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.3);
+  animation:pop .2s ease;
 }
-
-.modal-content h3{
-  margin-top:0;
-  color:#0b1f3a
+@keyframes pop{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-content .ic{font-size:40px}
+.modal-content h3{margin:6px 0 14px;color:var(--navy);font-size:19px}
+.mrow{
+  display:flex;justify-content:space-between;padding:9px 12px;border-radius:10px;
+  background:#f3f6fb;margin-bottom:6px;font-size:14px;font-weight:600;
 }
+.mrow.g span:last-child{color:var(--green)}
+.mrow.r span:last-child{color:var(--red)}
+.mrow.y span:last-child{color:var(--amber)}
+.mactions{display:flex;gap:8px;margin-top:14px}
+.mactions button{flex:1;height:44px;border-radius:10px;font-weight:700}
+.m-ok{background:var(--navy);color:#fff}
+.m-cancel{background:#eef2f8;color:var(--navy)}
 
-.modal-content p{
-  margin:6px 0
+/* ============ TOAST ============ */
+#toast{
+  position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(20px);
+  background:var(--navy);color:#fff;padding:11px 18px;border-radius:10px;
+  font-size:13.5px;font-weight:600;opacity:0;pointer-events:none;
+  transition:all .25s;z-index:60;max-width:90%;text-align:center;
 }
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.err{background:var(--red)}
 
-.modal-content button{
-  margin-top:10px;
-  background:#0b1f3a;
-  color:#fff;
+/* ============ RESPONSIVE ============ */
+@media(max-width:900px){
+  .filters{grid-template-columns:repeat(2,1fr)}
+  .lecture-field{grid-column:1/-1}
 }
-
-/* Responsive */
-
-@media(max-width:700px){
-
-  .controls{
-    flex-direction:column;
-  }
-
-  select,
-  input,
-  #submitBtn{
-    width:100%;
-    box-sizing:border-box;
-  }
-
-  table{
-    font-size:12px;
-  }
-
-  th,td{
-    padding:6px 4px;
-  }
+@media(max-width:600px){
+  .topbar{padding:14px 14px 50px}
+  .brand h1{font-size:17px}
+  .wrap{padding:0 10px}
+  .card{padding:14px}
+  .toolbar{flex-direction:column;align-items:stretch}
+  .seg{display:flex}
+  .seg button{flex:1;padding:9px 4px}
+  .bulk .btn{flex:1}
+  .pa button{width:50px;height:46px}
+  .count-box{text-align:left}
+  .bar-inner{gap:8px}
+  .stat{min-width:48px;padding:5px 8px}
+  #submitBtn{padding:0 18px}
+}
+@media(max-width:380px){
+  .stat.su{display:none}
 }
 </style>
 </head>
 
 <body>
 
-<h2>📊 Attendance Engine</h2>
-
-<div class="card">
-
-<div class="controls">
-
-  <!-- YEAR -->
-
-  <select id="year">
-    <option value="">All Years</option>
-    <option value="1">1st Year</option>
-    <option value="2">2nd Year</option>
-    <option value="3">3rd Year</option>
-    <option value="4">4th Year</option>
-    <option value="5">5th Year</option>
-  </select>
-
-
-  <!-- BRANCH -->
-
-  <select id="branch">
-
-    <option value="">All Branches</option>
-
-    <option value="CSE">CSE - Computer Science Engineering</option>
-
-    <option value="IT">IT - Information Technology</option>
-
-    <option value="AIML">AIML - Artificial Intelligence & Machine Learning</option>
-
-    <option value="AIDS">AIDS - Artificial Intelligence & Data Science</option>
-
-    <option value="CSBS">CSBS - Computer Science & Business Systems</option>
-
-    <option value="IOT">IoT - Internet of Things</option>
-
-
-    <!-- Electrical / Electronics -->
-
-    <option value="ECE">ECE - Electronics & Communication</option>
-
-    <option value="EEE">EEE - Electrical & Electronics</option>
-
-    <option value="EE">EE - Electrical Engineering</option>
-
-
-    <!-- Mechanical / Automobile -->
-
-    <option value="ME">ME - Mechanical Engineering</option>
-
-    <option value="AU">AU - Automobile Engineering</option>
-
-    <option value="MT">MT - Mechatronics</option>
-
-
-    <!-- Civil / Core -->
-
-    <option value="CE">CE - Civil Engineering</option>
-
-    <option value="CHE">CHE - Chemical Engineering</option>
-
-    <option value="MIN">MIN - Mining Engineering</option>
-
-    <option value="PET">PET - Petroleum Engineering</option>
-
-
-    <!-- Bio / Agri -->
-
-    <option value="BT">BT - Biotechnology</option>
-
-    <option value="BME">BME - Biomedical Engineering</option>
-
-    <option value="AG">AG - Agriculture Engineering</option>
-
-    <option value="FT">FT - Food Technology</option>
-
-    <option value="ENV">ENV - Environmental Engineering</option>
-
-    <option value="TX">TX - Textile Engineering</option>
-
-
-    <!-- Management / Pharma -->
-
-    <option value="PIE">PIE - Production & Industrial Engineering</option>
-
-    <option value="IM">IM - Industrial Management</option>
-
-    <option value="DPHARMA">D.Pharmacy</option>
-
-    <option value="BPHARMA">B.Pharmacy</option>
-
-    <option value="MPHARMA">M.Pharmacy</option>
-
-    <option value="PHARMA-CHEM">Pharmaceutical Chemistry</option>
-
-    <option value="PHARMA-ANALYTICAL">Pharmaceutical Analysis</option>
-
-    <option value="PHARMA-QUALITY">Quality Assurance</option>
-
-    <option value="PHARMA-PHARMACO">Pharmacology</option>
-
-    <option value="PHARMA-PHARMACEUTICS">Pharmaceutics</option>
-
-    <option value="PHARMA-BIOTECH">Pharmaceutical Biotechnology</option>
-
-    <option value="PHARMA-REGULATORY">Regulatory Affairs</option>
-
-
-    <!-- Diploma -->
-
-    <option value="DCSE">Diploma - Computer Science Engineering</option>
-
-    <option value="DIT">Diploma - Information Technology</option>
-
-    <option value="DCYBER">Diploma - Cyber Security</option>
-
-    <option value="DECE">Diploma - Electronics & Communication</option>
-
-    <option value="DEEE">Diploma - Electrical & Electronics</option>
-
-    <option value="DEE">Diploma - Electrical Engineering</option>
-
-    <option value="DME">Diploma - Mechanical Engineering</option>
-
-    <option value="DCE">Diploma - Civil Engineering</option>
-
-    <option value="DMIN">Diploma - Mining Engineering</option>
-
-    <option value="DCHE">Diploma - Chemical Engineering</option>
-
-    <option value="DAG">Diploma - Agriculture Engineering</option>
-
-    <option value="DTX">Diploma - Textile Technology</option>
-
-    <option value="DPLASTIC">Diploma - Plastic Engineering</option>
-
-    <option value="DPOLY">Diploma - Polymer Engineering</option>
-
-  </select>
-
-
-  <!-- SECTION -->
-
-  <select id="section">
-
-    <option value="">All Sections</option>
-
-    <option value="1">Section 1</option>
-
-    <option value="2">Section 2</option>
-
-    <option value="3">Section 3</option>
-
-    <option value="4">Section 4</option>
-
-    <option value="5">Section 5</option>
-
-  </select>
-
-
-  <!-- NEW BATCH FILTER -->
-
-  <select id="batch">
-
-    <option value="">Both B1 & B2</option>
-
-    <option value="B1">B1</option>
-
-    <option value="B2">B2</option>
-
-  </select>
-
-
-  <!-- LECTURE ID -->
-
-  <input
-    id="lectureId"
-    placeholder="Lecture ID"
-  >
-
-
-  <!-- SUBMIT -->
-
-  <button
-    id="submitBtn"
-    onclick="submitAttendance()"
-  >
-    🚀 Submit
-  </button>
-
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-icon">📊</div>
+      <div>
+        <h1>Attendance Engine</h1>
+        <p>Take lecture attendance quickly</p>
+      </div>
+    </div>
+    <div class="mentor-chip"><span class="dot"></span><span id="mentorLabel">Mentor</span></div>
+  </div>
 </div>
 
+<div class="wrap">
 
-<table>
+  <!-- FILTERS -->
+  <div class="card">
+    <div class="section-title">Select Class</div>
 
-<thead>
+    <div class="filters">
 
-<tr>
+      <div class="field">
+        <label for="year">Year</label>
+        <select id="year">
+          <option value="">All Years</option>
+          <option value="1">1st Year</option>
+          <option value="2">2nd Year</option>
+          <option value="3">3rd Year</option>
+          <option value="4">4th Year</option>
+          <option value="5">5th Year</option>
+        </select>
+      </div>
 
-  <th>Enrollment</th>
+      <div class="field">
+        <label for="branch">Branch</label>
+        <select id="branch">
+          <option value="">All Branches</option>
+          <option value="CSE">CSE - Computer Science Engineering</option>
+          <option value="IT">IT - Information Technology</option>
+          <option value="AIML">AIML - Artificial Intelligence & Machine Learning</option>
+          <option value="AIDS">AIDS - Artificial Intelligence & Data Science</option>
+          <option value="CSBS">CSBS - Computer Science & Business Systems</option>
+          <option value="IOT">IoT - Internet of Things</option>
+          <option value="ECE">ECE - Electronics & Communication</option>
+          <option value="EEE">EEE - Electrical & Electronics</option>
+          <option value="EE">EE - Electrical Engineering</option>
+          <option value="ME">ME - Mechanical Engineering</option>
+          <option value="AU">AU - Automobile Engineering</option>
+          <option value="MT">MT - Mechatronics</option>
+          <option value="CE">CE - Civil Engineering</option>
+          <option value="CHE">CHE - Chemical Engineering</option>
+          <option value="MIN">MIN - Mining Engineering</option>
+          <option value="PET">PET - Petroleum Engineering</option>
+          <option value="BT">BT - Biotechnology</option>
+          <option value="BME">BME - Biomedical Engineering</option>
+          <option value="AG">AG - Agriculture Engineering</option>
+          <option value="FT">FT - Food Technology</option>
+          <option value="ENV">ENV - Environmental Engineering</option>
+          <option value="TX">TX - Textile Engineering</option>
+          <option value="PIE">PIE - Production & Industrial Engineering</option>
+          <option value="IM">IM - Industrial Management</option>
+          <option value="DPHARMA">D.Pharmacy</option>
+          <option value="BPHARMA">B.Pharmacy</option>
+          <option value="MPHARMA">M.Pharmacy</option>
+          <option value="PHARMA-CHEM">Pharmaceutical Chemistry</option>
+          <option value="PHARMA-ANALYTICAL">Pharmaceutical Analysis</option>
+          <option value="PHARMA-QUALITY">Quality Assurance</option>
+          <option value="PHARMA-PHARMACO">Pharmacology</option>
+          <option value="PHARMA-PHARMACEUTICS">Pharmaceutics</option>
+          <option value="PHARMA-BIOTECH">Pharmaceutical Biotechnology</option>
+          <option value="PHARMA-REGULATORY">Regulatory Affairs</option>
+          <option value="DCSE">Diploma - Computer Science Engineering</option>
+          <option value="DIT">Diploma - Information Technology</option>
+          <option value="DCYBER">Diploma - Cyber Security</option>
+          <option value="DECE">Diploma - Electronics & Communication</option>
+          <option value="DEEE">Diploma - Electrical & Electronics</option>
+          <option value="DEE">Diploma - Electrical Engineering</option>
+          <option value="DME">Diploma - Mechanical Engineering</option>
+          <option value="DCE">Diploma - Civil Engineering</option>
+          <option value="DMIN">Diploma - Mining Engineering</option>
+          <option value="DCHE">Diploma - Chemical Engineering</option>
+          <option value="DAG">Diploma - Agriculture Engineering</option>
+          <option value="DTX">Diploma - Textile Technology</option>
+          <option value="DPLASTIC">Diploma - Plastic Engineering</option>
+          <option value="DPOLY">Diploma - Polymer Engineering</option>
+        </select>
+      </div>
 
-  <th>Name</th>
+      <div class="field">
+        <label for="section">Section</label>
+        <select id="section">
+          <option value="">All Sections</option>
+          <option value="1">Section 1</option>
+          <option value="2">Section 2</option>
+          <option value="3">Section 3</option>
+          <option value="4">Section 4</option>
+          <option value="5">Section 5</option>
+        </select>
+      </div>
 
-  <th>Year</th>
+      <div class="field">
+        <label for="batch">Batch</label>
+        <select id="batch">
+          <option value="">Both B1 & B2</option>
+          <option value="B1">B1</option>
+          <option value="B2">B2</option>
+        </select>
+      </div>
 
-  <th>Branch</th>
+      <div class="field lecture-field">
+        <label for="lectureId">Lecture ID</label>
+        <input id="lectureId" type="text" placeholder="Enter Lecture ID" autocomplete="off">
+      </div>
 
-  <th>Section</th>
+    </div>
+  </div>
 
-  <th>Batch</th>
+  <!-- SELECTED CLASS BANNER -->
+  <div class="class-banner" id="classBanner">
+    <div>
+      <div class="label">✅ Class Selected</div>
+      <div class="title" id="classTitle">Loading…</div>
+      <div class="tags" id="classTags"></div>
+    </div>
+    <div class="count-box">
+      <div class="num" id="classCount">0</div>
+      <div class="sub" id="classSub">students</div>
+    </div>
+  </div>
 
-  <th>P</th>
+  <!-- STUDENTS -->
+  <div class="card">
 
-  <th>A</th>
+    <div class="toolbar">
+      <div class="search">
+        <span>🔎</span>
+        <input id="search" type="text" placeholder="Search name or enrollment" autocomplete="off">
+      </div>
 
-</tr>
+      <div class="seg" id="viewSeg">
+        <button data-v="compact" title="Only enrollment + P/A">Enrollment</button>
+        <button data-v="names" title="Enrollment + name">With Name</button>
+        <button data-v="full" title="All details">Detailed</button>
+      </div>
 
-</thead>
+      <div class="bulk">
+        <button class="btn btn-green" id="allP">✔ All Present</button>
+        <button class="btn btn-red" id="allA">✖ All Absent</button>
+        <button class="btn btn-ghost" id="clearBtn">Reset</button>
+      </div>
+    </div>
 
-
-<tbody id="studentsBody">
-
-<tr>
-
-  <td colspan="8" class="no-data">
-    Loading...
-  </td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-</div>
-
-
-<!-- RESULT POPUP -->
-
-<div
-  class="modal"
-  id="resultModal"
->
-
-  <div class="modal-content">
-
-    <h3>✅ Attendance Submitted</h3>
-
-    <p id="totalCount"></p>
-
-    <p id="presentCount"></p>
-
-    <p id="absentCount"></p>
-
-    <button onclick="closeModal()">
-      OK
-    </button>
+    <div class="list v-names" id="studentsBody">
+      <div class="empty">Loading students…</div>
+    </div>
 
   </div>
 
 </div>
 
+<!-- BOTTOM SUBMIT BAR -->
+<div class="bar">
+  <div class="bar-inner">
+    <div class="stats">
+      <div class="stat sp"><b id="sP">0</b><small>Present</small></div>
+      <div class="stat sa"><b id="sA">0</b><small>Absent</small></div>
+      <div class="stat su"><b id="sU">0</b><small>Pending</small></div>
+    </div>
+    <button id="submitBtn">🚀 Submit</button>
+  </div>
+</div>
+
+<!-- CONFIRM / RESULT POPUP -->
+<div class="modal" id="resultModal">
+  <div class="modal-content">
+    <div class="ic" id="mIcon">✅</div>
+    <h3 id="mTitle">Attendance Submitted</h3>
+    <div class="mrow"><span>👥 Total Marked</span><span id="totalCount">0</span></div>
+    <div class="mrow g"><span>✅ Present</span><span id="presentCount">0</span></div>
+    <div class="mrow r"><span>❌ Absent</span><span id="absentCount">0</span></div>
+    <div class="mrow y" id="pendingRow" style="display:none"><span>⏳ Not marked (this class)</span><span id="pendingCount">0</span></div>
+    <div class="mactions" id="mActions"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
 
 <script>
 
@@ -456,48 +507,22 @@ button{
    ACCESS CONTROL — ADMIN PAGES
 ================================ */
 
-const mentorId =
-  localStorage.getItem("mentorId");
+const mentorId = localStorage.getItem("mentorId");
+const source = sessionStorage.getItem("accessSource");
 
-const source =
-  sessionStorage.getItem("accessSource");
+const ALLOWED_SOURCES = ["ad","admin"];
 
-
-const ALLOWED_SOURCES = [
-  "ad",
-  "admin"
-];
-
-
-if(
-  !mentorId ||
-  !ALLOWED_SOURCES.includes(source)
-){
+if(!mentorId || !ALLOWED_SOURCES.includes(source)){
 
   document.body.innerHTML = `
-
-    <h2
-      style="
-        text-align:center;
-        margin-top:20vh;
-        color:black
-      "
-    >
-
+    <h2 style="text-align:center;margin-top:20vh;color:black;font-family:Arial">
       ❌ Access Denied
-
       <br>
-
-      Please open this page via
-      Administration Panel
-
+      Please open this page via Administration Panel
     </h2>
-
   `;
 
-  throw new Error(
-    "Unauthorized access"
-  );
+  throw new Error("Unauthorized access");
 }
 
 
@@ -505,11 +530,8 @@ if(
    API
 ================================ */
 
-const API_STUDENTS =
-  "https://college-hwbb.onrender.com/api/admin/students";
-
-const API_ROBOT =
-  "https://college-hwbb.onrender.com/api/attendance/robot_update";
+const API_STUDENTS = "https://college-hwbb.onrender.com/api/admin/students";
+const API_ROBOT = "https://college-hwbb.onrender.com/api/attendance/robot_update";
 
 
 /* ===============================
@@ -518,44 +540,87 @@ const API_ROBOT =
 
 let STUDENTS = [];
 
-/*
-  RECORDS stores attendance.
-
-  Example:
-
-  {
-    "ENR001":"P",
-    "ENR002":"A"
-  }
-*/
-
+/* { "ENR001":"P", "ENR002":"A" } */
 let RECORDS = {};
+
+let VISIBLE = [];          // students currently shown (after all filters)
+let CLASS_STUDENTS = [];   // students of selected class (before search)
+let pendingSubmit = false;
 
 
 /* ===============================
-   DOM ELEMENTS
+   DOM
 ================================ */
 
-const year =
-  document.getElementById("year");
+const $ = id => document.getElementById(id);
 
-const branch =
-  document.getElementById("branch");
+const year = $("year");
+const branch = $("branch");
+const section = $("section");
+const batch = $("batch");
+const lectureId = $("lectureId");
+const submitBtn = $("submitBtn");
+const studentsBody = $("studentsBody");
+const searchBox = $("search");
 
-const section =
-  document.getElementById("section");
+$("mentorLabel").textContent = "Mentor: " + mentorId;
 
-const batch =
-  document.getElementById("batch");
 
-const lectureId =
-  document.getElementById("lectureId");
+/* ===============================
+   HELPERS
+================================ */
 
-const submitBtn =
-  document.getElementById("submitBtn");
+function esc(v){
+  return String(v == null ? "" : v)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
 
-const studentsBody =
-  document.getElementById("studentsBody");
+function initials(name){
+  const p = String(name || "?").trim().split(/\s+/);
+  return ((p[0]||"")[0] || "?").toUpperCase() + ((p[1]||"")[0] || "").toUpperCase();
+}
+
+function ordinal(n){
+  const m = {1:"1st",2:"2nd",3:"3rd",4:"4th",5:"5th"};
+  return m[n] || (n + "th");
+}
+
+let toastTimer;
+function toast(msg, isErr){
+  const t = $("toast");
+  t.textContent = msg;
+  t.className = "show" + (isErr ? " err" : "");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = ""; }, 2600);
+}
+
+
+/* ===============================
+   VIEW MODE (saved per device)
+================================ */
+
+let VIEW = "names";
+try{ VIEW = localStorage.getItem("attView") || "names"; }catch(e){}
+
+function applyView(){
+  studentsBody.classList.remove("v-compact","v-names","v-full");
+  studentsBody.classList.add("v-" + VIEW);
+  document.querySelectorAll("#viewSeg button").forEach(b => {
+    b.classList.toggle("active", b.dataset.v === VIEW);
+  });
+}
+
+document.querySelectorAll("#viewSeg button").forEach(b => {
+  b.addEventListener("click", () => {
+    VIEW = b.dataset.v;
+    try{ localStorage.setItem("attView", VIEW); }catch(e){}
+    applyView();
+  });
+});
 
 
 /* ===============================
@@ -566,401 +631,159 @@ async function fetchStudents(){
 
   try{
 
-    console.log(
-      "📡 Fetching students..."
-    );
-
-    const res =
-      await fetch(API_STUDENTS);
-
-    const d =
-      await res.json();
-
-    console.log(
-      "✅ Students API response:",
-      d
-    );
-
+    const res = await fetch(API_STUDENTS);
+    const d = await res.json();
 
     if(d.success){
 
-      STUDENTS =
-        Array.isArray(d.students)
-          ? d.students
-          : [];
-
-      console.log(
-        "👥 Total students fetched:",
-        STUDENTS.length
-      );
-
+      STUDENTS = Array.isArray(d.students) ? d.students : [];
       render();
 
     }else{
 
-      console.error(
-        "❌ Students fetch failed"
-      );
-
-      studentsBody.innerHTML = `
-
-        <tr>
-
-          <td
-            colspan="8"
-            class="no-data"
-          >
-            Failed to load students
-
-          </td>
-
-        </tr>
-
-      `;
+      studentsBody.innerHTML = `<div class="empty"><div class="big">⚠️</div>Failed to load students</div>`;
+      $("classTitle").textContent = "Unable to load";
     }
 
   }catch(err){
 
-    console.error(
-      "🔥 Fetch students error:",
-      err
-    );
-
-    studentsBody.innerHTML = `
-
-      <tr>
-
-        <td
-          colspan="8"
-          class="no-data"
-        >
-          Error loading students
-
-        </td>
-
-      </tr>
-
-    `;
+    console.error("Fetch students error:", err);
+    studentsBody.innerHTML = `<div class="empty"><div class="big">⚠️</div>Error loading students</div>`;
+    $("classTitle").textContent = "Unable to load";
   }
 }
 
 
 /* ===============================
-   GET FILTERED STUDENTS
+   FILTER + BATCH LOGIC (unchanged)
 ================================ */
 
 function getFilteredStudents(){
 
-  const y =
-    year.value;
-
-  const b =
-    branch.value;
-
-  const s =
-    section.value;
-
+  const y = year.value;
+  const b = branch.value;
+  const s = section.value;
 
   return STUDENTS.filter(st =>
-
     (!y || String(st.year) === String(y)) &&
-
     (!b || String(st.branch) === String(b)) &&
-
     (!s || String(st.section) === String(s))
-
   );
 }
-
-
-/* ===============================
-   DIVIDE STUDENTS INTO B1 / B2
-================================ */
 
 /*
-
-  IMPORTANT LOGIC:
-
-  First:
-
-  Year + Branch + Section
-
-  filters students.
-
-  Then:
-
-  filtered students are divided
-  sequentially into B1 and B2.
-
-  Example:
-
-  100 students
-
-  1 - 50   => B1
-  51 - 100 => B2
-
-
-  For odd number:
-
-  101 students
-
-  1 - 51   => B1
-  52 - 101 => B2
-
+  Year + Branch + Section filter first,
+  then that class is split sequentially:
+  first half (ceil) => B1, rest => B2
 */
-
 function assignBatches(students){
 
-  const total =
-    students.length;
+  const total = students.length;
+  if(total === 0) return [];
 
+  const b1Count = Math.ceil(total / 2);
 
-  if(total === 0){
-
-    return [];
-
-  }
-
-
-  /*
-    Math.ceil makes B1 receive
-    the extra student when total
-    is odd.
-
-    Example:
-
-    100 / 2 = 50
-
-    101 / 2 = 50.5
-    ceil = 51
-  */
-
-  const b1Count =
-    Math.ceil(total / 2);
-
-
-  return students.map(
-    (student,index) => {
-
-      return {
-
-        ...student,
-
-        batch:
-          index < b1Count
-            ? "B1"
-            : "B2"
-
-      };
-
-    }
-  );
+  return students.map((student,index) => ({
+    ...student,
+    batch: index < b1Count ? "B1" : "B2"
+  }));
 }
 
 
 /* ===============================
-   RENDER STUDENTS
+   CLASS BANNER
+================================ */
+
+function updateBanner(classList){
+
+  const y = year.value, b = branch.value, s = section.value, bt = batch.value;
+
+  const parts = [];
+  parts.push(y ? ordinal(y) + " Year" : "All Years");
+  parts.push(b ? b : "All Branches");
+  parts.push(s ? "Section " + s : "All Sections");
+
+  $("classTitle").textContent = parts.join(" • ");
+
+  const b1 = classList.filter(x => x.batch === "B1").length;
+  const b2 = classList.filter(x => x.batch === "B2").length;
+
+  const tags = [];
+  tags.push(bt ? "Batch " + bt : "Both Batches");
+  tags.push("B1: " + b1);
+  tags.push("B2: " + b2);
+
+  $("classTags").innerHTML = tags.map(t => `<span class="tag">${esc(t)}</span>`).join("");
+
+  $("classCount").textContent = bt ? (bt === "B1" ? b1 : b2) : classList.length;
+  $("classSub").textContent = bt ? "students in " + bt : "students fetched";
+}
+
+
+/* ===============================
+   RENDER
 ================================ */
 
 function render(){
 
-  /*
-    STEP 1
+  const withBatch = assignBatches(getFilteredStudents());
 
-    Get students according to:
+  updateBanner(withBatch);
 
-    Year
-    Branch
-    Section
-  */
+  const selectedBatch = batch.value;
 
-  const filtered =
-    getFilteredStudents();
+  CLASS_STUDENTS = withBatch.filter(st => !selectedBatch || st.batch === selectedBatch);
 
+  const q = searchBox.value.trim().toLowerCase();
 
-  console.log(
-    "🔍 Filtered before batch:",
-    filtered.length
+  VISIBLE = !q ? CLASS_STUDENTS : CLASS_STUDENTS.filter(st =>
+    String(st.name || "").toLowerCase().includes(q) ||
+    String(st.enrollment || "").toLowerCase().includes(q)
   );
 
-
-  /*
-    STEP 2
-
-    Assign B1/B2
-  */
-
-  const studentsWithBatch =
-    assignBatches(filtered);
-
-
-  /*
-    STEP 3
-
-    Apply batch filter
-  */
-
-  const selectedBatch =
-    batch.value;
-
-
-  const finalStudents =
-    studentsWithBatch.filter(st =>
-
-      !selectedBatch ||
-      st.batch === selectedBatch
-
-    );
-
-
-  console.log(
-    "🎯 Final students after batch:",
-    finalStudents.length
-  );
-
-
-  /*
-    Clear table
-  */
-
-  studentsBody.innerHTML = "";
-
-
-  /*
-    No students
-  */
-
-  if(!finalStudents.length){
+  if(!VISIBLE.length){
 
     studentsBody.innerHTML = `
+      <div class="empty">
+        <div class="big">🗂️</div>
+        No students found
+      </div>`;
 
-      <tr>
-
-        <td
-          colspan="8"
-          class="no-data"
-        >
-          No students found
-
-        </td>
-
-      </tr>
-
-    `;
-
+    updateStats();
     return;
   }
 
+  studentsBody.innerHTML = VISIBLE.map(st => {
 
-  /*
-    Render rows
-  */
+    const status = RECORDS[st.enrollment];
+    const e = esc(st.enrollment);
 
-  finalStudents.forEach(st => {
+    return `
+      <div class="row ${status === "P" ? "is-p" : status === "A" ? "is-a" : ""}" data-enr="${e}">
 
-    const existingStatus =
-      RECORDS[st.enrollment];
+        <div class="info">
+          <div class="avatar">${esc(initials(st.name))}</div>
+          <div class="txt">
+            <div class="enr">${e}</div>
+            <div class="nm">${esc(st.name)}</div>
+            <div class="meta">
+              <span class="pill">${esc(ordinal(st.year))} Yr</span>
+              <span class="pill">${esc(st.branch)}</span>
+              <span class="pill">Sec ${esc(st.section)}</span>
+              <span class="bb ${st.batch === "B1" ? "bb-b1" : "bb-b2"}">${st.batch}</span>
+            </div>
+          </div>
+        </div>
 
+        <div class="pa">
+          <button class="p ${status === "P" ? "selected" : ""}" data-s="P" aria-label="Present">P</button>
+          <button class="a ${status === "A" ? "selected" : ""}" data-s="A" aria-label="Absent">A</button>
+        </div>
 
-    studentsBody.innerHTML += `
+      </div>`;
+  }).join("");
 
-      <tr>
-
-        <td>
-          ${st.enrollment}
-        </td>
-
-
-        <td>
-          ${st.name}
-        </td>
-
-
-        <td>
-          ${st.year}
-        </td>
-
-
-        <td>
-          ${st.branch}
-        </td>
-
-
-        <td>
-          ${st.section}
-        </td>
-
-
-        <td>
-
-          <span
-            class="${
-              st.batch === "B1"
-                ? "batch-b1"
-                : "batch-b2"
-            }"
-          >
-
-            ${st.batch}
-
-          </span>
-
-        </td>
-
-
-        <td>
-
-          <button
-            class="p ${
-              existingStatus === "P"
-                ? "selected"
-                : ""
-            }"
-            onclick="
-              mark(
-                '${st.enrollment}',
-                'P',
-                this
-              )
-            "
-          >
-
-            P
-
-          </button>
-
-        </td>
-
-
-        <td>
-
-          <button
-            class="a ${
-              existingStatus === "A"
-                ? "selected"
-                : ""
-            }"
-            onclick="
-              mark(
-                '${st.enrollment}',
-                'A',
-                this
-              )
-            "
-          >
-
-            A
-
-          </button>
-
-        </td>
-
-      </tr>
-
-    `;
-
-  });
-
+  updateStats();
 }
 
 
@@ -968,50 +791,129 @@ function render(){
    MARK ATTENDANCE
 ================================ */
 
-function mark(
-  enr,
-  status,
-  btn
-){
+studentsBody.addEventListener("click", e => {
 
-  /*
-    Save attendance globally
-  */
+  const btn = e.target.closest(".pa button");
+  if(!btn) return;
 
-  RECORDS[enr] =
-    status;
+  const row = btn.closest(".row");
+  const enr = row.dataset.enr;
+  const status = btn.dataset.s;
 
+  /* tap again to un-mark */
+  if(RECORDS[enr] === status){
+    delete RECORDS[enr];
+  }else{
+    RECORDS[enr] = status;
+  }
 
-  console.log(
-    `📝 Marked ${enr} as ${status}`
-  );
+  const cur = RECORDS[enr];
 
+  row.querySelectorAll(".pa button").forEach(b => {
+    b.classList.toggle("selected", b.dataset.s === cur);
+  });
 
-  /*
-    Remove previous selected
-    state from same row
-  */
+  row.classList.toggle("is-p", cur === "P");
+  row.classList.toggle("is-a", cur === "A");
 
-  btn
-    .closest("tr")
-    .querySelectorAll("button")
-    .forEach(b => {
-
-      b.classList.remove(
-        "selected"
-      );
-
-    });
+  updateStats();
+});
 
 
-  /*
-    Highlight selected button
-  */
+/* bulk actions apply to students currently visible */
 
-  btn.classList.add(
-    "selected"
-  );
+function markAll(status){
 
+  if(!VISIBLE.length) return toast("No students to mark", true);
+
+  VISIBLE.forEach(st => { RECORDS[st.enrollment] = status; });
+  render();
+  toast(VISIBLE.length + " students marked " + (status === "P" ? "Present" : "Absent"));
+}
+
+$("allP").addEventListener("click", () => markAll("P"));
+$("allA").addEventListener("click", () => markAll("A"));
+
+$("clearBtn").addEventListener("click", () => {
+
+  if(!VISIBLE.length) return;
+
+  VISIBLE.forEach(st => { delete RECORDS[st.enrollment]; });
+  render();
+  toast("Selection reset");
+});
+
+
+/* ===============================
+   LIVE COUNTERS
+================================ */
+
+function counts(){
+
+  const vals = Object.values(RECORDS);
+
+  const present = vals.filter(v => v === "P").length;
+  const absent = vals.filter(v => v === "A").length;
+
+  const pending = CLASS_STUDENTS.filter(st => !RECORDS[st.enrollment]).length;
+
+  return { total: vals.length, present, absent, pending };
+}
+
+function updateStats(){
+
+  const c = counts();
+
+  $("sP").textContent = c.present;
+  $("sA").textContent = c.absent;
+  $("sU").textContent = c.pending;
+}
+
+
+/* ===============================
+   MODAL
+================================ */
+
+function openModal(kind, c){
+
+  const m = $("resultModal");
+
+  $("totalCount").textContent = c.total;
+  $("presentCount").textContent = c.present;
+  $("absentCount").textContent = c.absent;
+
+  const actions = $("mActions");
+
+  if(kind === "confirm"){
+
+    $("mIcon").textContent = "📝";
+    $("mTitle").textContent = "Confirm Submission";
+
+    $("pendingRow").style.display = c.pending > 0 ? "flex" : "none";
+    $("pendingCount").textContent = c.pending;
+
+    actions.innerHTML = `
+      <button class="m-cancel" id="mCancel">Cancel</button>
+      <button class="m-ok" id="mConfirm">Submit</button>`;
+
+    $("mCancel").onclick = closeModal;
+    $("mConfirm").onclick = () => { closeModal(); doSubmit(); };
+
+  }else{
+
+    $("mIcon").textContent = "✅";
+    $("mTitle").textContent = "Attendance Submitted";
+    $("pendingRow").style.display = "none";
+
+    actions.innerHTML = `<button class="m-ok" id="mOk">OK</button>`;
+    $("mOk").onclick = closeModal;
+  }
+
+  m.classList.add("show");
+}
+
+function closeModal(){
+  $("resultModal").classList.remove("show");
 }
 
 
@@ -1019,278 +921,100 @@ function mark(
    SUBMIT ATTENDANCE
 ================================ */
 
-async function submitAttendance(){
+function submitAttendance(){
 
-  const lecture =
-    lectureId.value.trim();
-
-
-  const btn =
-    submitBtn;
-
-
-  /*
-    Lecture validation
-  */
+  const lecture = lectureId.value.trim();
 
   if(!lecture){
-
-    console.warn(
-      "⚠ Lecture ID missing"
-    );
-
-    return alert(
-      "Lecture ID required"
-    );
-
+    lectureId.focus();
+    lectureId.scrollIntoView({behavior:"smooth", block:"center"});
+    return toast("Please enter Lecture ID", true);
   }
 
-
-  /*
-    Attendance validation
-  */
-
-  if(
-    !Object.keys(RECORDS).length
-  ){
-
-    console.warn(
-      "⚠ No attendance marked"
-    );
-
-    return alert(
-      "No attendance marked"
-    );
-
+  if(!Object.keys(RECORDS).length){
+    return toast("No attendance marked", true);
   }
 
+  openModal("confirm", counts());
+}
 
-  /*
-    Loading state
-  */
-
-  btn.classList.add(
-    "loading"
-  );
+submitBtn.addEventListener("click", submitAttendance);
 
 
-  btn.innerHTML = `
+async function doSubmit(){
 
-    <span class="spinner"></span>
+  if(pendingSubmit) return;
+  pendingSubmit = true;
 
-    Submitting
+  const lecture = lectureId.value.trim();
+  const summary = counts();
 
-  `;
-
+  submitBtn.classList.add("loading");
+  submitBtn.innerHTML = `<span class="spinner"></span> Submitting`;
 
   try{
 
-    console.log(
-      "🚀 Submitting attendance:",
-      RECORDS
-    );
+    const res = await fetch(API_ROBOT, {
 
+      method:"POST",
 
-    const res =
-      await fetch(
-        API_ROBOT,
-        {
+      headers:{ "Content-Type":"application/json" },
 
-          method:"POST",
+      body: JSON.stringify({
+        lectureId: lecture,
+        mentorId: mentorId,      /* mentor ID auto-sent from localStorage */
+        records: RECORDS
+      })
+    });
 
-          headers:{
-            "Content-Type":
-              "application/json"
-          },
+    let d = {};
+    try{ d = await res.json(); }catch(e){}
 
-          body:JSON.stringify({
+    if(!res.ok || d.success === false){
+      throw new Error(d.message || "Server rejected the request");
+    }
 
-            lectureId:
-              lecture,
-
-            records:
-              RECORDS
-
-          })
-
-        }
-      );
-
-
-    const d =
-      await res.json();
-
-
-    console.log(
-      "✅ Submit response:",
-      d
-    );
-
-
-    /*
-      Counts
-    */
-
-    const total =
-      Object.keys(
-        RECORDS
-      ).length;
-
-
-    const present =
-      Object.values(
-        RECORDS
-      )
-      .filter(
-        v => v === "P"
-      )
-      .length;
-
-
-    const absent =
-      Object.values(
-        RECORDS
-      )
-      .filter(
-        v => v === "A"
-      )
-      .length;
-
-
-    /*
-      Show result
-    */
-
-    showModal(
-      total,
-      present,
-      absent
-    );
-
-
-    /*
-      Clear attendance
-    */
+    openModal("result", summary);
 
     RECORDS = {};
-
-
-    /*
-      Re-render table
-
-      This also removes
-      selected buttons.
-    */
-
     render();
-
 
   }catch(err){
 
-    console.error(
-      "🔥 Submit error:",
-      err
-    );
-
-
-    alert(
-      "Something went wrong while submitting"
-    );
-
+    console.error("Submit error:", err);
+    toast("Submit failed. Attendance is still saved here, try again.", true);
   }
 
-
-  /*
-    Restore button
-  */
-
-  btn.classList.remove(
-    "loading"
-  );
-
-
-  btn.innerHTML =
-    "🚀 Submit";
-
+  submitBtn.classList.remove("loading");
+  submitBtn.innerHTML = "🚀 Submit";
+  pendingSubmit = false;
 }
 
 
 /* ===============================
-   RESULT MODAL
+   LISTENERS
 ================================ */
 
-function showModal(
-  total,
-  present,
-  absent
-){
+["year","branch","section","batch"].forEach(id => {
+  $(id).addEventListener("change", render);
+});
 
-  document.getElementById(
-    "totalCount"
-  ).textContent =
-    `👥 Total Marked: ${total}`;
+let st;
+searchBox.addEventListener("input", () => {
+  clearTimeout(st);
+  st = setTimeout(render, 150);
+});
 
-
-  document.getElementById(
-    "presentCount"
-  ).textContent =
-    `✅ Present: ${present}`;
-
-
-  document.getElementById(
-    "absentCount"
-  ).textContent =
-    `❌ Absent: ${absent}`;
-
-
-  document.getElementById(
-    "resultModal"
-  ).style.display =
-    "flex";
-
-}
-
-
-/* ===============================
-   CLOSE MODAL
-================================ */
-
-function closeModal(){
-
-  document.getElementById(
-    "resultModal"
-  ).style.display =
-    "none";
-
-}
-
-
-/* ===============================
-   FILTER LISTENERS
-================================ */
-
-[
-  "year",
-  "branch",
-  "section",
-  "batch"
-]
-.forEach(id => {
-
-  document
-    .getElementById(id)
-    .addEventListener(
-      "change",
-      render
-    );
-
+$("resultModal").addEventListener("click", e => {
+  if(e.target.id === "resultModal") closeModal();
 });
 
 
 /* ===============================
-   INITIAL FETCH
+   INIT
 ================================ */
 
+applyView();
 fetchStudents();
 
 </script>
