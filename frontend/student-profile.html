@@ -1,789 +1,299 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Student Profile | Acropolis</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student ID Card</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #e0e5ec;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
 
-<style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+        /* ID Card Container */
+        .id-card {
+            width: 500px;
+            height: 300px;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 10px 10px 20px rgba(0,0,0,0.1);
+            display: flex;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #ddd;
+        }
+
+        /* Red Stripe at the bottom */
+        .id-card::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background: #d32f2f;
+        }
+
+        /* Left Side: Photo and Director Sign */
+        .left-section {
+            width: 35%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            border-right: 1px solid #eee;
+        }
+
+        .profile-img {
+            width: 110px;
+            height: 130px;
+            object-fit: cover;
+            border: 2px solid #0a2c5a;
+            border-radius: 5px;
+        }
+
+     .signature {
+    text-align: right; /* right side le aayega */
+    margin-top: -10px; /* thoda upar shift */
+    margin-right: 20px; /* right me push */
 }
 
-body {
-    font-family: Inter, Arial, sans-serif;
-    background: #f4f6fa;
-    color: #172033;
-}
-
-.navbar {
-    height: 68px;
-    background: #fff;
-    border-bottom: 1px solid #e5e7eb;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 6%;
-}
-
-.nav-brand {
-    font-size: 19px;
-    font-weight: 750;
-    color: #102b50;
-}
-
-.back-btn {
-    border: 1px solid #e0e5ec;
-    background: white;
-    padding: 9px 16px;
-    border-radius: 8px;
-    color: #344054;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.back-btn:hover {
-    background: #f3f5f8;
-}
-
-.container {
-    max-width: 1050px;
-    margin: 40px auto;
-    padding: 0 20px;
-}
-
-.page-heading {
-    margin-bottom: 25px;
-}
-
-.page-heading h1 {
-    font-size: 27px;
-    color: #152c4b;
-}
-
-.page-heading p {
-    color: #7a8495;
-    font-size: 14px;
-    margin-top: 7px;
-}
-
-.profile-layout {
-    display: grid;
-    grid-template-columns: 340px 1fr;
-    gap: 24px;
-    align-items: start;
-}
-
-/* ID CARD */
-
-.id-card {
-    background: white;
-    border-radius: 15px;
-    overflow: hidden;
-    border: 1px solid #e6eaf0;
-    box-shadow: 0 5px 20px rgba(20,40,70,.05);
-}
-
-.card-header {
-    background: #102e53;
-    color: white;
-    padding: 23px 20px;
-    text-align: center;
-}
-
-.card-header h2 {
-    font-size: 18px;
-    letter-spacing: .4px;
-}
-
-.card-header p {
-    font-size: 11px;
-    opacity: .8;
-    margin-top: 6px;
-    letter-spacing: 1px;
-}
-
-.photo-section {
-    text-align: center;
-    padding: 25px 20px 15px;
-}
-
-.student-photo {
-    width: 112px;
-    height: 125px;
-    border-radius: 9px;
-    object-fit: cover;
-    border: 3px solid #e8edf5;
-    cursor: zoom-in;
-    background: #f1f3f6;
-}
-
-.photo-hint {
-    color: #8b95a5;
-    font-size: 11px;
-    margin-top: 7px;
-}
-
-.student-name {
-    text-align: center;
-    font-size: 20px;
-    font-weight: 750;
-    color: #17365d;
-    padding: 5px 15px;
-}
-
-.student-designation {
-    text-align: center;
-    font-size: 12px;
-    color: #8791a0;
-    margin-top: 4px;
-}
-
-.card-details {
-    padding: 20px 23px 25px;
-}
-
-.detail-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 11px 0;
-    border-bottom: 1px solid #eef0f4;
-    font-size: 12px;
-}
-
-.detail-row:last-child {
-    border-bottom: none;
-}
-
-.detail-row span:first-child {
-    color: #8791a0;
-}
-
-.detail-row span:last-child {
-    font-weight: 650;
-    color: #26364c;
-    text-align: right;
-    word-break: break-word;
-}
-
-.card-footer {
-    background: #f6f8fb;
-    text-align: center;
-    padding: 12px;
-    font-size: 10px;
-    color: #8b95a5;
-    letter-spacing: 1px;
-}
-
-/* PROFILE INFORMATION */
-
-.info-card {
-    background: white;
-    border: 1px solid #e6eaf0;
-    border-radius: 15px;
-    padding: 25px;
-    box-shadow: 0 5px 20px rgba(20,40,70,.04);
-}
-
-.info-heading {
-    font-size: 17px;
-    font-weight: 750;
-    color: #17365d;
-    padding-bottom: 17px;
-    border-bottom: 1px solid #edf0f4;
-    margin-bottom: 10px;
-}
-
-.info-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 22px 18px;
-    padding: 15px 0;
-}
-
-.info-item label {
+.signature img {
+    width: 120px; /* pehle 60px tha → ab double */
     display: block;
-    font-size: 11px;
-    color: #929baa;
-    margin-bottom: 7px;
+    margin-left: auto; /* right align image */
 }
 
-.info-item p {
-    font-size: 14px;
-    font-weight: 650;
-    color: #29384e;
-    overflow-wrap: anywhere;
+.signature p {
+    font-size: 22px; /* thoda bada text */
+    font-weight: 700; /* 1400 invalid hota hai → max 900 hota hai */
+    color: #0a2c5a;
+    margin: 0;
+    text-align: right;
 }
 
-.status-box {
-    background: #f0fdf4;
-    border: 1px solid #d1fadf;
-    color: #16834a;
-    border-radius: 9px;
-    padding: 13px 15px;
-    font-size: 13px;
-    font-weight: 650;
-    margin-top: 20px;
-}
+        /* Right Side: Details and Logo */
+        .right-section {
+            width: 65%;
+            padding: 15px 25px;
+            display: flex;
+            flex-direction: column;
+        }
 
-/* IMAGE VIEWER */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
 
-.image-modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(9,18,32,.88);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    padding: 20px;
-}
+        .college-logo {
+            width: 140px;
+        }
+        .ennn {
+            color: #0a2c5a;
+            text-align: right;
+            margin-right: 20px;
+            font-size: 10px;
+        }
+        .card-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #777;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
-.image-modal.show {
-    display: flex;
-}
+        .details {
+            font-size: 13px;
+            line-height: 1.6;
+        }
 
-.image-modal img {
-    max-width: 90%;
-    max-height: 85vh;
-    object-fit: contain;
-    border-radius: 10px;
-}
+        .detail-row {
+            margin-bottom: 5px;
+            display: flex;
+        }
 
-.close-modal {
-    position: absolute;
-    top: 22px;
-    right: 25px;
-    background: white;
-    color: #172033;
-    border: none;
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    font-size: 23px;
-    cursor: pointer;
-}
+        .label {
+            font-weight: 700;
+            color: #0a2c5a;
+            width: 100px;
+        }
 
-/* LOADING */
+        .value {
+            color: #333;
+            font-weight: 600;
+        }
 
-.loader {
-    text-align: center;
-    padding: 70px 15px;
-    color: #718096;
-}
+        /* Edit Section (Below ID Card) */
+        .edit-panel {
+            margin-top: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 460px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
 
-.error-box {
-    background: white;
-    border: 1px solid #fee2e2;
-    color: #b42318;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-}
+        .input-group {
+            margin-bottom: 10px;
+        }
 
-/* RESPONSIVE */
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
 
-@media(max-width: 750px) {
-    .profile-layout {
-        grid-template-columns: 1fr;
-    }
+        input {
+            width: 95%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
 
-    .id-card {
-        max-width: 400px;
-        width: 100%;
-        margin: auto;
-    }
+        button {
+            width: 100%;
+            background: #0a2c5a;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+.btn-download { background: #d32f2f; color: white; }
+        button:hover { background: #d32f2f; }
 
-    .info-grid {
-        grid-template-columns: 1fr 1fr;
-    }
+        .msg { font-size: 12px; text-align: center; margin-top: 10px; color: green; }
 
-    .container {
-        margin: 25px auto;
-    }
-}
-
-@media(max-width: 400px) {
-    .info-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .navbar {
-        padding: 0 15px;
-    }
-}
-</style>
+    </style>
 </head>
-
 <body>
 
-<nav class="navbar">
-    <div class="nav-brand">STUDENT PORTAL</div>
-    <button class="back-btn" onclick="history.back()">← Back</button>
-</nav>
+<div class="id-card" id="id-card-wrap">
+        <div class="left-section">
+            <img src="student-photo.jpg" id="disp-img" class="profile-img" alt="Student Photo">
+            <div class="signature">
+                <img src="sign.png" alt="sign">
+                <p>Director</p>
+            </div>
+        </div>
 
-<main class="container">
+        <div class="right-section">
+            <div class="header">
+                <img src="logo.jpg" class="college-logo" alt="ACROPOLIS">
+             <span class="ennn">Enlightment Wisdom</span>
+                <span class="card-title">STUDENT I. CARD</span>
+            </div>
 
-    <div class="page-heading">
-        <h1>Student Profile</h1>
-        <p>Your official student identity and profile information.</p>
+            <div class="details">
+                <div class="detail-row"><span class="label">Session:</span> <span class="value" id="disp-session">2024-2025</span></div>
+                <div class="detail-row"><span class="label">Scholar No.:</span> <span class="value" id="disp-enrollment">AITR241385</span></div>
+                <div class="detail-row"><span class="label">Name:</span> <span class="value" id="disp-name">Loading...</span></div>
+                <div class="detail-row"><span class="label">Course:</span> <span class="value" id="disp-class">B. Tech. - IT</span></div>
+                <div class="detail-row"><span class="label">Email:</span> <span class="value" id="disp-email">-</span></div>
+            </div>
+        </div>
     </div>
 
-    <div id="loading" class="loader">
-        Loading student profile...
-    </div>
-
-    <div id="error" style="display:none" class="error-box"></div>
-
-    <div class="profile-layout" id="profileLayout" style="display:none">
-
-        <!-- ID CARD -->
-
-        <section class="id-card">
-
-            <div class="card-header">
-                <h2>ACROPOLIS</h2>
-                <p>STUDENT IDENTITY CARD</p>
-            </div>
-
-            <div class="photo-section">
-
-                <img
-                    id="studentPhoto"
-                    class="student-photo"
-                    src=""
-                    alt="Student Photo"
-                    onclick="openPhoto()"
-                >
-
-                <p class="photo-hint">Click photo to view</p>
-
-            </div>
-
-            <h2 class="student-name" id="cardName">--</h2>
-
-            <p class="student-designation">STUDENT</p>
-
-            <div class="card-details">
-
-                <div class="detail-row">
-                    <span>Enrollment No.</span>
-                    <span id="cardEnrollment">--</span>
-                </div>
-
-                <div class="detail-row">
-                    <span>Course / Branch</span>
-                    <span id="cardBranch">--</span>
-                </div>
-
-                <div class="detail-row">
-                    <span>Academic Year</span>
-                    <span id="cardYear">--</span>
-                </div>
-
-                <div class="detail-row">
-                    <span>Phone</span>
-                    <span id="cardPhone">--</span>
-                </div>
-
-            </div>
-
-            <div class="card-footer">
-                OFFICIAL STUDENT IDENTITY
-            </div>
-
-        </section>
-
-        <!-- PROFILE INFORMATION -->
-
-        <section class="info-card">
-
-            <div class="info-heading">
-                Personal Information
-            </div>
-
-            <div class="info-grid">
-
-                <div class="info-item">
-                    <label>Full Name</label>
-                    <p id="infoName">--</p>
-                </div>
-
-                <div class="info-item">
-                    <label>Enrollment Number</label>
-                    <p id="infoEnrollment">--</p>
-                </div>
-
-                <div class="info-item">
-                    <label>Branch</label>
-                    <p id="infoBranch">--</p>
-                </div>
-
-                <div class="info-item">
-                    <label>Class</label>
-                    <p id="infoClass">--</p>
-                </div>
-
-                <div class="info-item">
-                    <label>Email Address</label>
-                    <p id="infoEmail">--</p>
-                </div>
-
-                <div class="info-item">
-                    <label>Phone Number</label>
-                    <p id="infoPhone">--</p>
-                </div>
-
-                <div class="info-item">
-                    <label>Gender</label>
-                    <p id="infoGender">--</p>
-                </div>
-
-                <div class="info-item">
-                    <label>Date of Birth</label>
-                    <p id="infoDob">--</p>
-                </div>
-
-            </div>
-
-            <div class="info-heading" style="margin-top:20px">
-                Academic Information
-            </div>
-
-            <div class="info-grid">
-
-                <div class="info-item">
-                    <label>Academic Year</label>
-                    <p id="infoYear">--</p>
-                </div>
-
-                <div class="info-item">
-                    <label>Section</label>
-                    <p id="infoSection">--</p>
-                </div>
-
-                <div class="info-item">
-                    <label>Pending Fees</label>
-                    <p id="infoFees">--</p>
-                </div>
-
-            </div>
-
-            <div class="status-box">
-                ● Profile information fetched successfully
-            </div>
-
-        </section>
-
-    </div>
-
-</main>
-
-<!-- FULL SCREEN PHOTO -->
-
-<div class="image-modal" id="imageModal" onclick="closePhoto()">
-
-    <button class="close-modal" onclick="closePhoto()">×</button>
-
-    <img id="fullPhoto" src="" alt="Student Photograph">
-
+    <div class="edit-panel">
+        <div class="input-group">
+            <label>Update Email</label>
+            <input type="email" id="email" placeholder="Enter new email">
+        </div>
+        
+<div class="input-group">
+    <label>Upload Photo</label>
+    <input type="file" id="photoInput" accept="image/*">
 </div>
+        <div class="input-group">
+            <label>Update Phone</label>
+            <input type="text" id="phone" placeholder="Enter phone number">
+        </div>
+        <button onclick="updateProfile()">Save Changes</button>
+        <button class="btn-download" onclick="downloadPDF()">Download ID Card</button>
+        <div class="msg" id="msg"></div>
+    </div>
 
 <script>
+    const API = "https://college-hwbb.onrender.com/api";
+    const enrollment = localStorage.getItem("enrollment") || "AITR241385"; // Default for testing
 
-/* =========================================
-   CONFIGURATION
-========================================= */
-
-const API_ROOT = "https://college-hwbb.onrender.com";
-
-const PROFILE_API = `${API_ROOT}/api/students`;
-
-
-/* =========================================
-   HELPERS
-========================================= */
-
-function getValue(...values) {
-
-    for (const value of values) {
-
-        if (
-            value !== undefined &&
-            value !== null &&
-            String(value).trim() !== ""
-        ) {
-            return value;
-        }
-
-    }
-
-    return "--";
-
-}
-
-function setText(id, value) {
-
-    document.getElementById(id).textContent =
-        getValue(value);
-
-}
-
-
-/* =========================================
-   STUDENT PHOTO
-========================================= */
-
-function getStudentPhoto(student) {
-
-    return getValue(
-        student.photo,
-        student.photoUrl,
-        student.photo_url,
-        student.profilePhoto,
-        student.profile_photo,
-        student.image,
-        student.imageUrl,
-        student.image_url,
-        student.studentPhoto,
-        student.student_photo,
-        student.avatar
-    );
-
-}
-
-function setStudentPhoto(photo) {
-
-    const image = document.getElementById("studentPhoto");
-
-    const fallback =
-        "data:image/svg+xml;charset=UTF-8," +
-        encodeURIComponent(`
-            <svg xmlns="http://www.w3.org/2000/svg" width="120" height="130">
-                <rect width="100%" height="100%" fill="#e9edf3"/>
-                <text x="50%" y="50%" text-anchor="middle"
-                dominant-baseline="middle" font-size="13"
-                fill="#64748b">No Photo</text>
-            </svg>
-        `);
-
-    image.src = photo && photo !== "--" ? photo : fallback;
-
-    image.onerror = function() {
-        this.src = fallback;
-        this.onerror = null;
-    };
-
-}
-
-
-/* =========================================
-   LOAD STUDENT PROFILE
-========================================= */
-
-async function loadStudentProfile() {
-
-    const enrollment =
-        localStorage.getItem("enrollment");
-
-    if (!enrollment) {
-
-        showError("Student enrollment not found. Please login again.");
-
-        return;
-
-    }
-
-    try {
-
-        const response = await fetch(
-            `${PROFILE_API}/${encodeURIComponent(enrollment)}/pending-fees`,
-            {
-                method: "GET",
-                headers: {
-                    "Accept": "application/json"
-                },
-                credentials: "include"
+    async function loadProfile(){
+        try {
+            const res = await fetch(`${API}/students/${enrollment}/class`);
+            const data = await res.json();
+            if(data.success){
+                // ID Card Display Update
+                document.getElementById("disp-name").innerText = data.student.name;
+                document.getElementById("disp-enrollment").innerText = data.student.enrollment;
+                document.getElementById("disp-class").innerText = data.student.class || data.student.branch;
+                document.getElementById("disp-email").innerText = data.student.email || "N/A";
+                
+                // Form Update
+                document.getElementById("email").value = data.student.email || "";
+                document.getElementById("phone").value = data.student.phone || "";
             }
-        );
+        } catch(err) { console.log(err); }
+    }
 
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-
-            throw new Error(
-                data.message || "Unable to fetch student information."
-            );
-
+    async function updateProfile(){
+        const email = document.getElementById("email").value;
+        const phone = document.getElementById("phone").value;
+        try {
+            const res = await fetch(`${API}/students/${enrollment}/profile`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, phone })
+            });
+            const data = await res.json();
+            document.getElementById("msg").innerText = data.message;
+            loadProfile(); // Refresh ID card values
+        } catch(err) { console.log(err); }
+    }
+function downloadPDF() {
+        const element = document.getElementById('id-card-wrap');
+        const opt = {
+            margin:       10,
+            filename:     `ID_Card_${enrollment}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
+    loadProfile();
+    document.getElementById("photoInput").addEventListener("change", function(e) {
+    const file = e.target.files[0];
+    if(file){
+        const reader = new FileReader();
+        reader.onload = function(event){
+            document.getElementById("disp-img").src = event.target.result;
         }
-
-        const student = data.student || {};
-
-        renderProfile(student);
-
-        document.getElementById("loading").style.display = "none";
-
-        document.getElementById("profileLayout").style.display = "grid";
-
+        reader.readAsDataURL(file);
     }
-
-    catch(error) {
-
-        console.error("Student Profile Error:", error);
-
-        showError(error.message);
-
-    }
-
-}
-
-
-/* =========================================
-   RENDER PROFILE
-========================================= */
-
-function renderProfile(student) {
-
-    const name = getValue(student.name);
-
-    const enrollment = getValue(
-        student.enrollment,
-        localStorage.getItem("enrollment")
-    );
-
-    const branch = getValue(student.branch);
-
-    const studentClass = getValue(
-        student.class,
-        student.studentClass,
-        student.branch
-    );
-
-    const phone = getValue(student.phone);
-
-    const email = getValue(student.email);
-
-    const year = getValue(student.year);
-
-    const section = getValue(student.section);
-
-    const photo = getStudentPhoto(student);
-
-    /* ID CARD */
-
-    setText("cardName", name);
-
-    setText("cardEnrollment", enrollment);
-
-    setText("cardBranch", branch);
-
-    setText("cardYear", year);
-
-    setText("cardPhone", phone);
-
-    setStudentPhoto(photo);
-
-
-    /* PERSONAL INFORMATION */
-
-    setText("infoName", name);
-
-    setText("infoEnrollment", enrollment);
-
-    setText("infoBranch", branch);
-
-    setText("infoClass", studentClass);
-
-    setText("infoEmail", email);
-
-    setText("infoPhone", phone);
-
-    setText("infoGender", student.gender);
-
-    setText(
-        "infoDob",
-        getValue(student.dob, student.dateOfBirth, student.date_of_birth)
-    );
-
-
-    /* ACADEMIC INFORMATION */
-
-    setText("infoYear", year);
-
-    setText("infoSection", section);
-
-    setText(
-        "infoFees",
-        student.pending_fees !== undefined
-            ? "₹ " + student.pending_fees
-            : "--"
-    );
-
-}
-
-
-/* =========================================
-   ERROR
-========================================= */
-
-function showError(message) {
-
-    document.getElementById("loading").style.display = "none";
-
-    const error = document.getElementById("error");
-
-    error.style.display = "block";
-
-    error.textContent = message;
-
-}
-
-
-/* =========================================
-   PHOTO VIEWER
-========================================= */
-
-function openPhoto() {
-
-    const photo = document.getElementById("studentPhoto").src;
-
-    if (!photo || photo.includes("No%20Photo")) return;
-
-    document.getElementById("fullPhoto").src = photo;
-
-    document.getElementById("imageModal").classList.add("show");
-
-}
-
-function closePhoto() {
-
-    document.getElementById("imageModal").classList.remove("show");
-
-}
-
-document.addEventListener("keydown", function(event) {
-
-    if (event.key === "Escape") {
-        closePhoto();
-    }
-
 });
-
-
-/* =========================================
-   INITIALIZE
-========================================= */
-
-document.addEventListener("DOMContentLoaded", function() {
-
-    loadStudentProfile();
-
-});
-
+reader.onload = function(event){
+    const imgData = event.target.result;
+    document.getElementById("disp-img").src = imgData;
+    localStorage.setItem("studentPhoto", imgData);
+}
+const savedPhoto = localStorage.getItem("studentPhoto");
+if(savedPhoto){
+    document.getElementById("disp-img").src = savedPhoto;
+}
 </script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
 </body>
 </html>
