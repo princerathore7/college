@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Profile | Acropolis</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Inter, Arial, sans-serif;
+    background: #f4f6fa;
+    color: #172033;
+}
+
+.navbar {
+    height: 68px;
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 6%;
+}
+
+.nav-brand {
+    font-size: 19px;
+    font-weight: 750;
+    color: #102b50;
+}
+
+.back-btn {
+    border: 1px solid #e0e5ec;
+    background: white;
+    padding: 9px 16px;
+    border-radius: 8px;
+    color: #344054;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    background: #f3f5f8;
+}
+
+.container {
+    max-width: 1050px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.page-heading {
+    margin-bottom: 25px;
+}
+
+.page-heading h1 {
+    font-size: 27px;
+    color: #152c4b;
+}
+
+.page-heading p {
+    color: #7a8495;
+    font-size: 14px;
+    margin-top: 7px;
+}
+
+.profile-layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+/* ID CARD */
+
+.id-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    border: 1px solid #e6eaf0;
+    box-shadow: 0 5px 20px rgba(20,40,70,.05);
+}
+
+.card-header {
+    background: #102e53;
+    color: white;
+    padding: 23px 20px;
+    text-align: center;
+}
+
+.card-header h2 {
+    font-size: 18px;
+    letter-spacing: .4px;
+}
+
+.card-header p {
+    font-size: 11px;
+    opacity: .8;
+    margin-top: 6px;
+    letter-spacing: 1px;
+}
+
+.photo-section {
+    text-align: center;
+    padding: 25px 20px 15px;
+}
+
+.student-photo {
+    width: 112px;
+    height: 125px;
+    border-radius: 9px;
+    object-fit: cover;
+    border: 3px solid #e8edf5;
+    cursor: zoom-in;
+    background: #f1f3f6;
+}
+
+.photo-hint {
+    color: #8b95a5;
+    font-size: 11px;
+    margin-top: 7px;
+}
+
+.student-name {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 750;
+    color: #17365d;
+    padding: 5px 15px;
+}
+
+.student-designation {
+    text-align: center;
+    font-size: 12px;
+    color: #8791a0;
+    margin-top: 4px;
+}
+
+.card-details {
+    padding: 20px 23px 25px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 11px 0;
+    border-bottom: 1px solid #eef0f4;
+    font-size: 12px;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-row span:first-child {
+    color: #8791a0;
+}
+
+.detail-row span:last-child {
+    font-weight: 650;
+    color: #26364c;
+    text-align: right;
+    word-break: break-word;
+}
+
+.card-footer {
+    background: #f6f8fb;
+    text-align: center;
+    padding: 12px;
+    font-size: 10px;
+    color: #8b95a5;
+    letter-spacing: 1px;
+}
+
+/* PROFILE INFORMATION */
+
+.info-card {
+    background: white;
+    border: 1px solid #e6eaf0;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 5px 20px rgba(20,40,70,.04);
+}
+
+.info-heading {
+    font-size: 17px;
+    font-weight: 750;
+    color: #17365d;
+    padding-bottom: 17px;
+    border-bottom: 1px solid #edf0f4;
+    margin-bottom: 10px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px 18px;
+    padding: 15px 0;
+}
+
+.info-item label {
+    display: block;
+    font-size: 11px;
+    color: #929baa;
+    margin-bottom: 7px;
+}
+
+.info-item p {
+    font-size: 14px;
+    font-weight: 650;
+    color: #29384e;
+    overflow-wrap: anywhere;
+}
+
+.status-box {
+    background: #f0fdf4;
+    border: 1px solid #d1fadf;
+    color: #16834a;
+    border-radius: 9px;
+    padding: 13px 15px;
+    font-size: 13px;
+    font-weight: 650;
+    margin-top: 20px;
+}
+
+/* IMAGE VIEWER */
+
+.image-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(9,18,32,.88);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+}
+
+.image-modal.show {
+    display: flex;
+}
+
+.image-modal img {
+    max-width: 90%;
+    max-height: 85vh;
+    object-fit: contain;
+    border-radius: 10px;
+}
+
+.close-modal {
+    position: absolute;
+    top: 22px;
+    right: 25px;
+    background: white;
+    color: #172033;
+    border: none;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    font-size: 23px;
+    cursor: pointer;
+}
+
+/* LOADING */
+
+.loader {
+    text-align: center;
+    padding: 70px 15px;
+    color: #718096;
+}
+
+.error-box {
+    background: white;
+    border: 1px solid #fee2e2;
+    color: #b42318;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+/* RESPONSIVE */
+
+@media(max-width: 750px) {
+    .profile-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .id-card {
+        max-width: 400px;
+        width: 100%;
+        margin: auto;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .container {
+        margin: 25px auto;
+    }
+}
+
+@media(max-width: 400px) {
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .navbar {
+        padding: 0 15px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<nav class="navbar">
+    <div class="nav-brand">STUDENT PORTAL</div>
+    <button class="back-btn" onclick="history.back()">← Back</button>
+</nav>
+
+<main class="container">
+
+    <div class="page-heading">
+        <h1>Student Profile</h1>
+        <p>Your official student identity and profile information.</p>
+    </div>
+
+    <div id="loading" class="loader">
+        Loading student profile...
+    </div>
+
+    <div id="error" style="display:none" class="error-box"></div>
+
+    <div class="profile-layout" id="profileLayout" style="display:none">
+
+        <!-- ID CARD -->
+
+        <section class="id-card">
+
+            <div class="card-header">
+                <h2>ACROPOLIS</h2>
+                <p>STUDENT IDENTITY CARD</p>
+            </div>
+
+            <div class="photo-section">
+
+                <img
+                    id="studentPhoto"
+                    class="student-photo"
+                    src=""
+                    alt="Student Photo"
+                    onclick="openPhoto()"
+                >
+
+                <p class="photo-hint">Click photo to view</p>
+
+            </div>
+
+            <h2 class="student-name" id="cardName">--</h2>
+
+            <p class="student-designation">STUDENT</p>
+
+            <div class="card-details">
+
+                <div class="detail-row">
+                    <span>Enrollment No.</span>
+                    <span id="cardEnrollment">--</span>
+                </div>
+
+                <div class="detail-row">
+                    <span>Course / Branch</span>
+                    <span id="cardBranch">--</span>
+                </div>
+
+                <div class="detail-row">
+                    <span>Academic Year</span>
+                    <span id="cardYear">--</span>
+                </div>
+
+                <div class="detail-row">
+                    <span>Phone</span>
+                    <span id="cardPhone">--</span>
+                </div>
+
+            </div>
+
+            <div class="card-footer">
+                OFFICIAL STUDENT IDENTITY
+            </div>
+
+        </section>
+
+        <!-- PROFILE INFORMATION -->
+
+        <section class="info-card">
+
+            <div class="info-heading">
+                Personal Information
+            </div>
+
+            <div class="info-grid">
+
+                <div class="info-item">
+                    <label>Full Name</label>
+                    <p id="infoName">--</p>
+                </div>
+
+                <div class="info-item">
+                    <label>Enrollment Number</label>
+                    <p id="infoEnrollment">--</p>
+                </div>
+
+                <div class="info-item">
+                    <label>Branch</label>
+                    <p id="infoBranch">--</p>
+                </div>
+
+                <div class="info-item">
+                    <label>Class</label>
+                    <p id="infoClass">--</p>
+                </div>
+
+                <div class="info-item">
+                    <label>Email Address</label>
+                    <p id="infoEmail">--</p>
+                </div>
+
+                <div class="info-item">
+                    <label>Phone Number</label>
+                    <p id="infoPhone">--</p>
+                </div>
+
+                <div class="info-item">
+                    <label>Gender</label>
+                    <p id="infoGender">--</p>
+                </div>
+
+                <div class="info-item">
+                    <label>Date of Birth</label>
+                    <p id="infoDob">--</p>
+                </div>
+
+            </div>
+
+            <div class="info-heading" style="margin-top:20px">
+                Academic Information
+            </div>
+
+            <div class="info-grid">
+
+                <div class="info-item">
+                    <label>Academic Year</label>
+                    <p id="infoYear">--</p>
+                </div>
+
+                <div class="info-item">
+                    <label>Section</label>
+                    <p id="infoSection">--</p>
+                </div>
+
+                <div class="info-item">
+                    <label>Pending Fees</label>
+                    <p id="infoFees">--</p>
+                </div>
+
+            </div>
+
+            <div class="status-box">
+                ● Profile information fetched successfully
+            </div>
+
+        </section>
+
+    </div>
+
+</main>
+
+<!-- FULL SCREEN PHOTO -->
+
+<div class="image-modal" id="imageModal" onclick="closePhoto()">
+
+    <button class="close-modal" onclick="closePhoto()">×</button>
+
+    <img id="fullPhoto" src="" alt="Student Photograph">
+
+</div>
+
+<script>
+
+/* =========================================
+   CONFIGURATION
+========================================= */
+
+const API_ROOT = "https://college-hwbb.onrender.com";
+
+const PROFILE_API = `${API_ROOT}/api/students`;
+
+
+/* =========================================
+   HELPERS
+========================================= */
+
+function getValue(...values) {
+
+    for (const value of values) {
+
+        if (
+            value !== undefined &&
+            value !== null &&
+            String(value).trim() !== ""
+        ) {
+            return value;
+        }
+
+    }
+
+    return "--";
+
+}
+
+function setText(id, value) {
+
+    document.getElementById(id).textContent =
+        getValue(value);
+
+}
+
+
+/* =========================================
+   STUDENT PHOTO
+========================================= */
+
+function getStudentPhoto(student) {
+
+    return getValue(
+        student.photo,
+        student.photoUrl,
+        student.photo_url,
+        student.profilePhoto,
+        student.profile_photo,
+        student.image,
+        student.imageUrl,
+        student.image_url,
+        student.studentPhoto,
+        student.student_photo,
+        student.avatar
+    );
+
+}
+
+function setStudentPhoto(photo) {
+
+    const image = document.getElementById("studentPhoto");
+
+    const fallback =
+        "data:image/svg+xml;charset=UTF-8," +
+        encodeURIComponent(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="120" height="130">
+                <rect width="100%" height="100%" fill="#e9edf3"/>
+                <text x="50%" y="50%" text-anchor="middle"
+                dominant-baseline="middle" font-size="13"
+                fill="#64748b">No Photo</text>
+            </svg>
+        `);
+
+    image.src = photo && photo !== "--" ? photo : fallback;
+
+    image.onerror = function() {
+        this.src = fallback;
+        this.onerror = null;
+    };
+
+}
+
+
+/* =========================================
+   LOAD STUDENT PROFILE
+========================================= */
+
+async function loadStudentProfile() {
+
+    const enrollment =
+        localStorage.getItem("enrollment");
+
+    if (!enrollment) {
+
+        showError("Student enrollment not found. Please login again.");
+
+        return;
+
+    }
+
+    try {
+
+        const response = await fetch(
+            `${PROFILE_API}/${encodeURIComponent(enrollment)}/pending-fees`,
+            {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
+                },
+                credentials: "include"
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+
+            throw new Error(
+                data.message || "Unable to fetch student information."
+            );
+
+        }
+
+        const student = data.student || {};
+
+        renderProfile(student);
+
+        document.getElementById("loading").style.display = "none";
+
+        document.getElementById("profileLayout").style.display = "grid";
+
+    }
+
+    catch(error) {
+
+        console.error("Student Profile Error:", error);
+
+        showError(error.message);
+
+    }
+
+}
+
+
+/* =========================================
+   RENDER PROFILE
+========================================= */
+
+function renderProfile(student) {
+
+    const name = getValue(student.name);
+
+    const enrollment = getValue(
+        student.enrollment,
+        localStorage.getItem("enrollment")
+    );
+
+    const branch = getValue(student.branch);
+
+    const studentClass = getValue(
+        student.class,
+        student.studentClass,
+        student.branch
+    );
+
+    const phone = getValue(student.phone);
+
+    const email = getValue(student.email);
+
+    const year = getValue(student.year);
+
+    const section = getValue(student.section);
+
+    const photo = getStudentPhoto(student);
+
+    /* ID CARD */
+
+    setText("cardName", name);
+
+    setText("cardEnrollment", enrollment);
+
+    setText("cardBranch", branch);
+
+    setText("cardYear", year);
+
+    setText("cardPhone", phone);
+
+    setStudentPhoto(photo);
+
+
+    /* PERSONAL INFORMATION */
+
+    setText("infoName", name);
+
+    setText("infoEnrollment", enrollment);
+
+    setText("infoBranch", branch);
+
+    setText("infoClass", studentClass);
+
+    setText("infoEmail", email);
+
+    setText("infoPhone", phone);
+
+    setText("infoGender", student.gender);
+
+    setText(
+        "infoDob",
+        getValue(student.dob, student.dateOfBirth, student.date_of_birth)
+    );
+
+
+    /* ACADEMIC INFORMATION */
+
+    setText("infoYear", year);
+
+    setText("infoSection", section);
+
+    setText(
+        "infoFees",
+        student.pending_fees !== undefined
+            ? "₹ " + student.pending_fees
+            : "--"
+    );
+
+}
+
+
+/* =========================================
+   ERROR
+========================================= */
+
+function showError(message) {
+
+    document.getElementById("loading").style.display = "none";
+
+    const error = document.getElementById("error");
+
+    error.style.display = "block";
+
+    error.textContent = message;
+
+}
+
+
+/* =========================================
+   PHOTO VIEWER
+========================================= */
+
+function openPhoto() {
+
+    const photo = document.getElementById("studentPhoto").src;
+
+    if (!photo || photo.includes("No%20Photo")) return;
+
+    document.getElementById("fullPhoto").src = photo;
+
+    document.getElementById("imageModal").classList.add("show");
+
+}
+
+function closePhoto() {
+
+    document.getElementById("imageModal").classList.remove("show");
+
+}
+
+document.addEventListener("keydown", function(event) {
+
+    if (event.key === "Escape") {
+        closePhoto();
+    }
+
+});
+
+
+/* =========================================
+   INITIALIZE
+========================================= */
+
+document.addEventListener("DOMContentLoaded", function() {
+
+    loadStudentProfile();
+
+});
+
+</script>
+
+</body>
+</html>
